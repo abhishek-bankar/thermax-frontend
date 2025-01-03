@@ -140,6 +140,9 @@ export const getSwSelectionDetails = async (payload: any) => {
         }
 
         const sortedByKW = matchingOptions.sort((a: any, b: any) => a.kw - b.kw)
+        if (kw === 90) {
+          console.log(sortedByKW)
+        }
         const switchgear = sortedByKW.find((item: any) => item.kw >= kw)
 
         if (!switchgear) {

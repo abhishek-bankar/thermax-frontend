@@ -114,7 +114,9 @@ const PanelTab: React.FC<Props> = ({ panelData, sldRevisions, projectPanelData, 
   }))
   console.log(panelData, "panel data ")
   const getLatestRevision = () => {
-    return sldRevisions?.find((item: any) => item.status === "Not Released") ?? {}
+    console.log(sldRevisions,'sld rev');
+    
+    return sldRevisions?.find((item: any) => !item.is_released) ?? {}
   }
 
   const PanelTabs = [

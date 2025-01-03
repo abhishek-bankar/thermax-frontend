@@ -39,13 +39,15 @@ const getRatingForIncomer = (sg_data: any) => {
   return result.toFixed(2)
 }
 const getDevice = (sg_data: any, projectPanelData: any) => {
-  return getRatingForIncomer(sg_data) <= projectPanelData?.incomer_ampere
+  // console.log(getRatingForIncomer(sg_data) <= Number(projectPanelData?.incomer_ampere));
+  
+  return Number(getRatingForIncomer(sg_data)) <= Number(projectPanelData?.incomer_ampere)
     ? projectPanelData?.incomer_type
     : projectPanelData?.incomer_above_type
 }
 
 const getPoles = (sg_data: any, projectPanelData: any) => {
-  return getRatingForIncomer(sg_data) <= projectPanelData?.incomer_ampere
+  return Number(getRatingForIncomer(sg_data)) <= Number(projectPanelData?.incomer_ampere)
     ? projectPanelData?.incomer_pole
     : projectPanelData?.incomer_above_pole
 }
@@ -90,7 +92,8 @@ const useDataFetching = (panelType: string, revision_id: string, panel_id: strin
       const pole = getPoles(sg_data, projectPanelData[0]) + "-POLE"
       const device = getDevice(sg_data, projectPanelData[0])
       const current_rating = getRatingForIncomer(sg_data)
-
+      console.log(current_rating,"current_rating");
+      
       const filters = [
         ["manufacturer", "=", preferredSwitchgear],
         ["cb_type", "like", `%${pole}%`],
@@ -98,11 +101,11 @@ const useDataFetching = (panelType: string, revision_id: string, panel_id: strin
         ["current_rating", ">", current_rating],
       ]
 
-      const encodedFilters = encodeURIComponent(JSON.stringify(filters))
+      // const encodedFilters = encodeURIComponent(JSON.stringify(filters))
       // const limit_start = (page - 1) * pageSize
       // console.log(limit_start, pageSize)
 
-      const url = `${CIRCUIT_BREAKER_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${0}&limit=${200}`
+      const url = `${CIRCUIT_BREAKER_API}?fields=["*"]&filters=${JSON.stringify(filters)}&limit_start=${0}&limit=${200}`
 
       const response = await getData(url)
       console.log(response, "incomers all")

@@ -314,6 +314,7 @@ export const GET_LOAD_LIST_EXCEL_API = `/method/load_list_revisions.get_load_lis
 export const GET_CABLE_SCHEDULE_EXCEL_API = `/method/cable_schedule_revisions.get_cable_schedule_excel`
 export const GET_VOLTAGE_DROP_EXCEL_API = `/method/cable_schedule_revisions.get_voltage_drop_excel`
 export const GET_CB_COUNT = `/method/frappe.client.get_count?doctype=Circuit Breaker`
+export const GET_SFU_COUNT = `/method/frappe.client.get_count?doctype=SFU`
 
 //sld
 
@@ -324,3 +325,4 @@ export const SUPPLYFEEDER_SWITCHGEAR_API = `/document/Supply Feeder`
 export const SLD_REVISIONS_API = `/document/SLD Revisions`
 
 export const CIRCUIT_BREAKER_API = `/document/Circuit Breaker`
+export const SFU_API = `/document/SFU`

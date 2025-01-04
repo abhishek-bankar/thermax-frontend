@@ -7,12 +7,14 @@ import type { TableColumnsType, TableProps } from "antd";
 import {
   CIRCUIT_BREAKER_API,
   GET_CB_COUNT,
+  GET_SFU_COUNT,
   MAKE_OF_COMPONENT_API,
   MCC_PANEL,
   PCC_PANEL,
+  SFU_API,
   SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
-import { getData } from "@/actions/crud-actions";
+import { getData, updateData } from "@/actions/crud-actions";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -22,13 +24,14 @@ interface Props {
   sld_revision_id: string;
   designBasisRevisionId: string;
   panelData: any;
+  incomers: any;
 }
 const getRatingForIncomer = (sg_data: any) => {
   if (!sg_data) return 0;
   let totalWorkingKW = 0;
   let highestStandbyKW = 0;
 
-  sg_data?.switchgear_selection_data.forEach((item: any) => {
+  sg_data?.switchgear_selection_data?.forEach((item: any) => {
     totalWorkingKW += item.working_kw || 0;
     if (item.standby_kw > highestStandbyKW) {
       highestStandbyKW = item.standby_kw;
@@ -39,14 +42,16 @@ const getRatingForIncomer = (sg_data: any) => {
 };
 const getDevice = (sg_data: any, projectPanelData: any) => {
   // console.log(getRatingForIncomer(sg_data) <= Number(projectPanelData?.incomer_ampere));
-  
-  return Number(getRatingForIncomer(sg_data)) <= Number(projectPanelData?.incomer_ampere)
+
+  return Number(getRatingForIncomer(sg_data)) <=
+    Number(projectPanelData?.incomer_ampere)
     ? projectPanelData?.incomer_type
     : projectPanelData?.incomer_above_type;
 };
 
 const getPoles = (sg_data: any, projectPanelData: any) => {
-  return Number(getRatingForIncomer(sg_data)) <= Number(projectPanelData?.incomer_ampere)
+  return Number(getRatingForIncomer(sg_data)) <=
+    Number(projectPanelData?.incomer_ampere)
     ? projectPanelData?.incomer_pole
     : projectPanelData?.incomer_above_pole;
 };
@@ -87,36 +92,67 @@ const useDataFetching = (
         `${getPanelDoctype(
           panelType
         )}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
-      )
-      const sg_data = await getData(`${SLD_REVISIONS_API}/${sld_revision_id}`)
-      console.log(projectPanelData,"vishal");
-      console.log(sg_data, projectPanelData[0],"vishal");
-      
-      const preferredSwitchgear = makeComponents[0]?.preferred_lv_switchgear.toUpperCase()
-      const pole = getPoles(sg_data, projectPanelData[0]) + "-POLE"
-      const device = getDevice(sg_data, projectPanelData[0])
-      const current_rating = getRatingForIncomer(sg_data)
-      console.log(current_rating,"current_rating");
-      
-      const filters = [
-        ["manufacturer", "=", preferredSwitchgear],
-        ["cb_type", "like", `%${pole}%`],
-        ["type_int", "like", `%${device}%`],
-        ["current_rating", ">", current_rating],
-      ];
+      );
+      const sg_data = await getData(`${SLD_REVISIONS_API}/${sld_revision_id}`);
+      console.log(projectPanelData, "vishal");
+      console.log(sg_data, projectPanelData[0], "vishal");
+
+      const preferredSwitchgear =
+        makeComponents[0]?.preferred_lv_switchgear.toUpperCase();
+      const pole = getPoles(sg_data, projectPanelData[0]) + "-POLE";
+      const device = getDevice(sg_data, projectPanelData[0]);
+      const current_rating = getRatingForIncomer(sg_data);
+      console.log(current_rating, "current_rating");
+
+      let filters;
 
       // const encodedFilters = encodeURIComponent(JSON.stringify(filters))
       // const limit_start = (page - 1) * pageSize
       // console.log(limit_start, pageSize)
+      let url;
+      if (device === "SFU") {
+        filters = [
+          ["make", "=", preferredSwitchgear],
+          ["pole", "like", `%${getPoles(sg_data, projectPanelData[0])}%`],
+          ["ampere", ">=", current_rating],
+        ];
+      } else {
+        filters = [
+          ["manufacturer", "=", preferredSwitchgear],
+          ["cb_type", "like", `%${pole}%`],
+          ["type_int", "like", `%${device}%`],
+          ["current_rating", ">=", current_rating],
+        ];
+      }
+      if (device === "SFU") {
+        url = `${SFU_API}?fields=["*"]&filters=${JSON.stringify(
+          filters
+        )}&limit_start=${0}&limit=${200}`;
+      } else {
+        url = `${CIRCUIT_BREAKER_API}?fields=["*"]&filters=${JSON.stringify(
+          filters
+        )}&limit_start=${0}&limit=${200}`;
+      }
 
-      const url = `${CIRCUIT_BREAKER_API}?fields=["*"]&filters=${JSON.stringify(filters)}&limit_start=${0}&limit=${200}`
-
+      console.log(filters, "incomers all");
       const response = await getData(url);
       console.log(response, "incomers all");
-
-      setIncomerResponse(response || []);
+      if (device === "SFU") {
+        const data = response?.map((el: any) => {
+          return {
+            catalog: el.sdf,
+            current_rating: el.ampere,
+            cb_type: el.pole,
+            description: el.description,
+          };
+        });
+        setIncomerResponse(data || []);
+      } else {
+        setIncomerResponse(response || []);
+      }
+      const count_url = device === "SFU" ? GET_SFU_COUNT : GET_CB_COUNT;
       const total_count = await getData(
-        GET_CB_COUNT + `&filters=${JSON.stringify(filters)}`
+        count_url + `&filters=${JSON.stringify(filters)}`
       );
 
       console.log(total_count, "total_count");
@@ -154,6 +190,7 @@ const AddIncomer: React.FC<Props> = ({
   revision_id,
   panel_id,
   sld_revision_id,
+  incomers,
 }) => {
   const {
     totalCountOfItems,
@@ -184,7 +221,7 @@ const AddIncomer: React.FC<Props> = ({
   });
   console.log(tableParams, "tableParams");
 
-  // const [selectedBreaker, setSelectedBreaker] = useState<any>(null);
+  const [selectedBreaker, setSelectedBreaker] = useState<any>(null);
 
   const columns: TableColumnsType<any> = [
     {
@@ -241,37 +278,67 @@ const AddIncomer: React.FC<Props> = ({
         makeComponents?.preferred_lv_switchgear.toUpperCase();
       const pole = getPoles(sg_data, projectPanelData) + "-POLE";
       const device = getDevice(sg_data, projectPanelData);
-      console.log(sg_data);
+      // console.log(sg_data);
+      let filters;
 
       const current_rating = getRatingForIncomer(sg_data);
-
-      const filters = [
-        ["manufacturer", "=", preferredSwitchgear],
-        ["cb_type", "like", `%${pole}%`],
-        ["type_int", "like", `%${device}%`],
-        ["current_rating", ">", current_rating],
-      ];
+      if (device === "SFU") {
+        filters = [
+          ["make", "=", preferredSwitchgear],
+          ["pole", "like", `%${getPoles(sg_data, projectPanelData[0])}%`],
+          ["ampere", ">=", current_rating],
+        ];
+      } else {
+        filters = [
+          ["manufacturer", "=", preferredSwitchgear],
+          ["cb_type", "like", `%${pole}%`],
+          ["type_int", "like", `%${device}%`],
+          ["current_rating", ">=", current_rating],
+        ];
+      }
+      // const filters = [
+      //   ["manufacturer", "=", preferredSwitchgear],
+      //   ["cb_type", "like", `%${pole}%`],
+      //   ["type_int", "like", `%${device}%`],
+      //   ["current_rating", ">", current_rating],
+      // ];
       console.log("search Model : ", searchModel);
       console.log("search rating : ", searchRating);
 
       if (searchModel) {
-        filters.push(["catalog", "like", `%${searchModel}%`]);
+        if (device === "SFU") {
+          filters.push(["sdf", "like", `%${searchModel}%`]);
+        } else {
+          filters.push(["catalog", "like", `%${searchModel}%`]);
+        }
       }
 
       if (searchRating) {
         filters.pop();
-        filters.push(["current_rating", "=", searchRating]);
+        if (device === "SFU") {
+          filters.push(["ampere", "=", searchRating]);
+        } else {
+          filters.push(["current_rating", "=", searchRating]);
+        }
       }
 
       const encodedFilters = encodeURIComponent(JSON.stringify(filters));
       const limit_start = (page - 1) * pageSize;
-      console.log(limit_start, pageSize);
+      // console.log(limit_start, pageSize);
 
-      const url = `${CIRCUIT_BREAKER_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${limit_start}&limit=${pageSize}`;
+      let url;
+      if (device === "SFU") {
+        url = `${SFU_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${limit_start}&limit=${pageSize}`;
+      } else {
+        url = `${CIRCUIT_BREAKER_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${limit_start}&limit=${pageSize}`;
+      }
+      const count_url = device === "SFU" ? GET_SFU_COUNT : GET_CB_COUNT;
+
       const total_count = await getData(
-        GET_CB_COUNT + `&filters=${JSON.stringify(filters)}`
+        count_url + `&filters=${JSON.stringify(filters)}`
       );
 
+      console.log("url :", url);
       const response = await getData(url);
       console.log("total_count :", total_count);
       console.log(response);
@@ -301,14 +368,52 @@ const AddIncomer: React.FC<Props> = ({
 
   const rowSelection: TableProps<any>["rowSelection"] = {
     type: "radio",
-    // onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-    // setSelectedBreaker(selectedRows[0]);
-    // },
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      setSelectedBreaker(selectedRows[0]);
+    },
   };
-
+    useEffect(() => {
+    if (!dataLoading && incomerResponse) {
+      setTableData(incomerResponse);
+    }
+  }, [incomerResponse, dataLoading]);
+  const handleAddIncomer = async () => {
+    console.log(incomers);
+    try {
+      // const
+      const newIncomer = tableData?.find(
+        (el: any) => el.catalog === selectedBreaker?.catalog
+      );
+      console.log(selectedBreaker);
+      console.log(newIncomer, tableData);
+      if (newIncomer) {
+        const payload = {
+          incomer_data: [
+            ...incomers,
+            {
+              model_number: newIncomer.catalog,
+              manufacturer: makeComponents?.preferred_lv_switchgear,
+              rating: newIncomer.current_rating,
+              type: newIncomer.cb_type,
+              description: newIncomer?.description ?? "",
+              quantity: 1,
+            },
+          ],
+        };
+        const respose = await updateData(
+          `${SLD_REVISIONS_API}/${sld_revision_id}`,
+          false,
+          payload
+        );
+        message.success("Incomer added!");
+        onClose();
+      }
+      setLoading(false);
+    } catch (error) {}
+  };
   const handleClearSearch = async () => {
     setTableData([]);
-    // setSelectedBreaker(null);
+    setSelectedBreaker(null);
     setSearchModel("");
     setSearchRating("");
     setTableParams({
@@ -363,7 +468,11 @@ const AddIncomer: React.FC<Props> = ({
               Recommended Rating for Incomer (Ampere)
             </p>
             <p>{sg_data && getRatingForIncomer(sg_data)}</p>
-            <Button type="primary" onClick={() => addIncomer()}>
+            <Button
+              type="primary"
+              disabled={!selectedBreaker}
+              onClick={handleAddIncomer}
+            >
               Add Incomer
             </Button>
             <p className="font-semibold text-blue-500">Make</p>
@@ -395,7 +504,7 @@ const AddIncomer: React.FC<Props> = ({
             <Table
               rowSelection={rowSelection}
               columns={columns}
-              dataSource={tableData.length ? tableData : incomerResponse}
+              dataSource={tableData}
               loading={loading}
               pagination={tableParams.pagination}
               onChange={handleTableChange}

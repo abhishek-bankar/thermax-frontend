@@ -896,22 +896,30 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     // console.log(getDownLoadEndpoint())
 
     try {
-      const result = await downloadFile(GET_VOLTAGE_DROP_EXCEL_API, true, {
-        revision_id: cableScheduleRevisionId,
-      });
-      console.log(result);
+      const base64Data: any = await downloadFile(
+        GET_VOLTAGE_DROP_EXCEL_API,
+        true,
+        {
+          revision_id: cableScheduleRevisionId,
+        }
+      );
 
-      const byteArray = new Uint8Array(result?.data?.data); // Convert the array into a Uint8Array
-      const excelBlob = new Blob([byteArray.buffer], {
+      // Create a Blob from the Base64 string
+      const binaryData = Buffer.from(base64Data, "base64");
+      const blob = new Blob([binaryData], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      const url = window.URL.createObjectURL(excelBlob);
+
+      // Create a download link and trigger the download
       const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `voltage_drop_calculation.xlsx`); // Filename
-      document.body.appendChild(link);
+      link.href = URL.createObjectURL(blob);
+
+      // Use Content-Disposition header to get the filename
+      const filename = "voltage_drop_calculation.xlsx";
+
+      link.download = filename.replace(/"/g, ""); // Remove quotes if present
+
       link.click();
-      document.body.removeChild(link);
     } catch (error) {
       console.error(error);
       setLoading(false);

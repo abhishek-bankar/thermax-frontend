@@ -92,28 +92,34 @@ export default function DocumentRevision() {
     setDownloadIconSpin(true);
 
     try {
-      const result = await downloadFile(GET_DESIGN_BASIS_EXCEL_API, true, {
-        revision_id,
-      });
+      const base64Data: any = await downloadFile(
+        GET_DESIGN_BASIS_EXCEL_API,
+        true,
+        {
+          revision_id,
+        }
+      );
 
-      const byteArray = new Uint8Array(result?.data?.data); // Convert the array into a Uint8Array
-      const excelBlob = new Blob([byteArray.buffer], {
+      // Create a Blob from the Base64 string
+      const binaryData = Buffer.from(base64Data, "base64");
+      const blob = new Blob([binaryData], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      const url = window.URL.createObjectURL(excelBlob);
+
+      // Create a download link and trigger the download
       const link = document.createElement("a");
-      link.href = url;
+      link.href = URL.createObjectURL(blob);
       const document_revision_length =
         revisionHistory.length > 0 ? revisionHistory.length : 0;
-      link.setAttribute(
-        "download",
-        `Design_Basis_${projectData?.project_oc_number}_R${
-          document_revision_length - 1
-        }.xlsx`
-      ); // Filename
-      document.body.appendChild(link);
+
+      // Use Content-Disposition header to get the filename
+      const filename = `Design_Basis_${projectData?.project_oc_number}_R${
+        document_revision_length - 1
+      }.xlsx`;
+
+      link.download = filename.replace(/"/g, ""); // Remove quotes if present
+
       link.click();
-      document.body.removeChild(link);
     } catch (error) {
       message.error("Error processing Excel file");
       console.error("Error processing Excel file:", error);

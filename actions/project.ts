@@ -28,6 +28,7 @@ import {
   COMMON_CONFIGURATION_2,
   COMMON_CONFIGURATION_3,
   MCC_PCC_PLC_PANEL_3,
+  SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
 import { createData, deleteData, getData } from "./crud-actions";
 
@@ -88,6 +89,9 @@ export const createProject = async (projectData: any, userInfo: any) => {
       project_id,
     });
     await createData(LOCAL_ISOLATOR_REVISION_HISTORY_API, false, {
+      project_id,
+    });
+    await createData(SLD_REVISIONS_API, false, {
       project_id,
     });
 
@@ -356,6 +360,15 @@ export const deleteProject = async (project_id: string) => {
         `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${revisionID}`,
         false
       );
+    }
+
+    const sldRevisionHistory = await getData(
+      `${SLD_REVISIONS_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["*"]`
+    );
+    for (const revision of sldRevisionHistory || []) {
+      const revisionID = revision.name;
+
+      await deleteData(`${SLD_REVISIONS_API}/${revisionID}`, false);
     }
 
     await deleteData(`${PROJECT_API}/${project_id}`, false);

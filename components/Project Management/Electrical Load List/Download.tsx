@@ -124,22 +124,26 @@ const Download: React.FC<Props> = ({
     console.log(getDownLoadEndpoint());
 
     try {
-      const result = await downloadFile(getDownLoadEndpoint(), true, {
+      const base64Data: any = await downloadFile(getDownLoadEndpoint(), true, {
         revision_id,
       });
-      console.log(result);
 
-      const byteArray = new Uint8Array(result?.data?.data); // Convert the array into a Uint8Array
-      const excelBlob = new Blob([byteArray.buffer], {
+      // Create a Blob from the Base64 string
+      const binaryData = Buffer.from(base64Data, "base64");
+      const blob = new Blob([binaryData], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      const url = window.URL.createObjectURL(excelBlob);
+
+      // Create a download link and trigger the download
       const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${getName(tabKey)}.xlsx`); // Filename
-      document.body.appendChild(link);
+      link.href = URL.createObjectURL(blob);
+
+      // Use Content-Disposition header to get the filename
+      const filename = `${getName(tabKey)}.xlsx`;
+
+      link.download = filename.replace(/"/g, ""); // Remove quotes if present
+
       link.click();
-      document.body.removeChild(link);
     } catch (error) {
       console.error(error);
       message.error("Unable to download file");

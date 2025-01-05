@@ -755,10 +755,10 @@ export const mccPanelValidationSchema = zod
       required_error: "Gland Plate Drill Type is required",
       message: "Gland Plate Drill Type is required",
     }),
-    ga_gland_plate_3mm_attachment_type: zod.string({
-      required_error: "Gland Plate Attachment Type is required",
-      message: "Gland Plate Attachment Type is required",
-    }),
+    // ga_gland_plate_3mm_attachment_type: zod.string({
+    //   required_error: "Gland Plate Attachment Type is required",
+    //   message: "Gland Plate Attachment Type is required",
+    // }),
     ga_busbar_chamber_position: zod.string({
       required_error: "Busbar Chamber Position is required",
       message: "Busbar Chamber Position is required",

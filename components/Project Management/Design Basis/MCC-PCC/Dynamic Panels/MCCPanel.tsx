@@ -113,8 +113,8 @@ const getDefaultValues = (
       mccPanelData?.ga_gland_plate_3mm_drill_type || "Knockout",
     ga_gland_plate_thickness:
       mccPanelData?.ga_gland_plate_thickness || "1.6 mm",
-    ga_gland_plate_3mm_attachment_type:
-      mccPanelData?.ga_gland_plate_3mm_attachment_type || "Detachable",
+    // ga_gland_plate_3mm_attachment_type:
+    //   mccPanelData?.ga_gland_plate_3mm_attachment_type || "Detachable",
     ga_busbar_chamber_position:
       mccPanelData?.ga_busbar_chamber_position || "Top",
     ga_power_and_control_busbar_separation:

@@ -63,8 +63,6 @@ export default function ProjectList({ userInfo, isComplete }: any) {
   }
   const { data: projectList, isLoading } = useGetData(getProjectUrl);
 
-  console.log("projectList", projectList);
-
   if (projectList) {
     projectList.sort((a: any, b: any) => {
       if (

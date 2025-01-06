@@ -342,7 +342,7 @@ const MCCcumPCCPLCPanel = ({
   const eo_system_hardware_options = dropdown["EO System Hardware"];
   const eo_monitor_size_options = dropdown["EO Monitor Size"];
 
-  const { control, handleSubmit, reset, watch } = useForm({
+  const { control, handleSubmit, reset, watch, formState } = useForm({
     resolver: zodResolver(plcPanelValidationSchema),
     defaultValues: getDefaultValues(plcPanelData?.[0]),
     mode: "onSubmit",
@@ -1945,7 +1945,7 @@ const MCCcumPCCPLCPanel = ({
           </div>
         </div>
         <div className="mt-2 flex w-full justify-end">
-          <Button type="primary" loading={loading}>
+          <Button type="primary" loading={loading} htmlType="submit">
             Save and Next
           </Button>
         </div>

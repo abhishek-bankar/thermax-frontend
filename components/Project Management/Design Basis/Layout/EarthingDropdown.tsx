@@ -22,7 +22,6 @@ export default function useEarthingDropdowns() {
         }
       );
 
-      console.log("earthing response", response);
       setDropdown(response);
     };
     getDropdown();

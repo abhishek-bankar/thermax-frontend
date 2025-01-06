@@ -61,7 +61,6 @@ export default function usePLCDropdowns() {
         }
       );
       setDropdown(response);
-      console.log("plc response", response);
     };
     getDropdown();
   }, []);

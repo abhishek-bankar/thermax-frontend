@@ -67,7 +67,7 @@ export default function CopyRevisionModel({
       setOpen(false);
     } catch (error) {
       message.error("Failed to clone revision data");
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(false);
     }

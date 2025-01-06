@@ -583,7 +583,6 @@ const CommonConfiguration = ({
   };
 
   const onSubmit = async (data: any) => {
-    console.log("data", data);
     setLoading(true);
     try {
       await updateData(

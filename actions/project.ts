@@ -91,9 +91,6 @@ export const createProject = async (projectData: any, userInfo: any) => {
     await createData(LOCAL_ISOLATOR_REVISION_HISTORY_API, false, {
       project_id,
     });
-    await createData(SLD_REVISIONS_API, false, {
-      project_id,
-    });
 
     await createData(APPROVER_EMAIL_NOTIFICATION_API, false, {
       approvar_email: projectData?.approver,

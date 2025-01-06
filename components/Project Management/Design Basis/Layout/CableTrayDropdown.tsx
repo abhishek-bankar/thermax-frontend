@@ -39,7 +39,6 @@ export default function useCableTrayDropdowns() {
         }
       );
 
-      console.log("cable tray response", response);
       setDropdown(response);
     };
     getDropdown();

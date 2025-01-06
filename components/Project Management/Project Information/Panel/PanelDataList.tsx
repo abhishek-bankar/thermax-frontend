@@ -11,6 +11,7 @@ import {
   MCC_PCC_PLC_PANEL_3,
   PCC_PANEL,
   PROJECT_PANEL_API,
+  SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
 import {
   MCC_PANEL_TYPE,
@@ -180,6 +181,16 @@ export default function PanelDataList({
       for (const mccPccPlcPanel3 of mccPccPlcPanel3Data) {
         const mccPccPlcPanel3ID = mccPccPlcPanel3.name;
         await deleteData(`${MCC_PCC_PLC_PANEL_3}/${mccPccPlcPanel3ID}`, false);
+      }
+
+      // Delete all SLD revision
+      const sldRevisionData = await getData(
+        `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${panelId}"]]&fields=["*"]`
+      );
+
+      for (const sldRevision of sldRevisionData) {
+        const sldRevisionID = sldRevision.name;
+        await deleteData(`${SLD_REVISIONS_API}/${sldRevisionID}`, false);
       }
     }
     await deleteData(`${PROJECT_PANEL_API}/${selectedRowID}`, false);

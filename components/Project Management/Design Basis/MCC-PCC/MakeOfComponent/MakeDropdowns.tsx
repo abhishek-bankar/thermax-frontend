@@ -100,7 +100,6 @@ export default function useMakeOfComponentDropdowns() {
           "PLC Make": "name",
         }
       );
-      console.log(response, "make response");
       setDropdown(response);
     };
     getDropdown();

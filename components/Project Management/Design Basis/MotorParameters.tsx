@@ -287,8 +287,6 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
     `${MOTOR_PARAMETER_API}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
   );
 
-  // console.log("mainPackageData: ", mainPackageData)
-
   useEffect(() => {
     if (motorParameters?.[0]) {
       setIsHazardous(Boolean(motorParameters?.[0].is_hazardous_area_present));

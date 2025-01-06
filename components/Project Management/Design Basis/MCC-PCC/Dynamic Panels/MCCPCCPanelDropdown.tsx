@@ -63,7 +63,6 @@ export default function useMCCPCCPanelDropdowns() {
         }
       );
 
-      console.log("PCC response", response);
       setDropdown(response);
     };
 

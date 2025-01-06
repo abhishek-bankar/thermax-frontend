@@ -8,6 +8,7 @@ import {
   COMMON_CONFIGURATION_3,
   PROJECT_INFO_API,
 } from "@/configs/api-endpoints";
+import { getBusbarSizingCalculations } from "@/actions/sld";
 
 const useDataFetching = (designBasisRevisionId: string) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -85,6 +86,9 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
   };
   useEffect(() => {
     if (projectInfo && commonConfig) {
+      let material_constant = commonConfig
+        ? commonConfig?.power_bus_current_density?.split(" ")[0]
+        : 0;
       form.setFieldsValue({
         // Fault Current Details
         faultCurrent: projectInfo.fault_level,
@@ -98,7 +102,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
 
         // // Material Details
         material: commonConfig.power_bus_material,
-        materialConstant: projectInfo.power_bus_current_density, // current density power bus
+        materialConstant: material_constant, // current density power bus
 
         // // Enclosure Details
         // height: projectInfo.height,
@@ -110,7 +114,23 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
       });
     }
   }, [projectInfo, commonConfig]);
-
+  const handleCalculateBusbarSizing = async () => {
+    // console.log(form);
+    let data;
+    form
+      .validateFields()
+      .then((values) => {
+        console.log("Form Values:", values);
+        data = values;
+      })
+      .catch((error) => {
+        console.log("Validation Failed:", error);
+        message.error("Please enter all fields");
+      });
+    // if (data) {
+      const res = await getBusbarSizingCalculations();
+    // }
+  };
   return (
     <>
       {isLoading ? (
@@ -318,7 +338,11 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
             </Card>
 
             <div className="flex justify-end gap-2">
-              <Button type="primary" htmlType="button">
+              <Button
+                type="primary"
+                htmlType="button"
+                onClick={handleCalculateBusbarSizing}
+              >
                 Calculate Busbar Sizing
               </Button>
               <Button type="primary" htmlType="button">

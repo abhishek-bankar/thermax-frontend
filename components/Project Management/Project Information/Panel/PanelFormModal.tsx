@@ -27,6 +27,7 @@ import {
   MCCcumPCC_PANEL_TYPE,
   PCC_PANEL_TYPE,
   S3FolderMapping,
+  SLD_STATUS,
 } from "@/configs/constants";
 import { useDropdownOptions } from "@/hooks/useDropdownOptions";
 import { useGetData } from "@/hooks/useCRUD";
@@ -183,7 +184,7 @@ export default function PanelFormModal({
         // panel_id: panelRes.name,
         panel_name: panelRes.panel_name,
         project_id,
-        status: "Not Released",
+        status: SLD_STATUS.DEFAULT,
         description: "Issued for approval",
       };
       await createData(SLD_REVISIONS_API, false, new_sld_revision);

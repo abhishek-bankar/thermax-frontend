@@ -154,9 +154,11 @@ const useDataFetching = (
       // )
 
       // const commonConfiguration: any =  [...(commonConfiguration1 || []), ...(commonConfiguration2 || []), ...(commonConfiguration3 || [])].flat()
-      console.log(revision_id,"revision_id");
-      
-      const sg_saved_data = await getData(`${SLD_REVISIONS_API}/${revision_id}`)
+      console.log(revision_id, "revision_id");
+
+      const sg_saved_data = await getData(
+        `${SLD_REVISIONS_API}/${revision_id}`
+      );
       const makeComponents = await getData(
         `${MAKE_OF_COMPONENT_API}?fields=["preferred_soft_starter","preferred_lv_switchgear","preferred_vfdvsd"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
       );
@@ -208,6 +210,7 @@ const SwitchgearSelection: React.FC<Props> = ({
     useState<JspreadsheetInstance | null>(null);
   const { setLoading } = useLoading();
   const params = useParams();
+  const [updatedSgData, setUpdatedSgData] = useState<any>([]);
   const userInfo: { division: string } = useCurrentUser();
 
   const project_id = params.project_id as string;
@@ -356,6 +359,11 @@ const SwitchgearSelection: React.FC<Props> = ({
 
     const payload = {
       switchgear_selection_data: data?.map((row: any) => {
+        const otherInfo = updatedSgData?.find(
+          (item: any) => item.tag_number === row[0]
+        );
+        console.log(otherInfo);
+        
         if (userInfo.division === ENVIRO) {
           return {
             tag_number: row[0],
@@ -378,8 +386,11 @@ const SwitchgearSelection: React.FC<Props> = ({
             terminal_part_number: row[17],
             cable_size: row[18],
             incomer: row[19],
-          }
-        }else if(userInfo.division === HEATING){
+            unit_2: otherInfo.unit_2,
+            unit_3: otherInfo.unit_3,
+            unit_4: otherInfo.unit_4,
+          };
+        } else if (userInfo.division === HEATING) {
           return {
             tag_number: row[0],
             service_description: row[1],
@@ -402,9 +413,11 @@ const SwitchgearSelection: React.FC<Props> = ({
             terminal_part_number: row[17],
             cable_size: row[18],
             incomer: row[19],
-          }
+            unit_2: otherInfo.unit_2,
+            unit_3: otherInfo.unit_3,
+            unit_4: otherInfo.unit_4,
+          };
         }
-      
       }),
     };
     try {
@@ -486,7 +499,12 @@ const SwitchgearSelection: React.FC<Props> = ({
         }
         return row;
       });
-      console.log("updated sg_data", sg_data);
+      if (sg_data.length) {
+        setUpdatedSgData(sg_data);
+        // console.log("up");
+        
+      }
+      console.log("updated data : ", sg_data);
       console.log("updated calc", updatedSgData);
 
       spreadsheetInstance?.setData(updatedSgData);

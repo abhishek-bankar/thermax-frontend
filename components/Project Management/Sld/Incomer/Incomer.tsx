@@ -19,6 +19,7 @@ interface IncomerData {
   rating: string;
   type: string;
   description: string;
+  quantity: string;
 }
 
 const Incomer: React.FC<Props> = ({
@@ -27,8 +28,7 @@ const Incomer: React.FC<Props> = ({
   panelData,
   revision_id,
 }) => {
-  const [isAddMainsIncomerOpen, setIsAddMainsIncomerOpen] =
-    useState<boolean>(false);
+  const [isAddMainsIncomerOpen, setIsAddMainsIncomerOpen] = useState<boolean>(false);
   const [incomers, setIncomers] = useState<IncomerData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -43,7 +43,6 @@ const Incomer: React.FC<Props> = ({
       title: "Model Number",
       dataIndex: "model_number",
       key: "model_number",
-      // width: ,
     },
     {
       title: "Rating",
@@ -60,7 +59,7 @@ const Incomer: React.FC<Props> = ({
     {
       title: "Quantity",
       dataIndex: "quantity",
-      key: "quantity",
+      key: "quantity", 
       width: 120,
     },
     {
@@ -73,13 +72,6 @@ const Incomer: React.FC<Props> = ({
       key: "actions",
       width: 120,
       render: (_, record) => (
-        // <Button
-        //   type="link"
-        //   danger
-        //   onClick={() => handleRemoveIncomer(record.model_number)}
-        // >
-        //   Remove
-        // </Button>
         <Tooltip placement="top" title="Remove">
           <Popconfirm
             title="Are you sure to remove this incomer?"
@@ -104,8 +96,14 @@ const Incomer: React.FC<Props> = ({
     try {
       setLoading(true);
       const response = await getData(`${SLD_REVISIONS_API}/${revision_id}`);
-
-      setIncomers(response.incomer_data);
+      
+      // Transform the data to ensure each item has a unique key
+      const incomersWithKeys = response.incomer_data.map((incomer: IncomerData) => ({
+        ...incomer,
+        key: incomer.model_number // Using model_number as a unique key
+      }));
+      
+      setIncomers(incomersWithKeys);
     } catch (error) {
       message.error("Failed to fetch incomers");
     } finally {
@@ -120,7 +118,7 @@ const Incomer: React.FC<Props> = ({
           (incomer: any) => incomer.model_number !== key
         ),
       };
-      const respose = await updateData(
+      await updateData(
         `${SLD_REVISIONS_API}/${revision_id}`,
         false,
         payload
@@ -135,13 +133,12 @@ const Incomer: React.FC<Props> = ({
   useEffect(() => {
     fetchIncomers();
   }, []);
+
   useEffect(() => {
     if (!isAddMainsIncomerOpen) {
       fetchIncomers();
     }
-    // fetchIncomers();
   }, [isAddMainsIncomerOpen]);
-  console.log(panelData);
 
   return (
     <div className="space-y-4">
@@ -179,7 +176,6 @@ const Incomer: React.FC<Props> = ({
           sld_revision_id={revision_id}
           designBasisRevisionId={designBasisRevisionId}
           incomers={incomers}
-          // onIncomerAdd={handleAddIncomer}
         />
       )}
     </div>

@@ -128,7 +128,7 @@
 //   console.log(panelData, "panel data ");
 //   const getLatestRevision = () => {
 //     console.log(sldRevisions,'sld rev');
-    
+
 //     return sldRevisions?.find((item: any) => !item.is_released) ?? {}
 //   }
 
@@ -205,19 +205,28 @@
 
 // export default PanelTab;
 
-
-
 import {
   CloudDownloadOutlined,
   FolderOpenOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
-import { Button, Table, TableColumnsType, Tabs, Tag, Tooltip } from "antd";
-import React, { useMemo, Suspense, lazy } from "react";
+import {
+  Button,
+  message,
+  Table,
+  TableColumnsType,
+  Tabs,
+  Tag,
+  Tooltip,
+} from "antd";
+import React, { useMemo, Suspense, lazy, useState } from "react";
 import { getThermaxDateFormat } from "@/utils/helpers";
+import { downloadFile } from "@/actions/crud-actions";
 
 // Lazy load tab components
-const SwitchgearSelection = lazy(() => import("./Switchgear Selection/SwitchgearSelection"));
+const SwitchgearSelection = lazy(
+  () => import("./Switchgear Selection/SwitchgearSelection")
+);
 const Incomer = lazy(() => import("./Incomer/Incomer"));
 const BusbarSizing = lazy(() => import("./Busbar Sizing/BusbarSizing"));
 
@@ -233,6 +242,7 @@ interface SLDRevision {
   status: string;
   is_released: boolean;
   creation: string;
+  sld_path: string;
 }
 
 const PanelTab: React.FC<Props> = ({
@@ -241,99 +251,169 @@ const PanelTab: React.FC<Props> = ({
   projectPanelData,
   designBasisRevisionId,
 }) => {
-  const columns: TableColumnsType = useMemo(() => [
-    {
-      title: () => <div className="text-center">Document Name</div>,
-      dataIndex: "documentName",
-      align: "center",
-      render: (text) => (
-        <Tooltip title="Edit Revision" placement="top">
-          <Button
-            type="link"
-            iconPosition="start"
-            onClick={() => {}}
-            icon={
-              <FolderOpenOutlined
-                style={{ color: "#fef65b", fontSize: "1.2rem" }}
-              />
-            }
-          >
-            {text}
-          </Button>
-        </Tooltip>
-      ),
-    },
-    {
-      title: () => <div className="text-center">Status</div>,
-      dataIndex: "status",
-      render: (text) => (
-        <div className="text-center">
-          <Tag color="green">{text}</Tag>
-        </div>
-      ),
-    },
-    {
-      title: () => <div className="text-center">Document Revision</div>,
-      dataIndex: "documentRevision",
-      render: (text) => <div className="text-center">{text}</div>,
-    },
-    {
-      title: () => <div className="text-center">Created Date</div>,
-      dataIndex: "createdDate",
-      render: (text) => getThermaxDateFormat(new Date(text)),
-    },
-    {
-      title: () => <div className="text-center">Download</div>,
-      dataIndex: "download",
-      render: () => (
-        <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
-          <Tooltip title="Download">
+  const [downloadIconSpin, setDownloadIconSpin] = useState(false);
+
+  // const handleDownload = async (revision_id: string) => {
+  //   setDownloadIconSpin(true);
+
+  //   try {
+  //     // const result = await downloadFile(GET_DESIGN_BASIS_EXCEL_API, true, {
+  //     //   revision_id,
+  //     // });
+
+  //     const byteArray = new Uint8Array(result?.data?.data); // Convert the array into a Uint8Array
+  //     const excelBlob = new Blob([byteArray.buffer], {
+  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //     });
+  //     const url = window.URL.createObjectURL(excelBlob);
+  //     const link = document.createElement("a");
+  //     link.href = url;
+  //     const document_revision_length =
+  //       revisionHistory.length > 0 ? revisionHistory.length : 0;
+  //     link.setAttribute(
+  //       "download",
+  //       `Design_Basis_${projectData?.project_oc_number}_R${
+  //         document_revision_length - 1
+  //       }.xlsx`
+  //     ); // Filename
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     document.body.removeChild(link);
+  //   } catch (error) {
+  //     message.error("Error processing Excel file");
+  //     console.error("Error processing Excel file:", error);
+  //   }
+
+  //   setDownloadIconSpin(false);
+  // };
+  const handleDownload = async (path: any) => {
+    // setDownloading(true);
+    // setStatus('');
+
+    try {
+      console.log(path);
+
+      const response = await fetch(path);
+
+      if (!response.ok) {
+        throw new Error("Download failed");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "TBD_SLD_R0.zip";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // setStatus('success');
+    } catch (error) {
+      console.error("Download error:", error);
+      // setStatus('error');
+    } finally {
+      // setDownloading(false);
+    }
+  };
+  const columns: TableColumnsType = useMemo(
+    () => [
+      {
+        title: () => <div className="text-center">Document Name</div>,
+        dataIndex: "documentName",
+        align: "center",
+        render: (text) => (
+          <Tooltip title="Edit Revision" placement="top">
             <Button
               type="link"
-              shape="circle"
+              iconPosition="start"
+              onClick={() => {}}
               icon={
-                <CloudDownloadOutlined
-                  style={{
-                    fontSize: "1.3rem",
-                    color: "green",
-                  }}
+                <FolderOpenOutlined
+                  style={{ color: "#fef65b", fontSize: "1.2rem" }}
                 />
               }
-            />
+            >
+              {text}
+            </Button>
           </Tooltip>
-        </div>
-      ),
-    },
-    {
-      title: () => <div className="text-center">Release</div>,
-      dataIndex: "release",
-      render: () => (
-        <div className="text-center">
-          <Button
-            type="primary"
-            size="small"
-            name="Release"
-          >
-            Release
-          </Button>
-        </div>
-      ),
-    },
-  ], []);
+        ),
+      },
+      {
+        title: () => <div className="text-center">Status</div>,
+        dataIndex: "status",
+        render: (text) => (
+          <div className="text-center">
+            <Tag color="green">{text}</Tag>
+          </div>
+        ),
+      },
+      {
+        title: () => <div className="text-center">Document Revision</div>,
+        dataIndex: "documentRevision",
+        render: (text) => <div className="text-center">{text}</div>,
+      },
+      {
+        title: () => <div className="text-center">Created Date</div>,
+        dataIndex: "createdDate",
+        render: (text) => getThermaxDateFormat(new Date(text)),
+      },
+      {
+        title: () => <div className="text-center">Download</div>,
+        dataIndex: "download",
+        render: (text, record) => (
+          <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
+            <Tooltip title="Download">
+              <Button
+                type="link"
+                shape="circle"
+                onClick={() => handleDownload(record.path)}
+                icon={
+                  <CloudDownloadOutlined
+                    style={{
+                      fontSize: "1.3rem",
+                      color: "green",
+                    }}
+                  />
+                }
+              />
+            </Tooltip>
+          </div>
+        ),
+      },
+      {
+        title: () => <div className="text-center">Release</div>,
+        dataIndex: "release",
+        render: () => (
+          <div className="text-center">
+            <Button type="primary" size="small" name="Release">
+              Release
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
-  const dataSource = useMemo(() => 
-    sldRevisions?.map((item: SLDRevision, index: number) => ({
-      key: item.name,
-      documentName: "SLD",
-      status: item.status,
-      documentRevision: `R${index}`,
-      createdDate: item.creation,
-    })),
+  console.log(sldRevisions);
+  const dataSource = useMemo(
+    () =>
+      sldRevisions?.map((item: SLDRevision, index: number) => ({
+        key: item.name,
+        documentName: "SLD",
+        status: item.status,
+        documentRevision: `R${index}`,
+        createdDate: item.creation,
+        path: item.sld_path,
+      })),
     [sldRevisions]
   );
 
-  const latestRevision = useMemo(() => 
-    sldRevisions?.find((item: SLDRevision) => !item.is_released) ?? {},
+  const latestRevision = useMemo(
+    () => sldRevisions?.find((item: SLDRevision) => !item.is_released) ?? {},
     [sldRevisions]
   );
 
@@ -346,9 +426,7 @@ const PanelTab: React.FC<Props> = ({
   const SLDRevisionTab = () => (
     <>
       <div className="text-end">
-        <Button icon={<SyncOutlined color="#492971" />}>
-          Refresh
-        </Button>
+        <Button icon={<SyncOutlined color="#492971" />}>Refresh</Button>
       </div>
       <div className="mt-2">
         <Table columns={columns} dataSource={dataSource} size="small" />
@@ -394,9 +472,7 @@ const PanelTab: React.FC<Props> = ({
       key: "4",
       children: (
         <Suspense fallback={<LoadingFallback />}>
-          <BusbarSizing 
-            designBasisRevisionId={designBasisRevisionId}
-          />
+          <BusbarSizing designBasisRevisionId={designBasisRevisionId} />
         </Suspense>
       ),
     },

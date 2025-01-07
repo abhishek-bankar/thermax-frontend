@@ -112,7 +112,7 @@ const useDataFetching = (
     } finally {
       setIsLoading(false);
     }
-  }, [loadListLatestRevisionId]);
+  }, [loadListLatestRevisionId, motorCanopyRevisionId]);
 
   useEffect(() => {
     fetchData();
@@ -195,7 +195,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
     return () => {
       spreadsheetInstance?.destroy();
     };
-  }, [isLoading, cableScheduleOptions]);
+  }, [isLoading, cableScheduleOptions, spreadsheetInstance, setLoading]);
 
   const handleMotorCanopySave = async () => {
     const data = spreadsheetInstance?.getData();

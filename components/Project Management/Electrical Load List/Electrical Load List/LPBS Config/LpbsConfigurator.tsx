@@ -139,7 +139,7 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
       };
 
       fetchSchemes();
-    }, [isOpen, lpbsSchemes.length, transformSchemeData]);
+    }, [isOpen, lpbsSchemes.length, setLoading, transformSchemeData, userInfo?.division]);
 
     // Initialize main LPBS spreadsheet
     useEffect(() => {
@@ -174,7 +174,7 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
         instance.destroy();
         setLpbsInstance(null);
       };
-    }, [isOpen, lpbsSchemes, getSpreadsheetConfig]);
+    }, [isOpen, lpbsSchemes, getSpreadsheetConfig, selectedLpbsSchemes]);
 
     // Initialize selected schemes spreadsheet
     useEffect(() => {

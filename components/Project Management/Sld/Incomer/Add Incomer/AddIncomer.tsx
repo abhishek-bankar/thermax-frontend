@@ -105,10 +105,7 @@ const useDataFetching = (
       console.log(current_rating, "current_rating");
 
       let filters;
-
-      // const encodedFilters = encodeURIComponent(JSON.stringify(filters))
-      // const limit_start = (page - 1) * pageSize
-      // console.log(limit_start, pageSize)
+ 
       let url;
       if (device === "SFU") {
         filters = [
@@ -168,7 +165,7 @@ const useDataFetching = (
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [panelType, panel_id, revision_id, sld_revision_id]);
 
   useEffect(() => {
     fetchData();
@@ -200,18 +197,12 @@ const AddIncomer: React.FC<Props> = ({
     makeComponents,
     isLoading: dataLoading,
   } = useDataFetching(panelType, revision_id, panel_id, sld_revision_id);
-
-  // Table states
-  console.log(sg_data, "vishal");
-  // console.log(sg_data, "vishal")
-  console.log(projectPanelData, "vishal");
+ 
   const [searchModel, setSearchModel] = useState("");
   const [searchRating, setSearchRating] = useState("");
 
   const [tableData, setTableData] = useState<any>(incomerResponse);
-  console.log(tableData, "tableData");
   const [loading, setLoading] = useState(false);
-  console.log(totalCountOfItems, "tableParams");
   const [tableParams, setTableParams] = useState({
     pagination: {
       current: 1,
@@ -219,10 +210,7 @@ const AddIncomer: React.FC<Props> = ({
       total: totalCountOfItems,
     },
   });
-  console.log(tableParams, "tableParams");
-
   const [selectedBreaker, setSelectedBreaker] = useState<any>(null);
-
   const columns: TableColumnsType<any> = [
     {
       title: "Model Number",
@@ -251,7 +239,6 @@ const AddIncomer: React.FC<Props> = ({
   ];
 
   useEffect(() => {
-    console.log(totalCountOfItems, "totalCountOfItems");
     if (totalCountOfItems) {
       setTableParams({
         ...tableParams,
@@ -260,104 +247,89 @@ const AddIncomer: React.FC<Props> = ({
           total: totalCountOfItems,
         },
       });
-      console.log(totalCountOfItems, "totalCountOfItems");
     }
-  }, [totalCountOfItems]);
+  }, [tableParams, totalCountOfItems]);
 
-  useEffect(() => {
-    console.log(tableParams, "totalCountOfItems");
-    // getData(GET_CB_COUNT)
-    //   .then((res: any) => console.log(res))
-    //   .catch((err: any) => console.log(err))
-  }, [tableParams]);
+ 
 
-  const getCircuitBreakersData = async (page = 1, pageSize = 200) => {
-    try {
-      setLoading(true);
-      const preferredSwitchgear =
-        makeComponents?.preferred_lv_switchgear.toUpperCase();
-      const pole = getPoles(sg_data, projectPanelData) + "-POLE";
-      const device = getDevice(sg_data, projectPanelData);
-      // console.log(sg_data);
-      let filters;
-
-      const current_rating = getRatingForIncomer(sg_data);
-      if (device === "SFU") {
-        filters = [
-          ["make", "=", preferredSwitchgear],
-          ["pole", "like", `%${getPoles(sg_data, projectPanelData[0])}%`],
-          ["ampere", ">=", current_rating],
-        ];
-      } else {
-        filters = [
-          ["manufacturer", "=", preferredSwitchgear],
-          ["cb_type", "like", `%${pole}%`],
-          ["type_int", "like", `%${device}%`],
-          ["current_rating", ">=", current_rating],
-        ];
-      }
-      // const filters = [
-      //   ["manufacturer", "=", preferredSwitchgear],
-      //   ["cb_type", "like", `%${pole}%`],
-      //   ["type_int", "like", `%${device}%`],
-      //   ["current_rating", ">", current_rating],
-      // ];
-      console.log("search Model : ", searchModel);
-      console.log("search rating : ", searchRating);
-
-      if (searchModel) {
+  const getCircuitBreakersData = useCallback(
+    async (page = 1, pageSize = 200) => {
+      try {
+        setLoading(true);
+        const preferredSwitchgear =
+          makeComponents?.preferred_lv_switchgear.toUpperCase();
+        const pole = getPoles(sg_data, projectPanelData) + "-POLE";
+        const device = getDevice(sg_data, projectPanelData);
+        let filters;
+  
+        const current_rating = getRatingForIncomer(sg_data);
         if (device === "SFU") {
-          filters.push(["sdf", "like", `%${searchModel}%`]);
+          filters = [
+            ["make", "=", preferredSwitchgear],
+            ["pole", "like", `%${getPoles(sg_data, projectPanelData[0])}%`],
+            ["ampere", ">=", current_rating],
+          ];
         } else {
-          filters.push(["catalog", "like", `%${searchModel}%`]);
+          filters = [
+            ["manufacturer", "=", preferredSwitchgear],
+            ["cb_type", "like", `%${pole}%`],
+            ["type_int", "like", `%${device}%`],
+            ["current_rating", ">=", current_rating],
+          ];
         }
-      }
-
-      if (searchRating) {
-        filters.pop();
+  
+        if (searchModel) {
+          if (device === "SFU") {
+            filters.push(["sdf", "like", `%${searchModel}%`]);
+          } else {
+            filters.push(["catalog", "like", `%${searchModel}%`]);
+          }
+        }
+  
+        if (searchRating) {
+          filters.pop();
+          if (device === "SFU") {
+            filters.push(["ampere", "=", searchRating]);
+          } else {
+            filters.push(["current_rating", "=", searchRating]);
+          }
+        }
+  
+        const encodedFilters = encodeURIComponent(JSON.stringify(filters));
+        const limit_start = (page - 1) * pageSize;
+  
+        let url;
         if (device === "SFU") {
-          filters.push(["ampere", "=", searchRating]);
+          url = `${SFU_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${limit_start}&limit=${pageSize}`;
         } else {
-          filters.push(["current_rating", "=", searchRating]);
+          url = `${CIRCUIT_BREAKER_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${limit_start}&limit=${pageSize}`;
         }
+  
+        const count_url = device === "SFU" ? GET_SFU_COUNT : GET_CB_COUNT;
+  
+        const total_count = await getData(
+          count_url + `&filters=${JSON.stringify(filters)}`
+        );
+  
+        const response = await getData(url);
+  
+        setTableData(response || []);
+        setTableParams({
+          ...tableParams,
+          pagination: {
+            ...tableParams.pagination,
+            total: total_count || 0,
+          },
+        });
+      } catch (error) {
+        console.error("Error fetching circuit breaker data:", error);
+        message.error("Failed to load circuit breaker data");
+      } finally {
+        setLoading(false);
       }
-
-      const encodedFilters = encodeURIComponent(JSON.stringify(filters));
-      const limit_start = (page - 1) * pageSize;
-      // console.log(limit_start, pageSize);
-
-      let url;
-      if (device === "SFU") {
-        url = `${SFU_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${limit_start}&limit=${pageSize}`;
-      } else {
-        url = `${CIRCUIT_BREAKER_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${limit_start}&limit=${pageSize}`;
-      }
-      const count_url = device === "SFU" ? GET_SFU_COUNT : GET_CB_COUNT;
-
-      const total_count = await getData(
-        count_url + `&filters=${JSON.stringify(filters)}`
-      );
-
-      console.log("url :", url);
-      const response = await getData(url);
-      console.log("total_count :", total_count);
-      console.log(response);
-
-      setTableData(response || []);
-      setTableParams({
-        ...tableParams,
-        pagination: {
-          ...tableParams.pagination,
-          total: total_count || 0,
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching circuit breaker data:", error);
-      message.error("Failed to load circuit breaker data");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [makeComponents, sg_data, projectPanelData, searchModel, searchRating, setLoading, setTableData, setTableParams, tableParams]
+  );
 
   const handleTableChange = (pagination: any) => {
     setTableParams({
@@ -439,7 +411,7 @@ const AddIncomer: React.FC<Props> = ({
         clearTimeout(handler);
       };
     }
-  }, [searchModel]);
+  }, [getCircuitBreakersData, searchModel]);
   useEffect(() => {
     if (searchRating.length) {
       const handler = setTimeout(() => {
@@ -450,7 +422,7 @@ const AddIncomer: React.FC<Props> = ({
         clearTimeout(handler);
       };
     }
-  }, [searchRating]);
+  }, [getCircuitBreakersData, searchRating]);
   return (
     <Modal
       isOpen={isOpen}

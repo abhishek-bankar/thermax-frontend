@@ -37,31 +37,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { mutate } from "swr";
 import { getThermaxDateFormat } from "@/utils/helpers";
-
-// interface TableDataType {
-//   key: React.Key;
-//   documentName: React.ReactNode;
-//   status: string;
-//   documentRevision: string;
-//   createdDate: string;
-//   action: React.ReactNode;
-//   download: React.ReactNode;
-//   release: React.ReactNode;
-// }
-
-// const columns: TableColumnType<TableDataType>[] = [
-//   { title: "Document Name", dataIndex: "documentName" },
-//   { title: "Status", dataIndex: "status" },
-//   { title: "Document Revision", dataIndex: "documentRevision" },
-//   { title: "Created Date", dataIndex: "createdDate" },
-//   { title: "Action", dataIndex: "action" },
-//   { title: "Download", dataIndex: "download", align: "left" },
-//   { title: "Release", dataIndex: "release" },
-// ];
-
-// const DownloadTable = ({ dataSource }: { dataSource: TableDataType[] }) => {
-//   return <Table columns={columns} dataSource={dataSource} pagination={false} />;
-// };
+ 
 interface Props {
   designBasisRevisionId: string;
   loadListLatestRevisionId: string;
@@ -104,7 +80,7 @@ const Download: React.FC<Props> = ({
       }));
       setDataSource(dataSource);
     }
-  }, [revisionHistory]);
+  }, [documentList, revisionHistory]);
 
   const getDownLoadEndpoint = () => {
     switch (tabKey) {

@@ -211,7 +211,7 @@ const useDataFetching = (
       setIsLoading(false);
       setLoading(false);
     }
-  }, [loadListLatestRevisionId, cableScheduleRevisionId]);
+  }, [loadListLatestRevisionId, userInfo.division, cableScheduleRevisionId, designBasisRevisionId, setLoading]);
 
   useEffect(() => {
     fetchData();
@@ -319,7 +319,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     return () => {
       spreadsheetInstance?.destroy();
     };
-  }, [isLoading, cableScheduleOptions]);
+  }, [isLoading, cableScheduleOptions, spreadsheetInstance, setLoading]);
   const getCableType = (tag_number: any) => {
     const feeder = cableSizeCalcData?.find(
       (item: any) => item.tag_number == tag_number

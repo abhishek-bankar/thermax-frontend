@@ -40,9 +40,6 @@ const useDataFetching = (
       const cableScheduleData = await getData(
         `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${cableScheduleRevisionId}`
       );
-      console.log(cableScheduleData, "cableScheduleData");
-      console.log(projectPanelData, "projectPanelData");
-      console.log(loadList);
       setCableScheduleData(cableScheduleData.cable_schedule_data);
       setProjectPanelData(projectPanelData);
       setLoadListData(loadList?.electrical_load_list_data);
@@ -52,7 +49,12 @@ const useDataFetching = (
     } finally {
       setIsLoading(false);
     }
-  }, [loadListLatestRevisionId]);
+  }, [
+    cableScheduleRevisionId,
+    designBasisRevisionId,
+    loadListLatestRevisionId,
+    setIsLoading,
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -107,7 +109,7 @@ const SLDTabs: React.FC<Props> = ({
       };
     });
     setSLDTabs(updatedTabs);
-  }, [panelWiseData]);
+  }, [designBasisRevisionId, panelWiseData, projectPanelData, sldRevisions]);
   useEffect(() => {
     setModalLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,7 +122,7 @@ const SLDTabs: React.FC<Props> = ({
   useEffect(() => {
     if (loadListData.length && projectPanelData.length) {
       const panelWiseData = projectPanelData.reduce((acc, panel) => {
-        const panelName = panel.panel_name; // Assuming each panel object in projectPanelData has a 'name' property
+        const panelName = panel.panel_name;
         const filteredData = loadListData.filter(
           (item) => item.panel === panelName
         );
@@ -129,6 +131,21 @@ const SLDTabs: React.FC<Props> = ({
           acc.push({
             panelName,
             data: [],
+            otherData: filteredData.map((item) => {
+              const cablesize = cableScheduleData.find(
+                (el) => el.tag_number === item.tag_number
+              );
+              return {
+                ...item,
+                cablesize:
+                  cablesize &&
+                  cablesize.number_of_runs &&
+                  cablesize.number_of_cores &&
+                  cablesize.final_cable_size
+                    ? `${cablesize.number_of_runs}R X ${cablesize.number_of_cores} X ${cablesize.final_cable_size} Sqmm`
+                    : "",
+              };
+            }),
           });
         } else {
           acc.push({ panelName, data: [] });
@@ -138,9 +155,9 @@ const SLDTabs: React.FC<Props> = ({
       }, []);
 
       setPanelWiseData(panelWiseData);
-      console.log(panelWiseData);
+      console.log(panelWiseData, "panelWiseData");
     }
-  }, [loadListData, projectPanelData]);
+  }, [cableScheduleData, loadListData, projectPanelData]);
 
   const getLoadListData = () => {
     if (loadListData.length && projectPanelData.length) {
@@ -168,6 +185,21 @@ const SLDTabs: React.FC<Props> = ({
                     : "",
               };
             }),
+            otherData: filteredData.map((item) => {
+              const cablesize = cableScheduleData.find(
+                (el) => el.tag_number === item.tag_number
+              );
+              return {
+                ...item,
+                cablesize:
+                  cablesize &&
+                  cablesize.number_of_runs &&
+                  cablesize.number_of_cores &&
+                  cablesize.final_cable_size
+                    ? `${cablesize.number_of_runs}R X ${cablesize.number_of_cores} X ${cablesize.final_cable_size} Sqmm`
+                    : "",
+              };
+            }),
           });
         } else {
           acc.push({ panelName, data: [] });
@@ -180,36 +212,6 @@ const SLDTabs: React.FC<Props> = ({
       console.log(panelWiseData);
     }
   };
-
-  // const onChange = async (key: string) => {
-  // setModalLoading(true)
-  // console.log(key)
-  // console.log(documentList)
-  // console.log(getApiEndpoint(key))
-  // try {
-  //   // const documentList = await getData()
-  //   // console.log(staticData,"staticData");
-  //   const data = await getData(getApiEndpoint(key))
-  //   console.log(data)
-  //   const dataSource = data?.map((item: any, index: number) => ({
-  //     key: item.name,
-  //     documentName: getName(key),
-  //     status: item.status,
-  //     documentRevision: `R${index}`,
-  //     createdDate: item.creation,
-  //   }))
-  //   if (key === "6") {
-  //     await getIsolatorData()
-  //   }
-  //   console.log(dataSource)
-  //   setDataSource(dataSource)
-  //   console.log(data)
-  // } catch (error) {
-  // } finally {
-  //   setModalLoading(false)
-  // }
-  // setTabKey(key)
-  // };
 
   return (
     <div className="">

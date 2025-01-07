@@ -1,5 +1,5 @@
 import { Button, Popconfirm, Table, Tooltip, message } from "antd";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { TableColumnsType } from "antd";
 import AddIncomer from "./Add Incomer/AddIncomer";
 import { SLD_REVISIONS_API } from "@/configs/api-endpoints";
@@ -19,6 +19,7 @@ interface IncomerData {
   rating: string;
   type: string;
   description: string;
+  quantity: string;
 }
 
 const Incomer: React.FC<Props> = ({
@@ -43,7 +44,6 @@ const Incomer: React.FC<Props> = ({
       title: "Model Number",
       dataIndex: "model_number",
       key: "model_number",
-      // width: ,
     },
     {
       title: "Rating",
@@ -73,17 +73,12 @@ const Incomer: React.FC<Props> = ({
       key: "actions",
       width: 120,
       render: (_, record) => (
-        // <Button
-        //   type="link"
-        //   danger
-        //   onClick={() => handleRemoveIncomer(record.model_number)}
-        // >
-        //   Remove
-        // </Button>
         <Tooltip placement="top" title="Remove">
           <Popconfirm
             title="Are you sure to remove this incomer?"
-            onConfirm={async () => await handleRemoveIncomer(record.model_number)}
+            onConfirm={async () =>
+              await handleRemoveIncomer(record.model_number)
+            }
             okText="Yes"
             cancelText="No"
             placement="topRight"
@@ -100,18 +95,25 @@ const Incomer: React.FC<Props> = ({
     },
   ];
 
-  const fetchIncomers = async () => {
+  const fetchIncomers = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getData(`${SLD_REVISIONS_API}/${revision_id}`);
 
-      setIncomers(response.incomer_data);
+      const incomersWithKeys = response.incomer_data.map(
+        (incomer: IncomerData) => ({
+          ...incomer,
+          key: incomer.model_number,
+        })
+      );
+
+      setIncomers(incomersWithKeys);
     } catch (error) {
       message.error("Failed to fetch incomers");
     } finally {
       setLoading(false);
     }
-  };
+  }, [revision_id, setLoading, setIncomers]);
 
   const handleRemoveIncomer = async (key: string) => {
     try {
@@ -120,11 +122,7 @@ const Incomer: React.FC<Props> = ({
           (incomer: any) => incomer.model_number !== key
         ),
       };
-      const respose = await updateData(
-        `${SLD_REVISIONS_API}/${revision_id}`,
-        false,
-        payload
-      );
+      await updateData(`${SLD_REVISIONS_API}/${revision_id}`, false, payload);
       message.success("Incomer removed successfully");
       fetchIncomers();
     } catch (error) {
@@ -134,14 +132,13 @@ const Incomer: React.FC<Props> = ({
 
   useEffect(() => {
     fetchIncomers();
-  }, []);
+  }, [fetchIncomers]);
+
   useEffect(() => {
     if (!isAddMainsIncomerOpen) {
       fetchIncomers();
     }
-    // fetchIncomers();
-  }, [isAddMainsIncomerOpen]);
-  console.log(panelData);
+  }, [fetchIncomers, isAddMainsIncomerOpen]);
 
   return (
     <div className="space-y-4">
@@ -179,7 +176,6 @@ const Incomer: React.FC<Props> = ({
           sld_revision_id={revision_id}
           designBasisRevisionId={designBasisRevisionId}
           incomers={incomers}
-          // onIncomerAdd={handleAddIncomer}
         />
       )}
     </div>

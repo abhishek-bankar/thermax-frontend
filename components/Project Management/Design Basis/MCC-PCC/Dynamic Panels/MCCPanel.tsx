@@ -436,7 +436,7 @@ const MCCPanel = ({
     } finally {
       setLoading(false);
     }
-  }, [revision_id, reset, getValues]);
+  }, [revision_id, panel_id, getValues]);
 
   if (isLoading) {
     return (

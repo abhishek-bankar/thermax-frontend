@@ -1,6 +1,5 @@
-// ControlSchemeConfigurator.tsx
 import { JspreadsheetInstance } from "jspreadsheet-ce";
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import jspreadsheet from "jspreadsheet-ce";
 import { Button } from "antd";
 import AlertNotification from "@/components/AlertNotification";
@@ -61,30 +60,28 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> = ({
   );
   const [isControlSchemeEmpty, setIsControlSchemeEmpty] = useState(false);
 
-  const getColumnsForDivision = () => {
+  const getColumnsForDivision = useCallback(() => {
     switch (userInfo.division) {
       case HEATING:
         return controlSchemeColumnsForHeating;
       case WWS_SPG:
-        return columnsForWwsSPG;
       case SERVICES:
         return columnsForWwsSPG;
       case WWS_IPG:
         return getIPGColumns(selectedFilter);
       case ENVIRO:
         return getEnviroColumns(selectedFilter);
-
       default:
         return [];
     }
-  };
+  }, [userInfo.division, selectedFilter]);
   const typedControlSchemeColumns = useMemo(
     () =>
       getColumnsForDivision().map((column) => ({
         ...column,
         type: column.type as ValidColumnType,
       })),
-    [selectedFilter]
+    [getColumnsForDivision]
   );
   const getApiEndpoint = (division: string) => {
     switch (division) {
@@ -275,7 +272,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> = ({
       getColumnsForDivision();
       setControlSchemes(getIPGSchemesData(selectedFilter));
     }
-  }, [selectedFilter]);
+  }, [getColumnsForDivision, selectedFilter, userInfo.division]);
 
   // Fetch control schemes
   useEffect(() => {
@@ -311,7 +308,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> = ({
       setControlSchemes(sortedSchemes);
       setLoading(false);
     });
-  }, []);
+  }, [controlSchemes.length, selectedFilter, setLoading, userInfo.division]);
   // Initialize main control scheme spreadsheet
 
   useEffect(() => {
@@ -364,7 +361,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> = ({
         setControlSchemeInstance(null);
       }
     };
-  }, [isOpen, controlSchemes, typedControlSchemeColumns]);
+  }, [isOpen, controlSchemes, typedControlSchemeColumns, controlSchemeInstance, selectedControlSchemes]);
 
   // Initialize selected schemes spreadsheet
   useEffect(() => {
@@ -403,7 +400,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> = ({
         setSelectedSchemeInstance(null);
       }
     };
-  }, [controlSchemesSelected, typedControlSchemeColumns]);
+  }, [controlSchemesSelected, selectedSchemeInstance, typedControlSchemeColumns]);
 
   const handleAdd = () => {
     const selected = controlSchemeInstance

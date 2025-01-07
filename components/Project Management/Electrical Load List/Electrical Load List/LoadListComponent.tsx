@@ -184,7 +184,7 @@ const useDataFetching = (
     } finally {
       setIsLoading(false);
     }
-  }, [designBasisRevisionId, loadListLatestRevisionId]);
+  }, [designBasisRevisionId, loadListLatestRevisionId, makeOfComponent, project_id]);
 
   useEffect(() => {
     fetchAllData();
@@ -248,97 +248,84 @@ const LoadList: React.FC<LoadListProps> = ({
   } = useCurrentUser();
   const { setLoading } = useLoading();
 
-  const handleCellChange = (
-    element: JspreadsheetInstanceElement,
-    cell: HTMLTableCellElement,
-    colIndex: string | number,
-    rowIndex: string | number,
-    newValue: CellValue
-  ) => {
-    const data: any = spreadsheetRef?.current?.getData() || [];
-    console.log(data, "load list data");
-    // console.log("col index :", typeof colIndex)
 
-    if (colIndex === "21") {
-      console.log(subPackages, "sub package");
-
-      subPackages?.forEach((pckg: any) => {
-        const selectedPckg = pckg?.sub_packages?.find(
-          (item: any) => item.sub_package_name == newValue
-        );
-        console.log(selectedPckg);
-
-        if (selectedPckg) {
-          if (selectedPckg?.area_of_classification === "Hazardous Area") {
-            data[rowIndex][22] = "Hazardous";
-            data[rowIndex][23] = pckg?.standard;
-            data[rowIndex][24] = pckg?.zone;
-            data[rowIndex][25] = pckg?.gas_group;
-            data[rowIndex][26] = pckg?.temperature_class;
-          } else {
-            data[rowIndex][22] = "Safe";
-            data[rowIndex][23] = "NA";
-            data[rowIndex][24] = "NA";
-            data[rowIndex][25] = "NA";
-            data[rowIndex][26] = "NA";
-          }
-        }
-      });
-      // updateSheetData(data)
-      // setLoadListData(data)
-      // spreadsheetRef?.current?.setData(data)
+  const handleCellChange = useCallback(
+    (
+      element: JspreadsheetInstanceElement,
+      cell: HTMLTableCellElement,
+      colIndex: string | number,
+      rowIndex: string | number,
+      newValue: CellValue
+    ) => {
+      const data: any = spreadsheetRef?.current?.getData() || [];
       console.log(data, "load list data");
-    }
-    if (colIndex == "21") {
-      if (data[rowIndex][21] === "NA" || newValue === "NA") {
+  
+      if (colIndex === "21") {
+        console.log(subPackages, "sub package");
+  
+        subPackages?.forEach((pckg: any) => {
+          const selectedPckg = pckg?.sub_packages?.find(
+            (item: any) => item.sub_package_name === newValue
+          );
+          console.log(selectedPckg);
+  
+          if (selectedPckg) {
+            if (selectedPckg?.area_of_classification === "Hazardous Area") {
+              data[rowIndex][22] = "Hazardous";
+              data[rowIndex][23] = pckg?.standard;
+              data[rowIndex][24] = pckg?.zone;
+              data[rowIndex][25] = pckg?.gas_group;
+              data[rowIndex][26] = pckg?.temperature_class;
+            } else {
+              data[rowIndex][22] = "Safe";
+              data[rowIndex][23] = "NA";
+              data[rowIndex][24] = "NA";
+              data[rowIndex][25] = "NA";
+              data[rowIndex][26] = "NA";
+            }
+          }
+        });
+        console.log(data, "load list data after updating for sub package");
+      }
+  
+      if (colIndex === "21" && (data[rowIndex][21] === "NA" || newValue === "NA")) {
         data[rowIndex][22] = "NA";
         data[rowIndex][23] = "NA";
         data[rowIndex][24] = "NA";
         data[rowIndex][25] = "NA";
         data[rowIndex][26] = "NA";
       }
-    }
-    if (colIndex == "14") {
-      if (newValue === "0") {
+  
+      if (colIndex === "14" && newValue === "0") {
         data[rowIndex][15] = "NA";
         data[rowIndex][16] = "NA";
       }
-    }
-    console.log(typeof colIndex);
-
-    if (colIndex === "5") {
-      if (newValue === "DOL-HTR") {
-        data[rowIndex][34] = "1";
+  
+      if (colIndex === "5") {
+        if (newValue === "DOL-HTR") {
+          data[rowIndex][34] = "1";
+        }
+        if (newValue === "SUPPLY FEEDER" || newValue === "DOL-HTR") {
+          console.log("inside if");
+  
+          data[rowIndex][29] = "No";
+          data[rowIndex][30] = "No";
+          data[rowIndex][31] = "No";
+        } else {
+          const standbyKw = getStandByKw(data[rowIndex][2], data[rowIndex][3]);
+          data[rowIndex][29] = standbyKw >= Number(motorParameters[0]?.safe_area_space_heater) ? "Yes" : "No";
+          data[rowIndex][30] = standbyKw >= Number(motorParameters[0]?.safe_area_bearing_rtd) ? "Yes" : "No";
+          data[rowIndex][31] = standbyKw >= Number(motorParameters[0]?.safe_area_winding_rtd) ? "Yes" : "No";
+        }
       }
-      if (newValue === "SUPPLY FEEDER" || newValue === "DOL-HTR") {
-        console.log("inside if");
-
-        data[rowIndex][29] = "No";
-        data[rowIndex][30] = "No";
-        data[rowIndex][31] = "No";
-      } else {
-        data[rowIndex][29] =
-          getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
-          Number(motorParameters[0]?.safe_area_space_heater)
-            ? "Yes"
-            : "No";
-        data[rowIndex][30] =
-          getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
-          Number(motorParameters[0]?.safe_area_bearing_rtd)
-            ? "Yes"
-            : "No";
-        data[rowIndex][31] =
-          getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
-          Number(motorParameters[0]?.safe_area_winding_rtd)
-            ? "Yes"
-            : "No";
-      }
-    }
-    spreadsheetRef?.current?.setData(data);
-
-    console.log(data[rowIndex]);
-    // console.log(element, cell, colIndex, rowIndex, newValue, oldValue)
-  };
+  
+      // Update the data in the spreadsheet after changes
+      spreadsheetRef?.current?.setData(data);
+  
+      console.log(data[rowIndex]);
+    },
+    [subPackages, motorParameters, spreadsheetRef]
+  );
   // Memoized columns with typed validation
   const typedLoadListColumns = useMemo(
     () =>
@@ -346,7 +333,7 @@ const LoadList: React.FC<LoadListProps> = ({
         ...column,
         type: column.type as ValidColumnType,
       })),
-    []
+    [userInfo?.division]
   );
   const getArrayOfLoadListData = (data: any, revision?: any) => {
     console.log(data, "load list");
@@ -417,7 +404,7 @@ const LoadList: React.FC<LoadListProps> = ({
       freezeColumns: 6,
       rowResize: true,
     }),
-    [typedLoadListColumns, loadListData]
+    [loadListData, revision, typedLoadListColumns, handleCellChange]
   );
 
   // Spreadsheet data update function
@@ -509,7 +496,7 @@ const LoadList: React.FC<LoadListProps> = ({
         }
       });
     }
-  }, [loadListData]);
+  }, [loadListData, typedLoadListColumns]);
 
   useEffect(() => {
     if (subPackages?.length) {
@@ -547,7 +534,7 @@ const LoadList: React.FC<LoadListProps> = ({
       });
     }
     // fetchProjectInfo()
-  }, [mainSupplyLV, panelList, subPackages]);
+  }, [mainSupplyLV, panelList, subPackages, typedLoadListColumns]);
   useEffect(() => {
     if (
       !isLoading &&
@@ -563,7 +550,7 @@ const LoadList: React.FC<LoadListProps> = ({
       const instance = jspreadsheet(jRef.current, loadListOptions);
       spreadsheetRef.current = instance;
     }
-  }, [isLoading, loadListData, loadListOptions, panelList]);
+  }, [isLoading, loadListData, loadListOptions, mainSupplyLV.length, panelList]);
 
   // Rest of the existing methods remain the same...
 

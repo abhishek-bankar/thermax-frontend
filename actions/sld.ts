@@ -149,7 +149,6 @@ export const getSwSelectionDetails = async (payload: any) => {
                   item.starter_type === starter_type
               ));
 
-          console.log("heating dol starter, start delta:", matchingOptions);
         } else if (starter_type === "SOFT STARTER") {
           matchingOptions = [].filter(
             (item: any) =>

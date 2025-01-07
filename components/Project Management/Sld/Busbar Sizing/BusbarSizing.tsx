@@ -56,7 +56,7 @@ const useDataFetching = (designBasisRevisionId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [designBasisRevisionId, getProjectInfoUrl]);
 
   useEffect(() => {
     fetchData();
@@ -86,7 +86,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
   };
   useEffect(() => {
     if (projectInfo && commonConfig) {
-      let material_constant = commonConfig
+      const material_constant = commonConfig
         ? commonConfig?.power_bus_current_density?.split(" ")[0]
         : 0;
       form.setFieldsValue({
@@ -113,7 +113,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
         // verticalCableWidth: projectInfo.verticalCableWidth,
       });
     }
-  }, [projectInfo, commonConfig]);
+  }, [projectInfo, commonConfig, form]);
   const handleCalculateBusbarSizing = async () => {
     // console.log(form);
     let data;

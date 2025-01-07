@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import jspreadsheet from "jspreadsheet-ce";
 import Modal from "@/components/Modal/Modal";
 import { getData } from "@/actions/crud-actions";
@@ -16,9 +22,7 @@ import { ENVIRO, HEATING, WWS_IPG, WWS_SPG } from "@/configs/constants";
 interface MulticoreCableConfigProps {
   isOpen: boolean;
   onClose: () => void;
-  //   loadListData: any[]
   loadListData: any[];
-  // loadListData:,
   typedMulticoreCableColumns: any[];
   onConfigurationComplete: (selectedCables: any[]) => void;
 }
@@ -26,48 +30,23 @@ interface MulticoreCableConfigProps {
 const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
   isOpen,
   onClose,
-  //   loadListData,
   loadListData,
-  // typedMulticoreCableColumns,
   onConfigurationComplete,
 }) => {
-  // const router = useRouter()
   const spreadsheetRef = useRef<HTMLDivElement>(null);
   const groupingRef = useRef<HTMLDivElement>(null);
-  // spreadsheet_grouping
   const [tble, setTble] = useState<any>(null);
   const [tbleSelected, setTbleSelected] = useState<any>(null);
   const [selectedElMulticore, setSelectedElMulticore] = useState<any[][]>([]);
   const [grouping, setGrouping] = useState<any[][]>([]);
   const [groupId, setGroupId] = useState<number>(1);
-  // const [insertedElementsLength, setInsertedElementsLength] =
-  //   useState<number>(0);
   const [selectedElements, setSelectedElements] = useState<any[]>([]);
   const [selectedPercent, setSelectedPercent] = useState<string | number>("");
   const [controlSchemes, setControlSchemes] = useState<any[]>([]);
   const userInfo: {
     division: string;
   } = useCurrentUser();
-  // const userData = { divisionId: 7 };
-
   const sparePercent = [10, 20];
-  // const DIDOSpare = [
-  //   "2C",
-  //   "3C",
-  //   "4C",
-  //   "6C",
-  //   "8C",
-  //   "12C",
-  //   "16C",
-  //   "24C",
-  //   "30C",
-  //   "37C",
-  //   "1P",
-  //   "2P",
-  //   "6P",
-  //   "12P",
-  // ];
-  // const AIAOSpare: string[] = [];
   const typedMulticoreConfigColumns = useMemo(
     () =>
       multicoreCableConfigColumns.map((column) => ({
@@ -164,90 +143,117 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
     return null;
   };
 
-  const findOtherData = (schemeTitle: string) => {
-    const division = userInfo.division;
-
-    switch (division) {
-      case HEATING:
-        return controlSchemes?.find((item) => item[2] === schemeTitle);
-      case ENVIRO:
-        return [].find((item) => item[1] === schemeTitle);
-      case WWS_SPG:
-        return [].find((item) => String(item[1]).trim() === schemeTitle.trim());
-      case WWS_IPG:
-        return [].find((item) => String(item[1]).trim() === schemeTitle.trim());
-      default:
-        return null;
-    }
-  };
-
-  const initializeMulticoreUi = (data: any) => {
-    if (!spreadsheetRef.current) return;
-
-    const options = {
-      data,
-      license: "39130-64ebc-bd98e-26bc4",
-      columns: typedMulticoreConfigColumns,
-      updateTable: (instance: any, cell: any, col: number, row: number) => {
-        if (data[row][0] === true && !selectedElMulticore.includes(data[row])) {
-          if (cell.classList.length > 0) {
-            const className = cell.classList;
-            if (className[0] !== "readonly") {
-              setSelectedElMulticore((prev: any) => [...prev, data[row]]);
-              if (!selectedElements.includes(cell)) {
-                setSelectedElements((prev) => [...prev, cell]);
+  const findOtherData = useCallback(
+    (schemeTitle: string) => {
+      const division = userInfo.division;
+  
+      switch (division) {
+        case HEATING:
+          return controlSchemes?.find((item) => item[2] === schemeTitle);
+        case ENVIRO:
+          return [].find((item) => item[1] === schemeTitle);
+        case WWS_SPG:
+          return [].find((item) => String(item[1]).trim() === schemeTitle.trim());
+        case WWS_IPG:
+          return [].find((item) => String(item[1]).trim() === schemeTitle.trim());
+        default:
+          return null;
+      }
+    },
+    [userInfo.division, controlSchemes] // Dependencies
+  );
+  
+  const initializeMulticoreUi = useCallback(
+    (data: any) => {
+      if (!spreadsheetRef.current) return;
+  
+      const options = {
+        data,
+        license: "39130-64ebc-bd98e-26bc4",
+        columns: typedMulticoreConfigColumns,
+        updateTable: (instance: any, cell: any, col: number, row: number) => {
+          if (data[row][0] === true && !selectedElMulticore.includes(data[row])) {
+            if (cell.classList.length > 0) {
+              const className = cell.classList;
+              if (className[0] !== "readonly") {
+                setSelectedElMulticore((prev: any) => [...prev, data[row]]);
+                if (!selectedElements.includes(cell)) {
+                  setSelectedElements((prev) => [...prev, cell]);
+                }
               }
             }
           }
-        }
-      },
-      tableOverflow: true,
-      filters: true,
-      tableWidth: "100%",
-      tableHeight: "600px",
-      freezeColumns: 0,
-    };
+        },
+        tableOverflow: true,
+        filters: true,
+        tableWidth: "100%",
+        tableHeight: "600px",
+        freezeColumns: 0,
+      };
+  
+      const newTable = jspreadsheet(spreadsheetRef.current, options);
+      setTble(newTable);
+    },
+    [
+      spreadsheetRef,
+      typedMulticoreConfigColumns,
+      selectedElMulticore,
+      selectedElements,
+      setSelectedElMulticore,
+      setSelectedElements,
+      setTble,
+    ]
+  );
 
-    const newTable = jspreadsheet(spreadsheetRef.current, options);
-    setTble(newTable);
-  };
+  const initializeGroupingeUi = useCallback(
+    (data: any) => {
+      if (groupingRef.current) {
+        tbleSelected?.destroy();
+      }
+      if (!groupingRef.current) return;
 
-  const initializeGroupingeUi = (data: any) => {
-    if (groupingRef.current) {
-      tbleSelected?.destroy();
-    }
-    if (!groupingRef.current) return;
-    // source: DIDOSpare,
-    // autocomplete: true,
-    // multiple: false,
-    const options = {
-      data,
-      license: "39130-64ebc-bd98e-26bc4",
-      columns: typedMulticoreCableConfigGroupedColumns,
+      const options = {
+        data,
+        license: "39130-64ebc-bd98e-26bc4",
+        columns: typedMulticoreCableConfigGroupedColumns,
 
-      updateTable: (instance: any, cell: any, col: number, row: number) => {
-        if (data[row][0] === true && !selectedElMulticore.includes(data[row])) {
-          if (cell.classList.length > 0) {
-            const className = cell.classList;
-            if (className[0] !== "readonly") {
-              setSelectedElMulticore((prev: any) => [...prev, data[row]]);
-              if (!selectedElements.includes(cell)) {
-                setSelectedElements((prev) => [...prev, cell]);
+        updateTable: (instance: any, cell: any, col: number, row: number) => {
+          if (
+            data[row][0] === true &&
+            !selectedElMulticore.includes(data[row])
+          ) {
+            if (cell.classList.length > 0) {
+              const className = cell.classList;
+              if (className[0] !== "readonly") {
+                setSelectedElMulticore((prev: any) => [...prev, data[row]]);
+                if (!selectedElements.includes(cell)) {
+                  setSelectedElements((prev) => [...prev, cell]);
+                }
               }
             }
           }
-        }
-      },
-      tableOverflow: true,
-      filters: true,
-      tableWidth: "100%",
-      tableHeight: "300px",
-      freezeColumns: 0,
-    };
+        },
+        tableOverflow: true,
+        filters: true,
+        tableWidth: "100%",
+        tableHeight: "300px",
+        freezeColumns: 0,
+      };
 
-    const newTable = jspreadsheet(groupingRef.current, options);
-    setTbleSelected(newTable);
-  };
+      const newTable = jspreadsheet(groupingRef.current, options);
+      setTbleSelected(newTable);
+    },
+    [
+      groupingRef,
+      tbleSelected,
+      selectedElMulticore,
+      selectedElements,
+      typedMulticoreCableConfigGroupedColumns,
+      setSelectedElMulticore,
+      setSelectedElements,
+      setTbleSelected,
+    ]
+  );
 
   const addGroup = () => {
     if (selectedElMulticore.length === 0) return;
@@ -351,7 +357,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
     if (grouping.length > 0) {
       initializeGroupingeUi(grouping);
     }
-  }, [grouping]);
+  }, [grouping, initializeGroupingeUi]);
   const onConfirm = () => {
     console.log(grouping, "grouping");
     if (grouping.length > 0) {
@@ -425,7 +431,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
       initializeGroupingeUi(grouping);
     }
     initializeMulticoreUi(processedData);
-  }, [isOpen]);
+  }, [findOtherData, grouping, initializeGroupingeUi, initializeMulticoreUi, isOpen, loadListData, userInfo.division]);
   const handleClearSelection = () => {
     tbleSelected?.destroy();
     console.log(

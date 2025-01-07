@@ -145,8 +145,6 @@ const MakeOfComponent = ({
   const lv_switchgear_options = dropdown["LV Switchgear Make"];
   const cable_make_options = dropdown["Cables Make"];
 
-  console.log("Gland make optinos", dropdown);
-
   useEffect(() => {
     setModalLoading(false);
   });

@@ -42,7 +42,6 @@ export default function useMotorParametersDropdowns() {
           "Material of Terminal Box Hazardous": "name",
         }
       );
-      console.log("Motor response", response);
       setDropdown(response);
     };
 

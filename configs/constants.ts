@@ -62,7 +62,7 @@ export const LOAD_LIST_REVISION_STATUS = {
   Released: "Released",
 };
 
-export const SLD_STATUS = {
+export const SLD_REVISION_STATUS = {
   DEFAULT: "DEFAULT",
   DOWNLOAD_READY: "DOWNLOAD_READY",
   IN_PROCESS: "IN_PROCESS",

@@ -111,7 +111,6 @@ export default function useCommonConfigDropdowns() {
         }
       );
 
-      console.log(response, "common Config response");
       setDropdown(response);
     };
 

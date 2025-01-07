@@ -52,7 +52,6 @@ export default function DocumentRevision() {
   const { data: revisionHistory } = useGetData(dbRevisionHistoryUrl);
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
   const projectOwnerEmail = projectData?.owner;
-  console.log("projectData", projectData);
 
   const handleReviewSubmission = async (record: any) => {
     const revision_id = record?.key;
@@ -267,7 +266,6 @@ export default function DocumentRevision() {
       title: () => <div className="text-center">Clone</div>,
       dataIndex: "clone",
       render: (_, record) => {
-        console.log("Clone record", record);
         return (
           <div className="text-center">
             <Tooltip title={"Clone Revision"}>

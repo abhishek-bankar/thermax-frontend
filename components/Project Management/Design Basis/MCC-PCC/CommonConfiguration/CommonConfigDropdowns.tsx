@@ -13,7 +13,7 @@ export default function useCommonConfigDropdowns() {
   useEffect(() => {
     const getDropdown = async () => {
       const response = await createData(
-        "/method/common_configuration.get_common_config_dropdown",
+        "/method/project_information.get_project_info_dropdown_data",
         true,
         {
           "DOL Starter": "name",

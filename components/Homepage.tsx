@@ -13,7 +13,7 @@ const Homepage = () => {
       <div className="flex items-center justify-between">
         <div>
           <Image
-            src="/logoLandingPage.png"
+            src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/logoLandingPage.png`}
             alt="Thermax Logo"
             width={100}
             height={100}

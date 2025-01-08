@@ -32,13 +32,11 @@ export const UserList = ({ userInfo }: any) => {
   const [userRow, setUserRow] = useState<any>(null);
   const [editEventTrigger, setEditEventTrigger] = useState(false);
 
-  const thermaxUserUrl = `${THERMAX_USER_API}?fields=["*"]&filters=[["division", "=",  "${userInfo?.division}"]]`;
+  const thermaxUserUrl = `${THERMAX_USER_API}?fields=["*"]&filters=[["division", "=",  "${userInfo?.division}"]]&limit=1000`;
   const { data: thermaxUserList } = useGetData(thermaxUserUrl);
-  const { data: userList } = useGetData(`${USER_API}?fields=["*"]`);
-  const mergedList = mergeLists(
-    [thermaxUserList, userList],
-    [{ fromKey: "name", toKey: "name" }]
-  );
+  const { data: userList } = useGetData(`${USER_API}?fields=["*"]&limit=1000`);
+  const mergedList = mergeLists(thermaxUserList, userList, "name", "name");
+
   const { setLoading: setModalLoading } = useLoading();
   useEffect(() => {
     setModalLoading(false);

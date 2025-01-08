@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { PROJECTS_PAGE } from "@/configs/constants";
 import { useLoading } from "@/hooks/useLoading";
-import LogoImage from "../public/eni_max_logo.png";
 import { PROJECT_API } from "@/configs/api-endpoints";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useGetData } from "@/hooks/useCRUD";
@@ -71,7 +70,7 @@ const ProjectDashboard = () => {
                 <div className="flex gap-4">
                   <div>
                     <Image
-                      src={"/eni_max_logo.png"}
+                      src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/eni_max_logo.png`}
                       alt="Description of the image"
                       width={65}
                       height={65}
@@ -97,7 +96,7 @@ const ProjectDashboard = () => {
                   <div className="flex gap-4">
                     <div>
                       <Image
-                        src={LogoImage}
+                        src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/eni_max_logo.png`}
                         alt="Description of the image"
                         width={65}
                         height={65}

@@ -104,8 +104,10 @@ export default function DocumentListModal({ open, setOpen, revision_id }: any) {
         `${DYNAMIC_DOCUMENT_API}?fields=["*"]&filters=[["panel_id", "in", [${quotedPanelIds}]]]`
       );
       const mergedList = mergeLists(
-        [projectPanelData, dynamicDocumentList],
-        [{ fromKey: "name", toKey: "panel_id" }]
+        projectPanelData,
+        dynamicDocumentList,
+        "name",
+        "panel_id"
       );
       setDynamicPanelDoc(mergedList);
     };

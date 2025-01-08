@@ -178,9 +178,6 @@ export default function PanelFormModal({
         panel_id: panelRes.name,
         revision_id: revisionId,
       };
-      console.log(panelRes);
-
-      debugger;
 
       const new_sld_revision = {
         panel_id: panelRes.name,

@@ -292,7 +292,7 @@ const PCCPanel = ({
       item.name === "200" || item.name === "300" || item.name === "500"
   );
 
-  const { control, watch, reset, setValue, handleSubmit } = useForm({
+  const { formState, control, watch, reset, setValue, handleSubmit } = useForm({
     resolver: zodResolver(pccPanelValidationSchema),
     defaultValues: getDefaultValues(
       projectMetadata,
@@ -301,6 +301,8 @@ const PCCPanel = ({
     ),
     mode: "onSubmit",
   });
+
+  console.log("form errors", formState.errors)
 
   useEffect(() => {
     reset(getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]));
@@ -340,25 +342,6 @@ const PCCPanel = ({
       setValue("ga_current_density", "1.0 A/Sq. mm");
     }
   }, [ga_current_density_controlled, ga_current_density_options, setValue]);
-
-  // to control the checkboxes
-
-  // useEffect(() => {
-  //   if (
-  //     incomer_type_controlled === "EDO ACB" ||
-  //     incomer_type_controlled === "MDO ACB" ||
-  //     incomer_type_controlled === "EF ACB" ||
-  //     incomer_type_controlled === "MF ACB" ||
-  //     incomer_above_type_controlled === "EDO ACB" ||
-  //     incomer_above_type_controlled === "MDO ACB" ||
-  //     incomer_above_type_controlled === "EF ACB" ||
-  //     incomer_above_type_controlled === "MF ACB"
-  //   ) {
-  //     setValue("is_blue_cb_spring_charge_selected", 1)
-  //     setValue("is_red_cb_in_service", 1)
-  //     setValue("is_white_healthy_trip_circuit_selected", 1)
-  //   }
-  // }, [incomer_type_controlled, incomer_above_type_controlled, setValue])
 
   useEffect(() => {
     if (incomer_ampere_controlled === "1000") {
@@ -414,6 +397,7 @@ const PCCPanel = ({
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-2 px-4"
       >
+
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <h4 className="flex-1 text-sm font-semibold text-slate-700">
@@ -489,6 +473,7 @@ const PCCPanel = ({
             />
           </div>
         </div>
+
         <div className="mt-2 flex items-center gap-4">
           <div className="">
             <CustomCheckboxInput
@@ -519,6 +504,7 @@ const PCCPanel = ({
             />
           </div>
         </div>
+
         <div className="mt-2 flex items-center gap-4">
           <div className="flex-1">
             {/* <div className="col-span-2 font-semibold">Indication (LED Type Lamp)</div> */}
@@ -576,6 +562,7 @@ const PCCPanel = ({
             />
           </div>
         </div>
+
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <CustomSingleSelect
@@ -690,6 +677,7 @@ const PCCPanel = ({
         <Divider>
           <span className="font-bold text-slate-700">General Arrangement</span>
         </Divider>
+
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <CustomSingleSelect
@@ -728,6 +716,7 @@ const PCCPanel = ({
             />
           </div>
         </div>
+
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <CustomSingleSelect
@@ -940,6 +929,7 @@ const PCCPanel = ({
             Painting / Powder Coating
           </span>
         </Divider>
+
         <div className="mt-2 flex items-center gap-4">
           {/* <div className="flex-1">
             <CustomSingleSelect
@@ -1435,6 +1425,7 @@ const PCCPanel = ({
             </div>
           </>
         )}
+
         <Divider>
           <span className="font-bold text-slate-700">Special Notes</span>
         </Divider>
@@ -1446,12 +1437,13 @@ const PCCPanel = ({
             rows={4}
           />
         </div>
+
         <div className="mt-2 flex w-full justify-end">
-          <Button type="primary" loading={loading}>
+          <Button type="primary" htmlType="submit" loading={loading}>
             Save and Next
           </Button>
         </div>
-      </form>
+      </form >
     </>
   );
 };

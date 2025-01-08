@@ -50,7 +50,7 @@ export default function useCommonConfigDropdowns() {
         "CT Wiring Color": "name",
         "CT Wiring Size": "name",
         "Cable Insulation PVC": "name",
-        Ferrule: "name",
+        "Ferrule": "name",
         "Power Terminal Clipon": "name",
         "Power Terminal Busbar Type": "name",
         "Control Terminal": "name",

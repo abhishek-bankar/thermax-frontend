@@ -78,7 +78,7 @@ export default function ResetPassword() {
         <>
           <div className="mb-2 flex justify-center">
             <Image
-              src="/logoLandingPage.png"
+              src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/logoLandingPage.png`}
               alt="Logo"
               width={60}
               height={60}

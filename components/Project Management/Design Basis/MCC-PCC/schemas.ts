@@ -121,10 +121,10 @@ export const configItemValidationSchema = zod.object({
     required_error: "Design & Manufacturer's Standard is required",
     message: "Design & Manufacturer's Standard is required",
   }),
-  testing_standard: zod.string({
-    required_error: "Testing Standard is required",
-    message: "Testing Standard is required",
-  }),
+  // testing_standard: zod.string({
+  //   required_error: "Testing Standard is required",
+  //   message: "Testing Standard is required",
+  // }),
   // Wiring
   power_wiring_color: zod.string({
     required_error: "Power Wiring Color is required",
@@ -449,6 +449,20 @@ export const configItemValidationSchema = zod.object({
     required_error: "Local Push Button Station Speed Decrease is required",
     message: "Local Push Button Station is required",
   }),
+
+  lpbs_forward_push_button_start: zod.string({
+    required_error: "Forward Push Button Start is required",
+    message: "Forward Push Button Start is required",
+  }),
+
+  lpbs_reverse_push_button_start: zod.string({
+    required_error: "Reverse Push Button Start",
+    message: "Reverse Push Button Start",
+  }),
+  lpbs_push_button_ess: zod.string({
+    required_error: "LPBS ESS is required",
+    message: "LPBS ESS is required"
+  }),
   //   // APFC
   apfc_relay: zod.string({
     required_error: "APFC Relay is required",
@@ -705,9 +719,13 @@ export const mccPanelValidationSchema = zod
       required_error: "MCC Construction Front Type is required",
       message: "MCC Construction Front Type is required",
     }),
-    ga_mcc_construction_drawout_type: zod.string({
-      required_error: "MCC Construction Drawout Type is required",
-      message: "MCC Construction Drawout Type is required",
+    incoming_drawout_type: zod.string({
+      required_error: "Incoming Drawout Type is required",
+      message: "Incoming Drawout Type is required",
+    }),
+    outgoing_drawout_type: zod.string({
+      required_error: "Outgoing Drawout Type is required",
+      message: "Outgoing Drawout Type is required",
     }),
     ga_mcc_construction_type: zod.string({
       required_error: "MCC Construction Type is required",
@@ -741,10 +759,10 @@ export const mccPanelValidationSchema = zod
       required_error: "Gland Plate Drill Type is required",
       message: "Gland Plate Drill Type is required",
     }),
-    ga_gland_plate_3mm_attachment_type: zod.string({
-      required_error: "Gland Plate Attachment Type is required",
-      message: "Gland Plate Attachment Type is required",
-    }),
+    // ga_gland_plate_3mm_attachment_type: zod.string({
+    //   required_error: "Gland Plate Attachment Type is required",
+    //   message: "Gland Plate Attachment Type is required",
+    // }),
     ga_busbar_chamber_position: zod.string({
       required_error: "Busbar Chamber Position is required",
       message: "Busbar Chamber Position is required",
@@ -1065,6 +1083,10 @@ export const pccPanelValidationSchema = zod
       required_error: "MOC Thickness Door is required",
       message: "MOC Thickness Door is required",
     }),
+    door_thickness: zod.string({
+      required_error: "Door Thickness  is required",
+      message: "Door Thickness is required",
+    }),
     ga_moc_thickness_covers: zod.string({
       required_error: "MOC Thickness Covers is required",
       message: "MOC Thickness Covers is required",
@@ -1097,6 +1119,14 @@ export const pccPanelValidationSchema = zod
       required_error: "Panel Mounting Frame is required",
       message: "Panel Mounting Frame is required",
     }),
+    incoming_drawout_type: zod.string({
+      required_error: "Incoming Drawout Type is required",
+      message: "Incoming Drawout Type is required",
+    }),
+    outgoing_drawout_type: zod.string({
+      required_error: "Outgoing Drawout Type is required",
+      message: "Outgoing Drawout Type is required",
+    }),
     ga_panel_mounting_height: zod.string({
       required_error: "Panel Mounting Height is required",
       message: "Panel Mounting Height is required",
@@ -1109,14 +1139,14 @@ export const pccPanelValidationSchema = zod
     is_cable_alley_section_selected: zod.number().optional(),
     is_power_and_bus_separation_section_selected: zod.number().optional(),
     is_both_side_extension_section_selected: zod.number().optional(),
-    ga_gland_plate_3mm_drill_type: zod.string({
+    ga_gland_plate_3mm_drill_type: zod.string({ // gland plate type
       required_error: "Gland Plate Drill Type is required",
       message: "Gland Plate Drill Type is required",
     }),
-    ga_gland_plate_3mm_attachment_type: zod.string({
-      required_error: "Gland Plate Attachment Type is required",
-      message: "Gland Plate Attachment Type is required",
-    }),
+    // ga_gland_plate_3mm_attachment_type: zod.string({
+    //   required_error: "Gland Plate Attachment Type is required",
+    //   message: "Gland Plate Attachment Type is required",
+    // }),
     ga_busbar_chamber_position: zod.string({
       required_error: "Busbar Chamber Position is required",
       message: "Busbar Chamber Position is required",

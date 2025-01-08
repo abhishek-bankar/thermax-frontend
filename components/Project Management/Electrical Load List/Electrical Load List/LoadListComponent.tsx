@@ -29,13 +29,17 @@
 //   updateData,
 // } from "@/actions/crud-actions";
 // import * as XLSX from "xlsx";
-
+// import { lazy, Suspense } from "react";
+// const ControlSchemeConfigurator = lazy(
+//   () => import("./Control Scheme Config/ControlSchemeConfig")
+// );
+// const LpbsConfigurator = lazy(() => import("./LPBS Config/LpbsConfigurator"));
+// const ValidatePanelLoad = lazy(
+//   () => import("./Validate Panel Load/ValidatePanelLoad")
+// );
 // import { LoadListcolumns } from "../common/ExcelColumns";
 // import "./LoadListComponent.css";
 // import { Button, message, Spin } from "antd";
-// import ControlSchemeConfigurator from "./Control Scheme Config/ControlSchemeConfig";
-// import LpbsConfigurator from "./LPBS Config/LpbsConfigurator";
-// import ValidatePanelLoad from "./Validate Panel Load/ValidatePanelLoad";
 // import { useProjectPanelData } from "@/hooks/useProjectPanelData";
 // import { useParams, useRouter } from "next/navigation";
 // import { useLoading } from "@/hooks/useLoading";
@@ -184,7 +188,12 @@
 //     } finally {
 //       setIsLoading(false);
 //     }
-//   }, [designBasisRevisionId, loadListLatestRevisionId]);
+//   }, [
+//     designBasisRevisionId,
+//     loadListLatestRevisionId,
+//     makeOfComponent,
+//     project_id,
+//   ]);
 
 //   useEffect(() => {
 //     fetchAllData();
@@ -330,10 +339,14 @@
 //         }
 //       }
 
+//       // Update the data in the spreadsheet after changes
 //       spreadsheetRef?.current?.setData(data);
+
+//       console.log(data[rowIndex]);
 //     },
 //     [subPackages, motorParameters, spreadsheetRef]
 //   );
+//   // Memoized columns with typed validation
 //   const typedLoadListColumns = useMemo(
 //     () =>
 //       LoadListcolumns(userInfo?.division).map((column) => ({
@@ -411,7 +424,7 @@
 //       freezeColumns: 6,
 //       rowResize: true,
 //     }),
-//     [loadListData, typedLoadListColumns]
+//     [loadListData, revision, typedLoadListColumns, handleCellChange]
 //   );
 
 //   // Spreadsheet data update function
@@ -435,16 +448,26 @@
 //   //   },
 //   //   [loadListOptions, loadListData, projectInfo]
 //   // );
-//   const getSelectedSchemes = () => {
+//   // const getSelectedSchemes = () => {
+//   //   if (loadListData?.electrical_load_list_data?.length) {
+//   //     const getSchemes = loadListData?.electrical_load_list_data?.map(
+//   //       (item: any) => item.control_scheme
+//   //     );
+//   //     return getSchemes?.filter((item: any) => item != "");
+//   //   } else {
+//   //     return [];
+//   //   }
+//   // };
+//   const getSelectedSchemes = useCallback(() => {
 //     if (loadListData?.electrical_load_list_data?.length) {
-//       const getSchemes = loadListData?.electrical_load_list_data?.map(
-//         (item: any) => item.control_scheme
-//       );
-//       return getSchemes?.filter((item: any) => item != "");
-//     } else {
-//       return [];
+//       return Array.from(new Set(
+//         loadListData.electrical_load_list_data
+//           .map((item: any) => item.control_scheme)
+//           .filter((item: any) => item !== "")
+//       ));
 //     }
-//   };
+//     return [];
+//   }, [loadListData]);
 //   const getSelectedLpbsSchemes = () => {
 //     if (loadListData?.electrical_load_list_data?.length) {
 //       const getSchemes = loadListData?.electrical_load_list_data?.map(
@@ -541,7 +564,7 @@
 //       });
 //     }
 //     // fetchProjectInfo()
-//   }, [mainSupplyLV, panelList, subPackages]);
+//   }, [mainSupplyLV, panelList, subPackages, typedLoadListColumns]);
 //   useEffect(() => {
 //     if (
 //       !isLoading &&
@@ -556,9 +579,14 @@
 
 //       const instance = jspreadsheet(jRef.current, loadListOptions);
 //       spreadsheetRef.current = instance;
-//       setLoading(false);
 //     }
-//   }, [isLoading, loadListData, loadListOptions, panelList]);
+//   }, [
+//     isLoading,
+//     loadListData,
+//     loadListOptions,
+//     // mainSupplyLV.length,
+//     // panelList,
+//   ]);
 
 //   // Rest of the existing methods remain the same...
 
@@ -1080,6 +1108,11 @@
 
 //     setPanelsSumData(filteredPanelData);
 //   };
+//   const LoadingFallback = () => (
+//     <div className="flex h-full items-center justify-center">
+//       <Spin size="large" />
+//     </div>
+//   );
 
 //   return (
 //     <>
@@ -1102,26 +1135,37 @@
 //       <div className="m-2 flex flex-col overflow-auto">
 //         <div ref={jRef} />
 //       </div>
+//       {isControlSchemeModalOpen && (
+//         <Suspense fallback={<LoadingFallback />}>
+//           <ControlSchemeConfigurator
+//             isOpen={isControlSchemeModalOpen}
+//             onClose={() => setIsControlSchemeModalOpen(false)}
+//             selectedControlSchemes={getSelectedSchemes()}
+//             onConfigurationComplete={handleControlSchemeComplete}
+//           />
+//         </Suspense>
+//       )}
 
-//       <ControlSchemeConfigurator
-//         isOpen={isControlSchemeModalOpen}
-//         onClose={() => setIsControlSchemeModalOpen(false)}
-//         // controlSchemes={controlSchemes}
-//         selectedControlSchemes={getSelectedSchemes()}
-//         onConfigurationComplete={handleControlSchemeComplete}
-//       />
+//       {isLPBSModalOpen && (
+//         <Suspense fallback={<LoadingFallback />}>
+//           <LpbsConfigurator
+//             isOpen={isLPBSModalOpen}
+//             onClose={() => setIsLPBSModalOpen(false)}
+//             selectedLpbsSchemes={getSelectedLpbsSchemes()}
+//             onConfigurationComplete={handleLpbsComplete}
+//           />
+//         </Suspense>
+//       )}
 
-//       <LpbsConfigurator
-//         isOpen={isLPBSModalOpen}
-//         onClose={() => setIsLPBSModalOpen(false)}
-//         selectedLpbsSchemes={getSelectedLpbsSchemes()}
-//         onConfigurationComplete={handleLpbsComplete}
-//       />
-//       <ValidatePanelLoad
-//         isOpen={isValidatePanelLoadOpen}
-//         onClose={() => setIsValidatePanelLoadOpen(false)}
-//         panelsSumData={panelsSumData}
-//       />
+//       {isValidatePanelLoadOpen && (
+//         <Suspense fallback={<LoadingFallback />}>
+//           <ValidatePanelLoad
+//             isOpen={isValidatePanelLoadOpen}
+//             onClose={() => setIsValidatePanelLoadOpen(false)}
+//             panelsSumData={panelsSumData}
+//           />
+//         </Suspense>
+//       )}
 
 //       <div className="flex w-full flex-row justify-end gap-2">
 //         <Button type="primary" onClick={handleCurrentCalculation}>
@@ -1179,11 +1223,6 @@
 
 // export default LoadList;
 
-
-
-
-
-
 "use client";
 import jspreadsheet, {
   CellValue,
@@ -1215,13 +1254,17 @@ import {
   updateData,
 } from "@/actions/crud-actions";
 import * as XLSX from "xlsx";
-
+import { lazy, Suspense } from "react";
+const ControlSchemeConfigurator = lazy(
+  () => import("./Control Scheme Config/ControlSchemeConfig")
+);
+const LpbsConfigurator = lazy(() => import("./LPBS Config/LpbsConfigurator"));
+const ValidatePanelLoad = lazy(
+  () => import("./Validate Panel Load/ValidatePanelLoad")
+);
 import { LoadListcolumns } from "../common/ExcelColumns";
 import "./LoadListComponent.css";
 import { Button, message, Spin } from "antd";
-import ControlSchemeConfigurator from "./Control Scheme Config/ControlSchemeConfig";
-import LpbsConfigurator from "./LPBS Config/LpbsConfigurator";
-import ValidatePanelLoad from "./Validate Panel Load/ValidatePanelLoad";
 import { useProjectPanelData } from "@/hooks/useProjectPanelData";
 import { useParams, useRouter } from "next/navigation";
 import { useLoading } from "@/hooks/useLoading";
@@ -1370,7 +1413,7 @@ const useDataFetching = (
     } finally {
       setIsLoading(false);
     }
-  }, [designBasisRevisionId, loadListLatestRevisionId, makeOfComponent, project_id]);
+  }, [designBasisRevisionId, loadListLatestRevisionId]);
 
   useEffect(() => {
     fetchAllData();
@@ -1434,84 +1477,97 @@ const LoadList: React.FC<LoadListProps> = ({
   } = useCurrentUser();
   const { setLoading } = useLoading();
 
+  const handleCellChange = (
+    element: JspreadsheetInstanceElement,
+    cell: HTMLTableCellElement,
+    colIndex: string | number,
+    rowIndex: string | number,
+    newValue: CellValue
+  ) => {
+    const data: any = spreadsheetRef?.current?.getData() || [];
+    console.log(data, "load list data");
+    // console.log("col index :", typeof colIndex)
 
-  const handleCellChange = useCallback(
-    (
-      element: JspreadsheetInstanceElement,
-      cell: HTMLTableCellElement,
-      colIndex: string | number,
-      rowIndex: string | number,
-      newValue: CellValue
-    ) => {
-      const data: any = spreadsheetRef?.current?.getData() || [];
-      console.log(data, "load list data");
-  
-      if (colIndex === "21") {
-        console.log(subPackages, "sub package");
-  
-        subPackages?.forEach((pckg: any) => {
-          const selectedPckg = pckg?.sub_packages?.find(
-            (item: any) => item.sub_package_name === newValue
-          );
-          console.log(selectedPckg);
-  
-          if (selectedPckg) {
-            if (selectedPckg?.area_of_classification === "Hazardous Area") {
-              data[rowIndex][22] = "Hazardous";
-              data[rowIndex][23] = pckg?.standard;
-              data[rowIndex][24] = pckg?.zone;
-              data[rowIndex][25] = pckg?.gas_group;
-              data[rowIndex][26] = pckg?.temperature_class;
-            } else {
-              data[rowIndex][22] = "Safe";
-              data[rowIndex][23] = "NA";
-              data[rowIndex][24] = "NA";
-              data[rowIndex][25] = "NA";
-              data[rowIndex][26] = "NA";
-            }
+    if (colIndex === "21") {
+      console.log(subPackages, "sub package");
+
+      subPackages?.forEach((pckg: any) => {
+        const selectedPckg = pckg?.sub_packages?.find(
+          (item: any) => item.sub_package_name == newValue
+        );
+        console.log(selectedPckg);
+
+        if (selectedPckg) {
+          if (selectedPckg?.area_of_classification === "Hazardous Area") {
+            data[rowIndex][22] = "Hazardous";
+            data[rowIndex][23] = pckg?.standard;
+            data[rowIndex][24] = pckg?.zone;
+            data[rowIndex][25] = pckg?.gas_group;
+            data[rowIndex][26] = pckg?.temperature_class;
+          } else {
+            data[rowIndex][22] = "Safe";
+            data[rowIndex][23] = "NA";
+            data[rowIndex][24] = "NA";
+            data[rowIndex][25] = "NA";
+            data[rowIndex][26] = "NA";
           }
-        });
-        console.log(data, "load list data after updating for sub package");
-      }
-  
-      if (colIndex === "21" && (data[rowIndex][21] === "NA" || newValue === "NA")) {
+        }
+      });
+      // updateSheetData(data)
+      // setLoadListData(data)
+      // spreadsheetRef?.current?.setData(data)
+      console.log(data, "load list data");
+    }
+    if (colIndex == "21") {
+      if (data[rowIndex][21] === "NA" || newValue === "NA") {
         data[rowIndex][22] = "NA";
         data[rowIndex][23] = "NA";
         data[rowIndex][24] = "NA";
         data[rowIndex][25] = "NA";
         data[rowIndex][26] = "NA";
       }
-  
-      if (colIndex === "14" && newValue === "0") {
+    }
+    if (colIndex == "14") {
+      if (newValue === "0") {
         data[rowIndex][15] = "NA";
         data[rowIndex][16] = "NA";
       }
-  
-      if (colIndex === "5") {
-        if (newValue === "DOL-HTR") {
-          data[rowIndex][34] = "1";
-        }
-        if (newValue === "SUPPLY FEEDER" || newValue === "DOL-HTR") {
-          console.log("inside if");
-  
-          data[rowIndex][29] = "No";
-          data[rowIndex][30] = "No";
-          data[rowIndex][31] = "No";
-        } else {
-          const standbyKw = getStandByKw(data[rowIndex][2], data[rowIndex][3]);
-          data[rowIndex][29] = standbyKw >= Number(motorParameters[0]?.safe_area_space_heater) ? "Yes" : "No";
-          data[rowIndex][30] = standbyKw >= Number(motorParameters[0]?.safe_area_bearing_rtd) ? "Yes" : "No";
-          data[rowIndex][31] = standbyKw >= Number(motorParameters[0]?.safe_area_winding_rtd) ? "Yes" : "No";
-        }
+    }
+    console.log(typeof colIndex);
+
+    if (colIndex === "5") {
+      if (newValue === "DOL-HTR") {
+        data[rowIndex][34] = "1";
       }
-  
-      // Update the data in the spreadsheet after changes
-      spreadsheetRef?.current?.setData(data);
-  
-      console.log(data[rowIndex]);
-    },
-    [subPackages, motorParameters, spreadsheetRef]
-  );
+      if (newValue === "SUPPLY FEEDER" || newValue === "DOL-HTR") {
+        console.log("inside if");
+
+        data[rowIndex][29] = "No";
+        data[rowIndex][30] = "No";
+        data[rowIndex][31] = "No";
+      } else {
+        data[rowIndex][29] =
+          getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
+          Number(motorParameters[0]?.safe_area_space_heater)
+            ? "Yes"
+            : "No";
+        data[rowIndex][30] =
+          getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
+          Number(motorParameters[0]?.safe_area_bearing_rtd)
+            ? "Yes"
+            : "No";
+        data[rowIndex][31] =
+          getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
+          Number(motorParameters[0]?.safe_area_winding_rtd)
+            ? "Yes"
+            : "No";
+      }
+    }
+    spreadsheetRef?.current?.setData(data);
+
+    console.log(data[rowIndex]);
+    // console.log(element, cell, colIndex, rowIndex, newValue, oldValue)
+  };
   // Memoized columns with typed validation
   const typedLoadListColumns = useMemo(
     () =>
@@ -1519,7 +1575,7 @@ const LoadList: React.FC<LoadListProps> = ({
         ...column,
         type: column.type as ValidColumnType,
       })),
-    [userInfo?.division]
+    []
   );
   const getArrayOfLoadListData = (data: any, revision?: any) => {
     console.log(data, "load list");
@@ -1590,7 +1646,7 @@ const LoadList: React.FC<LoadListProps> = ({
       freezeColumns: 6,
       rowResize: true,
     }),
-    [loadListData, revision, typedLoadListColumns, handleCellChange]
+    [typedLoadListColumns, loadListData]
   );
 
   // Spreadsheet data update function
@@ -1682,7 +1738,7 @@ const LoadList: React.FC<LoadListProps> = ({
         }
       });
     }
-  }, [loadListData, typedLoadListColumns]);
+  }, [loadListData]);
 
   useEffect(() => {
     if (subPackages?.length) {
@@ -1720,7 +1776,7 @@ const LoadList: React.FC<LoadListProps> = ({
       });
     }
     // fetchProjectInfo()
-  }, [mainSupplyLV, panelList, subPackages, typedLoadListColumns]);
+  }, [mainSupplyLV, panelList, subPackages]);
   useEffect(() => {
     if (
       !isLoading &&
@@ -1735,8 +1791,14 @@ const LoadList: React.FC<LoadListProps> = ({
 
       const instance = jspreadsheet(jRef.current, loadListOptions);
       spreadsheetRef.current = instance;
+      // setLoading(false)
     }
-  }, [isLoading, loadListData, loadListOptions, mainSupplyLV.length, panelList]);
+  }, [isLoading, loadListData, loadListOptions, panelList]);
+  useEffect(() => {
+    if (!isLoading) {
+      setLoading(false);
+    }
+  }, [isLoading]);
 
   // Rest of the existing methods remain the same...
 
@@ -1875,14 +1937,14 @@ const LoadList: React.FC<LoadListProps> = ({
   };
 
   const handleLoadListSave = async () => {
-    setLoading(true);
+    // setLoading(true);
     if (validateLoadValues()) {
-      setLoading(false);
+      // setLoading(false);
 
       return message.error("KW should be in one column only");
     }
     if (validateUniqueFeederTag()) {
-      setLoading(false);
+      // setLoading(false);
       return message.error("Feeder tag no. can not be repeated");
     }
 
@@ -1948,7 +2010,7 @@ const LoadList: React.FC<LoadListProps> = ({
         false,
         payload
       );
-      setLoading(false);
+      // setLoading(false);
       message.success("Electrical Load List Saved !");
 
       console.log(respose, "load list response");
@@ -1957,7 +2019,7 @@ const LoadList: React.FC<LoadListProps> = ({
 
       message.error("Unable to save electrical load list");
 
-      setLoading(false);
+      // setLoading(false);
     }
     console.log(spreadsheetRef?.current?.getData(), "all load list data");
     // localStorage.setItem("loadList", JSON.stringify(spreadsheetRef?.current?.getData()))
@@ -2085,7 +2147,7 @@ const LoadList: React.FC<LoadListProps> = ({
   };
 
   const handleCurrentCalculation = async () => {
-    setLoading(true);
+    // setLoading(true);
     const loadList = spreadsheetRef?.current?.getData();
     const currentCalculations = await getCurrentCalculation({
       divisionName: userInfo.division,
@@ -2211,7 +2273,11 @@ const LoadList: React.FC<LoadListProps> = ({
 
     setPanelsSumData(filteredPanelData);
   };
-
+  const LoadingFallback = () => (
+    <div className="flex h-full items-center justify-center">
+      <Spin size="large" />
+    </div>
+  );
   return (
     <>
       <div className="mb-4 flex justify-end gap-4">
@@ -2233,26 +2299,37 @@ const LoadList: React.FC<LoadListProps> = ({
       <div className="m-2 flex flex-col overflow-auto">
         <div ref={jRef} />
       </div>
+      {isControlSchemeModalOpen && (
+        <Suspense fallback={<LoadingFallback />}>
+          <ControlSchemeConfigurator
+            isOpen={isControlSchemeModalOpen}
+            onClose={() => setIsControlSchemeModalOpen(false)}
+            selectedControlSchemes={getSelectedSchemes()}
+            onConfigurationComplete={handleControlSchemeComplete}
+          />
+        </Suspense>
+      )}
 
-      <ControlSchemeConfigurator
-        isOpen={isControlSchemeModalOpen}
-        onClose={() => setIsControlSchemeModalOpen(false)}
-        // controlSchemes={controlSchemes}
-        selectedControlSchemes={getSelectedSchemes()}
-        onConfigurationComplete={handleControlSchemeComplete}
-      />
+      {isLPBSModalOpen && (
+        <Suspense fallback={<LoadingFallback />}>
+          <LpbsConfigurator
+            isOpen={isLPBSModalOpen}
+            onClose={() => setIsLPBSModalOpen(false)}
+            selectedLpbsSchemes={getSelectedLpbsSchemes()}
+            onConfigurationComplete={handleLpbsComplete}
+          />
+        </Suspense>
+      )}
 
-      <LpbsConfigurator
-        isOpen={isLPBSModalOpen}
-        onClose={() => setIsLPBSModalOpen(false)}
-        selectedLpbsSchemes={getSelectedLpbsSchemes()}
-        onConfigurationComplete={handleLpbsComplete}
-      />
-      <ValidatePanelLoad
-        isOpen={isValidatePanelLoadOpen}
-        onClose={() => setIsValidatePanelLoadOpen(false)}
-        panelsSumData={panelsSumData}
-      />
+      {isValidatePanelLoadOpen && (
+        <Suspense fallback={<LoadingFallback />}>
+          <ValidatePanelLoad
+            isOpen={isValidatePanelLoadOpen}
+            onClose={() => setIsValidatePanelLoadOpen(false)}
+            panelsSumData={panelsSumData}
+          />
+        </Suspense>
+      )}
 
       <div className="flex w-full flex-row justify-end gap-2">
         <Button type="primary" onClick={handleCurrentCalculation}>
@@ -2295,7 +2372,7 @@ const LoadList: React.FC<LoadListProps> = ({
         <Button
           type="primary"
           onClick={() => {
-            setLoading(true);
+            // setLoading(true);
             router.push(
               `/project/${project_id}/electrical-load-list/cable-schedule`
             );

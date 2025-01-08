@@ -4588,7 +4588,7 @@ export const columnsForEnviroDOL: any[] = [
     type: "text",
     name: "scheme",
     title: "SCHEME No",
-    width: "110",
+    width: "150",
     height: "100",
   },
   {
@@ -4615,7 +4615,7 @@ export const columnsForEnviroDOL: any[] = [
     type: "text",
     name: "starter",
     title: "Starter",
-    width: "150",
+    width: "200",
   },
   {
     type: "text",

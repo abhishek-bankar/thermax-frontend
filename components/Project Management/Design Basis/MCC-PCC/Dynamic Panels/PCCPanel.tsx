@@ -81,6 +81,7 @@ const getDefaultValues = (
 
     ga_moc_material: pccPanelData?.ga_moc_material || "FRP",
     ga_moc_thickness_door: pccPanelData?.ga_moc_thickness_door || "1.6 mm",
+    door_thickness: pccPanelData?.door_thickness || "1.6 mm",
     ga_moc_thickness_covers: pccPanelData?.ga_moc_thickness_covers || "1.6 mm",
     ga_pcc_compartmental:
       pccPanelData?.ga_pcc_compartmental || "Form-I A (Non Compartmental)",
@@ -117,8 +118,6 @@ const getDefaultValues = (
       pccPanelData?.ga_gland_plate_3mm_drill_type || "Knockout",
     ga_gland_plate_thickness:
       pccPanelData?.ga_gland_plate_thickness || "1.6 mm",
-    ga_gland_plate_3mm_attachment_type:
-      pccPanelData?.ga_gland_plate_3mm_attachment_type || "Detachable",
     ga_busbar_chamber_position:
       pccPanelData?.ga_busbar_chamber_position || "Top",
     ga_power_and_control_busbar_separation:
@@ -255,9 +254,9 @@ const PCCPanel = ({
   const incomer_above_ampere_options = dropdown["SD Incomer Above Ampere"];
   const incomer_above_pole_options = dropdown["SD Incomer Above Pole"];
   const incomer_above_type_options = dropdown["SD Incomer Above Type"];
-  const mi_analog_options = dropdown["Analog Meters"];
-  const mi_digital_options = dropdown["Digital Meters"];
-  const mi_communication_protocol_options = dropdown["Communication Protocol"];
+  const analog_meters_options = dropdown["Analog Meters"];
+  const digital_meters_options = dropdown["Digital Meters"];
+  const communication_protocol_options = dropdown["Communication Protocol"];
   const ga_moc_material_options = dropdown["GA MOC"];
   const ga_moc_thickness_door_options = dropdown["GA MOC Thickness Door"];
   const ga_moc_thickness_covers_options = dropdown["GA MOC Thickness Covers"];
@@ -617,6 +616,42 @@ const PCCPanel = ({
             />
           </div>
         </div>
+        <Divider>
+          <span className="font-bold text-slate-700">
+            Metering Instruments for Incomer
+          </span>
+        </Divider>
+
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="mi_analog"
+              label="Analog Meter"
+              options={analog_meters_options || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="mi_digital"
+              label="Digital Meter"
+              options={digital_meters_options || []}
+              size="small"
+            />
+          </div>
+
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="mi_communication_protocol"
+              label="Communication Protocol"
+              options={communication_protocol_options || []}
+              size="small"
+            />
+          </div>
+        </div>
 
         <Divider>
           <span className="font-bold text-slate-700">
@@ -652,94 +687,6 @@ const PCCPanel = ({
             />
           </div>
         </div>
-
-        <div className="flex items-center gap-4">
-          {/* <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="control_transformer_coating"
-              label="Control Transformer Coating"
-              options={current_transformer_coating_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="control_transformer_configuration"
-              label="Control Transformer Configuration"
-              options={control_transformer_configuration_options || []}
-              disabled={control_transformer_coating_controlled === "NA"}
-              size="small"
-            />
-          </div> */}
-        </div>
-        <Divider>
-          <span className="font-bold text-slate-700">
-            Metering Instruments for Incomer
-          </span>
-        </Divider>
-        {/* <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="mi_analog"
-              label="Analog"
-              options={mi_analog_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="mi_digital"
-              label="Digital"
-              options={mi_digital_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="mi_communication_protocol"
-              label="Communication Protocol"
-              options={mi_communication_protocol_options || []}
-              size="small"
-            />
-          </div>
-        </div> */}
-        {/* <Divider>
-          <span className="font-bold text-slate-700">Metering Instruments for Feeders</span>
-        </Divider> */}
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="mi_digital"
-              label="Digital Meters"
-              options={mi_digital_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="mi_analog"
-              label="Analog Meters"
-              options={mi_analog_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="mi_communication_protocol"
-              label="Communication Protocol"
-              options={mi_communication_protocol_options || []}
-              size="small"
-            />
-          </div>
-        </div>
         <Divider>
           <span className="font-bold text-slate-700">General Arrangement</span>
         </Divider>
@@ -758,6 +705,15 @@ const PCCPanel = ({
               control={control}
               name="ga_moc_thickness_door"
               label="Component Mounting Plate Thickness"
+              options={ga_moc_thickness_door_options || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="door_thickness"
+              label="Door Thickness"
               options={ga_moc_thickness_door_options || []}
               size="small"
             />

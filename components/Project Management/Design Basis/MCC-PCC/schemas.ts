@@ -969,7 +969,7 @@ export const pccPanelValidationSchema = zod
       message: "Incomer Ampere is required",
     }),
     special_note: zod.string().optional(),
-    is_other_selected: zod.number().optional(),
+    // is_other_selected: zod.number().optional(),
     incomer_pole: zod.string({
       required_error: "Incomer Pole is required",
       message: "Incomer Pole is required",
@@ -1004,22 +1004,22 @@ export const pccPanelValidationSchema = zod
       message: "Control Transformer Coating is required",
     }),
 
-    control_transformer_coating: zod.string({
-      required_error: "Control Transformer Coating is required",
-      message: "Control Transformer Coating is required",
-    }),
-    control_transformer_configuration: zod.string({
-      required_error: "Control Transformer Configuration is required",
-      message: "Control Transformer Configuration is required",
-    }),
+    // control_transformer_coating: zod.string({
+    //   required_error: "Control Transformer Coating is required",
+    //   message: "Control Transformer Coating is required",
+    // }),
+    // control_transformer_configuration: zod.string({
+    //   required_error: "Control Transformer Configuration is required",
+    //   message: "Control Transformer Configuration is required",
+    // }),
     is_under_or_over_voltage_selected: zod.number().optional(),
     is_lsig_selected: zod.number().optional(),
     is_lsi_selected: zod.number().optional(),
     is_neural_link_with_disconnect_facility_selected: zod.number().optional(),
-    is_led_type_lamp_selected: zod.string({
-      required_error: "LED Type Lamp is required",
-      message: "LED Type Lamp is required",
-    }),
+    // is_led_type_lamp_selected: zod.string({
+    //   required_error: "LED Type Lamp is required",
+    //   message: "LED Type Lamp is required",
+    // }),
     is_blue_cb_spring_charge_selected: zod.string({
       required_error: "This field is required",
       message: "This field is required",
@@ -1028,7 +1028,7 @@ export const pccPanelValidationSchema = zod
       required_error: "This field is required",
       message: "This field is required",
     }),
-    is_white_healthy_trip_circuit_selected: zod.number({
+    is_white_healthy_trip_circuit_selected: zod.string({
       required_error: "This field is required",
       message: "This field is required",
     }),
@@ -1107,14 +1107,14 @@ export const pccPanelValidationSchema = zod
       required_error: "PCC Construction Type is required",
       message: "PCC Construction Type is required",
     }),
-    busbar_material_of_construction: zod.string({
-      required_error: "Busbar Material Of Construction is required",
-      message: "Busbar Material Of Construction is required",
-    }),
-    ga_current_density: zod.string({
-      required_error: "Current Density is required",
-      message: "Current Density is required",
-    }),
+    // busbar_material_of_construction: zod.string({
+    //   required_error: "Busbar Material Of Construction is required",
+    //   message: "Busbar Material Of Construction is required",
+    // }),
+    // ga_current_density: zod.string({
+    //   required_error: "Current Density is required",
+    //   message: "Current Density is required",
+    // }),
     ga_panel_mounting_frame: zod.string({
       required_error: "Panel Mounting Frame is required",
       message: "Panel Mounting Frame is required",
@@ -1163,10 +1163,10 @@ export const pccPanelValidationSchema = zod
       required_error: "Cable Entry Position is required",
       message: "Cable Entry Position is required",
     }),
-    ppc_painting_standards: zod.string({
-      required_error: "Painting Standards is required",
-      message: "Painting Standards is required",
-    }),
+    // ppc_painting_standards: zod.string({
+    //   required_error: "Painting Standards is required",
+    //   message: "Painting Standards is required",
+    // }),
     ppc_interior_and_exterior_paint_shade: zod.string({
       required_error: "Interior and Exterior Paint Shade is required",
       message: "Interior and Exterior Paint Shade is required",
@@ -1175,10 +1175,10 @@ export const pccPanelValidationSchema = zod
       required_error: "Component Mounting Plate Paint Shade is required",
       message: "Component Mounting Plate Paint Shade is required",
     }),
-    ppc_base_frame_paint_shade: zod.string({
-      required_error: "Base Frame Paint Shade is required",
-      message: "Base Frame Paint Shade is required",
-    }),
+    // ppc_base_frame_paint_shade: zod.string({
+    //   required_error: "Base Frame Paint Shade is required",
+    //   message: "Base Frame Paint Shade is required",
+    // }),
     ppc_minimum_coating_thickness: zod.string({
       required_error: "Minimum Coating Thickness is required",
       message: "Minimum Coating Thickness is required",
@@ -1325,10 +1325,10 @@ export const pccPanelValidationSchema = zod
       message: "Part Code is required",
     }),
   })
-  .refine((fieldsData) => !(fieldsData.mi_digital === fieldsData.mi_analog), {
-    message: "Analog and Digital meter cannot be same",
-    path: ["mi_digital"],
-  });
+// .refine((fieldsData) => !(fieldsData.mi_digital === fieldsData.mi_analog), {
+//   message: "Analog and Digital meter cannot be same",
+//   path: ["mi_digital"],
+// });
 
 export const plcPanelValidationSchema = zod.object({
   ups_control_voltage: zod.string({

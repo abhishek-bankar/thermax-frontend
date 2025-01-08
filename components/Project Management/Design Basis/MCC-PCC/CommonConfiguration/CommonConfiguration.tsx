@@ -708,9 +708,9 @@ const CommonConfiguration = ({
                 label="Switchgear Combination"
                 disabled={
                   watch("mcc_switchgear_type") ===
-                    "Type II Coordination-Fuse" ||
+                  "Type II Coordination-Fuse" ||
                   watch("mcc_switchgear_type") ===
-                    "Type II Coordination-Fuse-One Size Higher"
+                  "Type II Coordination-Fuse-One Size Higher"
                 }
                 options={switchgear_combination_options || []}
                 size="small"
@@ -1119,30 +1119,6 @@ const CommonConfiguration = ({
               name="general_note_internal_wiring"
               label="General Note Internal Wiring"
             />
-            <CustomTextAreaInput
-              control={control}
-              name="general_note_internal_wiring"
-              label="General Note Internal Wiring"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomTextAreaInput
-              control={control}
-              name="general_note_internal_wiring"
-              label="General Note Internal Wiring"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomTextAreaInput
-              control={control}
-              name="common_requirement"
-              label="Common Requirement"
-            />
-            <CustomTextAreaInput
-              control={control}
-              name="general_note_internal_wiring"
-              label="General Note Internal Wiring"
-            />
           </div>
           <div className="flex-1">
             <CustomTextAreaInput
@@ -1257,15 +1233,6 @@ const CommonConfiguration = ({
             />
           </div>
           <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="reverse_push_button_start"
-              label="Reverse Start Push Button"
-              options={forward_reverst_push_button_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
             <CustomRadioSelect
               control={control}
               name="potentiometer"
@@ -1277,20 +1244,7 @@ const CommonConfiguration = ({
             />
           </div>
         </div>
-        <div className="flex gap-4">
-          <div className="flex-1 flex flex-row items-center justify-start gap-5">
-            <span className="font-semibold text-slate-700 mt-1">Speed</span>
-            <CustomRadioSelect
-              control={control}
-              name="potentiometer"
-              label="Potentiometer"
-              options={[
-                { label: "Applicable", value: "1" },
-                { label: "Not Applicable", value: "0" },
-              ]}
-            />
-          </div>
-        </div>
+        
         <div className="flex gap-4">
           <div className="flex-1 flex flex-row items-center justify-start gap-5">
             <span className="font-semibold text-slate-700 mt-1">Speed</span>
@@ -1777,7 +1731,7 @@ const CommonConfiguration = ({
           </div>
         </div>
 
-        <div className="text-base font-bold text-slate-700 flex flex-row items-center gap-4">
+        {/* <div className="text-base font-bold text-slate-700 flex flex-row items-center gap-4">
           <div className="flex gap-4">
             <div className="flex-1">
               <CustomSingleSelect
@@ -1804,7 +1758,7 @@ const CommonConfiguration = ({
               />
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="text-base font-bold text-slate-700 flex flex-row items-center gap-4">
           <div>Safe Area</div>
@@ -2247,28 +2201,8 @@ const CommonConfiguration = ({
               name="door_earthing"
               label="Door Earthing"
             />
-            <CustomTextAreaInput
-              control={control}
-              name="door_earthing"
-              label="Door Earthing"
-            />
-            <CustomTextAreaInput
-              control={control}
-              name="door_earthing"
-              label="Door Earthing"
-            />
           </div>
           <div className="flex-1">
-            <CustomTextAreaInput
-              control={control}
-              name="instrument_earth"
-              label="Instrumental Earth"
-            />
-            <CustomTextAreaInput
-              control={control}
-              name="instrument_earth"
-              label="Instrumental Earth"
-            />
             <CustomTextAreaInput
               control={control}
               name="instrument_earth"
@@ -2299,18 +2233,6 @@ const CommonConfiguration = ({
             />
           </div>
           <div className="flex-1">
-            <CustomTextInput
-              control={control}
-              name="ferrule_note"
-              label="Ferrule Note"
-              size="small"
-            />
-            <CustomTextInput
-              control={control}
-              name="ferrule_note"
-              label="Ferrule Note"
-              size="small"
-            />
             <CustomTextInput
               control={control}
               name="ferrule_note"

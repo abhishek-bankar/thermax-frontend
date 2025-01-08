@@ -12,7 +12,7 @@ export default function useCommonConfigDropdowns() {
 
   useEffect(() => {
     const getDropdown = async () => {
-      let response = await createData("/method/pcc_panel.get_pcc_panel_dropdown", true, {
+      const response = await createData("/method/pcc_panel.get_pcc_panel_dropdown", true, {
         "DOL Starter": "name",
         "Star Delta Starter": "name",
         "Ammeter": "name",
@@ -50,7 +50,7 @@ export default function useCommonConfigDropdowns() {
         "CT Wiring Color": "name",
         "CT Wiring Size": "name",
         "Cable Insulation PVC": "name",
-        Ferrule: "name",
+        "Ferrule": "name",
         "Power Terminal Clipon": "name",
         "Power Terminal Busbar Type": "name",
         "Control Terminal": "name",

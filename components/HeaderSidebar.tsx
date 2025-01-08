@@ -122,7 +122,7 @@ export default function HeaderSidebar() {
             className="hidden items-center gap-5 md:flex"
           >
             <Image
-              src={"/eni_max_logo.png"}
+              src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/eni_max_logo.png`}
               alt="Thermax logo"
               width={49}
               height={49}

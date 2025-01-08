@@ -9,7 +9,7 @@ import {
   THERMAX_USER_API,
   USER_API,
 } from "@/configs/api-endpoints";
-import { BTG, NEXT_PUBLIC_BASE_URL } from "@/configs/constants";
+import { BTG, NEXT_PUBLIC_FRAPPE_DOMAIN_NAME } from "@/configs/constants";
 import { adminApiClient } from "./axios-clients";
 import { createData, getData, updateData } from "./crud-actions";
 import { getSuperuserEmail } from "./user-actions";
@@ -138,7 +138,7 @@ export const sendUserVerificationEmail = async (
     await createData(EMAIL_VERIFICATION_API, true, {
       email,
       division_name,
-      verification_link: `${NEXT_PUBLIC_BASE_URL}/auth/verify-account?token=${token}`,
+      verification_link: `${NEXT_PUBLIC_FRAPPE_DOMAIN_NAME}/auth/verify-account?token=${token}`,
       sent_by,
     });
   } catch (error) {

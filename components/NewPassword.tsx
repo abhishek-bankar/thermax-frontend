@@ -66,7 +66,7 @@ export default function NewPassword({ email }: { email: string }) {
     <div className="flex flex-col rounded-xl border border-gray-300 p-6 shadow-md">
       <div className="mb-2 flex justify-center">
         <Image
-          src="/logoLandingPage.png"
+          src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/logoLandingPage.png`}
           alt="Logo"
           width={60}
           height={60}

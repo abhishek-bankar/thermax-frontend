@@ -145,7 +145,7 @@ const ProjectInfoSchema = zod.object({
 const getDefaultValues = (isEdit: boolean, projectData: any) => {
   return {
     project_name: projectData?.project_name,
-    altitude: projectData?.altitude || "75",
+    altitude: projectData?.altitude || "750",
     min_humidity: projectData?.min_humidity || "35",
     max_humidity: projectData?.max_humidity || "85",
     avg_humidity: projectData?.avg_humidity || "65",
@@ -243,6 +243,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
   }, [isControlSupplyVDC, isUtilitySupplyVDC, setValue]);
 
   useEffect(() => {
+    console.log(projectData,"projectData");
+    
     reset(getDefaultValues(true, projectData));
   }, [reset, projectData]);
 
@@ -267,6 +269,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
         message.error("Please select a panel");
         return;
       }
+      console.log("request payload:", data);
+
       await updateData(getProjectInfoUrl, false, data);
       message.success("Project information updated successfully!");
       // setModalLoading(true)
@@ -286,6 +290,58 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
   //     </div>
   //   )
   // }
+  const HumidityMax = [
+    {
+      name: "50",
+      value: "50",
+      label: "50",
+    },
+    {
+      name: "55",
+      value: "55",
+      label: "55",
+    },
+    {
+      name: "60",
+      value: "60",
+      label: "60",
+    },
+    {
+      name: "65",
+      value: "65",
+      label: "65",
+    },
+    {
+      name: "70",
+      value: "70",
+      label: "70",
+    },
+    {
+      name: "75",
+      value: "75",
+      label: "75",
+    },
+    {
+      name: "80",
+      value: "80",
+      label: "80",
+    },
+    {
+      name: "85",
+      value: "85",
+      label: "85",
+    },
+    {
+      name: "90",
+      value: "90",
+      label: "90",
+    },
+    {
+      name: "100",
+      value: "100",
+      label: "100",
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4 px-4">
@@ -637,7 +693,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             <CustomTextInput
               name="min_humidity"
               control={control}
-              label="Minimum Humidity"
+              label="Humidity [Min]"
               suffix={
                 <>
                   <PercentageOutlined style={{ color: "#3b82f6" }} />
@@ -647,13 +703,16 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             />
           </div>
           <div className="w-1/2">
-            <CustomTextInput
+           
+            <CustomSingleSelect
               name="max_humidity"
               control={control}
-              label="Maximum Humidity"
-              suffix={
+              label="Humidity [Max]"
+              options={HumidityMax}
+              suffixIcon={
                 <>
                   <PercentageOutlined style={{ color: "#3b82f6" }} />
+                  <DownOutlined />
                 </>
               }
               size="small"
@@ -666,7 +725,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             <CustomTextInput
               name="avg_humidity"
               control={control}
-              label="Average Humidity"
+              label="Humidity Average"
               suffix={
                 <>
                   <PercentageOutlined style={{ color: "#3b82f6" }} />
@@ -679,7 +738,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             <CustomTextInput
               name="performance_humidity"
               control={control}
-              label="Performance Humidity"
+              label="Humidity performance"
               suffix={
                 <>
                   <PercentageOutlined style={{ color: "#3b82f6" }} />

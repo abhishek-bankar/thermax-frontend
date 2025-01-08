@@ -17,6 +17,13 @@ import {
 import { useNewGetData } from "@/hooks/useCRUD";
 import usePLCDropdowns from "./PLCDropdown";
 import { plcPanelValidationSchema } from "../schemas";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { HEATING } from "@/configs/constants";
+import {
+  moveNAtoEnd,
+  sortAlphaNumericArray,
+  sortDropdownOptions,
+} from "@/utils/helpers";
 
 const getDefaultValues = (plcData: any) => {
   const defaultValues = {
@@ -68,7 +75,7 @@ const getDefaultValues = (plcData: any) => {
     is_plc_and_ups_marshalling_cabinet_selected:
       plcData?.is_plc_and_ups_marshalling_cabinet_selected || "0",
     marshalling_cabinet_for_plc_and_ups:
-      plcData?.marshalling_cabinet_for_plc_and_ups || "",
+      plcData?.marshalling_cabinet_for_plc_and_ups || "As per OEM",
     // Panel Mounted Push Buttons, Indication lamps & Colors
     is_electronic_hooter_selected:
       plcData?.is_electronic_hooter_selected || "0",
@@ -91,7 +98,7 @@ const getDefaultValues = (plcData: any) => {
       plcData?.di_module_input_type || "Potential Free Contacts",
     di_module_interrogation_voltage:
       plcData?.di_module_interrogation_voltage || "24 VDC",
-    di_module_scan_time: plcData?.di_module_scan_time || "",
+    di_module_scan_time: plcData?.di_module_scan_time || "VTS",
     // DO Modules
     do_module_channel_density:
       plcData?.do_module_channel_density || "8 Nos. Per Card",
@@ -111,7 +118,7 @@ const getDefaultValues = (plcData: any) => {
     ai_module_loop_current: plcData?.ai_module_loop_current || "VTS",
     ai_module_isolation: plcData?.ai_module_isolation || "Galvanic Isolation",
     ai_module_input_type: plcData?.ai_module_input_type || "4-20 mA DC",
-    ai_module_scan_time: plcData?.ai_module_scan_time || "",
+    ai_module_scan_time: plcData?.ai_module_scan_time || "VTS",
     is_ai_module_hart_protocol_support_selected:
       plcData?.is_ai_module_hart_protocol_support_selected || "0",
     // AO Modules
@@ -119,8 +126,9 @@ const getDefaultValues = (plcData: any) => {
       plcData?.ao_module_channel_density || "8 Nos. Per Card",
     ao_module_loop_current: plcData?.ao_module_loop_current || "VTS",
     ao_module_isolation: plcData?.ao_module_isolation || "Galvanic Isolation",
-    ao_module_output_type: plcData?.ao_module_output_type || "",
-    ao_module_scan_time: plcData?.ao_module_scan_time || "",
+    ao_module_output_type:
+      plcData?.ao_module_output_type || "Potential Free Contacts",
+    ao_module_scan_time: plcData?.ao_module_scan_time || "VTS",
     is_ao_module_hart_protocol_support_selected:
       plcData?.is_ao_module_hart_protocol_support_selected || "0",
     // RTD Modules
@@ -128,9 +136,8 @@ const getDefaultValues = (plcData: any) => {
       plcData?.rtd_module_channel_density || "8 Nos. Per Card",
     rtd_module_loop_current: plcData?.rtd_module_loop_current || "VTS",
     rtd_module_isolation: plcData?.rtd_module_isolation || "Galvanic Isolation",
-    rtd_module_input_type:
-      plcData?.rtd_module_input_type || "Resistance in (Ohm)",
-    rtd_module_scan_time: plcData?.rtd_module_scan_time || "",
+    rtd_module_input_type: plcData?.rtd_module_input_type || "",
+    rtd_module_scan_time: plcData?.rtd_module_scan_time || "VTS",
     is_rtd_module_hart_protocol_support_selected:
       plcData?.is_rtd_module_hart_protocol_support_selected || "0",
     // Thermocouple Modules
@@ -141,7 +148,7 @@ const getDefaultValues = (plcData: any) => {
     thermocouple_module_isolation:
       plcData?.thermocouple_module_isolation || "Galvanic Isolation",
     thermocouple_module_input_type:
-      plcData?.thermocouple_module_input_type || "Millivolts  (mV)",
+      plcData?.thermocouple_module_input_type || "",
     thermocouple_module_scan_time:
       plcData?.thermocouple_module_scan_time || "VTS",
     is_thermocouple_module_hart_protocol_support_selected:
@@ -153,10 +160,8 @@ const getDefaultValues = (plcData: any) => {
       plcData?.universal_module_loop_current || "VTS",
     universal_module_isolation:
       plcData?.universal_module_isolation || "Galvanic Isolation",
-    universal_module_input_type:
-      plcData?.universal_module_input_type ||
-      "Millivolts (mV) / Resistance in Ω (Ohm) / Millivolts (mV) & Resistance in (Ohm)",
-    universal_module_scan_time: plcData?.universal_module_scan_time || "",
+    universal_module_input_type: plcData?.universal_module_input_type || "",
+    universal_module_scan_time: plcData?.universal_module_scan_time || "VTS",
     is_universal_module_hart_protocol_support_selected:
       plcData?.is_universal_module_hart_protocol_support_selected || "1",
     // Terminal Block Connectors
@@ -240,8 +245,8 @@ const getDefaultValues = (plcData: any) => {
 Note - MFM, VFD, ACB Incomer - Address List & Parameter shall be configure by PLC Vendor for Status indications`,
     client_system_communication:
       plcData?.client_system_communication ||
-      `"Applicable (Redundant Communication ports to Fiber Optic Gateway for Communication to customer DCS.
-Note: Ethernet IP is preferrable protocol for communication of above package."
+      `Applicable (Redundant Communication ports to Fiber Optic Gateway for Communication to customer DCS.
+Note: Ethernet IP is preferrable protocol for communication of above package.
 `,
     hardware_between_plc_and_third_party:
       plcData?.hardware_between_plc_and_third_party || "",
@@ -310,6 +315,7 @@ const MCCcumPCCPLCPanel = ({
 
   const [loading, setLoading] = useState(false);
   const dropdown = usePLCDropdowns();
+  const userInfo: { division: string } = useCurrentUser();
 
   const plc_control_voltage_options = dropdown["PLC Control Voltage"];
   const plc_ups_1p_voltage_options = dropdown["PLC UPS 1 Phase Voltage"];
@@ -348,58 +354,18 @@ const MCCcumPCCPLCPanel = ({
     mode: "onSubmit",
   });
   const upsScope = watch("ups_scope");
-
-  // const is_third_party_communication_protocol_selected_controlled = watch(
-  //   "is_third_party_communication_protocol_selected"
-  // )
-  // const is_client_system_communication_selected_controlled = watch("is_client_system_communication_selected")
-  // const is_cpu_redundancy_selected_controlled = watch("is_plc_cpu_system_selected")
-  // const is_plc_and_ups_marshalling_cabinet_selected_controlled = watch("is_plc_and_ups_marshalling_cabinet_selected")
-  // const is_no_of_contact_selected_controlled = watch("is_no_of_contact_selected")
-  // const is_plc_spare_io_count_selected_controlled = watch("is_plc_spare_io_count_selected")
-  // const is_plc_spare_memory_selected_controlled = watch("is_plc_spare_memory_selected")
-  // const is_rtd_tc_moduule_selected_controlled = watch("is_rtd_tc_moduule_selected")
-
-  // useEffect(() => {
-  // if (is_third_party_communication_protocol_selected_controlled === "0") {
-  //   setValue("third_party_communication_protocol", "NA")
-  // }
-  // if (is_client_system_communication_selected_controlled === "0") {
-  //   setValue("client_system_communication", "NA")
-  // }
-  // if (is_cpu_redundancy_selected_controlled === "0") {
-  //   setValue("cpu_redundancy", "NA")
-  // }
-  // if (is_plc_and_ups_marshalling_cabinet_selected_controlled === "0") {
-  //   setValue("marshalling_cabinet_for_plc_and_ups", "NA")
-  // }
-  // if (is_no_of_contact_selected_controlled === "0") {
-  //   setValue("no_of_contacts", "NA")
-  // }
-  // if (is_plc_spare_io_count_selected_controlled === "0") {
-  //   setValue("plc_spare_io_count", "NA")
-  // }
-  // if (is_plc_spare_memory_selected_controlled === "0") {
-  //   setValue("plc_spare_memory", "NA")
-  // }
-  // if (is_rtd_tc_moduule_selected_controlled === "0") {
-  //   setValue("rtd_tc_module_density", "NA")
-  //   setValue("rtd_tc_module_input_type", "NA")
-  //   setValue("rtd_tc_module_scan_time", "NA")
-  //   setValue("is_rtd_tc_module_hart_protocol_support_selected", 0)
-  // }
-  // }, [
-  //   is_third_party_communication_protocol_selected_controlled,
-  //   is_client_system_communication_selected_controlled,
-  //   is_cpu_redundancy_selected_controlled,
-  //   is_plc_and_ups_marshalling_cabinet_selected_controlled,
-  //   is_no_of_contact_selected_controlled,
-  //   is_plc_spare_io_count_selected_controlled,
-  //   is_plc_spare_memory_selected_controlled,
-  //   is_rtd_tc_moduule_selected_controlled,
-  //   setValue,
-  // ])
-
+  const noOfContacts = [
+    {
+      name: "1NO + 1NC",
+      value: "1NO + 1NC",
+      label: "1NO + 1NC",
+    },
+    {
+      name: "2NO + 2NC",
+      value: "2NO + 2NC",
+      label: "2NO + 2NC",
+    },
+  ];
   useEffect(() => {
     reset(getDefaultValues(plcPanelData?.[0]));
   }, [plcPanelData, reset]);
@@ -442,6 +408,7 @@ const MCCcumPCCPLCPanel = ({
       setLoading(false);
     }
   };
+  console.log(channel_density_options, "channel_density_options");
 
   return (
     <>
@@ -487,7 +454,9 @@ const MCCcumPCCPLCPanel = ({
         <Divider>
           <span className="font-bold text-slate-700">UPS</span>
         </Divider>
+
         <div className="flex flex-col gap-4">
+          {/* First Row */}
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <CustomSingleSelect
@@ -518,6 +487,10 @@ const MCCcumPCCPLCPanel = ({
                 disabled={upsScope !== "Panel Vendor Scope"}
               />
             </div>
+          </div>
+
+          {/* Second Row */}
+          <div className="flex items-center gap-4">
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
@@ -528,8 +501,6 @@ const MCCcumPCCPLCPanel = ({
                 disabled={upsScope !== "Panel Vendor Scope"}
               />
             </div>
-          </div>
-          <div className="flex items-center gap-4">
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
@@ -545,11 +516,15 @@ const MCCcumPCCPLCPanel = ({
                 control={control}
                 name="ups_battery_type"
                 label="UPS Battery Type"
-                options={plc_ups_battery_type_options || []}
+                options={moveNAtoEnd(plc_ups_battery_type_options) || []}
                 disabled={upsScope !== "Panel Vendor Scope"}
                 size="small"
               />
             </div>
+          </div>
+
+          {/* Third Row */}
+          <div className="flex items-center gap-4">
             <div className="flex-1">
               <CustomRadioSelect
                 control={control}
@@ -572,13 +547,12 @@ const MCCcumPCCPLCPanel = ({
                 disabled={upsScope !== "Panel Vendor Scope"}
               />
             </div>
-
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
                 name="ups_redundancy"
                 label="UPS Redundancy"
-                options={plc_ups_redundancy_options || []}
+                options={moveNAtoEnd(plc_ups_redundancy_options) || []}
                 size="small"
                 disabled={upsScope !== "Panel Vendor Scope"}
               />
@@ -586,7 +560,7 @@ const MCCcumPCCPLCPanel = ({
           </div>
         </div>
 
-        <Divider>
+        {/* <Divider>
           <span className="font-bold text-slate-700">PLC Hardware</span>
         </Divider>
         <div className="flex gap-4">
@@ -831,6 +805,272 @@ const MCCcumPCCPLCPanel = ({
               />
             </div>
           </div>
+        </div> */}
+
+        <div className="flex flex-col gap-6">
+          {/* PLC Hardware Section */}
+          <div>
+            <Divider>
+              <span className="font-bold text-slate-700">PLC Hardware</span>
+            </Divider>
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <CustomTextInput
+                    control={control}
+                    name="plc_cpu_system_series"
+                    label="PLC CPU System Series"
+                    size="small"
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomSingleSelect
+                    control={control}
+                    name="plc_cpu_system_input_voltage"
+                    label="PLC CPU System Input Voltage"
+                    size="small"
+                    options={plc_control_voltage_options || []}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomTextInput
+                    control={control}
+                    name="plc_cpu_system_battery_backup"
+                    label="PLC CPU System Battery Backup"
+                    size="small"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <CustomTextInput
+                    control={control}
+                    name="plc_cpu_system_memory_free_space_after_program"
+                    label="PLC CPU System Memory Free Space after Program"
+                    size="small"
+                  />
+                </div>
+                <div className="flex-1" />
+                <div className="flex-1" />
+              </div>
+            </div>
+          </div>
+
+          {/* Redundancy Section */}
+          <div>
+            <Divider>
+              <span className="font-bold text-slate-700">Redundancy</span>
+            </Divider>
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-4 pb-4">
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_power_supply_plc_cpu_system_selected"
+                    label="Power Supply PLC CPU System"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_power_supply_input_output_module_selected"
+                    label="Power Supply Input - Output Module"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_plc_input_output_modules_system_selected"
+                    label="PLC Input - Output Modules System"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-4 pb-4">
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_plc_cpu_system_and_input_output_modules_system_selected"
+                    label="PLC CPU System and PLC Input - Output Modules System"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_plc_cpu_system_and_hmi_scada_selected"
+                    label="PLC CPU System and HMI / SCADA"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_plc_cpu_system_and_third_party_devices_selected"
+                    label="PLC CPU System and Third Party devices"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1 flex gap-4">
+                  <div className="flex-1">
+                    <CustomRadioSelect
+                      control={control}
+                      name="is_plc_cpu_system_selected"
+                      label="PLC CPU System"
+                      options={[
+                        { label: "Yes", value: "1" },
+                        { label: "No", value: "0" },
+                      ]}
+                    />
+                  </div>
+                </div>
+                <div className="flex-1" />
+                <div className="flex-1" />
+              </div>
+            </div>
+          </div>
+
+          {/* PLC Panel Mounted Section */}
+          <div>
+            <Divider>
+              <span className="font-bold text-slate-700">
+                PLC Panel Mounted
+              </span>
+            </Divider>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <CustomTextInput
+                  control={control}
+                  name="panel_mounted_ac"
+                  label="Panel Mounted AC"
+                  size="small"
+                />
+              </div>
+              <div className="flex-1 items-end flex gap-4">
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_plc_and_ups_marshalling_cabinet_selected"
+                    label="Marshalling Cabinet For PLC and UPS"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomTextInput
+                    control={control}
+                    name="marshalling_cabinet_for_plc_and_ups"
+                    label=""
+                    size="small"
+                    // options={marshalling_cabinet_options || []}
+                    disabled={
+                      watch("is_plc_and_ups_marshalling_cabinet_selected") ===
+                      "0"
+                    }
+                  />
+                </div>
+              </div>
+              {/* <div className="flex-1" /> */}
+            </div>
+          </div>
+
+          {/* Panel Mounted Push Buttons Section */}
+          <div>
+            <Divider>
+              <span className="font-bold text-slate-700">
+                Panel Mounted Push Buttons, Indication lamps & Colors
+              </span>
+            </Divider>
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_electronic_hooter_selected"
+                    label="Electronic Hooter"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomSingleSelect
+                    control={control}
+                    name="electronic_hooter_acknowledge"
+                    label="Electronic Hooter Acknowledge"
+                    options={
+                      moveNAtoEnd(electronic_hooter_acknowledge_options) || []
+                    }
+                    disabled={watch("is_electronic_hooter_selected") === "0"}
+                    size="small"
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomSingleSelect
+                    control={control}
+                    name="panel_power_supply_on_color"
+                    label="Panel Power Supply On"
+                    options={moveNAtoEnd(panel_power_supply_on_options) || []}
+                    size="small"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <CustomSingleSelect
+                    control={control}
+                    name="panel_power_supply_off_color"
+                    label="Panel Power Supply Off"
+                    options={moveNAtoEnd(panel_power_supply_off_options) || []}
+                    size="small"
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomSingleSelect
+                    control={control}
+                    name="indicating_lamp_color_for_nonups_power_supply"
+                    label="Indicating Lamp Colour for Non-UPS Power Supply"
+                    options={moveNAtoEnd(indicating_lamp_color_options) || []}
+                    size="small"
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomSingleSelect
+                    control={control}
+                    name="indicating_lamp_colour_for_ups_power_supply"
+                    label="Indicating Lamp Colour for UPS Power Supply"
+                    options={moveNAtoEnd(indicating_lamp_color_options) || []}
+                    size="small"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <Divider>
           <span className="font-bold text-slate-700">IO Modules</span>
@@ -846,7 +1086,7 @@ const MCCcumPCCPLCPanel = ({
                 name="di_module_channel_density"
                 label="Channel Density"
                 size="small"
-                options={channel_density_options || []}
+                options={sortAlphaNumericArray(channel_density_options) || []}
               />
             </div>
             <div className="flex-1">
@@ -863,7 +1103,7 @@ const MCCcumPCCPLCPanel = ({
                 name="di_module_isolation"
                 label="Isolation"
                 size="small"
-                options={isolation_dropdown_options || []}
+                options={moveNAtoEnd(isolation_dropdown_options) || []}
               />
             </div>
           </div>
@@ -899,41 +1139,47 @@ const MCCcumPCCPLCPanel = ({
         <Divider orientation="left" orientationMargin={0}>
           <span className="text-sm font-bold text-blue-500">DO Modules</span>
         </Divider>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="do_module_channel_density"
-              label="Channel Density"
-              size="small"
-              options={channel_density_options || []}
-            />
+        <div className="flex flex-col gap-4">
+          {" "}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="do_module_channel_density"
+                label="Channel Density"
+                size="small"
+                options={channel_density_options || []}
+              />
+            </div>
+            <div className="flex-1">
+              <CustomTextInput
+                control={control}
+                name="do_module_loop_current"
+                label="Loop Current"
+                size="small"
+              />
+            </div>
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="do_module_isolation"
+                label="Isolation"
+                size="small"
+                options={moveNAtoEnd(isolation_dropdown_options) || []}
+              />
+            </div>
           </div>
-          <div className="flex-1">
-            <CustomTextInput
-              control={control}
-              name="do_module_loop_current"
-              label="Loop Current"
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="do_module_isolation"
-              label="Isolation"
-              size="small"
-              options={isolation_dropdown_options || []}
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="do_module_output_type"
-              label="Type of Output"
-              size="small"
-              options={do_module_output_type_options || []}
-            />
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <CustomTextInput
+                control={control}
+                name="do_module_output_type"
+                label="Type of Output"
+                size="small"
+              />
+            </div>
+            <div className="flex-1" />
+            <div className="flex-1" />
           </div>
         </div>
 
@@ -942,45 +1188,47 @@ const MCCcumPCCPLCPanel = ({
             Interposing Relay
           </span>
         </Divider>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="interposing_relay"
-              label="Interposing Relay"
-              size="small"
-              options={interposing_relay_options || []}
-            />
-          </div>
-          <div className="flex-1">
-            <CustomTextInput
-              control={control}
-              name="output_contact_rating_of_interposing_relay"
-              label="Interposing Relay Contacts Rating"
-              size="small"
-            />
-          </div>
-          <div className="flex flex-1 items-end gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_no_of_contact_selected"
-                label="No. of Contacts"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-4">
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
-                name="no_of_contacts"
-                label=""
+                name="interposing_relay"
+                label="Interposing Relay"
                 size="small"
-                options={number_of_contacts_options || []}
-                disabled={watch("is_no_of_contact_selected") === "0"}
+                options={interposing_relay_options || []}
               />
+            </div>
+            <div className="flex-1">
+              <CustomTextInput
+                control={control}
+                name="output_contact_rating_of_interposing_relay"
+                label="Interposing Relay Contacts Rating"
+                size="small"
+              />
+            </div>
+            <div className="flex flex-1 items-end gap-4">
+              <div>
+                <CustomRadioSelect
+                  control={control}
+                  name="is_no_of_contact_selected"
+                  label="No. of Contacts"
+                  options={[
+                    { label: "Yes", value: "1" },
+                    { label: "No", value: "0" },
+                  ]}
+                />
+              </div>
+              <div className="flex-1">
+                <CustomSingleSelect
+                  control={control}
+                  name="no_of_contacts"
+                  label=""
+                  size="small"
+                  options={noOfContacts}
+                  disabled={watch("is_no_of_contact_selected") === "0"}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -1013,7 +1261,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ai_module_isolation"
                 label="Isolation"
                 size="small"
-                options={isolation_dropdown_options || []}
+                options={moveNAtoEnd(isolation_dropdown_options) || []}
               />
             </div>
           </div>
@@ -1076,18 +1324,18 @@ const MCCcumPCCPLCPanel = ({
                 name="ao_module_isolation"
                 label="Isolation"
                 size="small"
-                options={isolation_dropdown_options || []}
+                options={moveNAtoEnd(isolation_dropdown_options) || []}
               />
             </div>
           </div>
           <div className="flex flex-1 items-center gap-4">
             <div className="flex-1">
-              <CustomSingleSelect
+              <CustomTextInput
                 control={control}
                 name="ao_module_output_type"
                 label="Type of Output"
                 size="small"
-                options={ao_module_output_type_options || []}
+                // options={ao_module_output_type_options || []}
               />
             </div>
             <div className="flex-1">
@@ -1142,7 +1390,7 @@ const MCCcumPCCPLCPanel = ({
                 name="rtd_module_isolation"
                 label="Isolation"
                 size="small"
-                options={isolation_dropdown_options || []}
+                options={moveNAtoEnd(isolation_dropdown_options) || []}
               />
             </div>
           </div>
@@ -1207,7 +1455,7 @@ const MCCcumPCCPLCPanel = ({
                 name="thermocouple_module_isolation"
                 label="Isolation"
                 size="small"
-                options={isolation_dropdown_options || []}
+                options={moveNAtoEnd(isolation_dropdown_options) || []}
               />
             </div>
           </div>
@@ -1272,7 +1520,7 @@ const MCCcumPCCPLCPanel = ({
                 name="universal_module_isolation"
                 label="Isolation"
                 size="small"
-                options={isolation_dropdown_options || []}
+                options={moveNAtoEnd(isolation_dropdown_options) || []}
               />
             </div>
           </div>
@@ -1373,241 +1621,278 @@ const MCCcumPCCPLCPanel = ({
           </div>
         </div>
 
-        <Divider>
-          <span className="font-bold text-slate-700">HMI</span>
-        </Divider>
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_hmi_selected"
-                label="HMI"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="hmi_size"
-                label="HMI Size"
-                size="small"
-                options={plc_hmi_size_options || []}
-                suffixIcon={<p className="font-semibold text-blue-500">inch</p>}
-                disabled={watch("is_hmi_selected") === "0"}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextInput
-                control={control}
-                name="hmi_quantity"
-                label="HMI (Quantity)"
-                size="small"
-                disabled={watch("is_hmi_selected") === "0"}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="hmi_hardware_make"
-                label="HMI Hardware Make"
-                size="small"
-                options={hmi_hardware_make_options || []}
-                disabled={watch("is_hmi_selected") === "0"}
-              />
+        <div className="flex flex-col gap-6">
+          {/* HMI Section */}
+          <div>
+            <Divider>
+              <span className="font-bold text-slate-700">HMI</span>
+            </Divider>
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-4">
+                <div className="flex-1" />
+                <div className="flex-1 justify-center">
+                  <div className="flex justify-center">
+                    <CustomRadioSelect
+                      control={control}
+                      name="is_hmi_selected"
+                      label=""
+                      options={[
+                        { label: "Yes", value: "1" },
+                        { label: "No", value: "0" },
+                      ]}
+                    />
+                  </div>
+                </div>
+                <div className="flex-1" />
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <CustomSingleSelect
+                    control={control}
+                    name="hmi_size"
+                    label="HMI Size"
+                    size="small"
+                    options={sortDropdownOptions(plc_hmi_size_options) || []}
+                    suffixIcon={
+                      <p className="font-semibold text-blue-500">inch</p>
+                    }
+                    disabled={watch("is_hmi_selected") === "0"}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomTextNumber
+                    control={control}
+                    name="hmi_quantity"
+                    label="HMI (Quantity)"
+                    size="small"
+                    min={0}
+                    disabled={watch("is_hmi_selected") === "0"}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomSingleSelect
+                    control={control}
+                    name="hmi_hardware_make"
+                    label="HMI Hardware Make"
+                    size="small"
+                    options={hmi_hardware_make_options || []}
+                    disabled={watch("is_hmi_selected") === "0"}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <CustomTextInput
+                    control={control}
+                    name="hmi_series"
+                    label="HMI Series"
+                    size="small"
+                    disabled={watch("is_hmi_selected") === "0"}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomSingleSelect
+                    control={control}
+                    name="hmi_input_voltage"
+                    label="HMI Input Voltage"
+                    size="small"
+                    options={plc_control_voltage_options || []}
+                    disabled={watch("is_hmi_selected") === "0"}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomTextInput
+                    control={control}
+                    name="hmi_battery_backup"
+                    label="HMI Battery Backup"
+                    size="small"
+                    disabled={watch("is_hmi_selected") === "0"}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <CustomTextInput
-                control={control}
-                name="hmi_series"
-                label="HMI Series"
-                size="small"
-                disabled={watch("is_hmi_selected") === "0"}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="hmi_input_voltage"
-                label="HMI Input Voltage"
-                size="small"
-                options={plc_control_voltage_options || []}
-                disabled={watch("is_hmi_selected") === "0"}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextInput
-                control={control}
-                name="hmi_battery_backup"
-                label="HMI Battery Backup"
-                size="small"
-                disabled={watch("is_hmi_selected") === "0"}
-              />
-            </div>
-          </div>
-        </div>
 
-        <Divider>
-          <span className="font-bold text-slate-700">
-            Human Interface Device
-          </span>
-        </Divider>
-        <div className="flex gap-4">
-          <div className="flex flex-1 items-center gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_engineering_station_quantity_selected"
-                label="Engineering Station (Quantity)"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextNumber
-                control={control}
-                name="engineering_station_quantity"
-                label=""
-                size="small"
-                disabled={
-                  watch("is_engineering_station_quantity_selected") === "0"
-                }
-              />
+          {/* Human Interface Device Section */}
+          <div>
+            <Divider>
+              <span className="font-bold text-slate-700">
+                Human Interface Device
+              </span>
+            </Divider>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <CustomRadioSelect
+                      control={control}
+                      name="is_engineering_station_quantity_selected"
+                      label="Engineering Station (Quantity)"
+                      options={[
+                        { label: "Yes", value: "1" },
+                        { label: "No", value: "0" },
+                      ]}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <CustomTextNumber
+                      control={control}
+                      name="engineering_station_quantity"
+                      label=""
+                      size="small"
+                      disabled={
+                        watch("is_engineering_station_quantity_selected") ===
+                        "0"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <CustomRadioSelect
+                      control={control}
+                      name="is_engineering_cum_operating_station_quantity_selected"
+                      label="Engineering cum Operating Station (Quantity)"
+                      options={[
+                        { label: "Yes", value: "1" },
+                        { label: "No", value: "0" },
+                      ]}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <CustomTextNumber
+                      control={control}
+                      name="engineering_cum_operating_station_quantity"
+                      label=""
+                      size="small"
+                      disabled={
+                        watch(
+                          "is_engineering_cum_operating_station_quantity_selected"
+                        ) === "0"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <CustomRadioSelect
+                      control={control}
+                      name="is_operating_station_quantity_selected"
+                      label="Operating Station (Quantity)"
+                      options={[
+                        { label: "Yes", value: "1" },
+                        { label: "No", value: "0" },
+                      ]}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <CustomTextNumber
+                      control={control}
+                      name="operating_station_quantity"
+                      label=""
+                      size="small"
+                      disabled={
+                        watch("is_operating_station_quantity_selected") === "0"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex flex-1 items-center gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_engineering_cum_operating_station_quantity_selected"
-                label="Engineering cum Operating Station (Quantity)"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextNumber
-                control={control}
-                name="engineering_cum_operating_station_quantity"
-                label=""
-                size="small"
-                disabled={
-                  watch("is_engineering_station_quantity_selected") === "0"
-                }
-              />
-            </div>
-          </div>
-          <div className="flex flex-1 items-center gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_operating_station_quantity_selected"
-                label="Operating Station (Quantity)"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextNumber
-                control={control}
-                name="operating_station_quantity"
-                label=""
-                size="small"
-                disabled={
-                  watch("is_operating_station_quantity_selected") === "0"
-                }
-              />
-            </div>
-          </div>
-        </div>
 
-        <Divider>
-          <span className="font-bold text-slate-700">Software License</span>
-        </Divider>
-        <div className="flex gap-4">
-          <div className="flex flex-1 items-center gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_scada_program_development_license_quantity_selected"
-                label="SCADA Development License (Quantity)"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextNumber
-                control={control}
-                name="scada_program_development_license_quantity"
-                label=""
-                size="small"
-                disabled={
-                  watch(
-                    "is_scada_program_development_license_quantity_selected"
-                  ) === "0"
-                }
-              />
-            </div>
-          </div>
-          <div className="flex flex-1 items-center gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_scada_runtime_license_quantity_selected"
-                label="SCADA Runtime License (Quantity)"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextNumber
-                control={control}
-                name="scada_runtime_license_quantity"
-                disabled={
-                  watch("is_scada_runtime_license_quantity_selected") === "0"
-                }
-                label=""
-                size="small"
-              />
-            </div>
-          </div>
-          <div className="flex flex-1 items-center gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_plc_progamming_software_license_quantity"
-                label="PLC Programming License Software"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextNumber
-                control={control}
-                name="plc_programming_software_license_quantity"
-                label=""
-                size="small"
-                disabled={
-                  watch("is_plc_progamming_software_license_quantity") === "0"
-                }
-              />
+          {/* Software License Section */}
+          <div>
+            <Divider>
+              <span className="font-bold text-slate-700">Software License</span>
+            </Divider>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <CustomRadioSelect
+                      control={control}
+                      name="is_scada_program_development_license_quantity_selected"
+                      label="SCADA Development License (Quantity)"
+                      options={[
+                        { label: "Yes", value: "1" },
+                        { label: "No", value: "0" },
+                      ]}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <CustomTextNumber
+                      control={control}
+                      name="scada_program_development_license_quantity"
+                      label=""
+                      size="small"
+                      disabled={
+                        watch(
+                          "is_scada_program_development_license_quantity_selected"
+                        ) === "0"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <CustomRadioSelect
+                      control={control}
+                      name="is_scada_runtime_license_quantity_selected"
+                      label="SCADA Runtime License (Quantity)"
+                      options={[
+                        { label: "Yes", value: "1" },
+                        { label: "No", value: "0" },
+                      ]}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <CustomTextNumber
+                      control={control}
+                      name="scada_runtime_license_quantity"
+                      label=""
+                      size="small"
+                      disabled={
+                        watch("is_scada_runtime_license_quantity_selected") ===
+                        "0"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <CustomRadioSelect
+                      control={control}
+                      name="is_plc_progamming_software_license_quantity"
+                      label="PLC Programming License Software"
+                      options={[
+                        { label: "Yes", value: "1" },
+                        { label: "No", value: "0" },
+                      ]}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <CustomTextNumber
+                      control={control}
+                      name="plc_programming_software_license_quantity"
+                      label=""
+                      size="small"
+                      disabled={
+                        watch("is_plc_progamming_software_license_quantity") ===
+                        "0"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1664,36 +1949,9 @@ const MCCcumPCCPLCPanel = ({
               />
             </div>
           </div>
+          <div className="flex items-center justify-between gap-4"></div>
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="printer_type"
-                label="Printer Type"
-                size="small"
-                options={dropdown["Printer Type"] || []}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="printer_size"
-                label="Printer Size"
-                size="small"
-                options={dropdown["Printer Size"] || []}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextNumber
-                control={control}
-                name="printer_quantity"
-                label="Printer Quantity"
-                size="small"
-              />
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="">
               <CustomRadioSelect
                 control={control}
                 name="is_printer_with_suitable_communication_cable_selected"
@@ -1704,49 +1962,96 @@ const MCCcumPCCPLCPanel = ({
                 ]}
               />
             </div>
-            <div className="">
-              <CustomRadioSelect
+            <div className="flex-1">
+              <CustomSingleSelect
                 control={control}
-                name="is_furniture_selected"
-                label="Furniture ( Wooden Table With Chair)"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
+                name="printer_type"
+                label="Printer Type"
+                size="small"
+                disabled={
+                  watch(
+                    "is_printer_with_suitable_communication_cable_selected"
+                  ) === "0"
+                }
+                options={dropdown["Printer Type"] || []}
               />
             </div>
-            <div className="">
-              <CustomRadioSelect
+            <div className="flex-1">
+              <CustomSingleSelect
                 control={control}
-                name="is_console_with_chair_selected"
-                label="Console With Chair"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
+                name="printer_size"
+                label="Printer Size"
+                size="small"
+                disabled={
+                  watch(
+                    "is_printer_with_suitable_communication_cable_selected"
+                  ) === "0"
+                }
+                options={dropdown["Printer Size"] || []}
               />
             </div>
-            <div className="">
-              <CustomRadioSelect
+            <div className="flex-1">
+              <CustomTextNumber
                 control={control}
-                name="is_plc_logic_diagram_selected"
-                label="PLC logic diagram with Tag No. / Rung No & it's descriptions."
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
+                name="printer_quantity"
+                label="Printer Quantity"
+                disabled={
+                  watch(
+                    "is_printer_with_suitable_communication_cable_selected"
+                  ) === "0"
+                }
+                size="small"
               />
             </div>
-            <div className="">
-              <CustomRadioSelect
-                control={control}
-                name="is_loop_drawing_for_complete_project_selected"
-                label="Loop Drawing For Complete Project"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_furniture_selected"
+                    label="Furniture ( Wooden Table With Chair)"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_console_with_chair_selected"
+                    label="Console With Chair"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_plc_logic_diagram_selected"
+                    label="PLC logic diagram with Tag No. / Rung No & it's descriptions."
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_loop_drawing_for_complete_project_selected"
+                    label="Loop Drawing For Complete Project"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1762,7 +2067,10 @@ const MCCcumPCCPLCPanel = ({
                 name="interface_signal_and_control_logic_implementation"
                 label="All Interface Signals and Control Logic Shall be Implemented."
                 size="small"
-                options={dropdown["Interface Signal and Control Logic"] || []}
+                options={
+                  moveNAtoEnd(dropdown["Interface Signal and Control Logic"]) ||
+                  []
+                }
               />
             </div>
             <div className="flex-1">
@@ -1772,40 +2080,27 @@ const MCCcumPCCPLCPanel = ({
                 label="Signals From Differential Pressure Flow Transmitters Shall Be Linearized."
                 size="small"
                 options={
-                  dropdown["Differential Pressure Flow Linearization"] || []
+                  moveNAtoEnd(
+                    dropdown["Differential Pressure Flow Linearization"]
+                  ) || []
                 }
               />
             </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="third_party_comm_protocol_for_plc_cpu_system"
-                label="PLC CPU System  With Third Party Communication Protocol"
-                size="small"
-                options={dropdown["PLC CPU Communication Protocol"] || []}
-              />
-            </div>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <CustomTextAreaInput
-                control={control}
-                name="third_party_communication_protocol"
-                label="Third Party Communication Protocol"
-                rows={7}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextAreaInput
-                control={control}
-                name="client_system_communication"
-                label="Client System Communication"
-                rows={7}
-              />
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1">
+              <div className="pb-6">
+                <CustomSingleSelect
+                  control={control}
+                  name="third_party_comm_protocol_for_plc_cpu_system"
+                  label="PLC CPU System  With Third Party Communication Protocol"
+                  size="small"
+                  options={
+                    moveNAtoEnd(dropdown["PLC CPU Communication Protocol"]) ||
+                    []
+                  }
+                />
+              </div>
               <CustomTextInput
                 control={control}
                 name="hardware_between_plc_and_third_party"
@@ -1814,6 +2109,27 @@ const MCCcumPCCPLCPanel = ({
               />
             </div>
             <div className="flex-1">
+              <CustomTextAreaInput
+                control={control}
+                name="third_party_communication_protocol"
+                label="Third Party Communication Protocol"
+                rows={5}
+              />
+            </div>
+          </div>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="pb-6">
+                <CustomRadioSelect
+                  control={control}
+                  name="is_client_system_comm_with_plc_cpu_selected"
+                  label="PLC CPU System  With Client System Communication "
+                  options={[
+                    { label: "Yes", value: "1" },
+                    { label: "No", value: "0" },
+                  ]}
+                />
+              </div>
               <CustomTextInput
                 control={control}
                 name="hardware_between_plc_and_client_system"
@@ -1821,93 +2137,106 @@ const MCCcumPCCPLCPanel = ({
                 size="small"
               />
             </div>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_iiot_selected"
-                label="IIOT"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_client_system_comm_with_plc_cpu_selected"
-                label="PLC CPU System  With Client System Communication "
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               <CustomTextAreaInput
                 control={control}
-                name="iiot_gateway_note"
-                label="IIOT Gateway Note"
+                name="client_system_communication"
+                label="Client System Communication"
+                rows={5}
               />
             </div>
+          </div>
+          <div
+            className="flex 
+           items-end gap-4"
+          >
             <div className="flex-1">
-              <CustomTextAreaInput
-                control={control}
-                name="iiot_gateway_mounting"
-                label="IIOT Gateway is Mounted in PLC Panel"
-              />
+              <div className="flex-1 pb-2">
+                <div className="flex item-center gap-5 pb-2">
+                  <div className="w-1/4 flex flex-row items-center justify-start gap-4">
+                    <div className="font-semibold mt-1 text-slate-700">
+                      IIOT
+                    </div>
+                    <div className="">
+                      <CustomRadioSelect
+                        control={control}
+                        name="is_iiot_selected"
+                        label=""
+                        options={[
+                          { label: "Yes", value: "1" },
+                          { label: "No", value: "0" },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* // */}
+              </div>
+              <div className="flex-1">
+                <CustomTextAreaInput
+                  control={control}
+                  name="iiot_gateway_note"
+                  label="IIOT Gateway Note"
+                  rows={5}
+                />
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className="flex-1 items-end">
+                <CustomTextAreaInput
+                  control={control}
+                  name="iiot_gateway_mounting"
+                  label="IIOT Gateway is Mounted in PLC Panel"
+                  rows={5}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <Divider>
-          <span className="font-bold text-slate-700">
-            Burner Controller LMV
-          </span>
-        </Divider>
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_burner_controller_lmv_mounting_selected"
-                label="Burner Controller LMV"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
+        {userInfo.division === HEATING && (
+          <>
+            <div className="flex flex-col gap-6 pt-2">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <CustomRadioSelect
+                    control={control}
+                    name="is_burner_controller_lmv_mounting_selected"
+                    label="Burner Controller LMV"
+                    options={[
+                      { label: "Yes", value: "1" },
+                      { label: "No", value: "0" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomTextInput
+                    control={control}
+                    name="hardware_between_plc_and_burner_controller_lmv"
+                    label="Communication Cable & Hardware Between PLC CPU System & Burner Controller LMV"
+                    size="small"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <CustomTextAreaInput
+                    control={control}
+                    name="burner_controller_lmv_mounting"
+                    label="Burner Controller LMV is Mounted in PLC Panel"
+                  />
+                </div>
+                <div className="flex-1">
+                  <CustomTextAreaInput
+                    control={control}
+                    name="burner_controller_lmv_note"
+                    label="Burner Controller LMV Note"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex-1">
-              <CustomTextInput
-                control={control}
-                name="hardware_between_plc_and_burner_controller_lmv"
-                label="Communication Cable & Hardware Between PLC CPU System & Burner Controller LMV"
-                size="small"
-              />
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1">
-              <CustomTextAreaInput
-                control={control}
-                name="burner_controller_lmv_mounting"
-                label="Burner Controller LMV is Mounted in PLC Panel"
-              />
-            </div>
-            <div className="flex-1">
-              <CustomTextAreaInput
-                control={control}
-                name="burner_controller_lmv_note"
-                label="Burner Controller LMV Note"
-              />
-            </div>
-          </div>
-        </div>
+          </>
+        )}
 
         <Divider>
           <span className="font-bold text-slate-700">PLC Spares</span>

@@ -71,12 +71,13 @@ const getDefaultValues = (
     control_transformer_configuration:
       mccPanelData?.control_transformer_configuration || "Single",
     alarm_annunciator: mccPanelData?.alarm_annunciator || "Applicable",
-    mi_analog: mccPanelData?.mi_analog || "Ammeter",
-    mi_digital: mccPanelData?.mi_digital || "Multifunction meter",
+    mi_analog: mccPanelData?.mi_analog || "Ammeter with ASS",
+    mi_digital: mccPanelData?.mi_digital || "NA",
     mi_communication_protocol:
-      mccPanelData?.mi_communication_protocol || "Ethernet",
+      mccPanelData?.mi_communication_protocol || "NA",
     ga_moc_material: mccPanelData?.ga_moc_material || "Aluminium",
     ga_moc_thickness_door: mccPanelData?.ga_moc_thickness_door || "1.6 mm",
+    door_thickness: mccPanelData?.door_thickness || "1.6 mm",
     ga_moc_thickness_covers: mccPanelData?.ga_moc_thickness_covers || "1.6 mm",
     ga_mcc_compartmental:
       mccPanelData?.ga_mcc_compartmental || "Form-I A (Non Compartmental)",
@@ -257,10 +258,10 @@ const MCCPanel = ({
   const incomer_above_ampere_options = dropdown["SD Incomer Above Ampere"];
   const incomer_above_pole_options = dropdown["SD Incomer Above Pole"];
   const incomer_above_type_options = dropdown["SD Incomer Above Type"];
-  const mi_analog_options = dropdown["MI Analog"];
-  const mi_digital_options = dropdown["MI Digital"];
-  const mi_communication_protocol_options =
-    dropdown["MI Communication Protocol"];
+  const analog_meters_options = dropdown["Analog Meters"];
+  const digital_meters_options = dropdown["Digital Meters"];
+  const communication_protocol_options =
+    dropdown["Communication Protocol"];
   const ga_moc_material_options = dropdown["GA MOC"];
   const ga_moc_thickness_door_options = dropdown["GA MOC Thickness Door"];
   const ga_moc_thickness_covers_options = dropdown["GA MOC Thickness Covers"];
@@ -665,6 +666,41 @@ const MCCPanel = ({
             />
           </div> */}
         </div>
+
+        <Divider>
+          <span className="font-bold text-slate-700">
+            Metering Instruments for Incomer
+          </span>
+        </Divider>
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="mi_analog"
+              label="Analog Meter"
+              options={analog_meters_options || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="mi_digital"
+              label="Digital Meter"
+              options={digital_meters_options || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="mi_communication_protocol"
+              label="Communication Protocol"
+              options={communication_protocol_options || []}
+              size="small"
+            />
+          </div>
+        </div>
         <Divider>
           <span className="font-bold text-slate-700">
             Current Transformer for Incomer
@@ -701,40 +737,6 @@ const MCCPanel = ({
           </div>
         </div>
         <Divider>
-          <span className="font-bold text-slate-700">
-            Metering Instruments for Incomer
-          </span>
-        </Divider>
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="mi_analog"
-              label="Analog"
-              options={mi_analog_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="mi_digital"
-              label="Digital"
-              options={mi_digital_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="mi_communication_protocol"
-              label="Communication Protocol"
-              options={mi_communication_protocol_options || []}
-              size="small"
-            />
-          </div>
-        </div>
-        <Divider>
           <span className="font-bold text-slate-700">General Arrangement</span>
         </Divider>
         <div className="flex items-center gap-4">
@@ -756,6 +758,16 @@ const MCCPanel = ({
               size="small"
             />
           </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="door_thickness"
+              label="Door Thickness"
+              options={ga_moc_thickness_door_options || []}
+              size="small"
+            />
+          </div>
+
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
@@ -789,8 +801,18 @@ const MCCPanel = ({
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
-              name="ga_mcc_construction_drawout_type"
-              label="MCC Drawout Type"
+              name="incoming_drawout_type"
+              label="Panel Incoming Feeder Drawout Type"
+              options={ga_mcc_construction_drawout_type_options || []}
+              disabled={watch("ga_mcc_compartmental").includes("Non ")}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="outgoing_drawout_type"
+              label="Panel Outgoing Feeder Drawout Type"
               options={ga_mcc_construction_drawout_type_options || []}
               disabled={watch("ga_mcc_compartmental").includes("Non ")}
               size="small"

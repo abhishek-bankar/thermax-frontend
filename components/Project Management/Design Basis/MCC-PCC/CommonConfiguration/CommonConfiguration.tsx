@@ -609,9 +609,9 @@ const CommonConfiguration = ({
                 label="Switchgear Combination"
                 disabled={
                   watch("mcc_switchgear_type") ===
-                    "Type II Coordination-Fuse" ||
+                  "Type II Coordination-Fuse" ||
                   watch("mcc_switchgear_type") ===
-                    "Type II Coordination-Fuse-One Size Higher"
+                  "Type II Coordination-Fuse-One Size Higher"
                 }
                 options={switchgear_combination_options || []}
                 size="small"
@@ -694,35 +694,6 @@ const CommonConfiguration = ({
             Metering Instruments for Feeders
           </span>
         </Divider>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="digital_meters"
-              label="Digital Meters"
-              options={digital_meters_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="analog_meters"
-              label="Analog Meters"
-              options={analog_meters_options || []}
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="communication_protocol"
-              label="Communication Protocol"
-              options={communication_protocol_options || []}
-              size="small"
-            />
-          </div>
-        </div>
         <div className="flex gap-8">
           <div className="flex-1">
             <CustomSingleSelect
@@ -737,15 +708,7 @@ const CommonConfiguration = ({
               size="small"
             />
           </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="metering_for_feeders"
-              label="Ammeter Type"
-              options={metering_for_feeder_options || []}
-              size="small"
-            />
-          </div>
+
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
@@ -757,6 +720,36 @@ const CommonConfiguration = ({
             />
           </div>
         </div>
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="analog_meters"
+              label="Analog Meter"
+              options={analog_meters_options || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="digital_meters"
+              label="Digital Meter"
+              options={digital_meters_options || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="communication_protocol"
+              label="Communication Protocol"
+              options={communication_protocol_options || []}
+              size="small"
+            />
+          </div>
+        </div>
+
         <Divider>
           <span className="font-bold text-slate-700">
             Current Transformer for Feeders
@@ -806,11 +799,17 @@ const CommonConfiguration = ({
           <span className="font-bold text-slate-700">Supply Feeder</span>
         </Divider>
         <div className="flex items-center gap-4">
-          <div className="flex-1">
+          <div className="w-1/4">
             <CustomSingleSelect control={control} name="pole" label="Pole" options={pole_options || []} size="small" />
           </div>
+        </div>
 
-          <div className="flex-1 flex flex-row items-center justify-center gap-4">
+        <Divider>
+          <span className="font-bold text-slate-700">Standard</span>
+        </Divider>
+
+        <div className="flex item-center gap-5">
+          <div className="w-1/4 flex flex-row items-center justify-start gap-4">
             <div className="font-semibold mt-1 text-slate-700">Standard</div>
             <div className="">
               <CustomRadioSelect
@@ -824,7 +823,7 @@ const CommonConfiguration = ({
               />
             </div>
           </div>
-          <div className="flex-1">
+          <div className="w-1/4">
             <CustomSingleSelect
               control={control}
               name="dm_standard"
@@ -1553,7 +1552,7 @@ const CommonConfiguration = ({
           </div>
         </div>
         <div className="flex gap-4">
-          <div className="flex-1">
+          <div className="w-2/3">
             <CustomSingleSelect
               control={control}
               name="lpbs_push_button_ess"

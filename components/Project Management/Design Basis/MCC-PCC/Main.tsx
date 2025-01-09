@@ -46,7 +46,7 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
         <CommonConfiguration
           revision_id={revision_id}
           setActiveKey={setActiveKey}
-        />
+        /> 
       ),
     },
   ];

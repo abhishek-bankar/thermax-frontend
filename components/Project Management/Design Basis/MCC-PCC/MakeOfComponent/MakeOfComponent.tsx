@@ -14,6 +14,7 @@ import { useLoading } from "@/hooks/useLoading";
 import useMakeOfComponentDropdowns from "./MakeDropdowns";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
+import { moveNAtoEnd } from "@/utils/helpers";
 
 // Define Zod schema for validation
 const makeOfComponentSchema = zod.object({
@@ -239,8 +240,7 @@ const MakeOfComponent = ({
       setLoading(false);
       setActiveKey("Common Configuration");
     }
-  };
-
+  }; 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -256,7 +256,7 @@ const MakeOfComponent = ({
               control={control}
               name="motor"
               label="Motor"
-              options={motors_make_options || []}
+              options={moveNAtoEnd(motors_make_options) || []}
               size="small"
               disabled={userInfo?.division === HEATING}
             />
@@ -278,7 +278,7 @@ const MakeOfComponent = ({
               control={control}
               name="cable"
               label="Cable"
-              options={cable_make_options || []}
+              options={moveNAtoEnd(cable_make_options) || []}
               size="small"
             />
           </div>
@@ -320,7 +320,7 @@ const MakeOfComponent = ({
               control={control}
               name="panel_enclosure"
               label="Panel Enclosure"
-              options={panel_enclosure_options || []}
+              options={moveNAtoEnd(panel_enclosure_options) || []}
               size="small"
             />
           </div>
@@ -340,7 +340,7 @@ const MakeOfComponent = ({
               control={control}
               name="variable_frequency_speed_drive_vfd_vsd"
               label="Variable Frequency/Speed Drive (VFD/VSD)"
-              options={vfd_vsd_options || []}
+              options={moveNAtoEnd(vfd_vsd_options) || []}
               size="small"
             />
           </div>
@@ -360,7 +360,7 @@ const MakeOfComponent = ({
               control={control}
               name="soft_starter"
               label="Soft Starter"
-              options={soft_starter_options || []}
+              options={moveNAtoEnd(soft_starter_options) || []}
               size="small"
             />
           </div>
@@ -381,7 +381,7 @@ const MakeOfComponent = ({
             control={control}
             name="plc"
             label="PLC"
-            options={plc_make_options || []}
+            options={moveNAtoEnd(gland_make_options) || []}
             size="small"
           />
         </div>
@@ -400,7 +400,7 @@ const MakeOfComponent = ({
           <CustomMultiSelect
             control={control}
             name="gland_make"
-            label="Gland Make"
+            label="Gland"
             options={gland_make_options || []}
             size="small"
           />
@@ -410,7 +410,7 @@ const MakeOfComponent = ({
             control={control}
             name="preferred_gland_make"
             readOnly
-            label="Preferred Gland Make"
+            label="Preferred Gland"
             size="small"
           />
         </div>

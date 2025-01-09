@@ -8,11 +8,13 @@ import MCCPanel from "./MCCPanel";
 const MCCcumPCC = ({
   revision_id,
   panel_id,
+  setActiveKey,
 }: {
   revision_id: string;
   panel_id: string;
+  setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  const [activeKey, setActiveKey] = useState<string>("1"); // Default active tab
+  const [plcactiveKey, setPLCActiveKey] = useState<string>("1"); // Default active tab
   const { setLoading: setModalLoading } = useLoading();
   useEffect(() => {
     setModalLoading(false);
@@ -23,25 +25,35 @@ const MCCcumPCC = ({
     {
       label: "MCC",
       key: "1",
-      children: <MCCPanel revision_id={revision_id} panel_id={panel_id} />,
+      children: (
+        <MCCPanel
+          revision_id={revision_id}
+          panel_id={panel_id}
+          setActiveKey={setPLCActiveKey}
+        />
+      ),
     },
     {
       label: "PLC",
       key: "2",
       children: (
-        <MCCcumPCCPLCPanel revision_id={revision_id} panel_id={panel_id} />
+        <MCCcumPCCPLCPanel
+          revision_id={revision_id}
+          panel_id={panel_id}
+          setActiveKey={setActiveKey}
+        />
       ),
     },
   ];
 
   const onChange = (key: string) => {
-    setActiveKey(key); // Update active tab
+    setPLCActiveKey(key); // Update active tab
   };
 
   return (
     <div>
       <Tabs
-        activeKey={activeKey} // Set the active tab
+        activeKey={plcactiveKey} // Set the active tab
         onChange={onChange}
         type="card"
         items={TabMCC.map((tab) => ({

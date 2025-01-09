@@ -1,3 +1,4 @@
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as zod from "zod";
 import { Button, Divider, message } from "antd";
@@ -290,9 +291,11 @@ Note - MFM, VFD, ACB Incomer - Address List & Parameter shall be configure by PL
 const MCCcumPCCPLCPanel = ({
   revision_id,
   panel_id,
+  setActiveKey,
 }: {
   revision_id: string;
   panel_id: string;
+  setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const { data: plcPanelData1 } = useNewGetData(
     `${MCC_PCC_PLC_PANEL_1}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
@@ -401,6 +404,15 @@ const MCCcumPCCPLCPanel = ({
         data
       );
       message.success("PLC Data updated successfully");
+      const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
+      setActiveKey((prevKey: string) => {
+        if (prevKey == tabsCount) {
+          return "1";
+        }
+
+        return (parseInt(prevKey, 10) + 1).toString();
+      });
+      // setActiveKey((prevKey: string) => (parseInt(prevKey, 10) + 1).toString());
     } catch (error) {
       console.error(error);
       handleError(error);
@@ -559,8 +571,6 @@ const MCCcumPCCPLCPanel = ({
             </div>
           </div>
         </div>
-
-         
 
         <div className="flex flex-col gap-6">
           {/* PLC Hardware Section */}

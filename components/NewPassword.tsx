@@ -12,6 +12,7 @@ import { SIGN_IN } from "@/configs/constants";
 import { useLoading } from "@/hooks/useLoading";
 import AlertNotification from "./AlertNotification";
 import CustomPasswordInput from "./FormInputs/CustomPasswordInput";
+import LogoLandingImage from "@/public/files/logoLandingPage.png";
 
 const NewPasswordSchema = zod
   .object({
@@ -66,7 +67,7 @@ export default function NewPassword({ email }: { email: string }) {
     <div className="flex flex-col rounded-xl border border-gray-300 p-6 shadow-md">
       <div className="mb-2 flex justify-center">
         <Image
-          src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/logoLandingPage.png`}
+          src={LogoLandingImage}
           alt="Logo"
           width={60}
           height={60}

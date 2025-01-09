@@ -12,6 +12,7 @@ import CustomTextInput from "@/components/FormInputs/CustomInput";
 import { useLoading } from "@/hooks/useLoading";
 import { useRouter } from "next/navigation";
 import { SIGN_IN } from "@/configs/constants";
+import LogoLandingImage from "@/public/files/logoLandingPage.png";
 
 const resetPasswordSchema = zod.object({
   email: zod.string().email({
@@ -78,7 +79,7 @@ export default function ResetPassword() {
         <>
           <div className="mb-2 flex justify-center">
             <Image
-              src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/logoLandingPage.png`}
+              src={LogoLandingImage}
               alt="Logo"
               width={60}
               height={60}

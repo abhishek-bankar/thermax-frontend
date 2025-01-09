@@ -19,6 +19,11 @@ import useCommonConfigDropdowns from "./CommonConfigDropdowns";
 import { configItemValidationSchema } from "../schemas";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { WWS_SPG } from "@/configs/constants";
+import {
+  moveNAtoEnd,
+  sortAlphaNumericArray,
+  sortDropdownOptions,
+} from "@/utils/helpers";
 
 const getDefaultValues = (commonConfigData: any) => {
   return {
@@ -74,7 +79,7 @@ const getDefaultValues = (commonConfigData: any) => {
     analog_meters: commonConfigData?.analog_meters || "Ammeter with ASS",
     communication_protocol: commonConfigData?.communication_protocol || "NA",
 
-    current_transformer: commonConfigData?.current_transformer || "NA",
+    current_transformer: commonConfigData?.current_transformer || "0.37",
     current_transformer_coating:
       commonConfigData?.current_transformer_coating || "Cast Resin",
     current_transformer_number:
@@ -467,12 +472,21 @@ const CommonConfiguration = ({
     defaultValues: getDefaultValues(commonConfigurationData?.[0]),
     mode: "onSubmit",
   });
-
+  const currentTransformerNumber = watch("current_transformer_number");
   const supply_feeder_standard_controlled = watch("supply_feeder_standard");
 
   useEffect(() => {
     reset(getDefaultValues(commonConfigurationData?.[0]));
   }, [commonConfigurationData, reset]);
+  useEffect(() => {
+    if (currentTransformerNumber === "One") {
+      setValue("current_transformer_configuration", "Y-Phase with CT");
+    } else if (currentTransformerNumber === "Three") {
+      setValue("current_transformer_configuration", "All Phase with CT");
+    } else if (currentTransformerNumber === "NA") {
+      setValue("current_transformer_configuration", "NA");
+    }
+  }, [currentTransformerNumber, setValue]);
 
   useEffect(() => {
     if (supply_feeder_standard_controlled === "IS") {
@@ -668,7 +682,7 @@ const CommonConfiguration = ({
                   </span>
                 </>
               }
-              options={dol_starter_options || []}
+              options={sortDropdownOptions(dol_starter_options) || []}
               size="small"
             />
           </div>
@@ -684,7 +698,7 @@ const CommonConfiguration = ({
                   </span>
                 </>
               }
-              options={star_delta_starter_options || []}
+              options={sortDropdownOptions(star_delta_starter_options) || []}
               size="small"
             />
           </div>
@@ -708,9 +722,9 @@ const CommonConfiguration = ({
                 label="Switchgear Combination"
                 disabled={
                   watch("mcc_switchgear_type") ===
-                  "Type II Coordination-Fuse" ||
+                    "Type II Coordination-Fuse" ||
                   watch("mcc_switchgear_type") ===
-                  "Type II Coordination-Fuse-One Size Higher"
+                    "Type II Coordination-Fuse-One Size Higher"
                 }
                 options={switchgear_combination_options || []}
                 size="small"
@@ -736,8 +750,13 @@ const CommonConfiguration = ({
               control={control}
               name="control_transformer_primary_voltage"
               label="Control Transformer Primary Voltage"
-              options={control_transformer_primary_voltage_options || []}
+              options={
+                sortAlphaNumericArray(
+                  control_transformer_primary_voltage_options
+                ) || []
+              }
               size="small"
+              disabled={watch("is_control_transformer_applicable") === "0"}
             />
           </div>
           <div className="flex-1">
@@ -745,8 +764,13 @@ const CommonConfiguration = ({
               control={control}
               name="control_transformer_secondary_voltage"
               label="Control Transformer Secondary Voltage"
-              options={control_transformer_primary_voltage_options || []}
+              options={
+                sortAlphaNumericArray(
+                  control_transformer_primary_voltage_options
+                ) || []
+              }
               size="small"
+              disabled={watch("is_control_transformer_applicable") === "0"}
             />
           </div>
           <div className="flex-1">
@@ -754,8 +778,9 @@ const CommonConfiguration = ({
               control={control}
               name="control_transformer_coating"
               label="Control Transformer Coating"
-              options={control_tranformer_coating_options || []}
+              options={moveNAtoEnd(control_tranformer_coating_options) || []}
               size="small"
+              disabled={watch("is_control_transformer_applicable") === "0"}
             />
           </div>
         </div>
@@ -765,8 +790,9 @@ const CommonConfiguration = ({
               control={control}
               name="control_transformer_quantity"
               label="Control Transformer Quantity"
-              options={control_tranformer_quantity_options || []}
+              options={moveNAtoEnd(control_tranformer_quantity_options) || []}
               size="small"
+              disabled={watch("is_control_transformer_applicable") === "0"}
             />
           </div>
           <div className="flex-1">
@@ -774,8 +800,11 @@ const CommonConfiguration = ({
               control={control}
               name="control_transformer_configuration"
               label="Control Transformer Configuration"
-              options={control_tranformer_configuration_options || []}
+              options={
+                moveNAtoEnd(control_tranformer_configuration_options) || []
+              }
               size="small"
+              disabled={watch("is_control_transformer_applicable") === "0"}
             />
           </div>
           <div className="flex-1">
@@ -783,14 +812,15 @@ const CommonConfiguration = ({
               control={control}
               name="control_transformer_type"
               label="Control Transformer Type"
-              options={control_transformer_type_options || []}
+              options={moveNAtoEnd(control_transformer_type_options) || []}
               size="small"
+              disabled={watch("is_control_transformer_applicable") === "0"}
             />
           </div>
         </div>
         <Divider>
           <span className="font-bold text-slate-700">
-            Metering Instruments for Feeders
+            Metering Instruments for Feeder
           </span>
         </Divider>
         <div className="flex gap-8">
@@ -806,7 +836,7 @@ const CommonConfiguration = ({
                   </span>
                 </>
               }
-              options={ammeter_options || []}
+              options={sortDropdownOptions(ammeter_options) || []}
               size="small"
             />
           </div>
@@ -816,7 +846,7 @@ const CommonConfiguration = ({
               control={control}
               name="ammeter_configuration"
               label="Ammeter Configuration"
-              options={ammeter_configuration_options || []}
+              options={moveNAtoEnd(ammeter_configuration_options) || []}
               size="small"
               disabled={is_Ammeter_NA === "NA"}
             />
@@ -828,7 +858,7 @@ const CommonConfiguration = ({
               control={control}
               name="analog_meters"
               label="Analog Meter"
-              options={analog_meters_options || []}
+              options={moveNAtoEnd(analog_meters_options) || []}
               size="small"
             />
           </div>
@@ -837,7 +867,7 @@ const CommonConfiguration = ({
               control={control}
               name="digital_meters"
               label="Digital Meter"
-              options={digital_meters_options || []}
+              options={moveNAtoEnd(digital_meters_options) || []}
               size="small"
             />
           </div>
@@ -846,14 +876,14 @@ const CommonConfiguration = ({
               control={control}
               name="communication_protocol"
               label="Communication Protocol"
-              options={communication_protocol_options || []}
+              options={moveNAtoEnd(communication_protocol_options) || []}
               size="small"
             />
           </div>
         </div>
         <Divider>
           <span className="font-bold text-slate-700">
-            Current Transformer for Feeders
+            Current Transformer for Feeder
           </span>
         </Divider>
         <div className="flex gap-4">
@@ -861,8 +891,15 @@ const CommonConfiguration = ({
             <CustomSingleSelect
               control={control}
               name="current_transformer"
-              label="Current Transformer (kW Including and Above ) "
-              options={current_transformer_options || []}
+              label={
+                <>
+                  Current Transformer{" "}
+                  <span className="text-xs text-blue-500">
+                    (kW including and above)
+                  </span>
+                </>
+              }
+              options={sortDropdownOptions(current_transformer_options) || []}
               size="small"
             />
           </div>
@@ -871,7 +908,7 @@ const CommonConfiguration = ({
               control={control}
               name="current_transformer_coating"
               label="Current Transformer Coating "
-              options={control_tranformer_coating_options || []}
+              options={moveNAtoEnd(control_tranformer_coating_options) || []}
               size="small"
             />
           </div>
@@ -882,7 +919,13 @@ const CommonConfiguration = ({
               control={control}
               name="current_transformer_number"
               label="Current Transformer Quantity "
-              options={control_tranformer_quantity_options || []}
+              options={
+                moveNAtoEnd(
+                  control_tranformer_quantity_options?.filter(
+                    (el: any) => el.value !== "Two"
+                  )
+                ) || []
+              }
               size="small"
             />
           </div>
@@ -891,7 +934,9 @@ const CommonConfiguration = ({
               control={control}
               name="current_transformer_configuration"
               label="Current Transformer Configruration"
-              options={current_transformer_configuration_options || []}
+              options={
+                moveNAtoEnd(current_transformer_configuration_options) || []
+              }
               size="small"
             />
           </div>
@@ -954,7 +999,7 @@ const CommonConfiguration = ({
               control={control}
               name="power_wiring_color"
               label="Color"
-              options={power_wiring_color_options || []}
+              options={moveNAtoEnd(power_wiring_color_options) || []}
               size="small"
             />
           </div>
@@ -963,7 +1008,7 @@ const CommonConfiguration = ({
               control={control}
               name="power_wiring_size"
               label="Size"
-              options={power_wiring_length_options || []}
+              options={moveNAtoEnd(power_wiring_length_options) || []}
               size="small"
             />
           </div>
@@ -977,7 +1022,7 @@ const CommonConfiguration = ({
               control={control}
               name="control_wiring_color"
               label="Color"
-              options={control_wiring_color_options || []}
+              options={moveNAtoEnd(control_wiring_color_options) || []}
               size="small"
             />
           </div>
@@ -986,7 +1031,7 @@ const CommonConfiguration = ({
               control={control}
               name="control_wiring_size"
               label="Size"
-              options={control_wiring_length_options || []}
+              options={moveNAtoEnd(control_wiring_length_options) || []}
               size="small"
             />
           </div>
@@ -1097,7 +1142,7 @@ const CommonConfiguration = ({
             <CustomSingleSelect
               control={control}
               name="air_clearance_between_phase_to_phase_bus"
-              label="Air clearance between phase to phase Bus"
+              label="Air Clearance Between Phase to Phase Bus"
               options={air_clearance_between_phase_to_phase_bus_options || []}
               size="small"
             />
@@ -1106,7 +1151,7 @@ const CommonConfiguration = ({
             <CustomSingleSelect
               control={control}
               name="air_clearance_between_phase_to_neutral_bus"
-              label="Air clearance between phase to neutral Bus"
+              label="Air Clearance Between Phase to Neutral Bus"
               options={air_clearance_between_phase_to_neutral_bus_options || []}
               size="small"
             />
@@ -1168,7 +1213,18 @@ const CommonConfiguration = ({
               control={control}
               name="spare_terminal"
               label="Spare Terminal"
-              options={spare_terminal_options || []}
+              options={
+                spare_terminal_options
+                  ? sortDropdownOptions([
+                      ...spare_terminal_options,
+                      {
+                        name: "NA",
+                        value: "NA",
+                        label: "NA",
+                      },
+                    ])
+                  : []
+              }
               size="small"
               suffixIcon={
                 <>
@@ -1188,8 +1244,8 @@ const CommonConfiguration = ({
             <CustomSingleSelect
               control={control}
               name="push_button_start"
-              label="Start"
-              options={push_button_start_options || []}
+              label="Start Push Button"
+              options={moveNAtoEnd(push_button_start_options) || []}
               size="small"
             />
           </div>
@@ -1197,8 +1253,8 @@ const CommonConfiguration = ({
             <CustomSingleSelect
               control={control}
               name="push_button_stop"
-              label="Stop"
-              options={push_button_stop_options || []}
+              label="Stop Push Button"
+              options={moveNAtoEnd(push_button_stop_options) || []}
               size="small"
             />
           </div>
@@ -1206,8 +1262,8 @@ const CommonConfiguration = ({
             <CustomSingleSelect
               control={control}
               name="push_button_ess"
-              label="Emergency Stop Push button"
-              options={ess_options || []}
+              label="Emergency Stop Push Button"
+              options={moveNAtoEnd(ess_options) || []}
               size="small"
             />
           </div>
@@ -1219,7 +1275,7 @@ const CommonConfiguration = ({
               control={control}
               name="forward_push_button_start"
               label="Forward Start Push Button"
-              options={forward_reverst_push_button_options || []}
+              options={moveNAtoEnd(forward_reverst_push_button_options) || []}
               size="small"
             />
           </div>
@@ -1228,7 +1284,7 @@ const CommonConfiguration = ({
               control={control}
               name="reverse_push_button_start"
               label="Reverse Start Push Button"
-              options={forward_reverst_push_button_options || []}
+              options={moveNAtoEnd(forward_reverst_push_button_options) || []}
               size="small"
             />
           </div>
@@ -1244,7 +1300,7 @@ const CommonConfiguration = ({
             />
           </div>
         </div>
-        
+
         <div className="flex gap-4">
           <div className="flex-1 flex flex-row items-center justify-start gap-5">
             <span className="font-semibold text-slate-700 mt-1">Speed</span>
@@ -1263,7 +1319,7 @@ const CommonConfiguration = ({
               control={control}
               name="speed_increase_pb"
               label="Speed Increase Push Button"
-              options={speed_increase_pb_options || []}
+              options={moveNAtoEnd(speed_increase_pb_options) || []}
               disabled={watch("is_push_button_speed_selected") === "0"}
               size="small"
             />
@@ -1273,7 +1329,7 @@ const CommonConfiguration = ({
               control={control}
               name="speed_decrease_pb"
               label="Speed Decrease Push Button"
-              options={speed_decrease_pb_options || []}
+              options={moveNAtoEnd(speed_decrease_pb_options) || []}
               disabled={watch("is_push_button_speed_selected") === "0"}
               size="small"
             />
@@ -1285,7 +1341,7 @@ const CommonConfiguration = ({
               control={control}
               name="alarm_acknowledge_and_lamp_test"
               label="Alarm Acknowledge Push Button"
-              options={alarm_acknowledge_dropdown_options || []}
+              options={moveNAtoEnd(alarm_acknowledge_dropdown_options) || []}
               size="small"
             />
           </div>
@@ -1294,7 +1350,7 @@ const CommonConfiguration = ({
               control={control}
               name="test_dropdown"
               label="Test"
-              options={test_dropdown_options || []}
+              options={moveNAtoEnd(test_dropdown_options) || []}
               size="small"
             />
           </div>
@@ -1303,7 +1359,7 @@ const CommonConfiguration = ({
               control={control}
               name="reset_dropdown"
               label="Reset"
-              options={reset_dropdown_options || []}
+              options={moveNAtoEnd(reset_dropdown_options) || []}
               size="small"
             />
           </div>
@@ -1347,7 +1403,7 @@ const CommonConfiguration = ({
               control={control}
               name="running_open"
               label="Run"
-              options={running_open_options || []}
+              options={moveNAtoEnd(running_open_options) || []}
               size="small"
             />
           </div>
@@ -1356,7 +1412,7 @@ const CommonConfiguration = ({
               control={control}
               name="stopped_closed"
               label="Stop"
-              options={stopped_closed_options || []}
+              options={moveNAtoEnd(stopped_closed_options) || []}
               size="small"
             />
           </div>
@@ -1365,7 +1421,7 @@ const CommonConfiguration = ({
               control={control}
               name="trip"
               label="Trip"
-              options={trip_options || []}
+              options={moveNAtoEnd(trip_options) || []}
               size="small"
             />
           </div>
@@ -1429,7 +1485,7 @@ const CommonConfiguration = ({
               control={control}
               name="safe_field_motor_material"
               label="MOC"
-              options={field_motor_material_options || []}
+              options={moveNAtoEnd(field_motor_material_options) || []}
               size="small"
               disabled={
                 watch("is_field_motor_isolator_selected") === "0" ||
@@ -1470,7 +1526,7 @@ const CommonConfiguration = ({
               control={control}
               name="safe_field_motor_isolator_color_shade"
               label="Isolator Color Shade"
-              options={field_motor_color_shade_options || []}
+              options={moveNAtoEnd(field_motor_color_shade_options) || []}
               size="small"
               disabled={
                 watch("is_field_motor_isolator_selected") === "0" ||
@@ -1483,7 +1539,7 @@ const CommonConfiguration = ({
               control={control}
               name="safe_field_motor_canopy"
               label="Canopy"
-              options={field_motor_canopy_on_top_options || []}
+              options={moveNAtoEnd(field_motor_canopy_on_top_options) || []}
               size="small"
               disabled={
                 watch("is_field_motor_isolator_selected") === "0" ||
@@ -1496,7 +1552,7 @@ const CommonConfiguration = ({
               control={control}
               name="safe_field_motor_canopy_type"
               label="Canopy Type"
-              options={field_motor_canopy_type_options || []}
+              options={moveNAtoEnd(field_motor_canopy_type_options) || []}
               size="small"
               disabled={
                 watch("is_field_motor_isolator_selected") === "0" ||
@@ -1551,7 +1607,7 @@ const CommonConfiguration = ({
               control={control}
               name="hazardous_field_motor_material"
               label="MOC"
-              options={field_motor_material_options || []}
+              options={moveNAtoEnd(field_motor_material_options) || []}
               size="small"
               disabled={
                 watch("is_field_motor_isolator_selected") === "0" ||
@@ -1592,7 +1648,7 @@ const CommonConfiguration = ({
               control={control}
               name="hazardous_field_motor_isolator_color_shade"
               label="Isolator Color Shade"
-              options={field_motor_color_shade_options || []}
+              options={moveNAtoEnd(field_motor_color_shade_options) || []}
               size="small"
               disabled={
                 watch("is_field_motor_isolator_selected") === "0" ||
@@ -1605,7 +1661,7 @@ const CommonConfiguration = ({
               control={control}
               name="hazardous_field_motor_canopy"
               label="Canopy"
-              options={field_motor_canopy_on_top_options || []}
+              options={moveNAtoEnd(field_motor_canopy_on_top_options) || []}
               size="small"
               disabled={
                 watch("is_field_motor_isolator_selected") === "0" ||
@@ -1618,7 +1674,7 @@ const CommonConfiguration = ({
               control={control}
               name="hazardous_field_motor_canopy_type"
               label="Canopy Type"
-              options={field_motor_canopy_type_options || []}
+              options={moveNAtoEnd(field_motor_canopy_type_options) || []}
               size="small"
               disabled={
                 watch("is_field_motor_isolator_selected") === "0" ||
@@ -1649,7 +1705,7 @@ const CommonConfiguration = ({
               control={control}
               name="lpbs_push_button_start_color"
               label="Start Push Button"
-              options={lpbs_indicator_on_options || []}
+              options={moveNAtoEnd(lpbs_indicator_on_options) || []}
               disabled={watch("is_local_push_button_station_selected") === "0"}
               size="small"
             />
@@ -1659,7 +1715,7 @@ const CommonConfiguration = ({
               control={control}
               name="lpbs_forward_push_button_start"
               label="Forward Start Push Button"
-              options={forward_reverst_push_button_options || []}
+              options={moveNAtoEnd(forward_reverst_push_button_options) || []}
               size="small"
             />
           </div>
@@ -1668,7 +1724,7 @@ const CommonConfiguration = ({
               control={control}
               name="lpbs_reverse_push_button_start"
               label="Reverse Start Push Button"
-              options={forward_reverst_push_button_options || []}
+              options={moveNAtoEnd(forward_reverst_push_button_options) || []}
               size="small"
             />
           </div>
@@ -1679,7 +1735,7 @@ const CommonConfiguration = ({
               control={control}
               name="lpbs_push_button_ess"
               label="Emergency Stop Button"
-              options={ess_options || []}
+              options={moveNAtoEnd(ess_options) || []}
               size="small"
             />
           </div>
@@ -1691,7 +1747,7 @@ const CommonConfiguration = ({
               control={control}
               name="lpbs_speed_increase"
               label="Speed Increase Push Button"
-              options={lpbs_speed_increase_options || []}
+              options={moveNAtoEnd(lpbs_speed_increase_options) || []}
               disabled={watch("is_local_push_button_station_selected") === "0"}
               size="small"
             />
@@ -1701,7 +1757,7 @@ const CommonConfiguration = ({
               control={control}
               name="lpbs_speed_decrease"
               label="Speed Decrease Push Button"
-              options={lpbs_speed_decrease_options || []}
+              options={moveNAtoEnd(lpbs_speed_decrease_options) || []}
               disabled={watch("is_local_push_button_station_selected") === "0"}
               size="small"
             />
@@ -1714,7 +1770,7 @@ const CommonConfiguration = ({
               control={control}
               name="lpbs_indication_lamp_start_color"
               label="Start / ON Indication Lamp Color"
-              options={lpbs_indicator_on_options || []}
+              options={moveNAtoEnd(lpbs_indicator_on_options) || []}
               disabled={watch("is_local_push_button_station_selected") === "0"}
               size="small"
             />
@@ -1724,7 +1780,7 @@ const CommonConfiguration = ({
               control={control}
               name="lpbs_indication_lamp_stop_color"
               label="Stop / OFF Indication Lamp Color"
-              options={lpbs_indiacator_off_options || []}
+              options={moveNAtoEnd(lpbs_indiacator_off_options) || []}
               disabled={watch("is_local_push_button_station_selected") === "0"}
               size="small"
             />
@@ -1802,7 +1858,7 @@ const CommonConfiguration = ({
               control={control}
               name="safe_lpbs_material"
               label="MOC"
-              options={field_motor_material_options || []}
+              options={moveNAtoEnd(field_motor_material_options) || []}
               disabled={
                 watch("is_local_push_button_station_selected") === "0" ||
                 watch("is_safe_lpbs_selected") === "0"
@@ -1843,7 +1899,7 @@ const CommonConfiguration = ({
               control={control}
               name="safe_lpbs_color_shade"
               label="LPBS Color Shade"
-              options={lpbs_color_shade_options || []}
+              options={moveNAtoEnd(lpbs_color_shade_options) || []}
               disabled={
                 watch("is_local_push_button_station_selected") === "0" ||
                 watch("is_safe_lpbs_selected") === "0"
@@ -1856,7 +1912,7 @@ const CommonConfiguration = ({
               control={control}
               name="safe_lpbs_canopy"
               label="Canopy"
-              options={lpbs_canopy_on_top_options || []}
+              options={moveNAtoEnd(lpbs_canopy_on_top_options) || []}
               disabled={
                 watch("is_local_push_button_station_selected") === "0" ||
                 watch("is_safe_lpbs_selected") === "0"
@@ -1869,7 +1925,7 @@ const CommonConfiguration = ({
               control={control}
               name="safe_lpbs_canopy_type"
               label="Canopy Type"
-              options={field_motor_canopy_type_options || []}
+              options={moveNAtoEnd(field_motor_canopy_type_options) || []}
               disabled={
                 watch("is_local_push_button_station_selected") === "0" ||
                 watch("is_safe_lpbs_selected") === "0"
@@ -2010,7 +2066,7 @@ const CommonConfiguration = ({
             control={control}
             name="apfc_relay"
             label="APFC Relay"
-            options={apfc_relay_options || []}
+            options={sortDropdownOptions(apfc_relay_options) || []}
             suffixIcon={
               <>
                 <p className="font-semibold text-blue-500">Stage</p>
@@ -2181,7 +2237,6 @@ const CommonConfiguration = ({
                   ? al_eb_current_density
                   : cu_eb_current_density) || []
               }
-
               size="small"
             />
           </div>
@@ -2228,7 +2283,7 @@ const CommonConfiguration = ({
               control={control}
               name="ferrule"
               label="Ferrule"
-              options={ferrule_options || []}
+              options={moveNAtoEnd(ferrule_options) || []}
               size="small"
             />
           </div>
@@ -2244,7 +2299,7 @@ const CommonConfiguration = ({
             <CustomTextInput
               control={control}
               name="device_identification_of_components"
-              label="Device identification of components"
+              label="Device Identification of Components"
               size="small"
             />
           </div>

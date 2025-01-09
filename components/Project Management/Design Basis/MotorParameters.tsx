@@ -14,6 +14,7 @@ import { useGetData } from "@/hooks/useCRUD";
 import { useLoading } from "@/hooks/useLoading";
 import useMotorParametersDropdowns from "./MotorParametersDropdown";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
+import { sortDropdownOptions } from "@/utils/helpers";
 
 const fieldSchema = zod.object({
   safe_area_efficiency_level: zod.string({
@@ -594,13 +595,13 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           <div className="flex-1 border p-1.5 text-sm font-semibold">
             Thermistor{" "}
             <span className="text-xs text-[#3b82f6]">
-              (For motor rating included and above in KW)
+              (For motor rating included and above in kW)
             </span>
           </div>
           <div className="flex-1 border">
             <CustomSingleSelect
               control={control}
-              options={dropdown["Thermister Safe"] || []}
+              options={sortDropdownOptions(dropdown["Thermister Safe"]) || []}
               name="safe_area_thermister"
               placeholder="Select safe area thermister"
               label=""
@@ -610,7 +611,9 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           <div className="flex-1 border">
             <CustomSingleSelect
               control={control}
-              options={dropdown["Thermister Hazardous"] || []}
+              options={
+                sortDropdownOptions(dropdown["Thermister Hazardous"]) || []
+              }
               name="hazardous_area_thermister"
               placeholder="Select hazardous area thermister"
               label=""
@@ -623,13 +626,13 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           <div className="flex-1 border p-1.5 text-sm font-semibold">
             Space Heater{" "}
             <span className="text-xs text-[#3b82f6]">
-              (For motor rating included and above in KW)
+              (For motor rating included and above in kW)
             </span>
           </div>
           <div className="flex-1 border">
             <CustomSingleSelect
               control={control}
-              options={dropdown["Space Heater Safe"] || []}
+              options={sortDropdownOptions(dropdown["Space Heater Safe"]) || []}
               name="safe_area_space_heater"
               placeholder="Select safe area space heater"
               label=""
@@ -639,7 +642,9 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           <div className="flex-1 border">
             <CustomSingleSelect
               control={control}
-              options={dropdown["Space Heater Hazardous"] || []}
+              options={
+                sortDropdownOptions(dropdown["Space Heater Hazardous"]) || []
+              }
               name="hazardous_area_space_heater"
               placeholder="Select hazardous area space heater"
               label=""
@@ -679,13 +684,13 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           <div className="flex-1 border p-1.5 text-sm font-semibold">
             Bearing RTD{" "}
             <span className="text-xs text-[#3b82f6]">
-              (For motor rating included and above in KW)
+              (For motor rating included and above in kW)
             </span>
           </div>
           <div className="flex-1 border">
             <CustomSingleSelect
               control={control}
-              options={dropdown["Bearing RTD Safe"] || []}
+              options={sortDropdownOptions(dropdown["Bearing RTD Safe"]) || []}
               name="safe_area_bearing_rtd"
               placeholder="Select safe area bearing RTD"
               label=""
@@ -695,7 +700,9 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           <div className="flex-1 border">
             <CustomSingleSelect
               control={control}
-              options={dropdown["Bearing RTD Hazardous"] || []}
+              options={
+                sortDropdownOptions(dropdown["Bearing RTD Hazardous"]) || []
+              }
               name="hazardous_area_bearing_rtd"
               placeholder="Select hazardous area bearing RTD"
               label=""
@@ -708,13 +715,13 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           <div className="flex-1 border p-1.5 text-sm font-semibold">
             Winding RTD{" "}
             <span className="text-xs text-[#3b82f6]">
-              (For motor rating included and above in KW)
+              (For motor rating included and above in kW)
             </span>
           </div>
           <div className="flex-1 border">
             <CustomSingleSelect
               control={control}
-              options={dropdown["Winding RTD Safe"] || []}
+              options={sortDropdownOptions(dropdown["Winding RTD Safe"]) || []}
               name="safe_area_winding_rtd"
               placeholder="Select safe area winding RTD"
               label=""
@@ -724,7 +731,9 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           <div className="flex-1 border">
             <CustomSingleSelect
               control={control}
-              options={dropdown["Winding RTD Hazardous"] || []}
+              options={
+                sortDropdownOptions(dropdown["Winding RTD Hazardous"]) || []
+              }
               name="hazardous_area_winding_rtd"
               placeholder="Select hazardous area winding RTD"
               label=""
@@ -880,7 +889,7 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
         </div>
         <div className="flex items-center justify-center">
           <div className="flex-1 border p-1.5 text-sm font-semibold">
-            Paint Type & Shade
+            Painting Type & Shade
           </div>
           <div className="flex-1 border">
             <CustomTextInput

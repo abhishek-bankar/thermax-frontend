@@ -98,3 +98,17 @@ export function moveNAtoEnd(options: any[]): any[] {
   // Return combined array with "NA" items at the end
   return [...otherItems, ...naItems];
 }
+
+//sort alphanumeric strings array containing space
+
+export const sortAlphaNumericArray = (data: any) => {
+  if (!data) return [];
+  const sortedData = data?.sort((a: any, b: any) => {
+    const numA = parseInt(a.name.split(" ")[0], 10);
+    const numB = parseInt(b.name.split(" ")[0], 10);
+    return numA - numB;
+  });
+
+  console.log(sortedData);
+  return sortedData;
+};

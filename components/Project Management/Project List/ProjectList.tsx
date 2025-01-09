@@ -101,6 +101,15 @@ export default function ProjectList({ userInfo, isComplete }: any) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectList, searchQuery]);
 
+
+  // const truncateText = (text:string, maxLength = 6) => {
+  //   if (text.length > maxLength) {
+  //     return `${text.substring(0, maxLength)}...`;
+  //   }
+  //   return text;
+  // };
+
+  
   const columns: ColumnsType<DataType> = [
     {
       title: () => <div className="text-center">Division</div>,

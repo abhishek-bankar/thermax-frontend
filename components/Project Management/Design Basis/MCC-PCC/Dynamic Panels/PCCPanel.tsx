@@ -20,6 +20,7 @@ import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
+import { moveNAtoEnd } from "@/utils/helpers";
 
 const getDefaultValues = (
   projectMetadata: any,
@@ -46,13 +47,13 @@ const getDefaultValues = (
     is_led_type_lamp_selected:
       pccPanelData?.is_led_type_lamp_selected?.toString() || "1",
     is_indication_on_selected:
-      pccPanelData?.is_indication_on_selected?.toString() || "0",
+      pccPanelData?.is_indication_on_selected?.toString() || "Green",
     led_type_on_input: pccPanelData?.led_type_on_input || "NA",
     is_indication_off_selected:
-      pccPanelData?.is_indication_off_selected?.toString() || "0",
+      pccPanelData?.is_indication_off_selected?.toString() || "Red",
     led_type_off_input: pccPanelData?.led_type_off_input || "NA",
     is_indication_trip_selected:
-      pccPanelData?.is_indication_trip_selected?.toString() || "0",
+      pccPanelData?.is_indication_trip_selected?.toString() || "Amber",
     led_type_trip_input: pccPanelData?.led_type_trip_input || "NA",
 
     is_blue_cb_spring_charge_selected:
@@ -302,7 +303,7 @@ const PCCPanel = ({
     mode: "onSubmit",
   });
 
-  console.log("form errors", formState.errors)
+  console.log("form errors", formState.errors);
 
   useEffect(() => {
     reset(getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]));
@@ -316,7 +317,26 @@ const PCCPanel = ({
   const control_transformer_coating_controlled = watch(
     "control_transformer_coating"
   );
+  const [hasACB, setHasACB] = useState(false);
+  const incomer_type = watch("incomer_type");
+  const currentTransformerNumber = watch("current_transformer_number");
 
+  const incomer_above_type = watch("incomer_above_type");
+  useEffect(() => {
+    const hasACB =
+      (incomer_type && incomer_type.includes("ACB")) ||
+      (incomer_above_type && incomer_above_type.includes("ACB"));
+    if (!hasACB) {
+      setValue("is_blue_cb_spring_charge_selected", "NA");
+      setValue("is_red_cb_in_service", "NA");
+      setValue("is_white_healthy_trip_circuit_selected", "NA");
+    } else {
+      setValue("is_blue_cb_spring_charge_selected", "Blue");
+      setValue("is_red_cb_in_service", "Red");
+      setValue("is_white_healthy_trip_circuit_selected", "White");
+    }
+    setHasACB(hasACB);
+  }, [incomer_type, incomer_above_type, setValue]);
   useEffect(() => {
     if (control_transformer_coating_controlled === "NA") {
       setValue("control_transformer_configuration", "NA");
@@ -342,7 +362,15 @@ const PCCPanel = ({
       setValue("ga_current_density", "1.0 A/Sq. mm");
     }
   }, [ga_current_density_controlled, ga_current_density_options, setValue]);
-
+  useEffect(() => {
+    if (currentTransformerNumber === "One") {
+      setValue("current_transformer_configuration", "Y-Phase with CT");
+    } else if (currentTransformerNumber === "Three") {
+      setValue("current_transformer_configuration", "All Phase with CT");
+    } else if (currentTransformerNumber === "NA") {
+      setValue("current_transformer_configuration", "NA");
+    }
+  }, [currentTransformerNumber, setValue]);
   useEffect(() => {
     if (incomer_ampere_controlled === "1000") {
       setValue("incomer_above_ampere", "1001");
@@ -397,7 +425,6 @@ const PCCPanel = ({
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-2 px-4"
       >
-
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <h4 className="flex-1 text-sm font-semibold text-slate-700">
@@ -527,7 +554,14 @@ const PCCPanel = ({
               name="led_type_on_input"
               label=""
               disabled={!Boolean(watch("is_indication_on_selected"))}
-              options={led_type_on_input_options || []}
+              // options={led_type_on_input_options || []}
+              options={
+                led_type_on_input_options
+                  ? led_type_on_input_options.filter(
+                      (el: any) => el.name !== "NA"
+                    )
+                  : []
+              }
               size="small"
             />
           </div>
@@ -542,7 +576,14 @@ const PCCPanel = ({
               name="led_type_off_input"
               label=""
               disabled={!Boolean(watch("is_indication_off_selected"))}
-              options={led_type_off_input_options || []}
+              // options={led_type_off_input_options || []}
+              options={
+                led_type_off_input_options
+                  ? led_type_off_input_options.filter(
+                      (el: any) => el.name !== "NA"
+                    )
+                  : []
+              }
               size="small"
             />
           </div>
@@ -557,7 +598,14 @@ const PCCPanel = ({
               name="led_type_trip_input"
               label=""
               disabled={!Boolean(watch("is_indication_trip_selected"))}
-              options={led_type_trip_input_options || []}
+              // options={led_type_trip_input_options || []}
+              options={
+                led_type_trip_input_options
+                  ? led_type_trip_input_options.filter(
+                      (el: any) => el.name !== "NA"
+                    )
+                  : []
+              }
               size="small"
             />
           </div>
@@ -570,7 +618,8 @@ const PCCPanel = ({
               name="is_blue_cb_spring_charge_selected"
               label="ACB Spring Charge Indication lamp"
               size="small"
-              options={acb_spring_charge_options || []}
+              disabled={!hasACB}
+              options={moveNAtoEnd(acb_spring_charge_options) || []}
             />
           </div>
           <div className="flex-1">
@@ -579,7 +628,8 @@ const PCCPanel = ({
               name="is_red_cb_in_service"
               label="ACB Service Indication lamp"
               size="small"
-              options={acb_service_indication_options || []}
+              disabled={!hasACB}
+              options={moveNAtoEnd(acb_service_indication_options) || []}
             />
           </div>
           <div className="flex-1">
@@ -588,7 +638,10 @@ const PCCPanel = ({
               name="is_white_healthy_trip_circuit_selected"
               label="Trip Circuit Healthy Indication lamp"
               size="small"
-              options={trip_circuit_healthy_indication_options || []}
+              disabled={!hasACB}
+              options={
+                moveNAtoEnd(trip_circuit_healthy_indication_options) || []
+              }
             />
           </div>
           <div className="flex-1">
@@ -615,7 +668,7 @@ const PCCPanel = ({
               control={control}
               name="mi_analog"
               label="Analog Meter"
-              options={analog_meters_options || []}
+              options={moveNAtoEnd(analog_meters_options) || []}
               size="small"
             />
           </div>
@@ -624,7 +677,7 @@ const PCCPanel = ({
               control={control}
               name="mi_digital"
               label="Digital Meter"
-              options={digital_meters_options || []}
+              options={moveNAtoEnd(digital_meters_options) || []}
               size="small"
             />
           </div>
@@ -634,7 +687,7 @@ const PCCPanel = ({
               control={control}
               name="mi_communication_protocol"
               label="Communication Protocol"
-              options={communication_protocol_options || []}
+              options={moveNAtoEnd(communication_protocol_options) || []}
               size="small"
             />
           </div>
@@ -651,7 +704,7 @@ const PCCPanel = ({
               control={control}
               name="current_transformer_coating"
               label="Current Transformer Coating"
-              options={current_transformer_coating_options || []}
+              options={moveNAtoEnd(current_transformer_coating_options) || []}
               size="small"
             />
           </div>
@@ -660,7 +713,7 @@ const PCCPanel = ({
               control={control}
               name="current_transformer_number"
               label="Current Transformer Quantity"
-              options={current_transformer_number_options || []}
+              options={moveNAtoEnd(current_transformer_number_options) || []}
               size="small"
             />
           </div>
@@ -669,7 +722,9 @@ const PCCPanel = ({
               control={control}
               name="current_transformer_configuration"
               label="Current Transformer Configuration"
-              options={current_transformer_configuration_options || []}
+              options={
+                moveNAtoEnd(current_transformer_configuration_options) || []
+              }
               size="small"
             />
           </div>
@@ -762,7 +817,7 @@ const PCCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ga_pcc_construction_type"
-              label="PCC Construction Type"
+              label="Panel Construction Type"
               options={ga_mcc_construction_type_options || []}
               size="small"
             />
@@ -1426,9 +1481,7 @@ const PCCPanel = ({
           </>
         )}
 
-        <Divider>
-          <span className="font-bold text-slate-700">Special Notes</span>
-        </Divider>
+ 
         <div className="mt-4 w-full">
           <CustomTextAreaInput
             control={control}
@@ -1443,7 +1496,7 @@ const PCCPanel = ({
             Save and Next
           </Button>
         </div>
-      </form >
+      </form>
     </>
   );
 };

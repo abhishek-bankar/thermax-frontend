@@ -91,6 +91,8 @@ export default function PackageList() {
   const handleMainPkgDelete = async (selectedRowID: string) => {
     try {
       await deleteData(`${MAIN_PKG_API}/${selectedRowID}`, false);
+      message.success("Main Package Deleted Successfully.");
+
     } catch (error: any) {
       handleError(error);
     } finally {
@@ -101,7 +103,7 @@ export default function PackageList() {
   const handleSubPkgDelete = async (selectedRowID: string) => {
     try {
       await deleteData(`${SUB_PKG_API}/${selectedRowID}`, false);
-      message.success("Sub Package deleted successfully");
+      message.success("Sub Package Deleted Successfully.");
     } catch (error: any) {
       handleError(error);
     } finally {

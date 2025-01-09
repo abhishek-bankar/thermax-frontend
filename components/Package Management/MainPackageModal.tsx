@@ -55,7 +55,7 @@ export default function MainPackageModal({
     try {
       const errorObj = JSON.parse(error?.message) as any;
       if ((errorObj.type = "DuplicateEntryError")) {
-        message.error("Package name already exists");
+        message.error("Package Name Already Exists.");
         return;
       } else {
         message.error(errorObj?.message);
@@ -74,10 +74,10 @@ export default function MainPackageModal({
     try {
       if (editMode) {
         await updateData(`${MAIN_PKG_API}/${values.name}`, false, data);
-        message.success("Main Package saved successfully");
+        message.success("Main Package Saved Successfully.");
       } else {
         await createData(MAIN_PKG_API, false, data);
-        message.success("Main Package created successfully");
+        message.success("Main Package Created Successfully.");
       }
     } catch (error: any) {
       handleError(error);

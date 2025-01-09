@@ -145,7 +145,7 @@ const ProjectInfoSchema = zod.object({
 const getDefaultValues = (isEdit: boolean, projectData: any) => {
   return {
     project_name: projectData?.project_name,
-    altitude: projectData?.altitude || "75",
+    altitude: projectData?.altitude || "750",
     min_humidity: projectData?.min_humidity || "35",
     max_humidity: projectData?.max_humidity || "85",
     avg_humidity: projectData?.avg_humidity || "65",
@@ -243,6 +243,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
   }, [isControlSupplyVDC, isUtilitySupplyVDC, setValue]);
 
   useEffect(() => {
+    console.log(projectData, "projectData");
+
     reset(getDefaultValues(true, projectData));
   }, [reset, projectData]);
 
@@ -267,6 +269,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
         message.error("Please select a panel");
         return;
       }
+      console.log("request payload:", data);
+
       await updateData(getProjectInfoUrl, false, data);
       message.success("Project information updated successfully!");
       // setModalLoading(true)
@@ -286,6 +290,58 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
   //     </div>
   //   )
   // }
+  const HumidityMax = [
+    {
+      name: "50",
+      value: "50",
+      label: "50",
+    },
+    {
+      name: "55",
+      value: "55",
+      label: "55",
+    },
+    {
+      name: "60",
+      value: "60",
+      label: "60",
+    },
+    {
+      name: "65",
+      value: "65",
+      label: "65",
+    },
+    {
+      name: "70",
+      value: "70",
+      label: "70",
+    },
+    {
+      name: "75",
+      value: "75",
+      label: "75",
+    },
+    {
+      name: "80",
+      value: "80",
+      label: "80",
+    },
+    {
+      name: "85",
+      value: "85",
+      label: "85",
+    },
+    {
+      name: "90",
+      value: "90",
+      label: "90",
+    },
+    {
+      name: "100",
+      value: "100",
+      label: "100",
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4 px-4">
@@ -515,7 +571,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             />
           </div>
         </div>
-        <div className="flex w-2/3 gap-8">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomSingleSelect
               name="frequency"
@@ -546,8 +602,9 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
-        <div className="flex w-2/3 gap-8">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomSingleSelect
               name="fault_level"
@@ -572,8 +629,9 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
-        <div className="flex w-2/3 gap-8">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomSingleSelect
               name="ambient_temperature_max"
@@ -582,7 +640,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               options={dropdown["Ambient Temperature Max"] || []}
               suffixIcon={
                 <>
-                  <p className="font-semibold text-blue-500">Deg C</p>
+                  <p className="text-xs font-semibold text-blue-500">Deg C</p>
                   <DownOutlined />
                 </>
               }
@@ -597,14 +655,15 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               type="text"
               suffix={
                 <>
-                  <p className="text-xs font-semibold text-blue-400">Deg C</p>
+                  <p className="text-xs font-semibold text-blue-500">Deg C</p>
                 </>
               }
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
-        <div className="flex w-2/3 gap-8">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomSingleSelect
               name="electrical_design_temperature"
@@ -613,7 +672,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               options={dropdown["Electrical Design Temp"] || []}
               suffixIcon={
                 <>
-                  <p className="font-semibold text-blue-500">Deg C</p>
+                  <p className="text-xs font-semibold text-blue-500">Deg C</p>
                   <DownOutlined />
                 </>
               }
@@ -628,16 +687,34 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
 
         {/* Humidity Part */}
         {/* <div className="text-sm font-semibold text-slate-00">Humidity</div> */}
-        <div className="flex w-2/3 gap-4">
-          <div className="w-1/2">
+        <div className="flex gap-8">
+          <div className="flex-1">
+            <CustomSingleSelect
+              name="max_humidity"
+              control={control}
+              label="Humidity [Max]"
+              options={HumidityMax}
+              suffixIcon={
+                <>
+                  <PercentageOutlined
+                    style={{ color: "#3b82f6",fontSize: "14px", fontWeight: "500" }}
+                  />
+                  <DownOutlined />
+                </>
+              }
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
             <CustomTextInput
               name="min_humidity"
               control={control}
-              label="Minimum Humidity"
+              label="Humidity [Min]"
               suffix={
                 <>
                   <PercentageOutlined style={{ color: "#3b82f6" }} />
@@ -646,27 +723,15 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
-          <div className="w-1/2">
-            <CustomTextInput
-              name="max_humidity"
-              control={control}
-              label="Maximum Humidity"
-              suffix={
-                <>
-                  <PercentageOutlined style={{ color: "#3b82f6" }} />
-                </>
-              }
-              size="small"
-            />
-          </div>
+          <div className="flex-1"></div>
         </div>
 
-        <div className="flex w-2/3 gap-4">
-          <div className="w-1/2">
+        <div className="flex gap-8">
+          <div className="flex-1">
             <CustomTextInput
               name="avg_humidity"
               control={control}
-              label="Average Humidity"
+              label="Humidity Average"
               suffix={
                 <>
                   <PercentageOutlined style={{ color: "#3b82f6" }} />
@@ -675,11 +740,11 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
-          <div className="w-1/2">
+          <div className="flex-1">
             <CustomTextInput
               name="performance_humidity"
               control={control}
-              label="Performance Humidity"
+              label="Humidity performance"
               suffix={
                 <>
                   <PercentageOutlined style={{ color: "#3b82f6" }} />
@@ -688,9 +753,10 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
 
-        <div className="w-1/3">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomTextInput
               name="altitude"
@@ -704,6 +770,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
+          <div className="flex-1"></div>
         </div>
 
         <div className="w-2/3">

@@ -105,6 +105,7 @@ export default function ProjectFormModal({
 
   useEffect(() => {
     reset(getDefaultValues(editMode, values));
+    
   }, [editMode, reset, values]);
 
   const handleCancel = () => {

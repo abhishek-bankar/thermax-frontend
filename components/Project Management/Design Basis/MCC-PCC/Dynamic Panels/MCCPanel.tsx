@@ -19,6 +19,7 @@ import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
+import { moveNAtoEnd } from "@/utils/helpers";
 
 const getDefaultValues = (
   projectMetadata: any,
@@ -44,13 +45,13 @@ const getDefaultValues = (
     is_led_type_lamp_selected:
       mccPanelData?.is_led_type_lamp_selected?.toString() || "1",
     is_indication_on_selected:
-      Number(mccPanelData?.is_indication_on_selected) || 0,
+      Number(mccPanelData?.is_indication_on_selected) || "Green",
     led_type_on_input: mccPanelData?.led_type_on_input || "NA",
     is_indication_off_selected:
-      Number(mccPanelData?.is_indication_off_selected) || 0,
+      Number(mccPanelData?.is_indication_off_selected) || "Red",
     led_type_off_input: mccPanelData?.led_type_off_input || "NA",
     is_indication_trip_selected:
-      Number(mccPanelData?.is_indication_trip_selected) || 0,
+      Number(mccPanelData?.is_indication_trip_selected) || "Amber",
     led_type_trip_input: mccPanelData?.led_type_trip_input || "NA",
 
     is_blue_cb_spring_charge_selected:
@@ -73,8 +74,7 @@ const getDefaultValues = (
     alarm_annunciator: mccPanelData?.alarm_annunciator || "Applicable",
     mi_analog: mccPanelData?.mi_analog || "Ammeter with ASS",
     mi_digital: mccPanelData?.mi_digital || "NA",
-    mi_communication_protocol:
-      mccPanelData?.mi_communication_protocol || "NA",
+    mi_communication_protocol: mccPanelData?.mi_communication_protocol || "NA",
     ga_moc_material: mccPanelData?.ga_moc_material || "Aluminium",
     ga_moc_thickness_door: mccPanelData?.ga_moc_thickness_door || "1.6 mm",
     door_thickness: mccPanelData?.door_thickness || "1.6 mm",
@@ -260,8 +260,7 @@ const MCCPanel = ({
   const incomer_above_type_options = dropdown["SD Incomer Above Type"];
   const analog_meters_options = dropdown["Analog Meters"];
   const digital_meters_options = dropdown["Digital Meters"];
-  const communication_protocol_options =
-    dropdown["Communication Protocol"];
+  const communication_protocol_options = dropdown["Communication Protocol"];
   const ga_moc_material_options = dropdown["GA MOC"];
   const ga_moc_thickness_door_options = dropdown["GA MOC Thickness Door"];
   const ga_moc_thickness_covers_options = dropdown["GA MOC Thickness Covers"];
@@ -333,13 +332,40 @@ const MCCPanel = ({
   const control_transformer_coating_controlled = watch(
     "control_transformer_coating"
   );
+  const [hasACB, setHasACB] = useState(false);
+  const incomer_type = watch("incomer_type");
+  const incomer_above_type = watch("incomer_above_type");
+  const currentTransformerNumber = watch("current_transformer_number");
 
   useEffect(() => {
     if (control_transformer_coating_controlled === "NA") {
       setValue("control_transformer_configuration", "NA");
     }
   }, [control_transformer_coating_controlled, setValue]);
-
+  useEffect(() => {
+    const hasACB =
+      (incomer_type && incomer_type.includes("ACB")) ||
+      (incomer_above_type && incomer_above_type.includes("ACB"));
+    if (!hasACB) {
+      setValue("is_blue_cb_spring_charge_selected", "NA");
+      setValue("is_red_cb_in_service", "NA");
+      setValue("is_white_healthy_trip_circuit_selected", "NA");
+    } else {
+      setValue("is_blue_cb_spring_charge_selected", "Blue");
+      setValue("is_red_cb_in_service", "Red");
+      setValue("is_white_healthy_trip_circuit_selected", "White");
+    }
+    setHasACB(hasACB);
+  }, [incomer_type, incomer_above_type, setValue]);
+  useEffect(() => {
+    if (currentTransformerNumber === "One") {
+      setValue("current_transformer_configuration", "Y-Phase with CT");
+    } else if (currentTransformerNumber === "Three") {
+      setValue("current_transformer_configuration", "All Phase with CT");
+    } else if (currentTransformerNumber === "NA") {
+      setValue("current_transformer_configuration", "NA");
+    }
+  }, [currentTransformerNumber, setValue]);
   useEffect(() => {
     if (ga_panel_mounting_frame_controlled !== "Base Frame") {
       setValue("ga_panel_mounting_height", "200");
@@ -417,7 +443,7 @@ const MCCPanel = ({
 
       if (mccPanelData && mccPanelData.length > 0) {
         await updateData(`${MCC_PANEL}/${mccPanelData[0].name}`, false, data);
-        message.success("Panel data updated successfully");
+        message.success("Panel Data Saved successfully.");
       } else {
         const combined_Data = {
           ...data,
@@ -429,7 +455,7 @@ const MCCPanel = ({
         // data["revision_id"] = revision_id
         // data["panel_id"] = panel_id
         await createData(MCC_PANEL, false, data);
-        message.success("Panel data created successfully");
+        message.success("Panel Data Saved successfully.");
       }
     } catch (error) {
       console.error("error: ", error);
@@ -570,7 +596,13 @@ const MCCPanel = ({
               name="led_type_on_input"
               label=""
               disabled={!Boolean(watch("is_indication_on_selected"))}
-              options={led_type_on_input_options || []}
+              options={
+                led_type_on_input_options
+                  ? led_type_on_input_options.filter(
+                      (el: any) => el.name !== "NA"
+                    )
+                  : []
+              }
               size="small"
             />
           </div>
@@ -585,7 +617,13 @@ const MCCPanel = ({
               name="led_type_off_input"
               label=""
               disabled={!Boolean(watch("is_indication_off_selected"))}
-              options={led_type_off_input_options || []}
+              options={
+                led_type_off_input_options
+                  ? led_type_off_input_options.filter(
+                      (el: any) => el.name !== "NA"
+                    )
+                  : []
+              }
               size="small"
             />
           </div>
@@ -600,7 +638,14 @@ const MCCPanel = ({
               name="led_type_trip_input"
               label=""
               disabled={!Boolean(watch("is_indication_trip_selected"))}
-              options={led_type_trip_input_options || []}
+              // options={led_type_trip_input_options || []}
+              options={
+                led_type_trip_input_options
+                  ? led_type_trip_input_options.filter(
+                      (el: any) => el.name !== "NA"
+                    )
+                  : []
+              }
               size="small"
             />
           </div>
@@ -612,7 +657,8 @@ const MCCPanel = ({
               name="is_blue_cb_spring_charge_selected"
               label="ACB Spring Charge Indication lamp"
               size="small"
-              options={acb_spring_charge_options || []}
+              options={moveNAtoEnd(acb_spring_charge_options) || []}
+              disabled={!hasACB}
             />
           </div>
           <div className="flex-1">
@@ -621,7 +667,8 @@ const MCCPanel = ({
               name="is_red_cb_in_service"
               label="ACB Service Indication lamp"
               size="small"
-              options={acb_service_indication_options || []}
+              disabled={!hasACB}
+              options={moveNAtoEnd(acb_service_indication_options) || []}
             />
           </div>
           <div className="flex-1">
@@ -630,7 +677,10 @@ const MCCPanel = ({
               name="is_white_healthy_trip_circuit_selected"
               label="Trip Circuit Healthy Indication lamp"
               size="small"
-              options={trip_circuit_healthy_indication_options || []}
+              disabled={!hasACB}
+              options={
+                moveNAtoEnd(trip_circuit_healthy_indication_options) || []
+              }
             />
           </div>
           <div className="flex-1">
@@ -678,7 +728,7 @@ const MCCPanel = ({
               control={control}
               name="mi_analog"
               label="Analog Meter"
-              options={analog_meters_options || []}
+              options={moveNAtoEnd(analog_meters_options) || []}
               size="small"
             />
           </div>
@@ -687,7 +737,7 @@ const MCCPanel = ({
               control={control}
               name="mi_digital"
               label="Digital Meter"
-              options={digital_meters_options || []}
+              options={moveNAtoEnd(digital_meters_options) || []}
               size="small"
             />
           </div>
@@ -696,7 +746,7 @@ const MCCPanel = ({
               control={control}
               name="mi_communication_protocol"
               label="Communication Protocol"
-              options={communication_protocol_options || []}
+              options={moveNAtoEnd(communication_protocol_options) || []}
               size="small"
             />
           </div>
@@ -712,7 +762,7 @@ const MCCPanel = ({
               control={control}
               name="current_transformer_coating"
               label="Current Transformer Coating"
-              options={current_transformer_coating_options || []}
+              options={moveNAtoEnd(current_transformer_coating_options) || []}
               size="small"
             />
           </div>
@@ -721,7 +771,7 @@ const MCCPanel = ({
               control={control}
               name="current_transformer_number"
               label="Current Transformer Quantity"
-              options={current_transformer_number_options || []}
+              options={moveNAtoEnd(current_transformer_number_options) || []}
               size="small"
               disabled={currentTransformerCoating === "NA"}
             />
@@ -731,7 +781,9 @@ const MCCPanel = ({
               control={control}
               name="current_transformer_configuration"
               label="Current Transformer Configuration"
-              options={current_transformer_configuration_options || []}
+              options={
+                moveNAtoEnd(current_transformer_configuration_options) || []
+              }
               size="small"
             />
           </div>
@@ -818,15 +870,6 @@ const MCCPanel = ({
               size="small"
             />
           </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="ga_mcc_construction_type"
-              label="MCC Construction Type"
-              options={ga_mcc_construction_type_options || []}
-              size="small"
-            />
-          </div>
         </div>
         <div className="mt-2 flex items-center gap-4">
           {/* <div className="flex-1">
@@ -856,6 +899,15 @@ const MCCPanel = ({
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
+              name="ga_mcc_construction_type"
+              label="Panel Construction Type"
+              options={ga_mcc_construction_type_options || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
               name="ga_panel_mounting_frame"
               label="Panel Mounting"
               options={ga_panel_mounting_frame_options || []}
@@ -878,7 +930,7 @@ const MCCPanel = ({
         </div>
         <div className="mt-2 flex items-center gap-4">
           <h4 className="mr-2 font-semibold text-slate-700">Sections</h4>
-          <div className="">
+          <div className="flex-1">
             <CustomRadioSelect
               control={control}
               name="is_marshalling_section_selected"
@@ -889,7 +941,7 @@ const MCCPanel = ({
               ]}
             />
           </div>
-          <div className="">
+          <div className="flex-1">
             <CustomTextAreaInput
               control={control}
               name="marshalling_section_text_area"
@@ -897,21 +949,21 @@ const MCCPanel = ({
               disabled={watch("is_marshalling_section_selected") === "0"}
             />
           </div>
-          <div className="">
+          <div className="flex-1">
             <CustomCheckboxInput
               control={control}
               name="is_cable_alley_section_selected"
               label="Cable Alley Section"
             />
           </div>
-          <div className="">
+          <div className="flex-1">
             <CustomCheckboxInput
               control={control}
               name="is_power_and_bus_separation_section_selected"
               label="Separation Between Power & Control Bus"
             />
           </div>
-          <div className="">
+          <div className="flex-1">
             <CustomCheckboxInput
               control={control}
               name="is_both_side_extension_section_selected"
@@ -1502,9 +1554,6 @@ const MCCPanel = ({
           </>
         )}
 
-        <Divider>
-          <span className="font-bold text-slate-700">Special Notes</span>
-        </Divider>
         <div className="mt-4 w-full">
           <CustomTextAreaInput
             control={control}

@@ -280,7 +280,7 @@ export const LoadListcolumns = (division: string) => {
     { type: "text", name: "rev", title: "REV.", width: "200" },
     {
       type: "dropdown",
-      source: ["No", "Yes"],
+      source: ["No", "Yes", "As per OEM Standard"],
       name: "spaceHeater",
       title: "SPACE HEATER",
       width: "150",
@@ -301,7 +301,7 @@ export const LoadListcolumns = (division: string) => {
     },
     {
       type: "dropdown",
-      source: ["No", "Yes"],
+      source: ["No", "Yes", "As per OEM Standard"],
       name: "thermistor",
       title: "THERMISTOR",
       width: "150",

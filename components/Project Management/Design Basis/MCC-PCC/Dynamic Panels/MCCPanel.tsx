@@ -1,3 +1,4 @@
+"use client"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, message, Skeleton } from "antd"; // Import Select for dropdown
 import React, { useCallback, useEffect, useState } from "react";
@@ -206,9 +207,11 @@ const getDefaultValues = (
 const MCCPanel = ({
   revision_id,
   panel_id,
+  setActiveKey,
 }: {
   revision_id: string;
   panel_id: string;
+  setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const params = useParams();
   const project_id = params.project_id;
@@ -457,13 +460,23 @@ const MCCPanel = ({
         await createData(MCC_PANEL, false, data);
         message.success("Panel Data Saved successfully.");
       }
+ 
+      const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
+      setActiveKey((prevKey: string) => {
+        if (prevKey == tabsCount) {
+          return "1";
+        }
+
+        return (parseInt(prevKey, 10) + 1).toString();
+      });
+  
     } catch (error) {
       console.error("error: ", error);
       handleError(error);
     } finally {
       setLoading(false);
     }
-  }, [revision_id, panel_id, getValues]);
+  }, [getValues, revision_id, panel_id, setActiveKey]);
 
   if (isLoading) {
     return (

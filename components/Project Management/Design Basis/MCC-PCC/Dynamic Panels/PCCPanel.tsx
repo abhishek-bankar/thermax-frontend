@@ -1,3 +1,4 @@
+"use client"
 import * as zod from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, message, Skeleton } from "antd"; // Import Select for dropdown
@@ -206,9 +207,11 @@ const getDefaultValues = (
 const PCCPanel = ({
   revision_id,
   panel_id,
+  setActiveKey,
 }: {
   revision_id: string;
   panel_id: string;
+  setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const params = useParams();
   const project_id = params.project_id;
@@ -400,6 +403,15 @@ const PCCPanel = ({
     try {
       await updateData(`${PCC_PANEL}/${pccPanelData[0].name}`, false, data);
       message.success("Panel data saved successfully");
+      const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
+      setActiveKey((prevKey: string) => {
+        if (prevKey == tabsCount) {
+          return "1";
+        }
+
+        return (parseInt(prevKey, 10) + 1).toString();
+      });
+      // setActiveKey((prevKey: string) => (parseInt(prevKey, 10) + 1).toString());
     } catch (error) {
       console.error("error: ", error);
       handleError(error);
@@ -1481,7 +1493,6 @@ const PCCPanel = ({
           </>
         )}
 
- 
         <div className="mt-4 w-full">
           <CustomTextAreaInput
             control={control}

@@ -17,7 +17,7 @@ import PCCPanel from "./Dynamic Panels/PCCPanel";
 import { sortDatewise } from "@/utils/helpers";
 
 const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
-  const [activeKey, setActiveKey] = useState<string>("Make"); // Default active tab
+  const [activeKey, setActiveKey] = useState<string>("1"); // Default active tab
   const { setLoading: setModalLoading } = useLoading();
   useEffect(() => {
     setModalLoading(false);
@@ -31,7 +31,7 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
   const TabMCC = [
     {
       label: "Make",
-      key: "Make",
+      key: "1",
       children: (
         <MakeOfComponent
           revision_id={revision_id}
@@ -41,42 +41,63 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
     },
     {
       label: "Common Configuration",
-      key: "Common Configuration",
+      key: "2",
       children: (
         <CommonConfiguration
           revision_id={revision_id}
           setActiveKey={setActiveKey}
-        /> 
+        />
       ),
     },
   ];
-  const sortedProjectPanelData = sortDatewise(projectPanelData);
-  sortedProjectPanelData?.forEach((panel: any) => {
+  const sortedProjectPanelData = sortDatewise(projectPanelData); 
+
+  sortedProjectPanelData?.forEach((panel: any, index) => {
     if (panel.panel_main_type === MCC_PANEL_TYPE) {
       TabMCC.push({
         label: panel?.panel_name,
-        key: panel?.panel_name,
-        children: <MCCPanel revision_id={revision_id} panel_id={panel?.name} />,
+        key: String(index + 3),
+        children: (
+          <MCCPanel
+            revision_id={revision_id}
+            panel_id={panel?.name}
+            setActiveKey={setActiveKey}
+          />
+        ),
       });
     } else if (panel.panel_main_type === PCC_PANEL_TYPE) {
       TabMCC.push({
         label: panel?.panel_name,
-        key: panel?.panel_name,
-        children: <PCCPanel revision_id={revision_id} panel_id={panel?.name} />,
+        key: String(index + 3),
+        children: (
+          <PCCPanel
+            revision_id={revision_id}
+            panel_id={panel?.name}
+            setActiveKey={setActiveKey}
+          />
+        ),
       });
     } else if (panel.panel_main_type === MCCcumPCC_PANEL_TYPE) {
       TabMCC.push({
         label: panel?.panel_name,
-        key: panel?.panel_name,
+        key: String(index + 3),
         children: (
-          <MCCcumPCCPanel revision_id={revision_id} panel_id={panel?.name} />
+          <MCCcumPCCPanel
+            revision_id={revision_id}
+            panel_id={panel?.name}
+            setActiveKey={setActiveKey}
+          />
         ),
       });
     }
   });
 
-  const onChange = (key: string) => {
-    setActiveKey(key); // Update active tab
+  localStorage.setItem("dynamic-tabs-count", String(TabMCC.length));
+
+  const onChange = (key: string) => { 
+
+    setActiveKey(key); 
+    localStorage.setItem("active-panels-tab", String(key));
   };
 
   return (

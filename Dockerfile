@@ -30,11 +30,20 @@ COPY --from=builder /app/.next ./.next
 # Copy the .env.production file
 COPY .env.production .env
 
+# Copy SSL files
+COPY server.key /etc/ssl/private/
+COPY server.csr /etc/ssl/certs/
+
 # Install only production dependencies
 RUN npm install --only=production
 
 # Expose port 3000
 EXPOSE 3000
 
-# Start the Next.js application
+# Configure the application to use SSL by setting environment variables
+ENV NODE_ENV=production
+ENV SSL_CERT_PATH=/etc/ssl/certs/server.csr
+ENV SSL_KEY_PATH=/etc/ssl/private/server.key
+
+# Start the Next.js application with SSL enabled
 CMD ["npm", "start"]

@@ -43,7 +43,7 @@ export const createData = async (
     apiClient = adminApiClient;
   }
   try {
-    const response = await apiClient.post(url, data);
+    const response = await adminApiClient.post(url, data);
     return response.data.data;
   } catch (error: any) {
     handleAPIError(error);
@@ -61,7 +61,7 @@ export const updateData = async (
     apiClient = adminApiClient;
   }
   try {
-    const response = await apiClient.put(url, data);
+    const response = await adminApiClient.put(url, data);
     return response.data.data;
   } catch (error: any) {
     handleAPIError(error);
@@ -75,7 +75,7 @@ export const deleteData = async (url: string, useAdminClient: boolean) => {
     apiClient = adminApiClient;
   }
   try {
-    await apiClient.delete(url);
+    await adminApiClient.delete(url);
   } catch (error: any) {
     if (error.response?.status === 404) {
       return;
@@ -95,7 +95,7 @@ export const downloadFile = async (
   }
 
   try {
-    const response = await apiClient.post(url, data, {
+    const response = await adminApiClient.post(url, data, {
       responseType: "arraybuffer", // Expect binary data
     });
 

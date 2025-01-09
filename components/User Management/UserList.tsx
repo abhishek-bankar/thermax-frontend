@@ -36,6 +36,7 @@ export const UserList = ({ userInfo }: any) => {
   const { data: thermaxUserList } = useGetData(thermaxUserUrl);
   const { data: userList } = useGetData(`${USER_API}?fields=["*"]&limit=1000`);
   const mergedList = mergeLists(thermaxUserList, userList, "name", "name");
+  console.log(mergedList, " user list");
 
   const { setLoading: setModalLoading } = useLoading();
   useEffect(() => {
@@ -53,7 +54,7 @@ export const UserList = ({ userInfo }: any) => {
   const handleDelete = async (selectedRowID: string) => {
     try {
       await deleteUser(selectedRowID);
-      message.success("User deleted successfully");
+      message.success("User Deleted Successfully.");
     } catch (error) {
       message.error("Error deleting user");
       console.error("Error deleting user", error);
@@ -184,6 +185,7 @@ export const UserList = ({ userInfo }: any) => {
         values={userRow}
         editEventTrigger={editEventTrigger}
         userInfo={userInfo}
+        onMutate={() => mutate(thermaxUserUrl)}
       />
     </div>
   );

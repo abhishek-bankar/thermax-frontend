@@ -243,8 +243,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
   }, [isControlSupplyVDC, isUtilitySupplyVDC, setValue]);
 
   useEffect(() => {
-    console.log(projectData,"projectData");
-    
+    console.log(projectData, "projectData");
+
     reset(getDefaultValues(true, projectData));
   }, [reset, projectData]);
 
@@ -571,7 +571,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             />
           </div>
         </div>
-        <div className="flex w-2/3 gap-8">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomSingleSelect
               name="frequency"
@@ -602,8 +602,9 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
-        <div className="flex w-2/3 gap-8">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomSingleSelect
               name="fault_level"
@@ -628,8 +629,9 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
-        <div className="flex w-2/3 gap-8">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomSingleSelect
               name="ambient_temperature_max"
@@ -638,7 +640,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               options={dropdown["Ambient Temperature Max"] || []}
               suffixIcon={
                 <>
-                  <p className="font-semibold text-blue-500">Deg C</p>
+                  <p className="text-xs font-semibold text-blue-500">Deg C</p>
                   <DownOutlined />
                 </>
               }
@@ -653,14 +655,15 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               type="text"
               suffix={
                 <>
-                  <p className="text-xs font-semibold text-blue-400">Deg C</p>
+                  <p className="text-xs font-semibold text-blue-500">Deg C</p>
                 </>
               }
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
-        <div className="flex w-2/3 gap-8">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomSingleSelect
               name="electrical_design_temperature"
@@ -669,7 +672,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               options={dropdown["Electrical Design Temp"] || []}
               suffixIcon={
                 <>
-                  <p className="font-semibold text-blue-500">Deg C</p>
+                  <p className="text-xs font-semibold text-blue-500">Deg C</p>
                   <DownOutlined />
                 </>
               }
@@ -684,12 +687,30 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
 
         {/* Humidity Part */}
         {/* <div className="text-sm font-semibold text-slate-00">Humidity</div> */}
-        <div className="flex w-2/3 gap-4">
-          <div className="w-1/2">
+        <div className="flex gap-8">
+          <div className="flex-1">
+            <CustomSingleSelect
+              name="max_humidity"
+              control={control}
+              label="Humidity [Max]"
+              options={HumidityMax}
+              suffixIcon={
+                <>
+                  <PercentageOutlined
+                    style={{ color: "#3b82f6",fontSize: "14px", fontWeight: "500" }}
+                  />
+                  <DownOutlined />
+                </>
+              }
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
             <CustomTextInput
               name="min_humidity"
               control={control}
@@ -702,26 +723,11 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
-          <div className="w-1/2">
-           
-            <CustomSingleSelect
-              name="max_humidity"
-              control={control}
-              label="Humidity [Max]"
-              options={HumidityMax}
-              suffixIcon={
-                <>
-                  <PercentageOutlined style={{ color: "#3b82f6" }} />
-                  <DownOutlined />
-                </>
-              }
-              size="small"
-            />
-          </div>
+          <div className="flex-1"></div>
         </div>
 
-        <div className="flex w-2/3 gap-4">
-          <div className="w-1/2">
+        <div className="flex gap-8">
+          <div className="flex-1">
             <CustomTextInput
               name="avg_humidity"
               control={control}
@@ -734,7 +740,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
-          <div className="w-1/2">
+          <div className="flex-1">
             <CustomTextInput
               name="performance_humidity"
               control={control}
@@ -747,9 +753,10 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
         </div>
 
-        <div className="w-1/3">
+        <div className="flex gap-8">
           <div className="flex-1">
             <CustomTextInput
               name="altitude"
@@ -763,6 +770,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               size="small"
             />
           </div>
+          <div className="flex-1"></div>
+          <div className="flex-1"></div>
         </div>
 
         <div className="w-2/3">

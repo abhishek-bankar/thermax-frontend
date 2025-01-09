@@ -424,7 +424,7 @@ const MCCcumPCCPLCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ups_control_voltage"
-              label="Control voltage ( UPS )"
+              label="Control Voltage ( UPS )"
               options={plc_control_voltage_options || []}
               size="small"
             />
@@ -433,7 +433,7 @@ const MCCcumPCCPLCPanel = ({
             <CustomSingleSelect
               control={control}
               name="non_ups_control_voltage"
-              label="Control voltage ( Non UPS )"
+              label="Control Voltage ( Non UPS )"
               options={plc_control_voltage_options || []}
               size="small"
             />
@@ -560,252 +560,7 @@ const MCCcumPCCPLCPanel = ({
           </div>
         </div>
 
-        {/* <Divider>
-          <span className="font-bold text-slate-700">PLC Hardware</span>
-        </Divider>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <CustomTextInput
-              control={control}
-              name="plc_cpu_system_series"
-              label="PLC CPU System Series"
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomSingleSelect
-              control={control}
-              name="plc_cpu_system_input_voltage"
-              label="PLC CPU System Input Voltage"
-              size="small"
-              options={plc_control_voltage_options || []}
-            />
-          </div>
-          <div className="flex-1">
-            <CustomTextInput
-              control={control}
-              name="plc_cpu_system_battery_backup"
-              label="PLC CPU System Battery Backup"
-              size="small"
-            />
-          </div>
-          <div className="flex-1">
-            <CustomTextInput
-              control={control}
-              name="plc_cpu_system_memory_free_space_after_program"
-              label="PLC CPU System Memory Free Space after Program"
-              size="small"
-            />
-          </div>
-        </div>
-
-        <Divider>
-          <span className="font-bold text-slate-700">Redundancy</span>
-        </Divider>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-1 gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_power_supply_plc_cpu_system_selected"
-                label="Power Supply PLC CPU System"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_power_supply_input_output_module_selected"
-                label="Power Supply Input - Output Module"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_plc_input_output_modules_system_selected"
-                label="PLC Input - Output Modules System "
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_plc_cpu_system_and_input_output_modules_system_selected"
-                label="PLC CPU System and PLC Input - Output Modules System"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="basis-1/4">
-              <CustomRadioSelect
-                control={control}
-                name="is_plc_cpu_system_and_hmi_scada_selected"
-                label="PLC CPU System and HMI / SCADA"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="basis-1/4">
-              <CustomRadioSelect
-                control={control}
-                name="is_plc_cpu_system_and_third_party_devices_selected"
-                label="PLC CPU System and Third Party devices"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex basis-1/2 items-center gap-4">
-              <div className="">
-                <CustomRadioSelect
-                  control={control}
-                  name="is_plc_cpu_system_selected"
-                  label="PLC CPU System"
-                  options={[
-                    { label: "Yes", value: "1" },
-                    { label: "No", value: "0" },
-                  ]}
-                />
-              </div>
-              <div className="flex-1">
-                <CustomSingleSelect
-                  control={control}
-                  name="plc_cpu_system"
-                  label=""
-                  size="small"
-                  options={plc_cpu_system_options || []}
-                  disabled={watch("is_plc_cpu_system_selected") === "0"}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Divider>
-          <span className="font-bold text-slate-700">PLC Panel Mounted</span>
-        </Divider>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <CustomTextInput
-              control={control}
-              name="panel_mounted_ac"
-              label="Panel Mounted AC"
-              size="small"
-            />
-          </div>
-          <div className="flex flex-1 items-center gap-2">
-            <div className="flex flex-1 items-center gap-4">
-              <div className="flex-1">
-                <CustomRadioSelect
-                  control={control}
-                  name="is_plc_and_ups_marshalling_cabinet_selected"
-                  label="Marshalling Cabinet For PLC and UPS"
-                  options={[
-                    { label: "Yes", value: "1" },
-                    { label: "No", value: "0" },
-                  ]}
-                />
-              </div>
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="marshalling_cabinet_for_plc_and_ups"
-                label=""
-                size="small"
-                options={marshalling_cabinet_options || []}
-                disabled={
-                  watch("is_plc_and_ups_marshalling_cabinet_selected") === "0"
-                }
-              />
-            </div>
-          </div>
-        </div>
-
-        <Divider>
-          <span className="font-bold text-slate-700">
-            Panel Mounted Push Buttons, Indication lamps & Colors
-          </span>
-        </Divider>
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_electronic_hooter_selected"
-                label="Electronic Hooter"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="electronic_hooter_acknowledge"
-                label="Electronic Hooter Acknowledge"
-                options={electronic_hooter_acknowledge_options || []}
-                size="small"
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="panel_power_supply_on_color"
-                label="Panel Power Supply On"
-                options={panel_power_supply_on_options || []}
-                size="small"
-              />
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="panel_power_supply_off_color"
-                label="Panel Power Supply Off"
-                options={panel_power_supply_off_options || []}
-                size="small"
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="indicating_lamp_color_for_nonups_power_supply"
-                label="Indicating Lamp Colour for Non-UPS Power Supply"
-                options={indicating_lamp_color_options || []}
-                size="small"
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="indicating_lamp_colour_for_ups_power_supply"
-                label="Indicating Lamp Colour for UPS Power Supply"
-                options={indicating_lamp_color_options || []}
-                size="small"
-              />
-            </div>
-          </div>
-        </div> */}
+         
 
         <div className="flex flex-col gap-6">
           {/* PLC Hardware Section */}
@@ -924,7 +679,7 @@ const MCCcumPCCPLCPanel = ({
                   <CustomRadioSelect
                     control={control}
                     name="is_plc_cpu_system_and_third_party_devices_selected"
-                    label="PLC CPU System and Third Party devices"
+                    label="PLC CPU System and Third Party Devices"
                     options={[
                       { label: "Yes", value: "1" },
                       { label: "No", value: "0" },
@@ -1002,7 +757,7 @@ const MCCcumPCCPLCPanel = ({
           <div>
             <Divider>
               <span className="font-bold text-slate-700">
-                Panel Mounted Push Buttons, Indication lamps & Colors
+                Panel Mounted Push Buttons, Indication Lamps & Colors
               </span>
             </Divider>
             <div className="flex flex-col gap-4">
@@ -1754,7 +1509,7 @@ const MCCcumPCCPLCPanel = ({
                     <CustomRadioSelect
                       control={control}
                       name="is_engineering_cum_operating_station_quantity_selected"
-                      label="Engineering cum Operating Station (Quantity)"
+                      label="Engineering Cum Operating Station (Quantity)"
                       options={[
                         { label: "Yes", value: "1" },
                         { label: "No", value: "0" },
@@ -2033,7 +1788,7 @@ const MCCcumPCCPLCPanel = ({
                   <CustomRadioSelect
                     control={control}
                     name="is_plc_logic_diagram_selected"
-                    label="PLC logic diagram with Tag No. / Rung No & it's descriptions."
+                    label="PLC Logic Diagram With Tag No. / Rung No & It's Descriptions."
                     options={[
                       { label: "Yes", value: "1" },
                       { label: "No", value: "0" },

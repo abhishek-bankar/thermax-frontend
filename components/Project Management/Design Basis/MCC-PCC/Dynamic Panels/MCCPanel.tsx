@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, message, Skeleton } from "antd"; // Import Select for dropdown
 import React, { useCallback, useEffect, useState } from "react";
@@ -45,15 +45,16 @@ const getDefaultValues = (
 
     is_led_type_lamp_selected:
       mccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected:
-      Number(mccPanelData?.is_indication_on_selected) || "Green",
-    led_type_on_input: mccPanelData?.led_type_on_input || "NA",
-    is_indication_off_selected:
-      Number(mccPanelData?.is_indication_off_selected) || "Red",
-    led_type_off_input: mccPanelData?.led_type_off_input || "NA",
-    is_indication_trip_selected:
-      Number(mccPanelData?.is_indication_trip_selected) || "Amber",
-    led_type_trip_input: mccPanelData?.led_type_trip_input || "NA",
+    is_indication_on_selected: Number(mccPanelData?.is_indication_on_selected),
+    led_type_on_input: mccPanelData?.led_type_on_input || "Green",
+    is_indication_off_selected: Number(
+      mccPanelData?.is_indication_off_selected
+    ),
+    led_type_off_input: mccPanelData?.led_type_off_input || "Red",
+    is_indication_trip_selected: Number(
+      mccPanelData?.is_indication_trip_selected
+    ),
+    led_type_trip_input: mccPanelData?.led_type_trip_input || "Amber",
 
     is_blue_cb_spring_charge_selected:
       mccPanelData?.is_blue_cb_spring_charge_selected || "Blue",
@@ -318,6 +319,8 @@ const MCCPanel = ({
   }, [currentTransformerCoating, setValue]);
 
   useEffect(() => {
+    console.log(mccPanelData, "MCC DATA");
+
     if (projectInfo && mccPanelData) {
       reset(getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]));
     }
@@ -460,7 +463,7 @@ const MCCPanel = ({
         await createData(MCC_PANEL, false, data);
         message.success("Panel Data Saved successfully.");
       }
- 
+
       const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount) {
@@ -469,7 +472,6 @@ const MCCPanel = ({
 
         return (parseInt(prevKey, 10) + 1).toString();
       });
-  
     } catch (error) {
       console.error("error: ", error);
       handleError(error);

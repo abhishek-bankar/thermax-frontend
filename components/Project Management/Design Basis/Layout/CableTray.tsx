@@ -315,7 +315,7 @@ const CableTray = ({
         false,
         values
       );
-      message.success("Cable Tray Updated Successfully");
+      message.success("Cable Tray Saved Successfully");
       setActiveKey("2");
     } catch (error) {
       console.error("Submission error:", error);

@@ -141,7 +141,7 @@ export default function SignIn({ authSecret }: { authSecret: string }) {
     <div className="flex w-1/3 flex-col gap-2 rounded-xl border border-gray-300 p-6 shadow-lg">
       <div className="mb-2 flex flex-col items-center justify-center">
         <Image
-          src={`/${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/logoLandingPage.png`}
+          src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/logoLandingPage.png`}
           alt="Logo"
           width={60}
           height={60}

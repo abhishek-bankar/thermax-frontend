@@ -63,7 +63,7 @@ export default function CopyRevisionModel({
         approver_email
       );
       mutate(dbRevisionHistoryUrl);
-      message.success("Design Basis revision is released and locked");
+      message.success("Revision Copied Successfully");
       setOpen(false);
     } catch (error) {
       message.error("Failed to clone revision data");

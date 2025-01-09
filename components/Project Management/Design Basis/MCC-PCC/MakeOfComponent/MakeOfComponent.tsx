@@ -234,13 +234,13 @@ const MakeOfComponent = ({
       } else {
         message.error("Make of Component not found for this revision");
       }
+      setActiveKey("2");
     } catch (error) {
       handleError(error);
     } finally {
       setLoading(false);
-      setActiveKey("Common Configuration");
     }
-  }; 
+  };
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}

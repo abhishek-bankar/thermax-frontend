@@ -145,9 +145,10 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
         battery_limit: generalInfoData.battery_limit,
       });
     }
-    const pkgList = generalInfoData?.pkgList;
+    const pkgList = generalInfoData?.pkgList; 
     if (pkgList && pkgList.length > 0) {
       let hasHazardousArea = false;
+      let hasSafeArea = false;
       for (const mainPkg of pkgList) {
         const subPkgList = mainPkg?.sub_packages;
         const updateSubPkgList = [];
@@ -158,6 +159,12 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
               Boolean(subPkg.is_sub_package_selected)
             ) {
               hasHazardousArea = true;
+            }
+            if (
+              subPkg.area_of_classification === "Safe Area" &&
+              Boolean(subPkg.is_sub_package_selected)
+            ) {
+              hasSafeArea = true;
             }
             updateSubPkgList.push({
               sub_package_name: subPkg.sub_package_name,
@@ -178,7 +185,9 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
       }
 
       const isHazardousAreaPresent = hasHazardousArea ? true : false;
-
+      const isSafeAreaPresent = hasSafeArea ? true : false;
+ 
+   
       if (motorParameters && motorParameters.length > 0) {
         // Update existing motor parameters
         await updateData(
@@ -186,6 +195,7 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
           false,
           {
             is_hazardous_area_present: isHazardousAreaPresent,
+            is_safe_area_present: isSafeAreaPresent,
           }
         );
       } else {
@@ -193,6 +203,7 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
         await createData(MOTOR_PARAMETER_API, false, {
           revision_id,
           is_hazardous_area_present: isHazardousAreaPresent,
+          is_safe_area_present: isSafeAreaPresent,
         });
       }
     } else {
@@ -201,6 +212,7 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
         false,
         {
           is_hazardous_area_present: true,
+          isSafeAreaPresent: true,
         }
       );
     }

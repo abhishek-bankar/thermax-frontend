@@ -57,7 +57,7 @@ export default function DocumentRevision() {
     const revision_id = record?.key;
     const projectApproverEmail = record?.approverEmail;
     const currentStatus = record?.status;
-    setSubmitIconSpin(true);
+    setModalLoading(true);
     try {
       let status = DB_REVISION_STATUS.Submitted;
       if (currentStatus === DB_REVISION_STATUS.Resubmitted) {
@@ -83,7 +83,7 @@ export default function DocumentRevision() {
     } catch (error) {
       console.error(error);
     } finally {
-      setSubmitIconSpin(false);
+      setModalLoading(false);
     }
   };
 
@@ -135,7 +135,7 @@ export default function DocumentRevision() {
   const handleApprove = async (record: any) => {
     const revision_id = record?.key;
     const projectApproverEmail = record.approverEmail;
-    setApprovalIconSpin(true);
+    setModalLoading(true);
     try {
       await updateData(
         `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
@@ -157,7 +157,7 @@ export default function DocumentRevision() {
     } catch (error) {
       console.error(error);
     } finally {
-      setApprovalIconSpin(false);
+      setModalLoading(false);
     }
   };
 
@@ -180,6 +180,9 @@ export default function DocumentRevision() {
       setModalLoading(false);
     }
   };
+
+  console.log(userInfo);
+  console.log(revisionHistory);
 
   // Ensure columns is defined as an array of ColumnType
   const columns: TableColumnsType = [
@@ -335,23 +338,28 @@ export default function DocumentRevision() {
                   icon={
                     <ExportOutlined
                       style={{
-                        color: [
-                          DB_REVISION_STATUS.Released,
-                          DB_REVISION_STATUS.Submitted,
-                          DB_REVISION_STATUS.Approved,
-                        ].includes(record?.status)
-                          ? "grey"
-                          : "orange",
+                        color:
+                          [
+                            DB_REVISION_STATUS.Released,
+                            DB_REVISION_STATUS.Submitted,
+                            DB_REVISION_STATUS.Approved,
+                          ].includes(record?.status) ||
+                          userInfo?.email !== record.owner
+                            ? "grey"
+                            : "orange",
                       }}
                       spin={submitIconSpin}
                     />
                   }
                   onClick={async () => await handleReviewSubmission(record)}
-                  disabled={[
-                    DB_REVISION_STATUS.Released,
-                    DB_REVISION_STATUS.Submitted,
-                    DB_REVISION_STATUS.Approved,
-                  ].includes(record?.status)}
+                  disabled={
+                    [
+                      DB_REVISION_STATUS.Released,
+                      DB_REVISION_STATUS.Submitted,
+                      DB_REVISION_STATUS.Approved,
+                    ].includes(record?.status) ||
+                    userInfo?.email !== record.owner
+                  }
                 />
               </Tooltip>
             </div>
@@ -410,7 +418,7 @@ export default function DocumentRevision() {
                           ? "grey"
                           : "green",
                       }}
-                      spin={approvalIconSpin}
+                      // spin={approvalIconSpin}
                     />
                   }
                   onClick={() => handleApprove(record)}
@@ -439,7 +447,8 @@ export default function DocumentRevision() {
               name="Release"
               disabled={
                 record.status === DB_REVISION_STATUS.Released ||
-                record.status !== DB_REVISION_STATUS.Approved
+                record.status !== DB_REVISION_STATUS.Approved ||
+                userInfo?.email !== record.owner
               }
               onClick={() => handleRelease(record.key)}
             >
@@ -458,7 +467,9 @@ export default function DocumentRevision() {
     documentRevision: `R${index}`,
     createdDate: item.creation,
     approverEmail: item.approver_email,
+    owner: item.owner,
   }));
+  // console.log(revisionHistory);
 
   return (
     <>

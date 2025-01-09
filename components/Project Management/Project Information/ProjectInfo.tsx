@@ -655,7 +655,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               type="text"
               suffix={
                 <>
-                  <p className="text-xs font-semibold text-blue-500">Deg C</p>
+                  <p className="text-xs font-medium text-blue-500">Deg C</p>
                 </>
               }
               size="small"
@@ -764,7 +764,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               label="Altitude"
               suffix={
                 <>
-                  <p className="text-xs text-blue-500">meter</p>
+                  <p className="text-xs text-blue-500">meters</p>
                 </>
               }
               size="small"

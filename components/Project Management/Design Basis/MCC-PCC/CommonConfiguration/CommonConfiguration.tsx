@@ -282,6 +282,7 @@ const getDefaultValues = (commonConfigData: any) => {
 
 const CommonConfiguration = ({
   revision_id,
+  setActiveKey,
 }: {
   revision_id: string;
   setActiveKey: React.Dispatch<React.SetStateAction<string>>;
@@ -643,7 +644,8 @@ const CommonConfiguration = ({
         false,
         data
       );
-      message.success("Common configuration updated successfully");
+      message.success("Common Configuration Updated Successfully");
+      setActiveKey((prevKey: string) => (parseInt(prevKey, 10) + 1).toString());
     } catch (error) {
       console.error("error: ", error);
       handleError(error);

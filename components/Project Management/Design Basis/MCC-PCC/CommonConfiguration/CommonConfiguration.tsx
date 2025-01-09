@@ -644,7 +644,7 @@ const CommonConfiguration = ({
         false,
         data
       );
-      message.success("Common Configuration Updated Successfully");
+      message.success("Common Configuration Saved Successfully");
       setActiveKey((prevKey: string) => (parseInt(prevKey, 10) + 1).toString());
     } catch (error) {
       console.error("error: ", error);
@@ -1388,7 +1388,7 @@ const CommonConfiguration = ({
               label="Lock Type"
               options={[
                 { label: "Lockable", value: "Lockable" },
-                { label: "UnLockable", value: "UnLockable" },
+                { label: "Unlockable", value: "Unlockable" },
               ]}
               disabled={watch("selector_switch_applicable") !== "Applicable"}
             />

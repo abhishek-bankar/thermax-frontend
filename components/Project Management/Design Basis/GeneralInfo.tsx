@@ -145,14 +145,104 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
         battery_limit: generalInfoData.battery_limit,
       });
     }
-    const pkgList = generalInfoData?.pkgList; 
+    // const pkgList = generalInfoData?.pkgList;
+    // if (pkgList && pkgList.length > 0) {
+    //   let hasHazardousArea = false;
+    //   let hasSafeArea = false;
+    //   for (const mainPkg of pkgList) {
+    //     const subPkgList = mainPkg?.sub_packages;
+    //     console.log(subPkgList);
+
+    //     const updateSubPkgList = [];
+    //     if (subPkgList && subPkgList.length > 0) {
+    //       for (const subPkg of subPkgList) {
+    //         if (
+    //           subPkg.area_of_classification === "Hazardous Area" &&
+    //           Boolean(subPkg.is_sub_package_selected)
+    //         ) {
+    //           hasHazardousArea = true;
+    //         }
+    //         if (
+    //           subPkg.area_of_classification === "Safe Area" &&
+    //           Boolean(subPkg.is_sub_package_selected)
+    //         ) {
+    //           hasSafeArea = true;
+    //         }
+    //         updateSubPkgList.push({
+    //           sub_package_name: subPkg.sub_package_name,
+    //           area_of_classification: subPkg.area_of_classification,
+    //           is_sub_package_selected: subPkg.is_sub_package_selected,
+    //         });
+    //       }
+    //     }
+
+    //     await updateData(`${PROJECT_MAIN_PKG_API}/${mainPkg.name}`, false, {
+    //       main_package_name: mainPkg.main_package_name,
+    //       sub_packages: updateSubPkgList,
+    //       standard: mainPkg?.standard,
+    //       zone: mainPkg?.zone,
+    //       gas_group: mainPkg?.gas_group,
+    //       temperature_class: mainPkg?.temperature_class,
+    //     });
+    //   }
+
+    //   const isHazardousAreaPresent = hasHazardousArea ? true : false;
+    //   const isSafeAreaPresent = hasSafeArea ? true : false;
+
+    //   if (motorParameters && motorParameters.length > 0) {
+    //     // Update existing motor parameters
+    //     await updateData(
+    //       `${MOTOR_PARAMETER_API}/${motorParameters[0].name}`,
+    //       false,
+    //       {
+    //         is_hazardous_area_present: isHazardousAreaPresent,
+    //         is_safe_area_present: isSafeAreaPresent,
+    //       }
+    //     );
+    //   } else {
+    //     // Create new motor parameters if none exist
+    //     await createData(MOTOR_PARAMETER_API, false, {
+    //       revision_id,
+    //       is_hazardous_area_present: isHazardousAreaPresent,
+    //       is_safe_area_present: isSafeAreaPresent,
+    //     });
+    //   }
+    // } else {
+    //   await updateData(
+    //     `${MOTOR_PARAMETER_API}/${motorParameters[0].name}`,
+    //     false,
+    //     {
+    //       is_hazardous_area_present: true,
+    //       is_safe_area_present: true,
+    //     }
+    //   );
+    // }
+
+    const pkgList = generalInfoData?.pkgList;
+
     if (pkgList && pkgList.length > 0) {
       let hasHazardousArea = false;
       let hasSafeArea = false;
+
       for (const mainPkg of pkgList) {
         const subPkgList = mainPkg?.sub_packages;
+        console.log(subPkgList);
         const updateSubPkgList = [];
+
         if (subPkgList && subPkgList.length > 0) {
+          // Check if at least one subpackage is selected
+          const hasSelectedSubPackage = subPkgList.some((pkg: any) =>
+            Boolean(pkg.is_sub_package_selected)
+          );
+
+          if (!hasSelectedSubPackage) {
+            setSaveLoading(false);
+            return message.error(`Main package ${mainPkg.main_package_name} must have at least one subpackage selected`);
+            // throw new Error(
+            //   `Main package "${mainPkg.main_package_name}" must have at least one subpackage selected`
+            // );
+          }
+
           for (const subPkg of subPkgList) {
             if (
               subPkg.area_of_classification === "Hazardous Area" &&
@@ -184,12 +274,10 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
         });
       }
 
-      const isHazardousAreaPresent = hasHazardousArea ? true : false;
-      const isSafeAreaPresent = hasSafeArea ? true : false;
- 
-   
+      const isHazardousAreaPresent = hasHazardousArea;
+      const isSafeAreaPresent = hasSafeArea;
+
       if (motorParameters && motorParameters.length > 0) {
-        // Update existing motor parameters
         await updateData(
           `${MOTOR_PARAMETER_API}/${motorParameters[0].name}`,
           false,
@@ -199,7 +287,6 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
           }
         );
       } else {
-        // Create new motor parameters if none exist
         await createData(MOTOR_PARAMETER_API, false, {
           revision_id,
           is_hazardous_area_present: isHazardousAreaPresent,
@@ -212,12 +299,12 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
         false,
         {
           is_hazardous_area_present: true,
-          isSafeAreaPresent: true,
+          is_safe_area_present: true,
         }
       );
     }
     setSaveLoading(false);
-    message.success("Design Basis General Info saved successfully");
+    message.success("Design Basis General Information Saved Successfully");
     setModalLoading(true);
     router.push(`/project/${params.project_id}/design-basis/motor-parameters`);
   };

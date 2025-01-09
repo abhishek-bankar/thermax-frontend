@@ -51,7 +51,7 @@ export default function MainPackageModal({
   }, [editMode, reset, values, editEventTrigger]);
 
   const handleError = (error: any) => {
-    console.error(error);
+    console.log(error);
     try {
       const errorObj = JSON.parse(error?.message) as any;
       if ((errorObj.type = "DuplicateEntryError")) {
@@ -74,7 +74,7 @@ export default function MainPackageModal({
     try {
       if (editMode) {
         await updateData(`${MAIN_PKG_API}/${values.name}`, false, data);
-        message.success("Main Package Saved Successfully.");
+        message.success("Main Package Updated Successfully.");
       } else {
         await createData(MAIN_PKG_API, false, data);
         message.success("Main Package Created Successfully.");

@@ -290,7 +290,7 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
   );
 
   useEffect(() => {
-    if (motorParameters?.[0]) { 
+    if (motorParameters?.[0]) {  
       setIsHazardous(Boolean(motorParameters?.[0].is_hazardous_area_present));
       setIsSafe(Boolean(motorParameters?.[0].is_safe_area_present));
     }

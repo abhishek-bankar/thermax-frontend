@@ -658,15 +658,15 @@ export const mccPanelValidationSchema = zod
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_on_selected: zod.string({
+    is_indication_on_selected: zod.number({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_off_selected: zod.string({
+    is_indication_off_selected: zod.number({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_trip_selected: zod.string({
+    is_indication_trip_selected: zod.number({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
@@ -1037,15 +1037,15 @@ export const pccPanelValidationSchema = zod
       message: "Alarm Annunciator is required",
     }),
 
-    is_indication_on_selected: zod.string({
+    is_indication_on_selected: zod.number({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_off_selected: zod.string({
+    is_indication_off_selected: zod.number({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_trip_selected: zod.string({
+    is_indication_trip_selected: zod.number({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),

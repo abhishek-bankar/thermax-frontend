@@ -24,6 +24,7 @@ import {
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLoading } from "@/hooks/useLoading";
 import { UserButton } from "./UserButton";
+import EnimaxLogo from "@/public/files/eni_max_logo.png";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -122,7 +123,7 @@ export default function HeaderSidebar() {
             className="hidden items-center gap-5 md:flex"
           >
             <Image
-              src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/eni_max_logo.png`}
+              src={EnimaxLogo}
               alt="Thermax logo"
               width={49}
               height={49}

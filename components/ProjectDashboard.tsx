@@ -8,6 +8,7 @@ import { useLoading } from "@/hooks/useLoading";
 import { PROJECT_API } from "@/configs/api-endpoints";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useGetData } from "@/hooks/useCRUD";
+import EnimaxLogo from "@/public/files/eni_max_logo.png";
 
 interface Project {
   id: number;
@@ -70,7 +71,7 @@ const ProjectDashboard = () => {
                 <div className="flex gap-4">
                   <div>
                     <Image
-                      src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/eni_max_logo.png`}
+                      src={EnimaxLogo}
                       alt="Description of the image"
                       width={65}
                       height={65}
@@ -96,7 +97,7 @@ const ProjectDashboard = () => {
                   <div className="flex gap-4">
                     <div>
                       <Image
-                        src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/eni_max_logo.png`}
+                        src={EnimaxLogo}
                         alt="Description of the image"
                         width={65}
                         height={65}

@@ -4,6 +4,12 @@ import Link from "next/link";
 import React from "react";
 import { SIGN_IN } from "@/configs/constants";
 import { useLoading } from "@/hooks/useLoading";
+import LogoLandingImage from "@/public/files/logoLandingPage.png";
+import EnimaxLogo from "@/public/files/eni_max_logo_svg_final.svg";
+import FactoryImg from "@/public/files/factory2.png";
+import HeatingImg from "@/public/files/heating.png";
+import AirPollutionImg from "@/public/files/airPolution2.png";
+import WasteAndWaterImg from "@/public/files/wasteAndWater2.png";
 
 const Homepage = () => {
   const { setLoading } = useLoading();
@@ -13,7 +19,7 @@ const Homepage = () => {
       <div className="flex items-center justify-between">
         <div>
           <Image
-            src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/logoLandingPage.png`}
+            src={LogoLandingImage}
             alt="Thermax Logo"
             width={100}
             height={100}
@@ -28,19 +34,14 @@ const Homepage = () => {
             </Link>
           </div>
 
-          <Image
-            src="./eni_max_logo_svg_final.svg"
-            alt="EniMax Logo"
-            width={100}
-            height={100}
-          />
+          <Image src={EnimaxLogo} alt="EniMax Logo" width={100} height={100} />
         </div>
       </div>
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-8">
           <div className="flex-1">
             <Image
-              src="/factory2.png"
+              src={FactoryImg}
               alt="Factory Logo"
               width={500}
               height={500}
@@ -48,17 +49,12 @@ const Homepage = () => {
           </div>
           <div className="flex flex-1 items-center justify-between gap-4">
             <div className="flex flex-col items-center justify-center gap-4">
-              <Image
-                src="/heating.png"
-                alt="Heating"
-                width={100}
-                height={100}
-              />
+              <Image src={HeatingImg} alt="Heating" width={100} height={100} />
               <h2 className="font-semibold text-slate-800">HEATING</h2>
             </div>
             <div className="flex flex-col items-center justify-center gap-4">
               <Image
-                src="/airPolution2.png"
+                src={AirPollutionImg}
                 alt="Air Pollution"
                 width={100}
                 height={100}
@@ -67,7 +63,7 @@ const Homepage = () => {
             </div>
             <div className="flex flex-col items-center justify-center gap-4">
               <Image
-                src="/wasteAndWater2.png"
+                src={WasteAndWaterImg}
                 alt="Waste and Water"
                 width={100}
                 height={100}

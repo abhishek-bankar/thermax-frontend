@@ -1,8 +1,9 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, message, Skeleton } from "antd"; // Import Select for dropdown
-import React, { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import * as zod from "zod";
+import React, { useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { createData, getData, updateData } from "@/actions/crud-actions";
 import CustomCheckboxInput from "@/components/FormInputs/CustomCheckbox";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
@@ -300,7 +301,7 @@ const MCCPanel = ({
       item.name === "200" || item.name === "300" || item.name === "500"
   );
 
-  const { control, reset, watch, setValue, getValues } = useForm({
+  const { control, reset, watch, setValue, getValues, handleSubmit } = useForm({
     resolver: zodResolver(mccPanelValidationSchema),
     defaultValues: getDefaultValues(
       projectMetadata,
@@ -440,37 +441,18 @@ const MCCPanel = ({
     }
   };
 
-  const onSubmit = useCallback(async () => {
+  const onSubmit: SubmitHandler<
+    zod.infer<typeof mccPanelValidationSchema>
+  > = async (data) => {
     setLoading(true);
     try {
-      let data = getValues();
-      const mccPanelData = await getData(
-        `${MCC_PANEL}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
-      );
-
-      if (mccPanelData && mccPanelData.length > 0) {
-        await updateData(`${MCC_PANEL}/${mccPanelData[0].name}`, false, data);
-        message.success("Panel Data Saved successfully.");
-      } else {
-        const combined_Data = {
-          ...data,
-          revision_id,
-          panel_id,
-        };
-
-        data = { ...combined_Data };
-        // data["revision_id"] = revision_id
-        // data["panel_id"] = panel_id
-        await createData(MCC_PANEL, false, data);
-        message.success("Panel Data Saved successfully.");
-      }
+      await updateData(`${MCC_PANEL}/${mccPanelData[0].name}`, false, data);
+      message.success("Panel Data Saved successfully.");
 
       const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount) {
-           router.push(
-             `/project/${project_id}/design-basis/layout`
-          );
+          router.push(`/project/${project_id}/design-basis/layout`);
           return "1";
         }
 
@@ -482,7 +464,7 @@ const MCCPanel = ({
     } finally {
       setLoading(false);
     }
-  }, [getValues, revision_id, panel_id, setActiveKey]);
+  };
 
   if (isLoading) {
     return (
@@ -497,7 +479,10 @@ const MCCPanel = ({
       <Divider>
         <span className="font-bold text-slate-700">Incomer Selection</span>
       </Divider>
-      <form onSubmit={onSubmit} className="flex flex-col gap-2 px-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-2 px-4"
+      >
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <h4 className="flex-1 text-sm font-semibold text-slate-700">
@@ -1582,7 +1567,7 @@ const MCCPanel = ({
           />
         </div>
         <div className="mt-2 flex w-full justify-end">
-          <Button type="primary" onClick={onSubmit} loading={loading}>
+          <Button type="primary" htmlType="submit" loading={loading}>
             Save and Next
           </Button>
         </div>

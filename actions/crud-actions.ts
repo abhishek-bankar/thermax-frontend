@@ -38,9 +38,9 @@ export const createData = async (
   useAdminClient: boolean,
   data: any
 ) => {
-  let apiClient = await getApiClient();
-  if (useAdminClient) {
-    apiClient = adminApiClient;
+  let apiClient = adminApiClient;
+  if (!useAdminClient) {
+    apiClient = await getApiClient();
   }
   try {
     const response = await apiClient.post(url, data);
@@ -56,9 +56,9 @@ export const updateData = async (
   useAdminClient: boolean,
   data: any
 ) => {
-  let apiClient = await getApiClient();
-  if (useAdminClient) {
-    apiClient = adminApiClient;
+  let apiClient = adminApiClient;
+  if (!useAdminClient) {
+    apiClient = await getApiClient();
   }
   try {
     const response = await apiClient.put(url, data);
@@ -70,9 +70,9 @@ export const updateData = async (
 
 // Delete a document
 export const deleteData = async (url: string, useAdminClient: boolean) => {
-  let apiClient = await getApiClient();
-  if (useAdminClient) {
-    apiClient = adminApiClient;
+  let apiClient = adminApiClient;
+  if (!useAdminClient) {
+    apiClient = await getApiClient();
   }
   try {
     await apiClient.delete(url);

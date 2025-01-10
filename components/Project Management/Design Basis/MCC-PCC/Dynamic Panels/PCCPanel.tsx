@@ -47,14 +47,15 @@ const getDefaultValues = (
 
     is_led_type_lamp_selected:
       pccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected:
-      Number(pccPanelData?.is_indication_on_selected),
+    is_indication_on_selected: Number(pccPanelData?.is_indication_on_selected),
     led_type_on_input: pccPanelData?.led_type_on_input || "Green",
-    is_indication_off_selected:
-      Number(pccPanelData?.is_indication_off_selected),
+    is_indication_off_selected: Number(
+      pccPanelData?.is_indication_off_selected
+    ),
     led_type_off_input: pccPanelData?.led_type_off_input || "Red",
-    is_indication_trip_selected:
-      Number(pccPanelData?.is_indication_trip_selected),
+    is_indication_trip_selected: Number(
+      pccPanelData?.is_indication_trip_selected
+    ),
     led_type_trip_input: pccPanelData?.led_type_trip_input || "Amber",
 
     is_blue_cb_spring_charge_selected:
@@ -306,11 +307,11 @@ const PCCPanel = ({
     mode: "onSubmit",
   });
 
-  console.log("form errors", formState.errors);
+  // console.log("form errors", formState.errors);
 
   useEffect(() => {
-    console.log(pccPanelData?.[0], "PCC");
-    console.log(getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]), "PCC default");
+    // console.log(pccPanelData?.[0], "PCC");
+    // console.log(getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]), "PCC default");
 
     reset(getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]));
   }, [pccPanelData, projectMetadata, projectInfo, reset]);
@@ -404,7 +405,7 @@ const PCCPanel = ({
   > = async (data) => {
     setLoading(true);
     try {
-      console.log(data);
+      // console.log(data);
 
       await updateData(`${PCC_PANEL}/${pccPanelData[0].name}`, false, data);
       message.success("Panel Data Saved Successfully");

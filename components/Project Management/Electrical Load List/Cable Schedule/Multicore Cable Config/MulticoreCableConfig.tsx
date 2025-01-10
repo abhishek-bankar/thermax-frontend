@@ -146,33 +146,40 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
   const findOtherData = useCallback(
     (schemeTitle: string) => {
       const division = userInfo.division;
-  
+
       switch (division) {
         case HEATING:
           return controlSchemes?.find((item) => item[2] === schemeTitle);
         case ENVIRO:
           return [].find((item) => item[1] === schemeTitle);
         case WWS_SPG:
-          return [].find((item) => String(item[1]).trim() === schemeTitle.trim());
+          return [].find(
+            (item) => String(item[1]).trim() === schemeTitle.trim()
+          );
         case WWS_IPG:
-          return [].find((item) => String(item[1]).trim() === schemeTitle.trim());
+          return [].find(
+            (item) => String(item[1]).trim() === schemeTitle.trim()
+          );
         default:
           return null;
       }
     },
     [userInfo.division, controlSchemes] // Dependencies
   );
-  
+
   const initializeMulticoreUi = useCallback(
     (data: any) => {
       if (!spreadsheetRef.current) return;
-  
+
       const options = {
         data,
         license: "39130-64ebc-bd98e-26bc4",
         columns: typedMulticoreConfigColumns,
         updateTable: (instance: any, cell: any, col: number, row: number) => {
-          if (data[row][0] === true && !selectedElMulticore.includes(data[row])) {
+          if (
+            data[row][0] === true &&
+            !selectedElMulticore.includes(data[row])
+          ) {
             if (cell.classList.length > 0) {
               const className = cell.classList;
               if (className[0] !== "readonly") {
@@ -190,7 +197,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
         tableHeight: "600px",
         freezeColumns: 0,
       };
-  
+
       const newTable = jspreadsheet(spreadsheetRef.current, options);
       setTble(newTable);
     },
@@ -281,10 +288,10 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
 
     // Calculate spares
     const calcDISpare = Number(spareFormula(DI).toFixed(2));
-    console.log(DI);
-    console.log(DI * 1.2);
-    console.log(selectedPercent);
-    console.log(calcDISpare);
+    // console.log(DI);
+    // console.log(DI * 1.2);
+    // console.log(selectedPercent);
+    // console.log(calcDISpare);
 
     const calDOSpare = Number(spareFormula(DO).toFixed(2));
     const DISpare = calculateSpare(calcDISpare, "DIDO");
@@ -337,7 +344,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
         panelName,
       ],
     ];
-    console.log(grouping, "grouping");
+    // console.log(grouping, "grouping");
 
     setGrouping((prev) => [...prev, ...newGroups]);
     setSelectedElMulticore([]);
@@ -353,13 +360,13 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
     });
   };
   useEffect(() => {
-    console.log(grouping, "grouping");
+    // console.log(grouping, "grouping");
     if (grouping.length > 0) {
       initializeGroupingeUi(grouping);
     }
   }, [grouping, initializeGroupingeUi]);
   const onConfirm = () => {
-    console.log(grouping, "grouping");
+    // console.log(grouping, "grouping");
     if (grouping.length > 0) {
       onConfigurationComplete(grouping);
       localStorage.setItem(
@@ -375,7 +382,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
     localStorage.setItem("load_list_tab", JSON.stringify(2));
 
     // const loadList = JSON.parse(localStorage.getItem('loadList'));
-    console.log(loadListData, "loadListData");
+    // console.log(loadListData, "loadListData");
 
     const processedData = loadListData?.map((item: any) => {
       const schemeData = findOtherData(item.control_scheme);
@@ -395,7 +402,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
             return 0;
         }
       };
-      console.log(item, "loadList item");
+      // console.log(item, "loadList item");
       if (!schemeData) {
         return [
           false,
@@ -426,21 +433,29 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
         item.panel,
       ];
     });
-    console.log(processedData, "processedData");
+    // console.log(processedData, "processedData");
     if (grouping.length > 0) {
       initializeGroupingeUi(grouping);
     }
     initializeMulticoreUi(processedData);
-  }, [findOtherData, grouping, initializeGroupingeUi, initializeMulticoreUi, isOpen, loadListData, userInfo.division]);
+  }, [
+    findOtherData,
+    grouping,
+    initializeGroupingeUi,
+    initializeMulticoreUi,
+    isOpen,
+    loadListData,
+    userInfo.division,
+  ]);
   const handleClearSelection = () => {
     tbleSelected?.destroy();
-    console.log(
-      tble.getData().map((item: any) => {
-        const arr = [...item];
-        arr[0] = false;
-        return arr;
-      })
-    );
+    // console.log(
+    //   tble.getData().map((item: any) => {
+    //     const arr = [...item];
+    //     arr[0] = false;
+    //     return arr;
+    //   })
+    // );
     tble.setData(
       tble.getData().map((item: any) => {
         const arr = [...item];

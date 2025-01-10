@@ -28,14 +28,14 @@ export const getSwSelectionDetails = async (payload: any) => {
   } else {
     filters_all = JSON.stringify([["division", "=", division]]);
   }
-  console.log(
-    ">> HTR <<<",
-    `${SWITCHGEAR_API}?filters=${filters_htr}&fields=["*"]&limit=2500`
-  );
-  console.log(
-    ">> All divisions <<<",
-    `${SWITCHGEAR_API}?filters=${filters_all}&fields=["*"]&limit=2500`
-  );
+  // console.log(
+  //   ">> HTR <<<",
+  //   `${SWITCHGEAR_API}?filters=${filters_htr}&fields=["*"]&limit=2500`
+  // );
+  // console.log(
+  //   ">> All divisions <<<",
+  //   `${SWITCHGEAR_API}?filters=${filters_all}&fields=["*"]&limit=2500`
+  // );
 
   const database_dol_htr = await getData(
     `${SWITCHGEAR_API}?filters=${filters_htr}&fields=["*"]&limit=2500`
@@ -148,7 +148,6 @@ export const getSwSelectionDetails = async (payload: any) => {
                   item.sg_select === sw_type &&
                   item.starter_type === starter_type
               ));
-
         } else if (starter_type === "SOFT STARTER") {
           matchingOptions = [].filter(
             (item: any) =>
@@ -207,7 +206,7 @@ export const getSwSelectionDetails = async (payload: any) => {
             terminal_part_no: "",
           };
         }
-        console.log(`selected sg : ${tag_number} >>`, switchgear);
+        // console.log(`selected sg : ${tag_number} >>`, switchgear);
 
         // for pair of starters like "VFD BYPASS-S/D" , "VFD Bypass DOL"
 
@@ -253,8 +252,8 @@ export const getSwSelectionDetails = async (payload: any) => {
           (item: any) => item.kw >= kw
         );
         if (switchgearForPairStarter) {
-          console.log(switchgear, "vfd starter");
-          console.log(switchgearForPairStarter, "paired starter");
+          // console.log(switchgear, "vfd starter");
+          // console.log(switchgearForPairStarter, "paired starter");
         }
         return {
           tag_number,
@@ -910,7 +909,7 @@ export const getBusbarSizingCalculations = async (): Promise<void> => {
 
     // Get calculated value from formula cells
     const result = processor.getCellValue("G40");
-    console.log("Calculated Result:", result);
+    // console.log("Calculated Result:", result);
 
     // You can get multiple results
     const results = {
@@ -918,7 +917,7 @@ export const getBusbarSizingCalculations = async (): Promise<void> => {
       g41: processor.getCellValue("G41"),
       // add other cells as needed
     };
-    console.log("All Results:", results);
+    // console.log("All Results:", results);
 
     await processor.saveWorkbook("calculated_output.xlsx");
   } catch (error) {

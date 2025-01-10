@@ -281,9 +281,9 @@ const useDataFetching = (
       const cableScheduleData = await getData(
         `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${cableScheduleRevisionId}`
       );
-      console.log(cableScheduleData, "cableScheduleData");
-      console.log(projectPanelData, "projectPanelData");
-      console.log(loadList);
+      // console.log(cableScheduleData, "cableScheduleData");
+      // console.log(projectPanelData, "projectPanelData");
+      // console.log(loadList);
       setCableScheduleData(cableScheduleData.cable_schedule_data);
       setProjectPanelData(projectPanelData);
       setLoadListData(loadList?.electrical_load_list_data);
@@ -314,7 +314,7 @@ const SLDTabs: React.FC<Props> = ({
   loadListLatestRevisionId,
   sldRevisions,
 }) => {
-  console.log(sldRevisions, "getAllSldRevisions");
+  // console.log(sldRevisions, "getAllSldRevisions");
 
   const { setLoading: setModalLoading } = useLoading();
   const [sLDTabs, setSLDTabs] = useState<any[]>([]);
@@ -327,7 +327,7 @@ const SLDTabs: React.FC<Props> = ({
 
   const [panelWiseData, setPanelWiseData] = useState<any[]>([]);
   useEffect(() => {
-    console.log(panelWiseData);
+    // console.log(panelWiseData);
 
     const updatedTabs = panelWiseData.map((tab: any, index: number) => {
       return {
@@ -390,7 +390,7 @@ const SLDTabs: React.FC<Props> = ({
       }, []);
 
       setPanelWiseData(panelWiseData);
-      console.log(panelWiseData);
+      // console.log(panelWiseData);
     }
   }, [loadListData, projectPanelData]);
 
@@ -444,7 +444,7 @@ const SLDTabs: React.FC<Props> = ({
       }, []);
 
       setPanelWiseData(panelWiseData);
-      console.log(panelWiseData);
+      // console.log(panelWiseData);
     }
   };
 

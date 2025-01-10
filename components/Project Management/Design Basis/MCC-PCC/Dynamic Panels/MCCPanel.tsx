@@ -319,7 +319,7 @@ const MCCPanel = ({
   }, [currentTransformerCoating, setValue]);
 
   useEffect(() => {
-    console.log(mccPanelData, "MCC DATA");
+    // console.log(mccPanelData, "MCC DATA");
 
     if (projectInfo && mccPanelData) {
       reset(getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]));

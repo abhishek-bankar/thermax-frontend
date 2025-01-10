@@ -117,7 +117,7 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
           const response = await getData(
             `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${division}"]]&fields=["*"]`
           );
-          console.log(response, "lpbs schemes");
+          // console.log(response, "lpbs schemes");
 
           const transformedSchemes = response
             .map(transformSchemeData)
@@ -128,7 +128,7 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
                 ? parseInt(numA, 10) - parseInt(numB, 10)
                 : prefixA.localeCompare(prefixB);
             });
-          console.log(transformedSchemes, "transformedSchemes");
+          // console.log(transformedSchemes, "transformedSchemes");
 
           setLpbsSchemes(transformedSchemes);
           setLoading(false);
@@ -139,14 +139,20 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
       };
 
       fetchSchemes();
-    }, [isOpen, lpbsSchemes.length, setLoading, transformSchemeData, userInfo?.division]);
+    }, [
+      isOpen,
+      lpbsSchemes.length,
+      setLoading,
+      transformSchemeData,
+      userInfo?.division,
+    ]);
 
     // Initialize main LPBS spreadsheet
     useEffect(() => {
       if (!isOpen || !lpbsSheetRef.current) return;
 
-      console.log(selectedLpbsSchemes, "selectedLpbsSchemes");
-      console.log(lpbsSchemes, "selectedLpbsSchemes");
+      // console.log(selectedLpbsSchemes, "selectedLpbsSchemes");
+      // console.log(lpbsSchemes, "selectedLpbsSchemes");
 
       const storedSchemes = selectedLpbsSchemes;
       let updatedSchemes = [...lpbsSchemes];

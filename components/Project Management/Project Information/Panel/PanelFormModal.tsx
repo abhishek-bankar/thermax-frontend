@@ -105,7 +105,7 @@ export default function PanelFormModal({
   revisionId,
   projectMetadata,
 }: any) {
-  console.log("projectMetadata", projectMetadata);
+  // console.log("projectMetadata", projectMetadata);
   const [infoMessage, setInfoMessage] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
@@ -154,7 +154,7 @@ export default function PanelFormModal({
 
   // Watch panel_sub_type changes
   const panelSubType = watch("panel_sub_type");
-  console.log("panelSubType", panelSubType);
+  // console.log("panelSubType", panelSubType);
 
   // Effect to set panel_main_type based on panel_sub_type selection
   useEffect(() => {

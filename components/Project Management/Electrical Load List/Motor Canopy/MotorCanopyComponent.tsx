@@ -28,7 +28,7 @@ interface MotorCanopyProps {
 
 const getArrayOfMotorCanopyData = (data: any, motorCanopySavedData: any) => {
   if (!data?.electrical_load_list_data) return [];
-  console.log(data.electrical_load_list_data, "load list");
+  // console.log(data.electrical_load_list_data, "load list");
 
   return data.electrical_load_list_data
     ?.filter(
@@ -200,7 +200,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
   const handleMotorCanopySave = async () => {
     const data = spreadsheetInstance?.getData();
 
-    console.log(data, "all load list data");
+    // console.log(data, "all load list data");
 
     const payload = {
       project_id: project_id,
@@ -227,7 +227,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
       }),
     };
     try {
-      console.log(payload, "cable schedule payload");
+      // console.log(payload, "cable schedule payload");
 
       const respose = await updateData(
         `${MOTOR_CANOPY_REVISION_HISTORY_API}/${motorCanopyRevisionId}`,
@@ -237,7 +237,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
       setLoading(false);
       message.success("Motor Canopy Saved !");
 
-      console.log(respose, "Motor Canopy response");
+      // console.log(respose, "Motor Canopy response");
     } catch (error) {
       console.error("Error saving Motor Canopy:", error);
       message.error("Unable to save Motor Canopy list");
@@ -268,7 +268,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
         const calculationResult = motorData?.find(
           (item: any) => item.tag_number === row[0]
         );
-        console.log(calculationResult);
+        // console.log(calculationResult);
 
         if (calculationResult) {
           const updatedRow = [...row];
@@ -280,8 +280,8 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
         }
         return row;
       });
-      console.log("updated calc", motorData);
-      console.log("updated calc", updatedLoadList);
+      // console.log("updated calc", motorData);
+      // console.log("updated calc", updatedLoadList);
 
       spreadsheetInstance?.setData(updatedLoadList);
       // console.log(res,'motor calculations');

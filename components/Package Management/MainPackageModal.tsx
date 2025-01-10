@@ -51,7 +51,7 @@ export default function MainPackageModal({
   }, [editMode, reset, values, editEventTrigger]);
 
   const handleError = (error: any) => {
-    console.log(error);
+    // console.log(error);
     try {
       const errorObj = JSON.parse(error?.message) as any;
       if ((errorObj.type = "DuplicateEntryError")) {

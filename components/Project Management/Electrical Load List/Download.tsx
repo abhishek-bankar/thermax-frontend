@@ -37,7 +37,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { mutate } from "swr";
 import { getThermaxDateFormat } from "@/utils/helpers";
- 
+
 interface Props {
   designBasisRevisionId: string;
   loadListLatestRevisionId: string;
@@ -96,8 +96,8 @@ const Download: React.FC<Props> = ({
 
   const handleDownload = async (revision_id: string) => {
     setDownloadIconSpin(true);
-    console.log(revision_id);
-    console.log(getDownLoadEndpoint());
+    // console.log(revision_id);
+    // console.log(getDownLoadEndpoint());
 
     try {
       const base64Data: any = await downloadFile(getDownLoadEndpoint(), true, {
@@ -133,7 +133,7 @@ const Download: React.FC<Props> = ({
   const handleRelease = async (revision_id: string) => {
     setModalLoading(true);
     try {
-      console.log(revision_id);
+      // console.log(revision_id);
       // await copyDesignBasisRevision(project_id, revision_id)
       mutate(dbLoadlistHistoryUrl);
       message.success("Load list revision is released and locked");
@@ -149,7 +149,7 @@ const Download: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    console.log(dataSource);
+    // console.log(dataSource);
   }, [dataSource]);
   const getColumns = (tab: string) => {
     const columns: TableColumnsType = [
@@ -309,9 +309,8 @@ const Download: React.FC<Props> = ({
 
   const handleSave = async (key: any, tab: any) => {
     if (tab === "local-isolator") {
-      console.log(commonConfigData);
-      console.log(loadListData);
-
+      // console.log(commonConfigData);
+      // console.log(loadListData);
       // const payload = {
       //   project_id: project_id,
       //   status: "Not Released",
@@ -340,10 +339,9 @@ const Download: React.FC<Props> = ({
       //   ],
       // };
       // const respose = await updateData(getSaveEndPoint(key, tab), false, payload)
-
       // console.log(respose)
     }
-    console.log(key, tab);
+    // console.log(key, tab);
   };
   const DownloadTabs = [
     {
@@ -517,7 +515,7 @@ const Download: React.FC<Props> = ({
     }
   };
   const getIsolatorData = async () => {
-    console.log(designBasisRevisionId);
+    // console.log(designBasisRevisionId);
 
     try {
       const commonConfigData1 = await getData(
@@ -543,8 +541,8 @@ const Download: React.FC<Props> = ({
 
       setLoadListData(loadListData);
       setCommonConfigData(commonConfigData);
-      console.log(loadListData, "loadlist");
-      console.log(commonConfigData, "commonConfigData");
+      // console.log(loadListData, "loadlist");
+      // console.log(commonConfigData, "commonConfigData");
     } catch (error) {
       console.error(error);
     } finally {
@@ -572,9 +570,9 @@ const Download: React.FC<Props> = ({
   const onChange = async (key: string) => {
     setModalLoading(true);
 
-    console.log(key);
-    console.log(documentList);
-    console.log(getApiEndpoint(key));
+    // console.log(key);
+    // console.log(documentList);
+    // console.log(getApiEndpoint(key));
 
     try {
       // const documentList = await getData()
@@ -582,7 +580,7 @@ const Download: React.FC<Props> = ({
       // console.log(staticData,"staticData");
 
       const data = await getData(getApiEndpoint(key));
-      console.log(data);
+      // console.log(data);
 
       const dataSource = data?.map((item: any, index: number) => ({
         key: item.name,
@@ -594,10 +592,10 @@ const Download: React.FC<Props> = ({
       if (key === "6") {
         await getIsolatorData();
       }
-      console.log(dataSource);
+      // console.log(dataSource);
 
       setDataSource(dataSource);
-      console.log(data);
+      // console.log(data);
     } catch (error) {
       console.error(error);
     } finally {

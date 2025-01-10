@@ -243,7 +243,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
   }, [isControlSupplyVDC, isUtilitySupplyVDC, setValue]);
 
   useEffect(() => {
-    console.log(projectData, "projectData");
+    // console.log(projectData, "projectData");
 
     reset(getDefaultValues(true, projectData));
   }, [reset, projectData]);
@@ -254,7 +254,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
       const errorObj = JSON.parse(error?.message) as any;
       message.error(errorObj?.message);
     } catch (parseError) {
-      console.log(parseError);
+      // console.error(parseError);
       // If parsing fails, use the raw error message
       message.error(error?.message || "An unknown error occurred");
     }
@@ -269,7 +269,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
         message.error("Please select a panel");
         return;
       }
-      console.log("request payload:", data);
+      // console.log("request payload:", data);
 
       await updateData(getProjectInfoUrl, false, data);
       message.success("Project Information Updated Successfully");
@@ -702,7 +702,11 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               suffixIcon={
                 <>
                   <PercentageOutlined
-                    style={{ color: "#3b82f6",fontSize: "14px", fontWeight: "500" }}
+                    style={{
+                      color: "#3b82f6",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                    }}
                   />
                   <DownOutlined />
                 </>

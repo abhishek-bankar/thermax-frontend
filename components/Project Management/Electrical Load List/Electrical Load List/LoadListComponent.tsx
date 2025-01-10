@@ -1400,7 +1400,7 @@ const useDataFetching = (
       setLoadListData(loadList);
       setMotorParameters(motorParams);
       setCommonConfigurationData(commonConfig);
-      console.log(makeOfComponent, "makeOfComponent");
+      // console.log(makeOfComponent, "makeOfComponent");
 
       setMakeOfComponent(makeComponent);
       // setProjectPanelData(panelData);
@@ -1485,17 +1485,17 @@ const LoadList: React.FC<LoadListProps> = ({
     newValue: CellValue
   ) => {
     const data: any = spreadsheetRef?.current?.getData() || [];
-    console.log(data, "load list data");
+    // console.log(data, "load list data");
     // console.log("col index :", typeof colIndex)
 
     if (colIndex === "21") {
-      console.log(subPackages, "sub package");
+      // console.log(subPackages, "sub package");
 
       subPackages?.forEach((pckg: any) => {
         const selectedPckg = pckg?.sub_packages?.find(
           (item: any) => item.sub_package_name == newValue
         );
-        console.log(selectedPckg);
+        // console.log(selectedPckg);
 
         if (selectedPckg) {
           if (selectedPckg?.area_of_classification === "Hazardous Area") {
@@ -1516,7 +1516,7 @@ const LoadList: React.FC<LoadListProps> = ({
       // updateSheetData(data)
       // setLoadListData(data)
       // spreadsheetRef?.current?.setData(data)
-      console.log(data, "load list data");
+      // console.log(data, "load list data");
     }
     if (colIndex == "21") {
       if (data[rowIndex][21] === "NA" || newValue === "NA") {
@@ -1533,14 +1533,14 @@ const LoadList: React.FC<LoadListProps> = ({
         data[rowIndex][16] = "NA";
       }
     }
-    console.log(typeof colIndex);
+    // console.log(typeof colIndex);
 
     if (colIndex === "5") {
       if (newValue === "DOL-HTR") {
         data[rowIndex][34] = "1";
       }
       if (newValue === "SUPPLY FEEDER" || newValue === "DOL-HTR") {
-        console.log("inside if");
+        // console.log("inside if");
 
         data[rowIndex][29] = "No";
         data[rowIndex][30] = "No";
@@ -1565,7 +1565,7 @@ const LoadList: React.FC<LoadListProps> = ({
     }
     spreadsheetRef?.current?.setData(data);
 
-    console.log(data[rowIndex]);
+    // console.log(data[rowIndex]);
     // console.log(element, cell, colIndex, rowIndex, newValue, oldValue)
   };
   // Memoized columns with typed validation
@@ -1578,7 +1578,7 @@ const LoadList: React.FC<LoadListProps> = ({
     []
   );
   const getArrayOfLoadListData = (data: any, revision?: any) => {
-    console.log(data, "load list");
+    // console.log(data, "load list");
 
     return data?.electrical_load_list_data?.map((item: any) => [
       item.tag_number,
@@ -1692,7 +1692,7 @@ const LoadList: React.FC<LoadListProps> = ({
   };
 
   useEffect(() => {
-    console.log(loadListData, "getSchemes");
+    // console.log(loadListData, "getSchemes");
     if (loadListData) {
       let selectedControlSchemeItems: string[] = [];
       let selectedLpbsItems: string[] = [];
@@ -1707,7 +1707,7 @@ const LoadList: React.FC<LoadListProps> = ({
         const getLpbsSchemes = loadListData?.electrical_load_list_data?.map(
           (item: any) => item.lpbs_type
         );
-        console.log(getLpbsSchemes, "selectedLpbsItems");
+        // console.log(getLpbsSchemes, "selectedLpbsItems");
         selectedControlSchemeItems = getSchemes?.filter(
           (item: any) => item != "" || item != "NA"
         );
@@ -1811,7 +1811,7 @@ const LoadList: React.FC<LoadListProps> = ({
   }
 
   const handleControlSchemeComplete = (selectedSchemes: string[]) => {
-    console.log(selectedSchemes);
+    // console.log(selectedSchemes);
 
     typedLoadListColumns.forEach((column) => {
       if (column.name === "controlScheme") {
@@ -1830,7 +1830,7 @@ const LoadList: React.FC<LoadListProps> = ({
   };
 
   const downloadCurrentData = () => {
-    console.log(spreadsheetRef?.current);
+    // console.log(spreadsheetRef?.current);
 
     spreadsheetRef?.current?.download();
   };
@@ -2003,7 +2003,7 @@ const LoadList: React.FC<LoadListProps> = ({
         }),
     };
     try {
-      console.log(payload, "load list payload");
+      // console.log(payload, "load list payload");
 
       const respose = await updateData(
         `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${loadListLatestRevisionId}`,
@@ -2013,15 +2013,15 @@ const LoadList: React.FC<LoadListProps> = ({
       // setLoading(false);
       message.success("Electrical Load List Saved !");
 
-      console.log(respose, "load list response");
+      // console.log(respose, "load list response");
     } catch (error) {
-      console.log(error);
+      // console.error(error);
 
       message.error("Unable to save electrical load list");
 
       // setLoading(false);
     }
-    console.log(spreadsheetRef?.current?.getData(), "all load list data");
+    // console.log(spreadsheetRef?.current?.getData(), "all load list data");
     // localStorage.setItem("loadList", JSON.stringify(spreadsheetRef?.current?.getData()))
   };
 
@@ -2047,9 +2047,9 @@ const LoadList: React.FC<LoadListProps> = ({
       const newArray = jsonData.map((subArray) => subArray.slice(1));
 
       newArray.forEach((item) => {
-        console.log(item[6], !item[6], "supply voltage");
-        console.log(projectInfo?.main_supply_lv, "supply voltage");
-        console.log(motorParameters, "upload sheet");
+        // console.log(item[6], !item[6], "supply voltage");
+        // console.log(projectInfo?.main_supply_lv, "supply voltage");
+        // console.log(motorParameters, "upload sheet");
         if (!item[2]) {
           item[2] = "0";
         }
@@ -2176,7 +2176,7 @@ const LoadList: React.FC<LoadListProps> = ({
         };
       }),
     });
-    console.log("getFrameSize", getFrameSize);
+    // console.log("getFrameSize", getFrameSize);
     const updatedLoadList: any = loadList?.map((row: any) => {
       const calculationResult = currentCalculations?.find(
         (item: any) => item.tagNo === row[0]
@@ -2192,7 +2192,7 @@ const LoadList: React.FC<LoadListProps> = ({
       }
       return row;
     });
-    console.log("updated calc", updatedLoadList);
+    // console.log("updated calc", updatedLoadList);
 
     spreadsheetRef?.current?.setData(updatedLoadList);
     setLoading(false);
@@ -2218,7 +2218,7 @@ const LoadList: React.FC<LoadListProps> = ({
   const handleValidatePanelLoad = () => {
     if (spreadsheetRef?.current) {
       const data = spreadsheetRef?.current?.getData();
-      console.log(data, "load list data");
+      // console.log(data, "load list data");
 
       calculatePanelSum(data);
       setIsValidatePanelLoadOpen(true);

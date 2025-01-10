@@ -1105,14 +1105,14 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             const selected: string[] = Array.from(
               new Set(selectedControlSchemes)
             );
-            console.log(selected);
+            // console.log(selected);
             const temp = sortedSchemes.map((scheme: string[]) => {
               if (selected.includes(scheme[schemeIndex])) {
                 return [true, ...scheme.slice(1)];
               }
               return scheme;
             });
-            console.log(temp);
+            // console.log(temp);
 
             // sortedSchemes.map((el: any) => {
             //   if (selected.includes(el[schemeIndex])) {

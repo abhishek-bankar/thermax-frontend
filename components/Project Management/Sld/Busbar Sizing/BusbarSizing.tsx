@@ -45,7 +45,7 @@ const useDataFetching = (designBasisRevisionId: string) => {
         ...commonConfigData3?.[0],
       };
 
-      console.log(commonConfig, "commonConfig");
+      // console.log(commonConfig, "commonConfig");
 
       setProjectInfo(projectInfo);
       setCommonConfig(commonConfig);
@@ -82,7 +82,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
   );
 
   const onFinish = (values: any) => {
-    console.log("Received values:", values);
+    // console.log("Received values:", values);
   };
   useEffect(() => {
     if (projectInfo && commonConfig) {
@@ -120,15 +120,15 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
     form
       .validateFields()
       .then((values) => {
-        console.log("Form Values:", values);
+        // console.log("Form Values:", values);
         data = values;
       })
       .catch((error) => {
-        console.log("Validation Failed:", error);
+        // console.log("Validation Failed:", error);
         message.error("Please enter all fields");
       });
     // if (data) {
-      const res = await getBusbarSizingCalculations();
+    const res = await getBusbarSizingCalculations();
     // }
   };
   return (

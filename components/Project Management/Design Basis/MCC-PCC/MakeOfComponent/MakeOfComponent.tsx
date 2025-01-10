@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, message } from "antd";
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import * as zod from "zod";
 import { getData, updateData } from "@/actions/crud-actions";
 import { MAKE_OF_COMPONENT_API } from "@/configs/api-endpoints";
@@ -96,26 +96,26 @@ const parseToArray = (value: any) => {
 
 const getDefaultValues = (data: any) => {
   return {
-    gland_make: parseToArray(data?.gland_make || "Comet"),
+    gland_make: parseToArray(data?.gland_make || ["Comet"]),
     preferred_gland_make: data?.preferred_gland_make || "NA",
-    motor: parseToArray(data?.motor || "NA"),
+    motor: parseToArray(data?.motor || ["NA"]),
     preferred_motor: data?.preferred_motor || "NA",
-    cable: parseToArray(data?.cable || "Gemscab"),
+    cable: parseToArray(data?.cable || ["Gemscab"]),
     preferred_cable: data?.preferred_cable || "Gemscab",
-    lv_switchgear: parseToArray(data?.lv_switchgear || "Siemens"),
+    lv_switchgear: parseToArray(data?.lv_switchgear || ["Siemens"]),
     preferred_lv_switchgear: data?.preferred_lv_switchgear || "Siemens",
     panel_enclosure: parseToArray(
-      data?.panel_enclosure || "Thermax Approved Vendor"
+      data?.panel_enclosure || ["Thermax Approved Vendor"]
     ),
     preferred_panel_enclosure:
       data?.preferred_panel_enclosure || "Thermax Approved Vendor",
     variable_frequency_speed_drive_vfd_vsd: parseToArray(
-      data?.variable_frequency_speed_drive_vfd_vsd || "Danfoss"
+      data?.variable_frequency_speed_drive_vfd_vsd || ["Danfoss"]
     ),
     preferred_vfdvsd: data?.preferred_vfdvsd || "Danfoss",
-    soft_starter: parseToArray(data?.soft_starter || "ABB"),
+    soft_starter: parseToArray(data?.soft_starter || ["ABB"]),
     preferred_soft_starter: data?.preferred_soft_starter || "ABB",
-    plc: parseToArray(data?.plc || "Siemens"),
+    plc: parseToArray(data?.plc || ["Siemens"]),
     preferred_plc: data?.preferred_plc || "Siemens",
   };
 };
@@ -200,7 +200,9 @@ const MakeOfComponent = ({
     }
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit: SubmitHandler<
+    zod.infer<typeof makeOfComponentSchema>
+  > = async (data: any) => {
     setLoading(true);
     const fieldsToStringify = [
       "gland_make",
@@ -221,19 +223,12 @@ const MakeOfComponent = ({
       }
     });
     try {
-      const makeOfComponentData = await getData(
-        `${MAKE_OF_COMPONENT_API}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
+      await updateData(
+        `${MAKE_OF_COMPONENT_API}/${makeOfComponent[0].name}`,
+        false,
+        transformedData
       );
-      if (makeOfComponentData && makeOfComponentData.length > 0) {
-        await updateData(
-          `${MAKE_OF_COMPONENT_API}/${makeOfComponentData[0].name}`,
-          false,
-          transformedData
-        );
-        message.success("Make of Component Saved Successfully");
-      } else {
-        message.error("Make of Component not found for this revision");
-      }
+      message.success("Make of Component Saved Successfully");
       setActiveKey("2");
     } catch (error) {
       handleError(error);

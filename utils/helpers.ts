@@ -109,6 +109,5 @@ export const sortAlphaNumericArray = (data: any) => {
     return numA - numB;
   });
 
-  console.log(sortedData);
   return sortedData;
 };

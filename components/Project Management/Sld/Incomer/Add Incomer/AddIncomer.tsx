@@ -94,18 +94,18 @@ const useDataFetching = (
         )}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
       );
       const sg_data = await getData(`${SLD_REVISIONS_API}/${sld_revision_id}`);
-      console.log(projectPanelData, "vishal");
-      console.log(sg_data, projectPanelData[0], "vishal");
+      // console.log(projectPanelData, "vishal");
+      // console.log(sg_data, projectPanelData[0], "vishal");
 
       const preferredSwitchgear =
         makeComponents[0]?.preferred_lv_switchgear.toUpperCase();
       const pole = getPoles(sg_data, projectPanelData[0]) + "-POLE";
       const device = getDevice(sg_data, projectPanelData[0]);
       const current_rating = getRatingForIncomer(sg_data);
-      console.log(current_rating, "current_rating");
+      // console.log(current_rating, "current_rating");
 
       let filters;
- 
+
       let url;
       if (device === "SFU") {
         filters = [
@@ -131,9 +131,9 @@ const useDataFetching = (
         )}&limit_start=${0}&limit=${200}`;
       }
 
-      console.log(filters, "incomers all");
+      // console.log(filters, "incomers all");
       const response = await getData(url);
-      console.log(response, "incomers all");
+      // console.log(response, "incomers all");
       if (device === "SFU") {
         const data = response?.map((el: any) => {
           return {
@@ -152,8 +152,8 @@ const useDataFetching = (
         count_url + `&filters=${JSON.stringify(filters)}`
       );
 
-      console.log(total_count, "total_count");
-      console.log(projectPanelData[0], "data incomer projectPanelData");
+      // console.log(total_count, "total_count");
+      // console.log(projectPanelData[0], "data incomer projectPanelData");
       setTotalCountOfItems(total_count);
       setProjectPanelData(projectPanelData[0]);
       setMakeComponents(makeComponents[0]);
@@ -197,7 +197,7 @@ const AddIncomer: React.FC<Props> = ({
     makeComponents,
     isLoading: dataLoading,
   } = useDataFetching(panelType, revision_id, panel_id, sld_revision_id);
- 
+
   const [searchModel, setSearchModel] = useState("");
   const [searchRating, setSearchRating] = useState("");
 
@@ -250,8 +250,6 @@ const AddIncomer: React.FC<Props> = ({
     }
   }, [tableParams, totalCountOfItems]);
 
- 
-
   const getCircuitBreakersData = useCallback(
     async (page = 1, pageSize = 200) => {
       try {
@@ -261,7 +259,7 @@ const AddIncomer: React.FC<Props> = ({
         const pole = getPoles(sg_data, projectPanelData) + "-POLE";
         const device = getDevice(sg_data, projectPanelData);
         let filters;
-  
+
         const current_rating = getRatingForIncomer(sg_data);
         if (device === "SFU") {
           filters = [
@@ -277,7 +275,7 @@ const AddIncomer: React.FC<Props> = ({
             ["current_rating", ">=", current_rating],
           ];
         }
-  
+
         if (searchModel) {
           if (device === "SFU") {
             filters.push(["sdf", "like", `%${searchModel}%`]);
@@ -285,7 +283,7 @@ const AddIncomer: React.FC<Props> = ({
             filters.push(["catalog", "like", `%${searchModel}%`]);
           }
         }
-  
+
         if (searchRating) {
           filters.pop();
           if (device === "SFU") {
@@ -294,25 +292,25 @@ const AddIncomer: React.FC<Props> = ({
             filters.push(["current_rating", "=", searchRating]);
           }
         }
-  
+
         const encodedFilters = encodeURIComponent(JSON.stringify(filters));
         const limit_start = (page - 1) * pageSize;
-  
+
         let url;
         if (device === "SFU") {
           url = `${SFU_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${limit_start}&limit=${pageSize}`;
         } else {
           url = `${CIRCUIT_BREAKER_API}?fields=["*"]&filters=${encodedFilters}&limit_start=${limit_start}&limit=${pageSize}`;
         }
-  
+
         const count_url = device === "SFU" ? GET_SFU_COUNT : GET_CB_COUNT;
-  
+
         const total_count = await getData(
           count_url + `&filters=${JSON.stringify(filters)}`
         );
-  
+
         const response = await getData(url);
-  
+
         setTableData(response || []);
         setTableParams({
           ...tableParams,
@@ -328,7 +326,17 @@ const AddIncomer: React.FC<Props> = ({
         setLoading(false);
       }
     },
-    [makeComponents, sg_data, projectPanelData, searchModel, searchRating, setLoading, setTableData, setTableParams, tableParams]
+    [
+      makeComponents,
+      sg_data,
+      projectPanelData,
+      searchModel,
+      searchRating,
+      setLoading,
+      setTableData,
+      setTableParams,
+      tableParams,
+    ]
   );
 
   const handleTableChange = (pagination: any) => {
@@ -344,20 +352,20 @@ const AddIncomer: React.FC<Props> = ({
       setSelectedBreaker(selectedRows[0]);
     },
   };
-    useEffect(() => {
+  useEffect(() => {
     if (!dataLoading && incomerResponse) {
       setTableData(incomerResponse);
     }
   }, [incomerResponse, dataLoading]);
   const handleAddIncomer = async () => {
-    console.log(incomers);
+    // console.log(incomers);
     try {
       // const
       const newIncomer = tableData?.find(
         (el: any) => el.catalog === selectedBreaker?.catalog
       );
-      console.log(selectedBreaker);
-      console.log(newIncomer, tableData);
+      // console.log(selectedBreaker);
+      // console.log(newIncomer, tableData);
       if (newIncomer) {
         const payload = {
           incomer_data: [
@@ -398,7 +406,7 @@ const AddIncomer: React.FC<Props> = ({
     getCircuitBreakersData();
   };
   useEffect(() => {
-    console.log(tableData, "tableData");
+    // console.log(tableData, "tableData");
   }, [tableData]);
   const addIncomer = () => {};
   useEffect(() => {

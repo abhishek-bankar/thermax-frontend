@@ -226,7 +226,7 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
 
       for (const mainPkg of pkgList) {
         const subPkgList = mainPkg?.sub_packages;
-        console.log(subPkgList);
+        // console.log(subPkgList);
         const updateSubPkgList = [];
 
         if (subPkgList && subPkgList.length > 0) {
@@ -237,7 +237,9 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
 
           if (!hasSelectedSubPackage) {
             setSaveLoading(false);
-            return message.error(`Main package ${mainPkg.main_package_name} must have at least one subpackage selected`);
+            return message.error(
+              `Main package ${mainPkg.main_package_name} must have at least one subpackage selected`
+            );
             // throw new Error(
             //   `Main package "${mainPkg.main_package_name}" must have at least one subpackage selected`
             // );

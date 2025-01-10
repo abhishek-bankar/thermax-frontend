@@ -32,7 +32,7 @@ export default function useProjectInfoDropdowns() {
           "Seismic zone": "name",
         }
       );
-      console.log(response, "response");
+      // console.log(response, "response");
       setDropdown(response);
     };
 

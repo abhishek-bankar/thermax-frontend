@@ -19,6 +19,9 @@ import {
 import { useLoading } from "@/hooks/useLoading";
 import AlertNotification from "./AlertNotification";
 import LogoLandingImage from "@/public/files/logoLandingPage.png";
+import { getData } from "@/actions/crud-actions";
+import { USER_API } from "@/configs/api-endpoints";
+import { generateNewFrappeToken } from "@/actions/signin";
 
 const signInSchema = zod.object({
   email: zod
@@ -84,12 +87,14 @@ export default function SignIn({ authSecret }: { authSecret: string }) {
     data
   ) => {
     setLoading(true);
+    const { email, password } = data;
     const signInRes = await signIn("credentials", {
-      email: data.email,
-      password: data.password,
+      email,
+      password,
       redirect: false,
     });
     if (!signInRes?.error) {
+      await generateNewFrappeToken(email);
       // If no error then redirect to the desired page
       setStatus("success");
       setMessage("Successfully signed in. Redirecting...");

@@ -36,7 +36,6 @@ export const UserList = ({ userInfo }: any) => {
   const { data: thermaxUserList } = useGetData(thermaxUserUrl);
   const { data: userList } = useGetData(`${USER_API}?fields=["*"]&limit=1000`);
   const mergedList = mergeLists(thermaxUserList, userList, "name", "name");
-  console.log(mergedList, " user list");
 
   const { setLoading: setModalLoading } = useLoading();
   useEffect(() => {

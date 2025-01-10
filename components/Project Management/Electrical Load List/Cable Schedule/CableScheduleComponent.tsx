@@ -58,8 +58,8 @@ const getArrayOfCableScheduleData = (
   cableTrayData: any
 ) => {
   if (!data?.electrical_load_list_data) return [];
-  console.log(data.electrical_load_list_data, "load list");
-  console.log(savedCableSchedule?.cable_schedule_data, "load list cable");
+  // console.log(data.electrical_load_list_data, "load list");
+  // console.log(savedCableSchedule?.cable_schedule_data, "load list cable");
 
   return data.electrical_load_list_data.map((item: any) => {
     const cableScheduleData = savedCableSchedule?.cable_schedule_data?.find(
@@ -177,7 +177,7 @@ const useDataFetching = (
       );
 
       getData(getApiEndpoint(userInfo?.division)).then((res) => {
-        console.log(res);
+        // console.log(res);
         let sortedSchemes;
         if (userInfo.division === SERVICES || userInfo.division === WWS_SPG) {
           sortedSchemes = WWS_SPG_DATA;
@@ -193,7 +193,7 @@ const useDataFetching = (
           sortedSchemes = res;
         }
 
-        console.log(sortedSchemes, "control schemes sorted");
+        // console.log(sortedSchemes, "control schemes sorted");
 
         setControlSchemes(sortedSchemes);
         setLoading(false);
@@ -211,7 +211,13 @@ const useDataFetching = (
       setIsLoading(false);
       setLoading(false);
     }
-  }, [loadListLatestRevisionId, userInfo.division, cableScheduleRevisionId, designBasisRevisionId, setLoading]);
+  }, [
+    loadListLatestRevisionId,
+    userInfo.division,
+    cableScheduleRevisionId,
+    designBasisRevisionId,
+    setLoading,
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -348,8 +354,8 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
   };
   const handleCableScheduleSave = async () => {
     const data = spreadsheetInstance?.getData();
-    console.log(data, "Cable schedule data");
-    console.log("Load list data", loadListData);
+    // console.log(data, "Cable schedule data");
+    // console.log("Load list data", loadListData);
     const individualFeeders: any = data?.map((row: any) => {
       const division = userInfo?.division;
       const loadListItem = loadListData.find(
@@ -643,7 +649,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         i += 4;
 
         const cables: any[] = [];
-        console.log(Di, Do, Ai, Ao, "DIDOAIAO");
+        // console.log(Di, Do, Ai, Ao, "DIDOAIAO");
         if (Di !== "-") {
           const diCable = {
             panel_name: grouping[i][7],
@@ -747,9 +753,9 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         });
       }
     }
-    console.log(individualFeeders, "final payload");
-    console.log(groupPayload, "final payload group");
-    console.log({ ...individualFeeders, ...groupPayload }, "final payload all");
+    // console.log(individualFeeders, "final payload");
+    // console.log(groupPayload, "final payload group");
+    // console.log({ ...individualFeeders, ...groupPayload }, "final payload all");
 
     const payload = {
       project_id: project_id,
@@ -788,7 +794,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       excel_payload: { ...individualFeeders, ...groupPayload },
     };
     try {
-      console.log(payload, "cable schedule payload");
+      // console.log(payload, "cable schedule payload");
 
       const respose = await updateData(
         `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${cableScheduleRevisionId}`,
@@ -798,7 +804,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       setLoading(false);
       message.success("Cable Schedule Saved !");
 
-      console.log(respose, "Cable Schedule response");
+      // console.log(respose, "Cable Schedule response");
     } catch (error) {
       console.error(error);
       message.error("Unable to save Cable Schedule list");
@@ -816,7 +822,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
   const getCableSizing = async () => {
     setLoading(true);
     const cableScheduleData = spreadsheetInstance?.getData();
-    console.log(cableTrayData, "cableTrayData");
+    // console.log(cableTrayData, "cableTrayData");
     const cableSizeCalc = await getCableSizingCalculation({
       divisionName: userInfo.division,
       layoutCableTray: {
@@ -846,7 +852,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         };
       }),
     });
-    console.log(cableSizeCalc, "cableSizeCalc");
+    // console.log(cableSizeCalc, "cableSizeCalc");
     const sizingCalcData: any = [];
 
     const updatedCableSchedule: any = cableScheduleData?.map((row: any) => {
@@ -881,7 +887,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
 
       return row;
     });
-    console.log("updated calc", updatedCableSchedule);
+    // console.log("updated calc", updatedCableSchedule);
 
     spreadsheetInstance?.setData(updatedCableSchedule);
     setCableSizeCalcData(sizingCalcData);

@@ -25,27 +25,6 @@ export const generateSimplePassword = (length = 8) => {
   return password;
 };
 
-const handleAPIError = (error: any) => {
-  if (error.isAxiosError) {
-    throw new Error(
-      JSON.stringify({
-        message:
-          error.response?.data?.errors[0]?.message || "Not able to catch error",
-        type: error.response?.data?.errors[0]?.type || "Unknown error type",
-        status: error.response?.status,
-      })
-    );
-  } else {
-    throw new Error(
-      JSON.stringify({
-        message: "Error is not related to axios",
-        type: "Non-Axios error",
-        status: "500",
-      })
-    );
-  }
-};
-
 export const checkUserExists = async (email: string) => {
   try {
     await getData(`${USER_API}/${email}`);
@@ -146,18 +125,6 @@ export const sendUserVerificationEmail = async (
   }
 };
 
-export const createFrappeApiKeys = async (email: string) => {
-  try {
-    const { data } = await adminApiClient.post(
-      `/method/frappe.core.doctype.user.user.generate_keys?user=${email}`
-    );
-    const { api_secret } = data?.data;
-    return api_secret;
-  } catch (error) {
-    handleAPIError(error);
-  }
-};
-
 export const registerNewUser = async (
   values: any,
   user_role: string,
@@ -181,7 +148,6 @@ export const registerNewUser = async (
     if (errObj.type === "DoesNotExistError" && errObj.status === 404) {
       try {
         await createFrappeUser(email, first_name, last_name, user_role);
-        await createFrappeApiKeys(email);
         const token = uuid();
         const hashedPassword = await bcrypt.hash("Admin", 10);
         await createNextAuthUser(email, hashedPassword, token);

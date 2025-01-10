@@ -181,8 +181,8 @@ export default function DocumentRevision() {
     }
   };
 
-  console.log(userInfo);
-  console.log(revisionHistory);
+  // console.log(userInfo);
+  // console.log(revisionHistory);
 
   // Ensure columns is defined as an array of ColumnType
   const columns: TableColumnsType = [

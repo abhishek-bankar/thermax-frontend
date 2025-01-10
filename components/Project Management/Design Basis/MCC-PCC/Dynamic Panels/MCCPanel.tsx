@@ -18,7 +18,7 @@ import useMCCPCCPanelDropdowns from "./MCCPCCPanelDropdown";
 import { mccPanelValidationSchema } from "../schemas";
 import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
 import { moveNAtoEnd } from "@/utils/helpers";
 
@@ -310,6 +310,7 @@ const MCCPanel = ({
     mode: "onSubmit",
   });
 
+  const router = useRouter();
   const currentTransformerCoating = watch("current_transformer_coating");
   useEffect(() => {
     // Check if the coating is 'NA' and set the number to 'NA'
@@ -467,6 +468,9 @@ const MCCPanel = ({
       const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount) {
+           router.push(
+             `/project/${project_id}/design-basis/layout`
+          );
           return "1";
         }
 

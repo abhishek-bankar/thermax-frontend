@@ -19,7 +19,7 @@ import useMCCPCCPanelDropdowns from "./MCCPCCPanelDropdown";
 import { pccPanelValidationSchema } from "../schemas";
 import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
 import { moveNAtoEnd } from "@/utils/helpers";
 
@@ -306,12 +306,16 @@ const PCCPanel = ({
     ),
     mode: "onSubmit",
   });
+  const router = useRouter();
 
   // console.log("form errors", formState.errors);
 
   useEffect(() => {
-    // console.log(pccPanelData?.[0], "PCC");
-    // console.log(getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]), "PCC default");
+    console.log(pccPanelData?.[0], "PCC");
+    console.log(
+      getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]),
+      "PCC default"
+    );
 
     reset(getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]));
   }, [pccPanelData, projectMetadata, projectInfo, reset]);
@@ -412,6 +416,7 @@ const PCCPanel = ({
       const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount) {
+          router.push(`/project/${project_id}/design-basis/layout`);
           return "1";
         }
 

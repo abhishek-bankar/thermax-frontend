@@ -34,8 +34,7 @@ const getDefaultValues = (plcData: any) => {
       plcData?.ups_control_voltage || "230 VAC, 1-Phase, 2 Wire",
     non_ups_control_voltage:
       plcData?.non_ups_control_voltage || "230 VAC, 1-Phase, 2 Wire",
-    is_bulk_power_supply_selected:
-      plcData?.is_bulk_power_supply_selected ,
+    is_bulk_power_supply_selected: plcData?.is_bulk_power_supply_selected,
     // UPS
     ups_scope: plcData?.ups_scope || "Client Scope",
     ups_input_voltage_3p: plcData?.ups_input_voltage_3p || "NA",
@@ -45,7 +44,7 @@ const getDefaultValues = (plcData: any) => {
     ups_type: plcData?.ups_type || "NA",
     ups_battery_type: plcData?.ups_battery_type || "NA",
     is_ups_battery_mounting_rack_selected:
-      plcData?.is_ups_battery_mounting_rack_selected ,
+      plcData?.is_ups_battery_mounting_rack_selected,
     ups_battery_backup_time: plcData?.ups_battery_backup_time || "NA",
     ups_redundancy: plcData?.ups_redundancy || "NA",
     // PLC Hardware
@@ -78,8 +77,7 @@ const getDefaultValues = (plcData: any) => {
     marshalling_cabinet_for_plc_and_ups:
       plcData?.marshalling_cabinet_for_plc_and_ups || "As per OEM",
     // Panel Mounted Push Buttons, Indication lamps & Colors
-    is_electronic_hooter_selected:
-      plcData?.is_electronic_hooter_selected,
+    is_electronic_hooter_selected: plcData?.is_electronic_hooter_selected,
     electronic_hooter_acknowledge:
       plcData?.electronic_hooter_acknowledge || "NA",
     panel_power_supply_on_color: plcData?.panel_power_supply_on_color || "NA",
@@ -121,7 +119,7 @@ const getDefaultValues = (plcData: any) => {
     ai_module_input_type: plcData?.ai_module_input_type || "4-20 mA DC",
     ai_module_scan_time: plcData?.ai_module_scan_time || "VTS",
     is_ai_module_hart_protocol_support_selected:
-      plcData?.is_ai_module_hart_protocol_support_selected ,
+      plcData?.is_ai_module_hart_protocol_support_selected,
     // AO Modules
     ao_module_channel_density:
       plcData?.ao_module_channel_density || "8 Nos. Per Card",
@@ -140,7 +138,7 @@ const getDefaultValues = (plcData: any) => {
     rtd_module_input_type: plcData?.rtd_module_input_type || "",
     rtd_module_scan_time: plcData?.rtd_module_scan_time || "VTS",
     is_rtd_module_hart_protocol_support_selected:
-      plcData?.is_rtd_module_hart_protocol_support_selected ,
+      plcData?.is_rtd_module_hart_protocol_support_selected,
     // Thermocouple Modules
     thermocouple_module_channel_density:
       plcData?.thermocouple_module_channel_density || "8 Nos. Per Card",
@@ -219,12 +217,10 @@ const getDefaultValues = (plcData: any) => {
     printer_size: plcData?.printer_size || "A4",
     printer_quantity: plcData?.printer_quantity || "",
     is_printer_with_suitable_communication_cable_selected:
-      plcData?.is_printer_with_suitable_communication_cable_selected ,
+      plcData?.is_printer_with_suitable_communication_cable_selected,
     is_furniture_selected: plcData?.is_furniture_selected,
-    is_console_with_chair_selected:
-      plcData?.is_console_with_chair_selected,
-    is_plc_logic_diagram_selected:
-      plcData?.is_plc_logic_diagram_selected,
+    is_console_with_chair_selected: plcData?.is_console_with_chair_selected,
+    is_plc_logic_diagram_selected: plcData?.is_plc_logic_diagram_selected,
     is_loop_drawing_for_complete_project_selected:
       plcData?.is_loop_drawing_for_complete_project_selected,
     // Communication
@@ -253,9 +249,9 @@ Note: Ethernet IP is preferrable protocol for communication of above package.
       plcData?.hardware_between_plc_and_third_party || "",
     hardware_between_plc_and_client_system:
       plcData?.hardware_between_plc_and_client_system || "Approx. 50 meter",
-    is_iiot_selected: plcData?.is_iiot_selected ,
+    is_iiot_selected: plcData?.is_iiot_selected,
     is_client_system_comm_with_plc_cpu_selected:
-      plcData?.is_client_system_comm_with_plc_cpu_selected ,
+      plcData?.is_client_system_comm_with_plc_cpu_selected,
     iiot_gateway_note:
       plcData?.iiot_gateway_note ||
       `1) IIOT Gateway - Ethernet communication
@@ -272,7 +268,7 @@ Note - MFM, VFD, ACB Incomer - Address List & Parameter shall be configure by PL
       `IIOT gate way is mounted in PLC panel. Vendor to make the necessary mounting provision for the same. (Details will be shared during detailing). IIOT is in Thermax SSBU Scope of supply. IIOT will be installed at Site. IIOT is suitable for Profinet/Ethernet communication for which PLC vendor to ensure the compatability with Supplied PLC's.`,
     // Burner Controller LMV
     is_burner_controller_lmv_mounting_selected:
-      plcData?.is_burner_controller_lmv_mounting_selected ,
+      plcData?.is_burner_controller_lmv_mounting_selected,
     hardware_between_plc_and_burner_controller_lmv:
       plcData?.hardware_between_plc_and_burner_controller_lmv ||
       `Burner Controller LMV in PLC panel. Vendor to make the necessary mounting provision for the same. (Details will be shared during detailing). Burner Controller LMV is in Thermax Scope of supply. Burner Controller LMV is suitable for Profinet/Ethernet communication for which PLC vendor to ensure the compatability with Supplied PLC's.`,
@@ -763,8 +759,9 @@ const MCCcumPCCPLCPanel = ({
                     size="small"
                     // options={marshalling_cabinet_options || []}
                     disabled={
-                      watch("is_marshalling_cabinet_for_plc_and_ups_selected") ===
-                      0
+                      watch(
+                        "is_marshalling_cabinet_for_plc_and_ups_selected"
+                      ) === 0
                     }
                   />
                 </div>
@@ -1810,7 +1807,7 @@ const MCCcumPCCPLCPanel = ({
                     label="PLC Logic Diagram With Tag No. / Rung No & It's Descriptions."
                     options={[
                       { label: "Yes", value: 1 },
-                      { label: "No", value: 0},
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -1944,7 +1941,6 @@ const MCCcumPCCPLCPanel = ({
                     </div>
                   </div>
                 </div>
-                {/* // */}
               </div>
               <div className="flex-1">
                 <CustomTextAreaInput

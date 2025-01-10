@@ -1037,15 +1037,15 @@ export const pccPanelValidationSchema = zod
       message: "Alarm Annunciator is required",
     }),
 
-    is_indication_on_selected: zod.number({
+    is_indication_on_selected: zod.boolean({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_off_selected: zod.number({
+    is_indication_off_selected: zod.boolean({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_trip_selected: zod.number({
+    is_indication_trip_selected: zod.boolean({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),

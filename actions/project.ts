@@ -198,6 +198,7 @@ export const deleteProject = async (project_id: string) => {
       );
       for (const mccPanel of mccPanelData || []) {
         const mccPanelID = mccPanel.name;
+
         await deleteData(`${MCC_PANEL}/${mccPanelID}`, false);
       }
 
@@ -207,6 +208,7 @@ export const deleteProject = async (project_id: string) => {
       );
       for (const pccPanel of pccPanelData || []) {
         const pccPanelID = pccPanel.name;
+
         await deleteData(`${PCC_PANEL}/${pccPanelID}`, false);
       }
 
@@ -226,6 +228,7 @@ export const deleteProject = async (project_id: string) => {
 
       for (const mccPccPlcPanel1 of mccPccPlcPanel1Data || []) {
         const mccPccPlcPanel1ID = mccPccPlcPanel1.name;
+
         await deleteData(`${MCC_PCC_PLC_PANEL_1}/${mccPccPlcPanel1ID}`, false);
       }
 
@@ -246,6 +249,7 @@ export const deleteProject = async (project_id: string) => {
 
       for (const mccPccPlcPanel3 of mccPccPlcPanel3Data || []) {
         const mccPccPlcPanel3ID = mccPccPlcPanel3.name;
+
         await deleteData(`${MCC_PCC_PLC_PANEL_3}/${mccPccPlcPanel3ID}`, false);
       }
 
@@ -273,6 +277,13 @@ export const deleteProject = async (project_id: string) => {
       );
       for (const projectPanel of projectPanelData || []) {
         const projectPanelID = projectPanel.name;
+        const sldRevisionHistory = await getData(
+          `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${projectPanelID}"]]&fields=["*"]`
+        );
+        for (const sldRevision of sldRevisionHistory || []) {
+          const sldRevisionID = sldRevision.name;
+          await deleteData(`${SLD_REVISIONS_API}/${sldRevisionID}`, false);
+        }
 
         // Delete Dynamic Document List
         await deleteData(`${DYNAMIC_DOCUMENT_API}/${projectPanelID}`, false);

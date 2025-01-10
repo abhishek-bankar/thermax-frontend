@@ -1,12 +1,16 @@
 "use server";
 import { auth } from "@/auth";
+import { getData } from "./crud-actions";
+import { THERMAX_USER_API, USER_API } from "@/configs/api-endpoints";
 
 export const getFrappeToken = async () => {
   const session = await auth();
-  if (session && session.userInfo) {
-    return `token ${session.userInfo.api_key}:${session.userInfo.api_secret}`;
-  }
-  return "";
+  const email = session?.userInfo?.email;
+  const user = await getData(
+    `${THERMAX_USER_API}/${email}?fields=["hashed_token"]`
+  );
+  const token = user?.hashed_token;
+  return token;
 };
 
 export const getFrappeAdminToken = async () => {

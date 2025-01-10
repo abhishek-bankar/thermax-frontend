@@ -7,7 +7,6 @@ import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 import { getData } from "@/actions/crud-actions";
-import { createFrappeApiKeys } from "@/actions/register";
 import {
   NEXT_AUTH_USER_API,
   THERMAX_USER_API,
@@ -39,7 +38,6 @@ const config = {
             `${THERMAX_USER_API}?fields=["division", "is_superuser"]&filters=[["email", "=", "${email}"]]`
           );
           const userInfo = { ...nextUser[0], ...frappeUser, ...thermaxUser[0] };
-          const api_secret = await createFrappeApiKeys(email as string);
           return {
             first_name: userInfo?.first_name,
             last_name: userInfo?.last_name,
@@ -48,8 +46,6 @@ const config = {
             division: userInfo?.division,
             is_superuser: userInfo?.is_superuser,
             roles: userInfo?.roles,
-            api_key: userInfo?.api_key,
-            api_secret: api_secret,
           };
         }
         return null;

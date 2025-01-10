@@ -25,6 +25,7 @@ import {
   sortAlphaNumericArray,
   sortDropdownOptions,
 } from "@/utils/helpers";
+import { useParams, useRouter } from "next/navigation";
 
 const getDefaultValues = (plcData: any) => {
   const defaultValues = {
@@ -34,7 +35,7 @@ const getDefaultValues = (plcData: any) => {
     non_ups_control_voltage:
       plcData?.non_ups_control_voltage || "230 VAC, 1-Phase, 2 Wire",
     is_bulk_power_supply_selected:
-      plcData?.is_bulk_power_supply_selected || "0",
+      plcData?.is_bulk_power_supply_selected ,
     // UPS
     ups_scope: plcData?.ups_scope || "Client Scope",
     ups_input_voltage_3p: plcData?.ups_input_voltage_3p || "NA",
@@ -44,7 +45,7 @@ const getDefaultValues = (plcData: any) => {
     ups_type: plcData?.ups_type || "NA",
     ups_battery_type: plcData?.ups_battery_type || "NA",
     is_ups_battery_mounting_rack_selected:
-      plcData?.is_ups_battery_mounting_rack_selected || "0",
+      plcData?.is_ups_battery_mounting_rack_selected ,
     ups_battery_backup_time: plcData?.ups_battery_backup_time || "NA",
     ups_redundancy: plcData?.ups_redundancy || "NA",
     // PLC Hardware
@@ -57,29 +58,28 @@ const getDefaultValues = (plcData: any) => {
       plcData?.plc_cpu_system_memory_free_space_after_program || "20%",
     // Redundancy
     is_power_supply_plc_cpu_system_selected:
-      plcData?.is_power_supply_plc_cpu_system_selected || "1",
+      plcData?.is_power_supply_plc_cpu_system_selected,
     is_power_supply_input_output_module_selected:
-      plcData?.is_power_supply_input_output_module_selected || "1",
+      plcData?.is_power_supply_input_output_module_selected,
     is_plc_input_output_modules_system_selected:
-      plcData?.is_plc_input_output_modules_system_selected || "1",
+      plcData?.is_plc_input_output_modules_system_selected,
     is_plc_cpu_system_and_input_output_modules_system_selected:
-      plcData?.is_plc_cpu_system_and_input_output_modules_system_selected ||
-      "0",
+      plcData?.is_plc_cpu_system_and_input_output_modules_system_selected,
     is_plc_cpu_system_and_hmi_scada_selected:
-      plcData?.is_plc_cpu_system_and_hmi_scada_selected || "0",
+      plcData?.is_plc_cpu_system_and_hmi_scada_selected,
     is_plc_cpu_system_and_third_party_devices_selected:
-      plcData?.is_plc_cpu_system_and_third_party_devices_selected || "0",
-    is_plc_cpu_system_selected: plcData?.is_plc_cpu_system_selected || "1",
+      plcData?.is_plc_cpu_system_and_third_party_devices_selected,
+    is_plc_cpu_system_selected: plcData?.is_plc_cpu_system_selected,
     plc_cpu_system: plcData?.plc_cpu_system || "",
     // PLC Panel Mounted
     panel_mounted_ac: plcData?.panel_mounted_ac || "",
-    is_plc_and_ups_marshalling_cabinet_selected:
-      plcData?.is_plc_and_ups_marshalling_cabinet_selected || "0",
+    is_marshalling_cabinet_for_plc_and_ups_selected:
+      plcData?.is_marshalling_cabinet_for_plc_and_ups_selected,
     marshalling_cabinet_for_plc_and_ups:
       plcData?.marshalling_cabinet_for_plc_and_ups || "As per OEM",
     // Panel Mounted Push Buttons, Indication lamps & Colors
     is_electronic_hooter_selected:
-      plcData?.is_electronic_hooter_selected || "0",
+      plcData?.is_electronic_hooter_selected,
     electronic_hooter_acknowledge:
       plcData?.electronic_hooter_acknowledge || "NA",
     panel_power_supply_on_color: plcData?.panel_power_supply_on_color || "NA",
@@ -111,8 +111,8 @@ const getDefaultValues = (plcData: any) => {
     interposing_relay: plcData?.interposing_relay || "Applicable",
     output_contact_rating_of_interposing_relay:
       plcData?.output_contact_rating_of_interposing_relay || "230 VAC, 5AMP",
-    is_no_of_contact_selected: plcData?.is_no_of_contact_selected || "0",
-    no_of_contacts: plcData?.no_of_contacts || "",
+    is_no_of_contacts_selected: plcData?.is_no_of_contacts_selected,
+    no_of_contacts: plcData?.no_of_contacts || "1NO + 1NC",
     // AI Modules
     ai_module_channel_density:
       plcData?.ai_module_channel_density || "8 Nos. Per Card",
@@ -121,7 +121,7 @@ const getDefaultValues = (plcData: any) => {
     ai_module_input_type: plcData?.ai_module_input_type || "4-20 mA DC",
     ai_module_scan_time: plcData?.ai_module_scan_time || "VTS",
     is_ai_module_hart_protocol_support_selected:
-      plcData?.is_ai_module_hart_protocol_support_selected || "0",
+      plcData?.is_ai_module_hart_protocol_support_selected ,
     // AO Modules
     ao_module_channel_density:
       plcData?.ao_module_channel_density || "8 Nos. Per Card",
@@ -131,7 +131,7 @@ const getDefaultValues = (plcData: any) => {
       plcData?.ao_module_output_type || "Potential Free Contacts",
     ao_module_scan_time: plcData?.ao_module_scan_time || "VTS",
     is_ao_module_hart_protocol_support_selected:
-      plcData?.is_ao_module_hart_protocol_support_selected || "0",
+      plcData?.is_ao_module_hart_protocol_support_selected,
     // RTD Modules
     rtd_module_channel_density:
       plcData?.rtd_module_channel_density || "8 Nos. Per Card",
@@ -140,7 +140,7 @@ const getDefaultValues = (plcData: any) => {
     rtd_module_input_type: plcData?.rtd_module_input_type || "",
     rtd_module_scan_time: plcData?.rtd_module_scan_time || "VTS",
     is_rtd_module_hart_protocol_support_selected:
-      plcData?.is_rtd_module_hart_protocol_support_selected || "0",
+      plcData?.is_rtd_module_hart_protocol_support_selected ,
     // Thermocouple Modules
     thermocouple_module_channel_density:
       plcData?.thermocouple_module_channel_density || "8 Nos. Per Card",
@@ -153,7 +153,7 @@ const getDefaultValues = (plcData: any) => {
     thermocouple_module_scan_time:
       plcData?.thermocouple_module_scan_time || "VTS",
     is_thermocouple_module_hart_protocol_support_selected:
-      plcData?.is_thermocouple_module_hart_protocol_support_selected || "1",
+      plcData?.is_thermocouple_module_hart_protocol_support_selected,
     // Universal Modules
     universal_module_channel_density:
       plcData?.universal_module_channel_density || "8 Nos. Per Card",
@@ -164,7 +164,7 @@ const getDefaultValues = (plcData: any) => {
     universal_module_input_type: plcData?.universal_module_input_type || "",
     universal_module_scan_time: plcData?.universal_module_scan_time || "VTS",
     is_universal_module_hart_protocol_support_selected:
-      plcData?.is_universal_module_hart_protocol_support_selected || "1",
+      plcData?.is_universal_module_hart_protocol_support_selected,
     // Terminal Block Connectors
     di_module_terminal: plcData?.di_module_terminal || "Fuse With LED Terminal",
     do_module_terminal: plcData?.do_module_terminal || "Fuse With LED Terminal",
@@ -174,7 +174,7 @@ const getDefaultValues = (plcData: any) => {
     thermocouple_module_terminal:
       plcData?.thermocouple_module_terminal || "Fuse Terminal",
     // HMI
-    is_hmi_selected: plcData?.is_hmi_selected || "0",
+    is_hmi_selected: plcData?.is_hmi_selected,
     hmi_size: plcData?.hmi_size || "10",
     hmi_quantity: plcData?.hmi_quantity || "",
     hmi_hardware_make: plcData?.hmi_hardware_make || "Allen Bradley",
@@ -183,26 +183,26 @@ const getDefaultValues = (plcData: any) => {
     hmi_battery_backup: plcData?.hmi_battery_backup || "",
     // Human Interface Device
     is_engineering_station_quantity_selected:
-      plcData?.is_engineering_station_quantity_selected || "1",
+      plcData?.is_engineering_station_quantity_selected,
     engineering_station_quantity: plcData?.engineering_station_quantity || "",
     is_engineering_cum_operating_station_quantity_selected:
-      plcData?.is_engineering_cum_operating_station_quantity_selected || "0",
+      plcData?.is_engineering_cum_operating_station_quantity_selected,
     engineering_cum_operating_station_quantity:
       plcData?.engineering_cum_operating_station_quantity || "",
     is_operating_station_quantity_selected:
-      plcData?.is_operating_station_quantity_selected || "0",
+      plcData?.is_operating_station_quantity_selected,
     operating_station_quantity: plcData?.operating_station_quantity || "",
     // Software
     is_scada_program_development_license_quantity_selected:
-      plcData?.is_scada_program_development_license_quantity_selected || "1",
+      plcData?.is_scada_program_development_license_quantity_selected,
     scada_program_development_license_quantity:
       plcData?.scada_program_development_license_quantity || "",
     is_scada_runtime_license_quantity_selected:
-      plcData?.is_scada_runtime_license_quantity_selected || "1",
+      plcData?.is_scada_runtime_license_quantity_selected,
     scada_runtime_license_quantity:
       plcData?.scada_runtime_license_quantity || "",
     is_plc_progamming_software_license_quantity:
-      plcData?.is_plc_progamming_software_license_quantity || "1",
+      plcData?.is_plc_progamming_software_license_quantity,
     plc_programming_software_license_quantity:
       plcData?.plc_programming_software_license_quantity || "",
 
@@ -219,14 +219,14 @@ const getDefaultValues = (plcData: any) => {
     printer_size: plcData?.printer_size || "A4",
     printer_quantity: plcData?.printer_quantity || "",
     is_printer_with_suitable_communication_cable_selected:
-      plcData?.is_printer_with_suitable_communication_cable_selected || "0",
-    is_furniture_selected: plcData?.is_furniture_selected || "1",
+      plcData?.is_printer_with_suitable_communication_cable_selected ,
+    is_furniture_selected: plcData?.is_furniture_selected,
     is_console_with_chair_selected:
-      plcData?.is_console_with_chair_selected || "1",
+      plcData?.is_console_with_chair_selected,
     is_plc_logic_diagram_selected:
-      plcData?.is_plc_logic_diagram_selected || "1",
+      plcData?.is_plc_logic_diagram_selected,
     is_loop_drawing_for_complete_project_selected:
-      plcData?.is_loop_drawing_for_complete_project_selected || "1",
+      plcData?.is_loop_drawing_for_complete_project_selected,
     // Communication
     interface_signal_and_control_logic_implementation:
       plcData?.interface_signal_and_control_logic_implementation || "NA",
@@ -253,9 +253,9 @@ Note: Ethernet IP is preferrable protocol for communication of above package.
       plcData?.hardware_between_plc_and_third_party || "",
     hardware_between_plc_and_client_system:
       plcData?.hardware_between_plc_and_client_system || "Approx. 50 meter",
-    is_iiot_selected: plcData?.is_iiot_selected || "0",
+    is_iiot_selected: plcData?.is_iiot_selected ,
     is_client_system_comm_with_plc_cpu_selected:
-      plcData?.is_client_system_comm_with_plc_cpu_selected || "0",
+      plcData?.is_client_system_comm_with_plc_cpu_selected ,
     iiot_gateway_note:
       plcData?.iiot_gateway_note ||
       `1) IIOT Gateway - Ethernet communication
@@ -272,7 +272,7 @@ Note - MFM, VFD, ACB Incomer - Address List & Parameter shall be configure by PL
       `IIOT gate way is mounted in PLC panel. Vendor to make the necessary mounting provision for the same. (Details will be shared during detailing). IIOT is in Thermax SSBU Scope of supply. IIOT will be installed at Site. IIOT is suitable for Profinet/Ethernet communication for which PLC vendor to ensure the compatability with Supplied PLC's.`,
     // Burner Controller LMV
     is_burner_controller_lmv_mounting_selected:
-      plcData?.is_burner_controller_lmv_mounting_selected || "0",
+      plcData?.is_burner_controller_lmv_mounting_selected ,
     hardware_between_plc_and_burner_controller_lmv:
       plcData?.hardware_between_plc_and_burner_controller_lmv ||
       `Burner Controller LMV in PLC panel. Vendor to make the necessary mounting provision for the same. (Details will be shared during detailing). Burner Controller LMV is in Thermax Scope of supply. Burner Controller LMV is suitable for Profinet/Ethernet communication for which PLC vendor to ensure the compatability with Supplied PLC's.`,
@@ -306,6 +306,9 @@ const MCCcumPCCPLCPanel = ({
   const { data: plcPanelData3 } = useNewGetData(
     `${MCC_PCC_PLC_PANEL_3}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
   );
+  const params = useParams();
+  const project_id = params.project_id;
+  const router = useRouter();
 
   const plcPanelData = useMemo(
     () => ({
@@ -353,9 +356,11 @@ const MCCcumPCCPLCPanel = ({
 
   const { control, handleSubmit, reset, watch, formState } = useForm({
     resolver: zodResolver(plcPanelValidationSchema),
-    defaultValues: getDefaultValues(plcPanelData?.[0]),
+    defaultValues: getDefaultValues(plcPanelData),
     mode: "onSubmit",
   });
+  console.log("form errors PLC", formState.errors);
+
   const upsScope = watch("ups_scope");
   const noOfContacts = [
     {
@@ -370,8 +375,13 @@ const MCCcumPCCPLCPanel = ({
     },
   ];
   useEffect(() => {
-    reset(getDefaultValues(plcPanelData?.[0]));
+    console.log(plcPanelData?.[0], "PLC DATA");
+
+    reset(getDefaultValues(plcPanelData));
   }, [plcPanelData, reset]);
+  useEffect(() => {
+    console.log(plcPanelData, "PLC DATA");
+  }, [plcPanelData]);
 
   const handleError = (error: any) => {
     try {
@@ -407,6 +417,7 @@ const MCCcumPCCPLCPanel = ({
       const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount) {
+          router.push(`/project/${project_id}/design-basis/layout`);
           return "1";
         }
 
@@ -420,7 +431,6 @@ const MCCcumPCCPLCPanel = ({
       setLoading(false);
     }
   };
-  console.log(channel_density_options, "channel_density_options");
 
   return (
     <>
@@ -456,8 +466,8 @@ const MCCcumPCCPLCPanel = ({
               name="is_bulk_power_supply_selected"
               label="Bulk Power Supply for I/O"
               options={[
-                { label: "Yes", value: "1" },
-                { label: "No", value: "0" },
+                { label: "Yes", value: 1 },
+                { label: "No", value: 0 },
               ]}
             />
           </div>
@@ -543,8 +553,8 @@ const MCCcumPCCPLCPanel = ({
                 name="is_ups_battery_mounting_rack_selected"
                 label="UPS Battery Mounting Rack"
                 options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
                 ]}
                 disabled={upsScope !== "Panel Vendor Scope"}
               />
@@ -634,8 +644,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_power_supply_plc_cpu_system_selected"
                     label="Power Supply PLC CPU System"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -645,8 +655,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_power_supply_input_output_module_selected"
                     label="Power Supply Input - Output Module"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -656,8 +666,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_plc_input_output_modules_system_selected"
                     label="PLC Input - Output Modules System"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -669,8 +679,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_plc_cpu_system_and_input_output_modules_system_selected"
                     label="PLC CPU System and PLC Input - Output Modules System"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -680,8 +690,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_plc_cpu_system_and_hmi_scada_selected"
                     label="PLC CPU System and HMI / SCADA"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -691,8 +701,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_plc_cpu_system_and_third_party_devices_selected"
                     label="PLC CPU System and Third Party Devices"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -705,8 +715,8 @@ const MCCcumPCCPLCPanel = ({
                       name="is_plc_cpu_system_selected"
                       label="PLC CPU System"
                       options={[
-                        { label: "Yes", value: "1" },
-                        { label: "No", value: "0" },
+                        { label: "Yes", value: 1 },
+                        { label: "No", value: 0 },
                       ]}
                     />
                   </div>
@@ -737,11 +747,11 @@ const MCCcumPCCPLCPanel = ({
                 <div className="flex-1">
                   <CustomRadioSelect
                     control={control}
-                    name="is_plc_and_ups_marshalling_cabinet_selected"
+                    name="is_marshalling_cabinet_for_plc_and_ups_selected"
                     label="Marshalling Cabinet For PLC and UPS"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -753,8 +763,8 @@ const MCCcumPCCPLCPanel = ({
                     size="small"
                     // options={marshalling_cabinet_options || []}
                     disabled={
-                      watch("is_plc_and_ups_marshalling_cabinet_selected") ===
-                      "0"
+                      watch("is_marshalling_cabinet_for_plc_and_ups_selected") ===
+                      0
                     }
                   />
                 </div>
@@ -778,8 +788,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_electronic_hooter_selected"
                     label="Electronic Hooter"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -791,7 +801,7 @@ const MCCcumPCCPLCPanel = ({
                     options={
                       moveNAtoEnd(electronic_hooter_acknowledge_options) || []
                     }
-                    disabled={watch("is_electronic_hooter_selected") === "0"}
+                    disabled={watch("is_electronic_hooter_selected") === 0}
                     size="small"
                   />
                 </div>
@@ -976,11 +986,11 @@ const MCCcumPCCPLCPanel = ({
               <div>
                 <CustomRadioSelect
                   control={control}
-                  name="is_no_of_contact_selected"
+                  name="is_no_of_contacts_selected"
                   label="No. of Contacts"
                   options={[
-                    { label: "Yes", value: "1" },
-                    { label: "No", value: "0" },
+                    { label: "Yes", value: 1 },
+                    { label: "No", value: 0 },
                   ]}
                 />
               </div>
@@ -991,7 +1001,7 @@ const MCCcumPCCPLCPanel = ({
                   label=""
                   size="small"
                   options={noOfContacts}
-                  disabled={watch("is_no_of_contact_selected") === "0"}
+                  disabled={watch("is_no_of_contacts_selected") === 0}
                 />
               </div>
             </div>
@@ -1053,8 +1063,8 @@ const MCCcumPCCPLCPanel = ({
                 name="is_ai_module_hart_protocol_support_selected"
                 label="HART Protocol Support"
                 options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
                 ]}
               />
             </div>
@@ -1118,8 +1128,8 @@ const MCCcumPCCPLCPanel = ({
                   name="is_ao_module_hart_protocol_support_selected"
                   label="HART Protocol Support"
                   options={[
-                    { label: "Yes", value: "1" },
-                    { label: "No", value: "0" },
+                    { label: "Yes", value: 1 },
+                    { label: "No", value: 0 },
                   ]}
                 />
               </div>
@@ -1182,8 +1192,8 @@ const MCCcumPCCPLCPanel = ({
                 name="is_rtd_module_hart_protocol_support_selected"
                 label="HART Protocol Support"
                 options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
                 ]}
               />
             </div>
@@ -1247,8 +1257,8 @@ const MCCcumPCCPLCPanel = ({
                 name="is_thermocouple_module_hart_protocol_support_selected"
                 label="HART Protocol Support"
                 options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
                 ]}
               />
             </div>
@@ -1312,8 +1322,8 @@ const MCCcumPCCPLCPanel = ({
                 name="is_universal_module_hart_protocol_support_selected"
                 label="HART Protocol Support"
                 options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
                 ]}
               />
             </div>
@@ -1402,8 +1412,8 @@ const MCCcumPCCPLCPanel = ({
                       name="is_hmi_selected"
                       label=""
                       options={[
-                        { label: "Yes", value: "1" },
-                        { label: "No", value: "0" },
+                        { label: "Yes", value: 1 },
+                        { label: "No", value: 0 },
                       ]}
                     />
                   </div>
@@ -1421,7 +1431,7 @@ const MCCcumPCCPLCPanel = ({
                     suffixIcon={
                       <p className="font-semibold text-blue-500">inch</p>
                     }
-                    disabled={watch("is_hmi_selected") === "0"}
+                    disabled={watch("is_hmi_selected") === 0}
                   />
                 </div>
                 <div className="flex-1">
@@ -1431,7 +1441,7 @@ const MCCcumPCCPLCPanel = ({
                     label="HMI (Quantity)"
                     size="small"
                     min={0}
-                    disabled={watch("is_hmi_selected") === "0"}
+                    disabled={watch("is_hmi_selected") === 0}
                   />
                 </div>
                 <div className="flex-1">
@@ -1441,7 +1451,7 @@ const MCCcumPCCPLCPanel = ({
                     label="HMI Hardware Make"
                     size="small"
                     options={hmi_hardware_make_options || []}
-                    disabled={watch("is_hmi_selected") === "0"}
+                    disabled={watch("is_hmi_selected") === 0}
                   />
                 </div>
               </div>
@@ -1452,7 +1462,7 @@ const MCCcumPCCPLCPanel = ({
                     name="hmi_series"
                     label="HMI Series"
                     size="small"
-                    disabled={watch("is_hmi_selected") === "0"}
+                    disabled={watch("is_hmi_selected") === 0}
                   />
                 </div>
                 <div className="flex-1">
@@ -1462,7 +1472,7 @@ const MCCcumPCCPLCPanel = ({
                     label="HMI Input Voltage"
                     size="small"
                     options={plc_control_voltage_options || []}
-                    disabled={watch("is_hmi_selected") === "0"}
+                    disabled={watch("is_hmi_selected") === 0}
                   />
                 </div>
                 <div className="flex-1">
@@ -1471,7 +1481,7 @@ const MCCcumPCCPLCPanel = ({
                     name="hmi_battery_backup"
                     label="HMI Battery Backup"
                     size="small"
-                    disabled={watch("is_hmi_selected") === "0"}
+                    disabled={watch("is_hmi_selected") === 0}
                   />
                 </div>
               </div>
@@ -1494,8 +1504,8 @@ const MCCcumPCCPLCPanel = ({
                       name="is_engineering_station_quantity_selected"
                       label="Engineering Station (Quantity)"
                       options={[
-                        { label: "Yes", value: "1" },
-                        { label: "No", value: "0" },
+                        { label: "Yes", value: 1 },
+                        { label: "No", value: 0 },
                       ]}
                     />
                   </div>
@@ -1506,8 +1516,7 @@ const MCCcumPCCPLCPanel = ({
                       label=""
                       size="small"
                       disabled={
-                        watch("is_engineering_station_quantity_selected") ===
-                        "0"
+                        watch("is_engineering_station_quantity_selected") === 0
                       }
                     />
                   </div>
@@ -1521,8 +1530,8 @@ const MCCcumPCCPLCPanel = ({
                       name="is_engineering_cum_operating_station_quantity_selected"
                       label="Engineering Cum Operating Station (Quantity)"
                       options={[
-                        { label: "Yes", value: "1" },
-                        { label: "No", value: "0" },
+                        { label: "Yes", value: 1 },
+                        { label: "No", value: 0 },
                       ]}
                     />
                   </div>
@@ -1535,7 +1544,7 @@ const MCCcumPCCPLCPanel = ({
                       disabled={
                         watch(
                           "is_engineering_cum_operating_station_quantity_selected"
-                        ) === "0"
+                        ) === 0
                       }
                     />
                   </div>
@@ -1549,8 +1558,8 @@ const MCCcumPCCPLCPanel = ({
                       name="is_operating_station_quantity_selected"
                       label="Operating Station (Quantity)"
                       options={[
-                        { label: "Yes", value: "1" },
-                        { label: "No", value: "0" },
+                        { label: "Yes", value: 1 },
+                        { label: "No", value: 0 },
                       ]}
                     />
                   </div>
@@ -1561,7 +1570,7 @@ const MCCcumPCCPLCPanel = ({
                       label=""
                       size="small"
                       disabled={
-                        watch("is_operating_station_quantity_selected") === "0"
+                        watch("is_operating_station_quantity_selected") === 0
                       }
                     />
                   </div>
@@ -1584,8 +1593,8 @@ const MCCcumPCCPLCPanel = ({
                       name="is_scada_program_development_license_quantity_selected"
                       label="SCADA Development License (Quantity)"
                       options={[
-                        { label: "Yes", value: "1" },
-                        { label: "No", value: "0" },
+                        { label: "Yes", value: 1 },
+                        { label: "No", value: 0 },
                       ]}
                     />
                   </div>
@@ -1598,7 +1607,7 @@ const MCCcumPCCPLCPanel = ({
                       disabled={
                         watch(
                           "is_scada_program_development_license_quantity_selected"
-                        ) === "0"
+                        ) === 0
                       }
                     />
                   </div>
@@ -1612,8 +1621,8 @@ const MCCcumPCCPLCPanel = ({
                       name="is_scada_runtime_license_quantity_selected"
                       label="SCADA Runtime License (Quantity)"
                       options={[
-                        { label: "Yes", value: "1" },
-                        { label: "No", value: "0" },
+                        { label: "Yes", value: 1 },
+                        { label: "No", value: 0 },
                       ]}
                     />
                   </div>
@@ -1625,7 +1634,7 @@ const MCCcumPCCPLCPanel = ({
                       size="small"
                       disabled={
                         watch("is_scada_runtime_license_quantity_selected") ===
-                        "0"
+                        0
                       }
                     />
                   </div>
@@ -1639,8 +1648,8 @@ const MCCcumPCCPLCPanel = ({
                       name="is_plc_progamming_software_license_quantity"
                       label="PLC Programming License Software"
                       options={[
-                        { label: "Yes", value: "1" },
-                        { label: "No", value: "0" },
+                        { label: "Yes", value: 1 },
+                        { label: "No", value: 0 },
                       ]}
                     />
                   </div>
@@ -1652,7 +1661,7 @@ const MCCcumPCCPLCPanel = ({
                       size="small"
                       disabled={
                         watch("is_plc_progamming_software_license_quantity") ===
-                        "0"
+                        0
                       }
                     />
                   </div>
@@ -1722,8 +1731,8 @@ const MCCcumPCCPLCPanel = ({
                 name="is_printer_with_suitable_communication_cable_selected"
                 label="Printer With Suitable Communication Cable"
                 options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
                 ]}
               />
             </div>
@@ -1736,7 +1745,7 @@ const MCCcumPCCPLCPanel = ({
                 disabled={
                   watch(
                     "is_printer_with_suitable_communication_cable_selected"
-                  ) === "0"
+                  ) === 0
                 }
                 options={dropdown["Printer Type"] || []}
               />
@@ -1750,7 +1759,7 @@ const MCCcumPCCPLCPanel = ({
                 disabled={
                   watch(
                     "is_printer_with_suitable_communication_cable_selected"
-                  ) === "0"
+                  ) === 0
                 }
                 options={dropdown["Printer Size"] || []}
               />
@@ -1763,7 +1772,7 @@ const MCCcumPCCPLCPanel = ({
                 disabled={
                   watch(
                     "is_printer_with_suitable_communication_cable_selected"
-                  ) === "0"
+                  ) === 0
                 }
                 size="small"
               />
@@ -1778,8 +1787,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_furniture_selected"
                     label="Furniture ( Wooden Table With Chair)"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -1789,8 +1798,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_console_with_chair_selected"
                     label="Console With Chair"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -1800,8 +1809,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_plc_logic_diagram_selected"
                     label="PLC Logic Diagram With Tag No. / Rung No & It's Descriptions."
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0},
                     ]}
                   />
                 </div>
@@ -1811,8 +1820,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_loop_drawing_for_complete_project_selected"
                     label="Loop Drawing For Complete Project"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>
@@ -1888,10 +1897,10 @@ const MCCcumPCCPLCPanel = ({
                 <CustomRadioSelect
                   control={control}
                   name="is_client_system_comm_with_plc_cpu_selected"
-                  label="PLC CPU System  With Client System Communication "
+                  label="PLC CPU System With Client System Communication "
                   options={[
-                    { label: "Yes", value: "1" },
-                    { label: "No", value: "0" },
+                    { label: "Yes", value: 1 },
+                    { label: "No", value: 0 },
                   ]}
                 />
               </div>
@@ -1928,8 +1937,8 @@ const MCCcumPCCPLCPanel = ({
                         name="is_iiot_selected"
                         label=""
                         options={[
-                          { label: "Yes", value: "1" },
-                          { label: "No", value: "0" },
+                          { label: "Yes", value: 1 },
+                          { label: "No", value: 0 },
                         ]}
                       />
                     </div>
@@ -1969,8 +1978,8 @@ const MCCcumPCCPLCPanel = ({
                     name="is_burner_controller_lmv_mounting_selected"
                     label="Burner Controller LMV"
                     options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
+                      { label: "Yes", value: 1 },
+                      { label: "No", value: 0 },
                     ]}
                   />
                 </div>

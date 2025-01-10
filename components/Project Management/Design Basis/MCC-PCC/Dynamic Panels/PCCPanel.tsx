@@ -19,7 +19,7 @@ import useMCCPCCPanelDropdowns from "./MCCPCCPanelDropdown";
 import { pccPanelValidationSchema } from "../schemas";
 import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
 import { moveNAtoEnd } from "@/utils/helpers";
 
@@ -47,14 +47,15 @@ const getDefaultValues = (
 
     is_led_type_lamp_selected:
       pccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected:
-      Number(pccPanelData?.is_indication_on_selected),
+    is_indication_on_selected: Number(pccPanelData?.is_indication_on_selected),
     led_type_on_input: pccPanelData?.led_type_on_input || "Green",
-    is_indication_off_selected:
-      Number(pccPanelData?.is_indication_off_selected),
+    is_indication_off_selected: Number(
+      pccPanelData?.is_indication_off_selected
+    ),
     led_type_off_input: pccPanelData?.led_type_off_input || "Red",
-    is_indication_trip_selected:
-      Number(pccPanelData?.is_indication_trip_selected),
+    is_indication_trip_selected: Number(
+      pccPanelData?.is_indication_trip_selected
+    ),
     led_type_trip_input: pccPanelData?.led_type_trip_input || "Amber",
 
     is_blue_cb_spring_charge_selected:
@@ -305,12 +306,16 @@ const PCCPanel = ({
     ),
     mode: "onSubmit",
   });
+  const router = useRouter();
 
   console.log("form errors", formState.errors);
 
   useEffect(() => {
     console.log(pccPanelData?.[0], "PCC");
-    console.log(getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]), "PCC default");
+    console.log(
+      getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]),
+      "PCC default"
+    );
 
     reset(getDefaultValues(projectMetadata, projectInfo, pccPanelData?.[0]));
   }, [pccPanelData, projectMetadata, projectInfo, reset]);
@@ -411,6 +416,7 @@ const PCCPanel = ({
       const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount) {
+          router.push(`/project/${project_id}/design-basis/layout`);
           return "1";
         }
 

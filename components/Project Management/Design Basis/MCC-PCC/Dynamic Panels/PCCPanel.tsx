@@ -47,13 +47,13 @@ const getDefaultValues = (
 
     is_led_type_lamp_selected:
       pccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected: Number(pccPanelData?.is_indication_on_selected),
+    is_indication_on_selected: Boolean(pccPanelData?.is_indication_on_selected),
     led_type_on_input: pccPanelData?.led_type_on_input || "Green",
-    is_indication_off_selected: Number(
+    is_indication_off_selected: Boolean(
       pccPanelData?.is_indication_off_selected
     ),
     led_type_off_input: pccPanelData?.led_type_off_input || "Red",
-    is_indication_trip_selected: Number(
+    is_indication_trip_selected: Boolean(
       pccPanelData?.is_indication_trip_selected
     ),
     led_type_trip_input: pccPanelData?.led_type_trip_input || "Amber",
@@ -308,7 +308,7 @@ const PCCPanel = ({
   });
   const router = useRouter();
 
-  // console.log("form errors", formState.errors);
+  console.log("form errors", formState.errors);
 
   useEffect(() => {
     console.log(pccPanelData?.[0], "PCC");

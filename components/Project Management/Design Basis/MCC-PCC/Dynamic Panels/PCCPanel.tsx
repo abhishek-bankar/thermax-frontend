@@ -308,7 +308,7 @@ const PCCPanel = ({
   });
   const router = useRouter();
 
-  console.log("form errors", formState.errors);
+  // console.log("form errors", formState.errors);
 
   useEffect(() => {
     console.log(pccPanelData?.[0], "PCC");
@@ -409,7 +409,7 @@ const PCCPanel = ({
   > = async (data) => {
     setLoading(true);
     try {
-      console.log(data);
+      // console.log(data);
 
       await updateData(`${PCC_PANEL}/${pccPanelData[0].name}`, false, data);
       message.success("Panel Data Saved Successfully");

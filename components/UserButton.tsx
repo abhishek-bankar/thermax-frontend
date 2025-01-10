@@ -7,6 +7,8 @@ import { SIGN_IN } from "@/configs/constants";
 import { verifyEmailandGenerateToken } from "@/actions/verification-token";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useState } from "react";
+import { updateData } from "@/actions/crud-actions";
+import { THERMAX_USER_API } from "@/configs/api-endpoints";
 
 export const UserButton = () => {
   const userInfo = useCurrentUser();
@@ -31,6 +33,13 @@ export const UserButton = () => {
       });
     }
   };
+
+  const handleSignOut = async () => {
+    await updateData(`${THERMAX_USER_API}/${userInfo?.email}`, true, {
+      hashed_token: "",
+    });
+    await signOut({ callbackUrl: SIGN_IN });
+  };
   const items: MenuProps["items"] = [
     {
       key: "1",
@@ -41,7 +50,7 @@ export const UserButton = () => {
       danger: true,
       icon: <LogoutOutlined />,
       label: "Logout",
-      onClick: async () => await signOut({ callbackUrl: SIGN_IN }),
+      onClick: async () => await handleSignOut(),
     },
   ];
   return (

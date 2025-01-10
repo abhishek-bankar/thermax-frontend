@@ -11,7 +11,7 @@ import { LoadingProvider } from "./context/BaseContext";
 export const metadata: Metadata = {
   title: "EniMax",
   icons: {
-    icon: "/eni_max_logo_svg_final.svg",
+    icon: "/files/eni_max_logo_svg_final.svg",
   },
 };
 

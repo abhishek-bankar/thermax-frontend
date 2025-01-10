@@ -600,8 +600,8 @@ const getArrayOfSwitchgearSelectionData = (
   makeComponents: any,
   division: string
 ) => {
-  console.log(data, "load list data");
-  console.log(sg_saved_data, "load list data sg_saved_data  ");
+  // console.log(data, "load list data");
+  // console.log(sg_saved_data, "load list data sg_saved_data  ");
 
   if (sg_saved_data.length && !data.length) {
     return sg_saved_data.map((item: any) => {
@@ -639,7 +639,7 @@ const getArrayOfSwitchgearSelectionData = (
   }
 
   if (!data) return [];
-  console.log(commonConfiguration, "commonConfiguration");
+  // console.log(commonConfiguration, "commonConfiguration");
 
   return data.map((item: any) => {
     const savedItem = sg_saved_data?.find(
@@ -717,7 +717,7 @@ const useDataFetching = (
       // )
 
       // const commonConfiguration: any =  [...(commonConfiguration1 || []), ...(commonConfiguration2 || []), ...(commonConfiguration3 || [])].flat()
-      console.log(revision_id, "revision_id");
+      // console.log(revision_id, "revision_id");
 
       const sg_saved_data = await getData(
         `${SLD_REVISIONS_API}/${revision_id}`
@@ -725,7 +725,7 @@ const useDataFetching = (
       const makeComponents = await getData(
         `${MAKE_OF_COMPONENT_API}?fields=["preferred_soft_starter","preferred_lv_switchgear","preferred_vfdvsd"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
       );
-      console.log(commonConfiguration, "commonConfiguration");
+      // console.log(commonConfiguration, "commonConfiguration");
 
       const formattedData = getArrayOfSwitchgearSelectionData(
         loadListData,
@@ -765,8 +765,8 @@ const SwitchgearSelection: React.FC<Props> = ({
   data,
   revision_id,
 }) => {
-  console.log(data, "switchgear");
-  console.log(revision_id, "switchgear revision_id");
+  // console.log(data, "switchgear");
+  // console.log(revision_id, "switchgear revision_id");
 
   const jRef = useRef<HTMLDivElement | null>(null);
   const [spreadsheetInstance, setSpreadsheetInstance] =
@@ -789,7 +789,7 @@ const SwitchgearSelection: React.FC<Props> = ({
     userInfo.division,
     revision_id
   );
-  console.log(swSelectionData, "switchegear data");
+  // console.log(swSelectionData, "switchegear data");
 
   const typedSwitchgearColumns = useMemo(
     () =>
@@ -879,7 +879,7 @@ const SwitchgearSelection: React.FC<Props> = ({
     if (spreadsheetInstance) {
       spreadsheetInstance.destroy();
     }
-    console.log(swSelectionData);
+    // console.log(swSelectionData);
 
     const instance = jspreadsheet(jRef.current!, swSelectionOptions);
     setSpreadsheetInstance(instance);
@@ -896,7 +896,7 @@ const SwitchgearSelection: React.FC<Props> = ({
     };
   }, [isLoading, swSelectionOptions]);
   useEffect(() => {
-    console.log(data);
+    // console.log(data);
 
     if (data.length) {
       const formattedData = getArrayOfSwitchgearSelectionData(
@@ -907,7 +907,7 @@ const SwitchgearSelection: React.FC<Props> = ({
         userInfo.division
       );
       // setSwSelectionData(formattedData)
-      console.log(formattedData, "formattedData");
+      // console.log(formattedData, "formattedData");
       spreadsheetInstance?.setData(formattedData);
       // swSelectionData=formattedData;
       // initSpreadsheet()
@@ -917,7 +917,7 @@ const SwitchgearSelection: React.FC<Props> = ({
   const handleSgSave = async () => {
     const data = spreadsheetInstance?.getData();
 
-    console.log(data, "all load list data");
+    // console.log(data, "all load list data");
 
     const payload = {
       switchgear_selection_data: data?.map((row: any) => {
@@ -972,7 +972,7 @@ const SwitchgearSelection: React.FC<Props> = ({
       }),
     };
     try {
-      console.log(payload, "sg payload");
+      // console.log(payload, "sg payload");
       setLoading(true);
 
       const respose = await updateData(
@@ -983,7 +983,7 @@ const SwitchgearSelection: React.FC<Props> = ({
       setLoading(false);
       message.success("Switchgear Selection Saved !");
 
-      console.log(respose, "Switchgear Selection response");
+      // console.log(respose, "Switchgear Selection response");
     } catch (error) {
       console.error("Error saving Switchgear Selection list:", error);
       message.error("Unable to save Switchgear Selection list");
@@ -1022,7 +1022,7 @@ const SwitchgearSelection: React.FC<Props> = ({
         const calculationResult = sg_data?.find(
           (item: any) => item.tag_number === row[0]
         );
-        console.log(calculationResult);
+        // console.log(calculationResult);
 
         if (calculationResult) {
           const updatedRow = [...row];
@@ -1050,8 +1050,8 @@ const SwitchgearSelection: React.FC<Props> = ({
         }
         return row;
       });
-      console.log("updated sg_data", sg_data);
-      console.log("updated calc", updatedSgData);
+      // console.log("updated sg_data", sg_data);
+      // console.log("updated calc", updatedSgData);
 
       spreadsheetInstance?.setData(updatedSgData);
       setLoading(false);

@@ -1047,7 +1047,7 @@ const CommonConfiguration = ({
               control={control}
               name="vdc_24_wiring_color"
               label="Color"
-              options={vdc_24_wiring_color_options || []}
+              options={moveNAtoEnd(vdc_24_wiring_color_options) || []}
               size="small"
             />
           </div>
@@ -1093,7 +1093,7 @@ const CommonConfiguration = ({
               control={control}
               name="ct_wiring_color"
               label="Color"
-              options={ct_wiring_color_options || []}
+              options={moveNAtoEnd(ct_wiring_color_options) || []}
               size="small"
             />
           </div>
@@ -1720,7 +1720,6 @@ const CommonConfiguration = ({
               options={moveNAtoEnd(forward_reverst_push_button_options) || []}
               size="small"
               disabled={watch("is_local_push_button_station_selected") === "0"}
-
             />
           </div>
           <div className="flex-1">
@@ -1731,7 +1730,6 @@ const CommonConfiguration = ({
               options={moveNAtoEnd(forward_reverst_push_button_options) || []}
               size="small"
               disabled={watch("is_local_push_button_station_selected") === "0"}
-
             />
           </div>
         </div>
@@ -1744,7 +1742,6 @@ const CommonConfiguration = ({
               options={moveNAtoEnd(ess_options) || []}
               size="small"
               disabled={watch("is_local_push_button_station_selected") === "0"}
-
             />
           </div>
         </div>

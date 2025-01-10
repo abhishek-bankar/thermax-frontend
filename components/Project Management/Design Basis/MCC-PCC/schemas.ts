@@ -1339,7 +1339,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Control Voltage is required",
     message: "Control Voltage is required",
   }),
-  is_bulk_power_supply_selected: zod.string({
+  is_bulk_power_supply_selected: zod.number({
     required_error: "Bulk Power Supply is required",
     message: "Bulk Power Supply is required",
   }),
@@ -1367,7 +1367,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "UPS Battery Type is required",
     message: "UPS Battery Type is required",
   }),
-  is_ups_battery_mounting_rack_selected: zod.string({
+  is_ups_battery_mounting_rack_selected: zod.number({
     required_error: "UPS Battery Mounting Rack is required",
     message: "UPS Battery Mounting Rack is required",
   }),
@@ -1396,32 +1396,32 @@ export const plcPanelValidationSchema = zod.object({
       "PLC CPU System Memory Free Space after Program is required",
     message: "PLC CPU System Memory Free Space after Program is required",
   }),
-  is_power_supply_plc_cpu_system_selected: zod.string({
+  is_power_supply_plc_cpu_system_selected: zod.number({
     required_error: "Power Supply PLC CPU System is required",
     message: "Power Supply PLC CPU System is required",
   }),
-  is_power_supply_input_output_module_selected: zod.string({
+  is_power_supply_input_output_module_selected: zod.number({
     required_error: "Power Supply Input - Output Module is required",
     message: "Power Supply Input - Output Module is required",
   }),
-  is_plc_input_output_modules_system_selected: zod.string({
+  is_plc_input_output_modules_system_selected: zod.number({
     required_error: "PLC Input - Output Modules System is required",
     message: "PLC Input - Output Modules System is required",
   }),
-  is_plc_cpu_system_and_input_output_modules_system_selected: zod.string({
+  is_plc_cpu_system_and_input_output_modules_system_selected: zod.number({
     required_error:
       "PLC CPU System and PLC Input - Output Modules System is required",
     message: "PLC CPU System and PLC Input - Output Modules System is required",
   }),
-  is_plc_cpu_system_and_hmi_scada_selected: zod.string({
+  is_plc_cpu_system_and_hmi_scada_selected: zod.number({
     required_error: "PLC CPU System and HMI SCADA is required",
     message: "PLC CPU System and HMI SCADA is required",
   }),
-  is_plc_cpu_system_and_third_party_devices_selected: zod.string({
+  is_plc_cpu_system_and_third_party_devices_selected: zod.number({
     required_error: "PLC CPU System and Third Party Devices is required",
     message: "PLC CPU System and Third Party Devices is required",
   }),
-  is_plc_cpu_system_selected: zod.string({
+  is_plc_cpu_system_selected: zod.number({
     required_error: "PLC CPU System is required",
     message: "PLC CPU System is required",
   }),
@@ -1433,7 +1433,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Panel Mounted AC is required",
     message: "Panel Mounted AC is required",
   }),
-  is_plc_and_ups_marshalling_cabinet_selected: zod.string({
+  is_marshalling_cabinet_for_plc_and_ups_selected: zod.number({
     required_error: "PLC and UPS Marshalling Cabinet is required",
     message: "PLC and UPS Marshalling Cabinet is required",
   }),
@@ -1441,7 +1441,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Marshalling Cabinet for PLC and UPS is required",
     message: "Marshalling Cabinet for PLC and UPS is required",
   }),
-  is_electronic_hooter_selected: zod.string({
+  is_electronic_hooter_selected: zod.number({
     required_error: "Electronic Hooter is required",
     message: "Electronic Hooter is required",
   }),
@@ -1514,7 +1514,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Output Contact Rating of Interposing Relay is required",
     message: "Output Contact Rating of Interposing Relay is required",
   }),
-  is_no_of_contact_selected: zod.string({
+  is_no_of_contacts_selected: zod.number({
     required_error: "No of Contacts is required",
     message: "No of Contacts is required",
   }),
@@ -1542,7 +1542,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "AI Module Scan Time is required",
     message: "AI Module Scan Time is required",
   }),
-  is_ai_module_hart_protocol_support_selected: zod.string({
+  is_ai_module_hart_protocol_support_selected: zod.number({
     required_error: "AI Module HART Protocol Support is required",
     message: "AI Module HART Protocol Support is required",
   }),
@@ -1566,7 +1566,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "AO Module Scan Time is required",
     message: "AO Module Scan Time is required",
   }),
-  is_ao_module_hart_protocol_support_selected: zod.string({
+  is_ao_module_hart_protocol_support_selected: zod.number({
     required_error: "AO Module HART Protocol Support is required",
     message: "AO Module HART Protocol Support is required",
   }),
@@ -1590,7 +1590,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "RTD Module Scan Time is required",
     message: "RTD Module Scan Time is required",
   }),
-  is_rtd_module_hart_protocol_support_selected: zod.string({
+  is_rtd_module_hart_protocol_support_selected: zod.number({
     required_error: "RTD Module HART Protocol Support is required",
     message: "RTD Module HART Protocol Support is required",
   }),
@@ -1614,7 +1614,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Thermocouple Module Scan Time is required",
     message: "Thermocouple Module Scan Time is required",
   }),
-  is_thermocouple_module_hart_protocol_support_selected: zod.string({
+  is_thermocouple_module_hart_protocol_support_selected: zod.number({
     required_error: "Thermocouple Module HART Protocol Support is required",
     message: "Thermocouple Module HART Protocol Support is required",
   }),
@@ -1638,7 +1638,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Universal Module Scan Time is required",
     message: "Universal Module Scan Time is required",
   }),
-  is_universal_module_hart_protocol_support_selected: zod.string({
+  is_universal_module_hart_protocol_support_selected: zod.number({
     required_error: "Universal Module HART Protocol Support is required",
     message: "Universal Module HART Protocol Support is required",
   }),
@@ -1666,7 +1666,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Thermocouple Module Terminal is required",
     message: "Thermocouple Module Terminal is required",
   }),
-  is_hmi_selected: zod.string({
+  is_hmi_selected: zod.number({
     required_error: "HMI is required",
     message: "HMI is required",
   }),
@@ -1694,7 +1694,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "HMI Battery Backup is required",
     message: "HMI Battery Backup is required",
   }),
-  is_engineering_station_quantity_selected: zod.string({
+  is_engineering_station_quantity_selected: zod.number({
     required_error: "Engineering Station Quantity is required",
     message: "Engineering Station Quantity is required",
   }),
@@ -1702,7 +1702,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Engineering Station Quantity is required",
     message: "Engineering Station Quantity is required",
   }),
-  is_engineering_cum_operating_station_quantity_selected: zod.string({
+  is_engineering_cum_operating_station_quantity_selected: zod.number({
     required_error: "Engineering cum Operating Station Quantity is required",
     message: "Engineering cum Operating Station Quantity is required",
   }),
@@ -1710,7 +1710,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Engineering cum Operating Station Quantity is required",
     message: "Engineering cum Operating Station Quantity is required",
   }),
-  is_operating_station_quantity_selected: zod.string({
+  is_operating_station_quantity_selected: zod.number({
     required_error: "Operating Station Quantity is required",
     message: "Operating Station Quantity is required",
   }),
@@ -1718,7 +1718,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Operating Station Quantity is required",
     message: "Operating Station Quantity is required",
   }),
-  is_scada_program_development_license_quantity_selected: zod.string({
+  is_scada_program_development_license_quantity_selected: zod.number({
     required_error: "SCADA Program Development License Quantity is required",
     message: "SCADA Program Development License Quantity is required",
   }),
@@ -1726,7 +1726,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "SCADA Program Development License Quantity is required",
     message: "SCADA Program Development License Quantity is required",
   }),
-  is_scada_runtime_license_quantity_selected: zod.string({
+  is_scada_runtime_license_quantity_selected: zod.number({
     required_error: "SCADA Runtime License Quantity is required",
     message: "SCADA Runtime License Quantity is required",
   }),
@@ -1734,7 +1734,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "SCADA Runtime License Quantity is required",
     message: "SCADA Runtime License Quantity is required",
   }),
-  is_plc_progamming_software_license_quantity: zod.string({
+  is_plc_progamming_software_license_quantity: zod.number({
     required_error: "PLC Programming Software License Quantity is required",
     message: "PLC Programming Software License Quantity is required",
   }),
@@ -1774,23 +1774,23 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Printer Quantity is required",
     message: "Printer Quantity is required",
   }),
-  is_printer_with_suitable_communication_cable_selected: zod.string({
+  is_printer_with_suitable_communication_cable_selected: zod.number({
     required_error: "Printer with Suitable Communication Cable is required",
     message: "Printer with Suitable Communication Cable is required",
   }),
-  is_furniture_selected: zod.string({
+  is_furniture_selected: zod.number({
     required_error: "Furniture is required",
     message: "Furniture is required",
   }),
-  is_console_with_chair_selected: zod.string({
+  is_console_with_chair_selected: zod.number({
     required_error: "Console with Chair is required",
     message: "Console with Chair is required",
   }),
-  is_plc_logic_diagram_selected: zod.string({
+  is_plc_logic_diagram_selected: zod.number({
     required_error: "PLC Logic Diagram is required",
     message: "PLC Logic Diagram is required",
   }),
-  is_loop_drawing_for_complete_project_selected: zod.string({
+  is_loop_drawing_for_complete_project_selected: zod.number({
     required_error: "Loop Drawing for Complete Project is required",
     message: "Loop Drawing for Complete Project is required",
   }),
@@ -1823,11 +1823,11 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Hardware between PLC and Client System is required",
     message: "Hardware between PLC and Client System is required",
   }),
-  is_iiot_selected: zod.string({
+  is_iiot_selected: zod.number({
     required_error: "IIOT is required",
     message: "IIOT is required",
   }),
-  is_client_system_comm_with_plc_cpu_selected: zod.string({
+  is_client_system_comm_with_plc_cpu_selected: zod.number({
     required_error: "Client System Comm with PLC CPU is required",
     message: "Client System Comm with PLC CPU is required",
   }),
@@ -1839,7 +1839,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "IIOT Gateway Mounting is required",
     message: "IIOT Gateway Mounting is required",
   }),
-  is_burner_controller_lmv_mounting_selected: zod.string({
+  is_burner_controller_lmv_mounting_selected: zod.number({
     required_error: "Burner Controller LMV Mounting is required",
     message: "Burner Controller LMV Mounting is required",
   }),

@@ -266,7 +266,7 @@ export default function DocumentRevision() {
       render: (text) => <div className="text-center">{text}</div>,
     },
     {
-      title: () => <div className="text-center">Clone</div>,
+      title: () => <div className="text-center">Create New Revision</div>,
       dataIndex: "clone",
       render: (_, record) => {
         return (

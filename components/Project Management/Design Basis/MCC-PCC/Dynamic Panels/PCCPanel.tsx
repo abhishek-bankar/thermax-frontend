@@ -2,7 +2,7 @@
 import * as zod from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, message, Skeleton } from "antd"; // Import Select for dropdown
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { updateData } from "@/actions/crud-actions";
 import CustomCheckboxInput from "@/components/FormInputs/CustomCheckbox";
@@ -21,7 +21,8 @@ import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
-import { moveNAtoEnd } from "@/utils/helpers";
+import { moveNAtoEnd, parseToArray } from "@/utils/helpers";
+import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 
 const getDefaultValues = (
   projectMetadata: any,
@@ -77,8 +78,8 @@ const getDefaultValues = (
     control_transformer_configuration:
       pccPanelData?.control_transformer_configuration || "Single",
 
-    mi_analog: pccPanelData?.mi_analog || "Ammeter with ASS",
-    mi_digital: pccPanelData?.mi_digital || "Multifunction meter",
+    mi_analog: parseToArray(pccPanelData?.mi_analog) || ["Ammeter with ASS"],
+    mi_digital: parseToArray(pccPanelData?.mi_digital) || ["Multifunction meter"],
     mi_communication_protocol:
       pccPanelData?.mi_communication_protocol || "Ethernet",
 
@@ -331,7 +332,12 @@ const PCCPanel = ({
   const [hasACB, setHasACB] = useState(false);
   const incomer_type = watch("incomer_type");
   const currentTransformerNumber = watch("current_transformer_number");
-
+  const tabsCount = useRef("0");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
+    }
+  }, []);
   const incomer_above_type = watch("incomer_above_type");
   useEffect(() => {
     const hasACB =
@@ -411,12 +417,24 @@ const PCCPanel = ({
     try {
       // console.log(data);
 
-      await updateData(`${PCC_PANEL}/${pccPanelData[0].name}`, false, data);
+      const fieldsToStringify = ["mi_analog", "mi_digital"];
+
+      const transformedData: any = { ...data };
+
+      fieldsToStringify.forEach((field) => {
+        if (Array.isArray(transformedData[field])) {
+          transformedData[field] = JSON.stringify(transformedData[field]);
+        }
+      });
+      await updateData(`${PCC_PANEL}/${pccPanelData[0].name}`, false, transformedData);
       message.success("Panel Data Saved Successfully");
-      const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
+      const redirectToLayout = () => {
+        router.push(`/project/${project_id}/design-basis/layout`);
+      };
+      // const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
       setActiveKey((prevKey: string) => {
-        if (prevKey == tabsCount) {
-          router.push(`/project/${project_id}/design-basis/layout`);
+        if (prevKey == tabsCount.current) { 
+          redirectToLayout()
           return "1";
         }
 
@@ -687,7 +705,7 @@ const PCCPanel = ({
 
         <div className="flex gap-4">
           <div className="flex-1">
-            <CustomSingleSelect
+            <CustomMultiSelect
               control={control}
               name="mi_analog"
               label="Analog Meter"
@@ -696,7 +714,7 @@ const PCCPanel = ({
             />
           </div>
           <div className="flex-1">
-            <CustomSingleSelect
+            <CustomMultiSelect
               control={control}
               name="mi_digital"
               label="Digital Meter"

@@ -50,7 +50,7 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
       ),
     },
   ];
-  const sortedProjectPanelData = sortDatewise(projectPanelData); 
+  const sortedProjectPanelData = sortDatewise(projectPanelData);
 
   sortedProjectPanelData?.forEach((panel: any, index) => {
     if (panel.panel_main_type === MCC_PANEL_TYPE) {
@@ -91,12 +91,12 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
       });
     }
   });
+  if (typeof window !== "undefined") {
+    localStorage.setItem("dynamic-tabs-count", String(TabMCC.length));
+  }
 
-  localStorage.setItem("dynamic-tabs-count", String(TabMCC.length));
-
-  const onChange = (key: string) => { 
-
-    setActiveKey(key); 
+  const onChange = (key: string) => {
+    setActiveKey(key);
     localStorage.setItem("active-panels-tab", String(key));
   };
 

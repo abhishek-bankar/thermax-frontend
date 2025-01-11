@@ -14,7 +14,7 @@ import { useLoading } from "@/hooks/useLoading";
 import useMakeOfComponentDropdowns from "./MakeDropdowns";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
-import { moveNAtoEnd } from "@/utils/helpers";
+import { moveNAtoEnd, parseToArray } from "@/utils/helpers";
 
 // Define Zod schema for validation
 const makeOfComponentSchema = zod.object({
@@ -84,15 +84,7 @@ const makeOfComponentSchema = zod.object({
   }),
 });
 
-const parseToArray = (value: any) => {
-  try {
-    return Array.isArray(value) ? value : JSON.parse(value);
-  } catch (e) {
-    console.error(e);
-    // If parsing fails, return the value wrapped in an array
-    return Array.isArray(value) ? value : [value];
-  }
-};
+
 
 const getDefaultValues = (data: any) => {
   return {

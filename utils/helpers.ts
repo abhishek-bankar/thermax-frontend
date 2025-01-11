@@ -111,3 +111,17 @@ export const sortAlphaNumericArray = (data: any) => {
 
   return sortedData;
 };
+
+export const parseToArray = (value: any) => { 
+  if(!value){
+    return []
+  }
+
+  try {
+    return Array.isArray(value) ? value : JSON.parse(value);
+  } catch (e) {
+    console.error(e);
+    // If parsing fails, return the value wrapped in an array
+    return Array.isArray(value) ? value : [value];
+  }
+};

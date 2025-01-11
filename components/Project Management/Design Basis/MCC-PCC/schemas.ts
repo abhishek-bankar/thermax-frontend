@@ -68,13 +68,12 @@ export const configItemValidationSchema = zod.object({
     message: "Control Transformer Configuration is required",
   }),
 
-  digital_meters: zod.string({
+  digital_meters: zod.array(zod.string(), {
     required_error: "Digital Meters is required",
     message: "Digtial Meters is Required",
   }),
-  analog_meters: zod.string({
+  analog_meters: zod.array(zod.string(), {
     required_error: "Analog Meters is required",
-    message: "Analog Meters is Required",
   }),
   communication_protocol: zod.string({
     required_error: "Communication Protocol is required",
@@ -626,10 +625,10 @@ export const mccPanelValidationSchema = zod
     is_lsig_selected: zod.number().optional(),
     is_lsi_selected: zod.number().optional(),
     is_neural_link_with_disconnect_facility_selected: zod.number().optional(),
-    is_led_type_lamp_selected: zod.string({
-      required_error: "LED Type Lamp is required",
-      message: "LED Type Lamp is required",
-    }),
+    // is_led_type_lamp_selected: zod.string({
+    //   required_error: "LED Type Lamp is required",
+    //   message: "LED Type Lamp is required",
+    // }),
     is_blue_cb_spring_charge_selected: zod.string({
       required_error: "This field is required",
       message: "This field is required",
@@ -638,7 +637,7 @@ export const mccPanelValidationSchema = zod
       required_error: "This field is required",
       message: "This field is required",
     }),
-    is_white_healthy_trip_circuit_selected: zod.number({
+    is_white_healthy_trip_circuit_selected: zod.string({
       required_error: "This field is required",
       message: "This field is required",
     }),
@@ -683,11 +682,11 @@ export const mccPanelValidationSchema = zod
       required_error: "ON Indication Lamp is required",
       message: "ON Indication Lamp is required",
     }),
-    mi_analog: zod.string({
+    mi_analog: zod.array(zod.string(), {
       required_error: "Analog is required",
       message: "Analog is required",
     }),
-    mi_digital: zod.string({
+    mi_digital: zod.array(zod.string(), {
       required_error: "Digital is required",
       message: "Digital is required",
     }),
@@ -1062,11 +1061,11 @@ export const pccPanelValidationSchema = zod.object({
     message: "ON Indication Lamp is required",
   }),
 
-  mi_analog: zod.string({
+  mi_analog: zod.array(zod.string(),{
     required_error: "Analog is required",
     message: "Analog is required",
   }),
-  mi_digital: zod.string({
+  mi_digital: zod.array(zod.string(),{
     required_error: "Digital is required",
     message: "Digital is required",
   }),

@@ -9,7 +9,12 @@ import { updateData } from "@/actions/crud-actions";
 import CustomTextNumber from "@/components/FormInputs/CustomInputNumber";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
-import { MOTOR_PARAMETER_API, PROJECT_INFO_API } from "@/configs/api-endpoints";
+import {
+  DESIGN_BASIS_GENERAL_INFO_API,
+  MOTOR_PARAMETER_API,
+  PROJECT_INFO_API,
+  PROJECT_MAIN_PKG_LIST_API,
+} from "@/configs/api-endpoints";
 import { useGetData } from "@/hooks/useCRUD";
 import { useLoading } from "@/hooks/useLoading";
 import useMotorParametersDropdowns from "./MotorParametersDropdown";
@@ -183,7 +188,11 @@ const fieldSchema = zod.object({
   }),
 });
 
-const getDefaultValues = (defaultData: any, projectInfoData: any) => {
+const getDefaultValues = (
+  defaultData: any,
+  projectInfoData: any,
+  mainPkgData: any
+) => {
   return {
     safe_area_efficiency_level:
       defaultData?.safe_area_efficiency_level || "IE-2",
@@ -227,7 +236,7 @@ const getDefaultValues = (defaultData: any, projectInfoData: any) => {
     hazardous_area_space_heater:
       defaultData?.hazardous_area_space_heater || "110",
     hazardous_area_certification:
-      defaultData?.hazardous_area_certification || "PESO",
+      defaultData?.hazardous_area_certification || mainPkgData?.standard,
     safe_area_bearing_rtd: defaultData?.safe_area_bearing_rtd || "110",
     hazardous_area_bearing_rtd:
       defaultData?.hazardous_area_bearing_rtd || "110",
@@ -290,7 +299,7 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
   );
 
   useEffect(() => {
-    if (motorParameters?.[0]) {  
+    if (motorParameters?.[0]) {
       setIsHazardous(Boolean(motorParameters?.[0].is_hazardous_area_present));
       setIsSafe(Boolean(motorParameters?.[0].is_safe_area_present));
     }
@@ -323,15 +332,24 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
     // hazardousTerminalBoxOptions,
   } = useMotorParametersDropdowns();
 
+  const getMainPkgUrl = `${PROJECT_MAIN_PKG_LIST_API}?revision_id=${revision_id}`;
+
+  const { data: mainPkgData } = useGetData(getMainPkgUrl);
+
   const { control, handleSubmit, reset, setValue } = useForm({
     resolver: zodResolver(fieldSchema),
-    defaultValues: getDefaultValues(motorParameters?.[0], projectInfoData),
+    defaultValues: getDefaultValues(
+      motorParameters?.[0],
+      projectInfoData,
+      mainPkgData[0]
+    ),
     mode: "onSubmit",
   });
-
   useEffect(() => {
-    reset(getDefaultValues(motorParameters?.[0], projectInfoData));
-  }, [reset, motorParameters, projectInfoData]);
+    reset(
+      getDefaultValues(motorParameters?.[0], projectInfoData, mainPkgData[0])
+    );
+  }, [reset, motorParameters, projectInfoData, mainPkgData]);
 
   useEffect(() => {
     setValue(

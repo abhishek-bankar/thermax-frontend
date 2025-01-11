@@ -144,7 +144,7 @@ const getDefaultValues = (
       mccPanelData?.ppc_pretreatment_panel_standard ||
       "- Panel Shall Be Degreased And Derusted(7 Tank Pretreatment)\n- Panel Shall Be Powder Coated.\nOR\n- OEM standard for pretreatment.    ",
     general_requirments_for_construction:
-      mccPanelData?.general_requirments_for_construction || "NA",
+      mccPanelData?.general_requirments_for_construction || "Not Applicable",
     vfd_auto_manual_selection:
       mccPanelData?.vfd_auto_manual_selection || "Applicable",
     is_punching_details_for_boiler_selected:
@@ -175,7 +175,7 @@ const getDefaultValues = (
     heater_model: mccPanelData?.heater_model || "NA",
     heater_fuel: mccPanelData?.heater_fuel || "NA",
     heater_year: mccPanelData?.heater_year || "NA",
-    special_note: mccPanelData?.special_note || "NA",
+    special_note: mccPanelData?.special_note || "Not Applicable",
     heater_power_supply_vac:
       mccPanelData?.heater_power_supply_vac || projectInfo?.main_supply_lv,
     heater_power_supply_phase:
@@ -325,10 +325,12 @@ const MCCPanel = ({
   }, [currentTransformerCoating, setValue]);
 
   useEffect(() => {
-    
     console.log(mccPanelData, "MCC DATA");
     if (projectInfo && mccPanelData) {
-      console.log(getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]), "Default Values MCC");
+      console.log(
+        getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]),
+        "Default Values MCC"
+      );
 
       reset(getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]));
     }
@@ -472,7 +474,7 @@ const MCCPanel = ({
         false,
         transformedData
       );
-      message.success("Panel Data Saved successfully.");
+      message.success("Panel Data Saved Successfully");
       const redirectToLayout = () => {
         router.push(`/project/${project_id}/design-basis/layout`);
       };
@@ -491,6 +493,9 @@ const MCCPanel = ({
       setLoading(false);
     }
   };
+  useEffect(() => {
+    window.scroll(0, 0);
+  }, []);
 
   if (isLoading) {
     return (
@@ -948,18 +953,23 @@ const MCCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ga_panel_mounting_height"
-              label="Height of Base Frame (mm)"
+              label="Height of Base Frame"
               options={
                 (watch("ga_panel_mounting_frame") === "Base Frame"
                   ? base_frame_options
                   : extended_frame_options) || []
               }
               size="small"
+              suffixIcon={
+                <>
+                  <p className="font-semibold text-blue-500">mm</p>
+                </>
+              }
             />
           </div>
         </div>
         <div className="mt-2 flex items-center gap-4">
-          <h4 className="mr-2 font-semibold text-slate-700">Sections</h4>
+          {/* <h4 className="mr-2 font-semibold text-slate-700">Sections</h4> */}
           <div className="flex-1">
             <CustomRadioSelect
               control={control}
@@ -1007,7 +1017,7 @@ const MCCPanel = ({
               control={control}
               name="ga_gland_plate_3mm_drill_type"
               label="Gland Plate Type"
-              options={ga_gland_plate_3mm_drill_type_options || []}
+              options={moveNAtoEnd(ga_gland_plate_3mm_drill_type_options) || []}
               size="small"
             />
           </div>

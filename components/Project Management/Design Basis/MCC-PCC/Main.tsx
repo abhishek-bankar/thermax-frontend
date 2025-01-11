@@ -105,7 +105,7 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
       <Tabs
         activeKey={activeKey} // Set the active tab
         onChange={onChange}
-        type="card"
+        type="card" 
         items={TabMCC.map((tab) => ({
           label: tab.label,
           key: tab.key,

@@ -271,7 +271,7 @@ export default function DocumentRevision() {
       render: (_, record) => {
         return (
           <div className="text-center">
-            <Tooltip title={"Clone Revision"}>
+            <Tooltip title={"Copy Revision"}>
               <Button
                 type="link"
                 shape="circle"

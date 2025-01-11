@@ -101,7 +101,6 @@ export default function ProjectList({ userInfo, isComplete }: any) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectList, searchQuery]);
 
-
   // const truncateText = (text:string, maxLength = 6) => {
   //   if (text.length > maxLength) {
   //     return `${text.substring(0, maxLength)}...`;
@@ -109,7 +108,6 @@ export default function ProjectList({ userInfo, isComplete }: any) {
   //   return text;
   // };
 
-  
   const columns: ColumnsType<DataType> = [
     {
       title: () => <div className="text-center">Division</div>,
@@ -117,7 +115,11 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       key: "division",
       hidden: !userInfo.is_superuser,
       render: (text: keyof typeof TagColors) => {
-        return <Tag color={TagColors[text]}>{text}</Tag>;
+        return (
+          <div className="text-center text-wrap">
+            <Tag color={TagColors[text]}>{text}</Tag>
+          </div>
+        );
       },
       filters: [HEATING, ENVIRO, WWS_IPG, WWS_SPG, SERVICES].map((division) => {
         return { text: division, value: division };
@@ -126,11 +128,12 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       defaultFilteredValue: [userInfo?.division],
     },
     {
-      title: () => <div className="text-center">Project OC No</div>,
+      title: () => <div className="text-center text-wrap">Project OC No</div>,
       dataIndex: "project_oc_number",
       key: "project_oc_number",
+      ellipsis: true,
       render: (text) => {
-        return <div className="text-center">{text}</div>;
+        return <div className="text-center text-wrap">{text}</div>;
       },
     },
     {
@@ -159,7 +162,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
     {
       title: "Created Date",
       dataIndex: "creation",
-      key: "creation",
+      key: "creation", 
       align: "center",
       render: (text) => {
         const date = new Date(text);
@@ -168,10 +171,10 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       },
     },
     {
-      title: () => <div className="text-center">Modified Date</div>,
+      title: "Modified Date",  
       dataIndex: "modified",
       key: "modified",
-      align: "center",
+      align: "center", 
       render: (text) => {
         const date = new Date(text);
         const stringDate = getThermaxDateFormat(date);
@@ -196,9 +199,11 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       title: "Action",
       dataIndex: "action",
       align: "center",
+      ellipsis: true,
+
       hidden: isComplete === 1,
       render: (text, record: any) => (
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center">
           <Tooltip placement="top" title="Edit">
             <Button
               type="link"

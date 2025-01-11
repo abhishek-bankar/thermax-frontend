@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, message, Skeleton } from "antd"; // Import Select for dropdown
 import * as zod from "zod";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { createData, getData, updateData } from "@/actions/crud-actions";
 import CustomCheckboxInput from "@/components/FormInputs/CustomCheckbox";
@@ -21,7 +21,8 @@ import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
-import { moveNAtoEnd } from "@/utils/helpers";
+import { moveNAtoEnd, parseToArray } from "@/utils/helpers";
+import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 
 const getDefaultValues = (
   projectMetadata: any,
@@ -44,8 +45,8 @@ const getDefaultValues = (
     is_neural_link_with_disconnect_facility_selected:
       mccPanelData?.is_neural_link_with_disconnect_facility_selected || 0,
 
-    is_led_type_lamp_selected:
-      mccPanelData?.is_led_type_lamp_selected?.toString() || "1",
+    // is_led_type_lamp_selected:
+    //   mccPanelData?.is_led_type_lamp_selected?.toString() || "1",
     is_indication_on_selected: Number(mccPanelData?.is_indication_on_selected),
     led_type_on_input: mccPanelData?.led_type_on_input || "Green",
     is_indication_off_selected: Number(
@@ -75,8 +76,12 @@ const getDefaultValues = (
     control_transformer_configuration:
       mccPanelData?.control_transformer_configuration || "Single",
     alarm_annunciator: mccPanelData?.alarm_annunciator || "Applicable",
-    mi_analog: mccPanelData?.mi_analog || "Ammeter with ASS",
-    mi_digital: mccPanelData?.mi_digital || "NA",
+    mi_analog: mccPanelData?.mi_analog
+      ? parseToArray(mccPanelData?.mi_analog)
+      : ["Ammeter with ASS"],
+    mi_digital: mccPanelData?.mi_digital
+      ? parseToArray(mccPanelData?.mi_digital)
+      : ["NA"],
     mi_communication_protocol: mccPanelData?.mi_communication_protocol || "NA",
     ga_moc_material: mccPanelData?.ga_moc_material || "Aluminium",
     ga_moc_thickness_door: mccPanelData?.ga_moc_thickness_door || "1.6 mm",
@@ -134,8 +139,7 @@ const getDefaultValues = (
     ppc_base_frame_paint_shade:
       mccPanelData?.ppc_base_frame_paint_shade || "Black",
     ppc_minimum_coating_thickness:
-      mccPanelData?.ppc_minimum_coating_thickness ||
-      "As per Client Specification",
+      mccPanelData?.ppc_minimum_coating_thickness || "60 to 70 microns",
     ppc_pretreatment_panel_standard:
       mccPanelData?.ppc_pretreatment_panel_standard ||
       "- Panel Shall Be Degreased And Derusted(7 Tank Pretreatment)\n- Panel Shall Be Powder Coated.\nOR\n- OEM standard for pretreatment.    ",
@@ -321,9 +325,11 @@ const MCCPanel = ({
   }, [currentTransformerCoating, setValue]);
 
   useEffect(() => {
-    // console.log(mccPanelData, "MCC DATA");
-
+    
+    console.log(mccPanelData, "MCC DATA");
     if (projectInfo && mccPanelData) {
+      console.log(getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]), "Default Values MCC");
+
       reset(getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]));
     }
     // reset(getDefaultValues(projectInfo, mccPanelData?.[0]))
@@ -399,6 +405,12 @@ const MCCPanel = ({
       setValue("current_transformer_number", "NA");
     }
   }, [current_transformer_coating_Controlled, setValue]);
+  const tabsCount = useRef("0");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
+    }
+  }, []);
 
   // to control the checkboxes
 
@@ -446,13 +458,27 @@ const MCCPanel = ({
   > = async (data) => {
     setLoading(true);
     try {
-      await updateData(`${MCC_PANEL}/${mccPanelData[0].name}`, false, data);
-      message.success("Panel Data Saved successfully.");
+      const fieldsToStringify = ["mi_analog", "mi_digital"];
 
-      const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
+      const transformedData: any = { ...data };
+
+      fieldsToStringify.forEach((field) => {
+        if (Array.isArray(transformedData[field])) {
+          transformedData[field] = JSON.stringify(transformedData[field]);
+        }
+      });
+      await updateData(
+        `${MCC_PANEL}/${mccPanelData[0].name}`,
+        false,
+        transformedData
+      );
+      message.success("Panel Data Saved successfully.");
+      const redirectToLayout = () => {
+        router.push(`/project/${project_id}/design-basis/layout`);
+      };
       setActiveKey((prevKey: string) => {
-        if (prevKey == tabsCount) {
-          router.push(`/project/${project_id}/design-basis/layout`);
+        if (prevKey == tabsCount.current) {
+          redirectToLayout();
           return "1";
         }
 
@@ -728,7 +754,7 @@ const MCCPanel = ({
         </Divider>
         <div className="flex items-center gap-4">
           <div className="flex-1">
-            <CustomSingleSelect
+            <CustomMultiSelect
               control={control}
               name="mi_analog"
               label="Analog Meter"
@@ -737,7 +763,7 @@ const MCCPanel = ({
             />
           </div>
           <div className="flex-1">
-            <CustomSingleSelect
+            <CustomMultiSelect
               control={control}
               name="mi_digital"
               label="Digital Meter"

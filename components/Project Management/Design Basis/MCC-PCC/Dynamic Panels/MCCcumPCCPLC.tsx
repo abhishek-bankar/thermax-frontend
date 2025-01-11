@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as zod from "zod";
 import { Button, Divider, message } from "antd";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { updateData } from "@/actions/crud-actions";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
@@ -26,6 +26,7 @@ import {
   sortDropdownOptions,
 } from "@/utils/helpers";
 import { useParams, useRouter } from "next/navigation";
+import { PercentageOutlined } from "@ant-design/icons";
 
 const getDefaultValues = (plcData: any) => {
   const defaultValues = {
@@ -51,10 +52,9 @@ const getDefaultValues = (plcData: any) => {
     plc_cpu_system_series: plcData?.plc_cpu_system_series || "VTS",
     plc_cpu_system_input_voltage:
       plcData?.plc_cpu_system_input_voltage || "24 VDC",
-    plc_cpu_system_battery_backup:
-      plcData?.plc_cpu_system_battery_backup || "40%",
+    plc_cpu_system_battery_backup: plcData?.plc_cpu_system_battery_backup || "",
     plc_cpu_system_memory_free_space_after_program:
-      plcData?.plc_cpu_system_memory_free_space_after_program || "20%",
+      plcData?.plc_cpu_system_memory_free_space_after_program || "20",
     // Redundancy
     is_power_supply_plc_cpu_system_selected:
       plcData?.is_power_supply_plc_cpu_system_selected,
@@ -106,7 +106,7 @@ const getDefaultValues = (plcData: any) => {
     do_module_output_type:
       plcData?.do_module_output_type || "Potential Free Contacts",
     // Interposing Relay
-    interposing_relay: plcData?.interposing_relay || "Applicable",
+    interposing_relay: plcData?.interposing_relay || "Applicable for DI",
     output_contact_rating_of_interposing_relay:
       plcData?.output_contact_rating_of_interposing_relay || "230 VAC, 5AMP",
     is_no_of_contacts_selected: plcData?.is_no_of_contacts_selected,
@@ -355,6 +355,12 @@ const MCCcumPCCPLCPanel = ({
     defaultValues: getDefaultValues(plcPanelData),
     mode: "onSubmit",
   });
+  const tabsCount = useRef("0");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
+    }
+  }, []);
   console.log("form errors PLC", formState.errors);
 
   const upsScope = watch("ups_scope");
@@ -409,11 +415,14 @@ const MCCcumPCCPLCPanel = ({
         false,
         data
       );
-      message.success("PLC Data updated successfully");
-      const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
+      message.success("PLC Data updated successfully"); 
+      const redirectToLayout = () => {
+        router.push(`/project/${project_id}/design-basis/layout`);
+      };
+
       setActiveKey((prevKey: string) => {
-        if (prevKey == tabsCount) {
-          router.push(`/project/${project_id}/design-basis/layout`);
+        if (prevKey == tabsCount.current) {
+          redirectToLayout()
           return "1";
         }
 
@@ -442,7 +451,7 @@ const MCCcumPCCPLCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ups_control_voltage"
-              label="Control Voltage ( UPS )"
+              label="Incoming UPS Supply"
               options={plc_control_voltage_options || []}
               size="small"
             />
@@ -451,7 +460,7 @@ const MCCcumPCCPLCPanel = ({
             <CustomSingleSelect
               control={control}
               name="non_ups_control_voltage"
-              label="Control Voltage ( Non UPS )"
+              label="Incoming Non-UPS Supply"
               options={plc_control_voltage_options || []}
               size="small"
             />
@@ -492,7 +501,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Input Voltage 3-Phase"
                 options={dropdown["PLC UPS 3 Phase Voltage"] || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
             <div className="flex-1">
@@ -502,7 +511,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Input Voltage 1-Phase"
                 options={plc_ups_1p_voltage_options || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
           </div>
@@ -516,7 +525,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Output Voltage 1-Phase"
                 options={plc_ups_1p_voltage_options || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
             <div className="flex-1">
@@ -525,7 +534,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ups_type"
                 label="UPS Type"
                 options={plc_ups_type_options || []}
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
                 size="small"
               />
             </div>
@@ -535,7 +544,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ups_battery_type"
                 label="UPS Battery Type"
                 options={moveNAtoEnd(plc_ups_battery_type_options) || []}
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
                 size="small"
               />
             </div>
@@ -552,7 +561,7 @@ const MCCcumPCCPLCPanel = ({
                   { label: "Yes", value: 1 },
                   { label: "No", value: 0 },
                 ]}
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
             <div className="flex-1">
@@ -562,7 +571,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Battery Backup Time In Min"
                 options={plc_ups_battery_backup_time_options || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
             <div className="flex-1">
@@ -572,7 +581,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Redundancy"
                 options={moveNAtoEnd(plc_ups_redundancy_options) || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
           </div>
@@ -606,23 +615,16 @@ const MCCcumPCCPLCPanel = ({
                 <div className="flex-1">
                   <CustomTextInput
                     control={control}
-                    name="plc_cpu_system_battery_backup"
-                    label="PLC CPU System Battery Backup"
-                    size="small"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <CustomTextInput
-                    control={control}
                     name="plc_cpu_system_memory_free_space_after_program"
-                    label="PLC CPU System Memory Free Space after Program"
+                    label="PLC CPU Memory Free Space"
                     size="small"
+                    suffix={
+                      <>
+                        <PercentageOutlined style={{ color: "#3b82f6" }} />
+                      </>
+                    }
                   />
                 </div>
-                <div className="flex-1" />
-                <div className="flex-1" />
               </div>
             </div>
           </div>

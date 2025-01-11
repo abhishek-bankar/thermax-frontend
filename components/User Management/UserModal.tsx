@@ -384,7 +384,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
       if (registerRes?.status === 409) {
         setStatus("error");
-        setInfoMessage("User already exists");
+        setInfoMessage("User Already Exists");
         return;
       }
 

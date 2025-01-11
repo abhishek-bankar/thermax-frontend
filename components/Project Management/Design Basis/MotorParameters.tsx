@@ -335,21 +335,25 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
   const getMainPkgUrl = `${PROJECT_MAIN_PKG_LIST_API}?revision_id=${revision_id}`;
 
   const { data: mainPkgData } = useGetData(getMainPkgUrl);
-
+  const [mainPkg, setMainPkg] = useState();
   const { control, handleSubmit, reset, setValue } = useForm({
     resolver: zodResolver(fieldSchema),
     defaultValues: getDefaultValues(
       motorParameters?.[0],
       projectInfoData,
-      mainPkgData[0]
+      mainPkg
     ),
     mode: "onSubmit",
   });
   useEffect(() => {
-    reset(
-      getDefaultValues(motorParameters?.[0], projectInfoData, mainPkgData[0])
-    );
-  }, [reset, motorParameters, projectInfoData, mainPkgData]);
+    if (mainPkgData) {
+      setMainPkg(mainPkgData[0]);
+    }
+  }, [mainPkgData]);
+
+  useEffect(() => {
+    reset(getDefaultValues(motorParameters?.[0], projectInfoData, mainPkg));
+  }, [reset, motorParameters, projectInfoData, mainPkg]);
 
   useEffect(() => {
     setValue(

@@ -350,7 +350,7 @@ const MCCcumPCCPLCPanel = ({
   const eo_system_hardware_options = dropdown["EO System Hardware"];
   const eo_monitor_size_options = dropdown["EO Monitor Size"];
 
-  const { control, handleSubmit, reset, watch, formState } = useForm({
+  const { control, handleSubmit, reset, watch, setValue, formState } = useForm({
     resolver: zodResolver(plcPanelValidationSchema),
     defaultValues: getDefaultValues(plcPanelData),
     mode: "onSubmit",
@@ -364,6 +364,7 @@ const MCCcumPCCPLCPanel = ({
   console.log("form errors PLC", formState.errors);
 
   const upsScope = watch("ups_scope");
+  const is_electronic_hooter_selected = watch("is_electronic_hooter_selected");
   const noOfContacts = [
     {
       name: "1NO + 1NC",
@@ -377,13 +378,20 @@ const MCCcumPCCPLCPanel = ({
     },
   ];
   useEffect(() => {
+    window.scroll(0, 0);
+  }, []);
+  useEffect(() => {
     console.log(plcPanelData?.[0], "PLC DATA");
 
     reset(getDefaultValues(plcPanelData));
   }, [plcPanelData, reset]);
   useEffect(() => {
-    console.log(plcPanelData, "PLC DATA");
-  }, [plcPanelData]);
+    if (is_electronic_hooter_selected) {
+      setValue("electronic_hooter_acknowledge", "Black");
+    } else {
+      setValue("electronic_hooter_acknowledge", "NA");
+    }
+  }, [is_electronic_hooter_selected, setValue]);
 
   const handleError = (error: any) => {
     try {
@@ -415,14 +423,14 @@ const MCCcumPCCPLCPanel = ({
         false,
         data
       );
-      message.success("PLC Data updated successfully"); 
+      message.success("PLC Data updated successfully");
       const redirectToLayout = () => {
         router.push(`/project/${project_id}/design-basis/layout`);
       };
 
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount.current) {
-          redirectToLayout()
+          redirectToLayout();
           return "1";
         }
 
@@ -1449,7 +1457,7 @@ const MCCcumPCCPLCPanel = ({
                     name="hmi_hardware_make"
                     label="HMI Hardware Make"
                     size="small"
-                    options={hmi_hardware_make_options || []}
+                    options={moveNAtoEnd(hmi_hardware_make_options) || []}
                     disabled={watch("is_hmi_selected") === 0}
                   />
                 </div>
@@ -1908,6 +1916,7 @@ const MCCcumPCCPLCPanel = ({
                 name="hardware_between_plc_and_client_system"
                 label="Communication Cable & Hardware Between PLC CPU System & Client System"
                 size="small"
+                disabled={!watch("is_client_system_comm_with_plc_cpu_selected")}
               />
             </div>
             <div className="flex-1">
@@ -1916,6 +1925,7 @@ const MCCcumPCCPLCPanel = ({
                 name="client_system_communication"
                 label="Client System Communication"
                 rows={5}
+                disabled={!watch("is_client_system_comm_with_plc_cpu_selected")}
               />
             </div>
           </div>
@@ -1926,7 +1936,7 @@ const MCCcumPCCPLCPanel = ({
             <div className="flex-1">
               <div className="flex-1 pb-2">
                 <div className="flex item-center gap-5 pb-2">
-                  <div className="w-1/4 flex flex-row items-center justify-start gap-4">
+                  <div className="flex flex-row items-center justify-start gap-4">
                     <div className="font-semibold mt-1 text-slate-700">
                       IIOT
                     </div>
@@ -1950,6 +1960,7 @@ const MCCcumPCCPLCPanel = ({
                   name="iiot_gateway_note"
                   label="IIOT Gateway Note"
                   rows={5}
+                  disabled={!watch("is_iiot_selected")}
                 />
               </div>
             </div>
@@ -1960,6 +1971,7 @@ const MCCcumPCCPLCPanel = ({
                   name="iiot_gateway_mounting"
                   label="IIOT Gateway is Mounted in PLC Panel"
                   rows={5}
+                  disabled={!watch("is_iiot_selected")}
                 />
               </div>
             </div>

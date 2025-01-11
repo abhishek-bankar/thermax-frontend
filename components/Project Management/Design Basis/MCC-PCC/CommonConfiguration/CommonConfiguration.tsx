@@ -79,10 +79,12 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
       commonConfigData?.control_transformer_type ||
       "Industrial control Step down transformer",
 
-    digital_meters: parseToArray(commonConfigData?.digital_meters) || ["NA"],
-    analog_meters: parseToArray(commonConfigData?.analog_meters) || [
-      "Ammeter with ASS",
-    ],
+    digital_meters: commonConfigData?.digital_meters
+      ? parseToArray(commonConfigData?.digital_meters)
+      : ["NA"],
+    analog_meters: commonConfigData?.analog_meters
+      ? parseToArray(commonConfigData?.analog_meters)
+      : ["Ammeter with ASS"],
     communication_protocol: commonConfigData?.communication_protocol || "NA",
 
     current_transformer: commonConfigData?.current_transformer || "0.37",
@@ -179,7 +181,10 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     safe_field_motor_cable_entry: commonConfigData?.cable_entry || "Bottom",
     safe_field_motor_canopy: commonConfigData?.canopy_on_top || "All",
     safe_field_motor_canopy_type: commonConfigData?.type || "On Top",
-    hazardous_field_motor_type: commonConfigData?.type || mainPkgData?.standard,
+    hazardous_field_motor_type:
+      commonConfigData?.type || mainPkgData?.standard
+        ? mainPkgData?.standard
+        : "IS",
     hazardous_field_motor_enclosure: commonConfigData?.enclosure || "IP 65",
     hazardous_field_motor_material: commonConfigData?.material || "SS 316",
     hazardous_field_motor_thickness: commonConfigData?.thickness || "1.6 mm",
@@ -362,7 +367,7 @@ const CommonConfiguration = ({
       value: "NA",
       label: "NA",
     },
-  ]; 
+  ];
 
   const { control, handleSubmit, reset, watch, setValue } = useForm({
     resolver: zodResolver(configItemValidationSchema),
@@ -435,6 +440,10 @@ const CommonConfiguration = ({
     hazardous_field_motor_material,
     setValue,
   ]);
+  const safe_field_motor_canopy = watch("safe_field_motor_canopy");
+  const safe_lpbs_canopy = watch("safe_lpbs_canopy");
+  const hazardous_field_motor_canopy = watch("hazardous_field_motor_canopy");
+  const hazardous_lpbs_canopy = watch("hazardous_lpbs_canopy");
   useEffect(() => {
     const transformerConfigMap: { [key: string]: string } = {
       One: "Y-Phase with CT",
@@ -448,7 +457,35 @@ const CommonConfiguration = ({
       ] || "NA";
 
     setValue("current_transformer_configuration", configuration);
-  }, [currentTransformerNumber, setValue]);
+
+    if (safe_field_motor_canopy === "NA") {
+      setValue("safe_field_motor_canopy_type", "NA");
+    } else {
+      setValue("safe_field_motor_canopy_type", "On Top");
+    }
+    if (safe_lpbs_canopy === "NA") {
+      setValue("safe_lpbs_canopy_type", "NA");
+    } else {
+      setValue("safe_lpbs_canopy_type", "On Top");
+    }
+    if (hazardous_field_motor_canopy === "NA") {
+      setValue("hazardous_field_motor_canopy_type", "NA");
+    } else {
+      setValue("hazardous_field_motor_canopy_type", "On Top");
+    }
+    if (hazardous_lpbs_canopy === "NA") {
+      setValue("hazardous_lpbs_canopy_type", "NA");
+    } else {
+      setValue("hazardous_lpbs_canopy_type", "On Top");
+    }
+  }, [
+    currentTransformerNumber,
+    hazardous_field_motor_canopy,
+    hazardous_lpbs_canopy,
+    safe_field_motor_canopy,
+    safe_lpbs_canopy,
+    setValue,
+  ]);
 
   useEffect(() => {
     if (supply_feeder_standard_controlled === "IS") {
@@ -661,9 +698,7 @@ const CommonConfiguration = ({
               size="small"
             />
           </div>
-          <div className="flex-1">
-            
-          </div>
+          <div className="flex-1"></div>
         </div>
         <Divider>
           <span className="font-bold text-slate-700">Control Transformer</span>
@@ -1046,7 +1081,6 @@ const CommonConfiguration = ({
           )}
         </div>
 
-       
         <Divider>
           <span className="font-bold text-slate-700">
             Metering Instruments for Feeder
@@ -1565,7 +1599,7 @@ const CommonConfiguration = ({
             <CustomSingleSelect
               control={control}
               name="lamp_test_push_button"
-              label="Lamp Test Push Button"
+              label="Lamp Test"
               options={
                 moveNAtoEnd(
                   dropdown["Reset Dropdown"]?.filter(
@@ -2141,7 +2175,7 @@ const CommonConfiguration = ({
               control={control}
               name="safe_lpbs_qty"
               label="Qty"
-              options={dropdown["Field Motor Isolator General QTY"] || []}
+              options={dropdown["Local Push Button Station Qty"] || []}
               disabled={
                 is_local_push_button_station_selected === "0" ||
                 watch("is_safe_lpbs_selected") === "0"
@@ -2280,7 +2314,7 @@ const CommonConfiguration = ({
               control={control}
               name="hazardous_lpbs_qty"
               label="Qty"
-              options={dropdown["Field Motor Isolator General QTY"] || []}
+              options={dropdown["Local Push Button Station Qty"] || []}
               disabled={
                 is_local_push_button_station_selected === "0" ||
                 watch("is_hazardous_lpbs_selected") === "0"
@@ -2309,7 +2343,9 @@ const CommonConfiguration = ({
               name="hazardous_lpbs_canopy"
               label="Canopy"
               options={
-                dropdown["Local Push Button Station Canopy On top"] || []
+                moveNAtoEnd(
+                  dropdown["Local Push Button Station Canopy On top"]
+                ) || []
               }
               disabled={
                 is_local_push_button_station_selected === "0" ||
@@ -2323,7 +2359,9 @@ const CommonConfiguration = ({
               control={control}
               name="hazardous_lpbs_canopy_type"
               label="Canopy Type"
-              options={dropdown["Field Motor Isolator Canopy Type"] || []}
+              options={
+                moveNAtoEnd(dropdown["Field Motor Isolator Canopy Type"]) || []
+              }
               disabled={
                 is_local_push_button_station_selected === "0" ||
                 watch("is_hazardous_lpbs_selected") === "0"
@@ -2332,7 +2370,7 @@ const CommonConfiguration = ({
             />
           </div>
         </div>
-      
+
         <Divider>
           <span className="font-bold text-slate-700">
             Identification of Components

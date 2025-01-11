@@ -31,7 +31,7 @@ const getDefaultValues = (
 ) => {
   return {
     incomer_ampere: pccPanelData?.incomer_ampere || "1000",
-    special_note: pccPanelData?.special_note || "NA",
+    special_note: pccPanelData?.special_note || "Not Applicable",
     led_type_other_input: pccPanelData?.led_type_other_input || "NA",
     incomer_pole: pccPanelData?.incomer_pole || "3",
     incomer_type: pccPanelData?.incomer_type || "SFU",
@@ -78,8 +78,12 @@ const getDefaultValues = (
     control_transformer_configuration:
       pccPanelData?.control_transformer_configuration || "Single",
 
-    mi_analog: parseToArray(pccPanelData?.mi_analog) || ["Ammeter with ASS"],
-    mi_digital: parseToArray(pccPanelData?.mi_digital) || ["Multifunction meter"],
+    mi_analog: pccPanelData?.mi_analog
+      ? parseToArray(pccPanelData?.mi_analog)
+      : ["Ammeter with ASS"],
+    mi_digital: pccPanelData?.mi_digital
+      ? parseToArray(pccPanelData?.mi_digital)
+      : ["Multifunction meter"],
     mi_communication_protocol:
       pccPanelData?.mi_communication_protocol || "Ethernet",
 
@@ -143,7 +147,7 @@ const getDefaultValues = (
       pccPanelData?.ppc_pretreatment_panel_standard ||
       "- Panel Shall Be Degreased And Derusted(7 Tank Pretreatment)\n- Panel Shall Be Powder Coated.\nOR\n- OEM standard for pretreatment.    ",
     general_requirments_for_construction:
-      pccPanelData?.general_requirments_for_construction || "NA",
+      pccPanelData?.general_requirments_for_construction || "Not Applicable",
     is_punching_details_for_boiler_selected:
       pccPanelData?.is_punching_details_for_boiler_selected?.toString() || "0",
     boiler_model: pccPanelData?.boiler_model || "NA",
@@ -310,7 +314,9 @@ const PCCPanel = ({
   const router = useRouter();
 
   console.log("form errors", formState.errors);
-
+  useEffect(() => {
+    window.scroll(0, 0);
+  }, []);
   useEffect(() => {
     console.log(pccPanelData?.[0], "PCC");
     console.log(
@@ -426,15 +432,19 @@ const PCCPanel = ({
           transformedData[field] = JSON.stringify(transformedData[field]);
         }
       });
-      await updateData(`${PCC_PANEL}/${pccPanelData[0].name}`, false, transformedData);
+      await updateData(
+        `${PCC_PANEL}/${pccPanelData[0].name}`,
+        false,
+        transformedData
+      );
       message.success("Panel Data Saved Successfully");
       const redirectToLayout = () => {
         router.push(`/project/${project_id}/design-basis/layout`);
       };
       // const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
       setActiveKey((prevKey: string) => {
-        if (prevKey == tabsCount.current) { 
-          redirectToLayout()
+        if (prevKey == tabsCount.current) {
+          redirectToLayout();
           return "1";
         }
 
@@ -900,18 +910,23 @@ const PCCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ga_panel_mounting_height"
-              label="Height of Base Frame (mm)"
+              label="Height of Base Frame"
               options={
                 (watch("ga_panel_mounting_frame") === "Base Frame"
                   ? base_frame_options
                   : extended_frame_options) || []
               }
               size="small"
+              suffixIcon={
+                <>
+                  <p className="font-semibold text-blue-500">mm</p>
+                </>
+              }
             />
           </div>
         </div>
         <div className="mt-2 flex items-center gap-4">
-          <h4 className="mr-2 font-semibold text-slate-700">Sections</h4>
+          {/* <h4 className="mr-2 font-semibold text-slate-700">Sections</h4> */}
           <div className="flex-1">
             <CustomRadioSelect
               control={control}
@@ -959,7 +974,7 @@ const PCCPanel = ({
               control={control}
               name="ga_gland_plate_3mm_drill_type"
               label="Gland Plate Type"
-              options={ga_gland_plate_3mm_drill_type_options || []}
+              options={moveNAtoEnd(ga_gland_plate_3mm_drill_type_options) || []}
               size="small"
             />
           </div>

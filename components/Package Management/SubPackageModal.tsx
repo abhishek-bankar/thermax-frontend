@@ -78,15 +78,15 @@ export default function SubPackageModal({
     try {
       if (editMode) {
         await updateData(`${SUB_PKG_API}/${values.name}`, false, data);
-        message.success("Sub Package Updated Successfully.");
+        message.success("Sub Package Updated Successfully");
       } else {
         if (subPkgNames?.includes(data.package_name)) {
           message.error(
-            "Sub Package Name Already Exists For This Main Package."
+            "Sub Package Name Already Exists For This Main Package"
           );
         } else {
           await createData(SUB_PKG_API, false, data);
-          message.success("Sub Package Created Successfully.");
+          message.success("Sub Package Created Successfully");
         }
       }
     } catch (error: any) {

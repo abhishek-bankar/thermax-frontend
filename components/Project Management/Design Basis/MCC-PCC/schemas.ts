@@ -47,7 +47,7 @@ export const configItemValidationSchema = zod.object({
     required_error: "Control Transformer Primary Voltage is required",
     message: "Control Transformer Primary Voltage is required",
   }),
-  control_transformer_secondary_voltage: zod.string({
+  control_transformer_secondary_voltage_copy: zod.string({
     required_error: "Control Transformer Secondary Voltage is required",
     message: "Control Transformer Secondary Voltage is required",
   }),
@@ -89,7 +89,7 @@ export const configItemValidationSchema = zod.object({
     required_error: "Current Transformer Coating is required",
     message: "Current Transformer Coating is Required",
   }),
-  current_transformer_number: zod.string({
+  current_transformer_quantity: zod.string({
     required_error: "Current Transformer Quantity is required",
     message: "Current Transformer Quantity is Required",
   }),

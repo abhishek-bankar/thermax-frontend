@@ -39,24 +39,23 @@ const getDefaultValues = (
     incomer_above_pole: pccPanelData?.incomer_above_pole || "4",
     incomer_above_type: pccPanelData?.incomer_above_type || "SFU",
     is_under_or_over_voltage_selected:
-      pccPanelData?.is_under_or_over_voltage_selected || 0,
-    is_other_selected: pccPanelData?.is_other_selected || 0,
-    is_lsig_selected: pccPanelData?.is_lsig_selected || 0,
-    is_lsi_selected: pccPanelData?.is_lsi_selected || 0,
+      Boolean(pccPanelData?.is_under_or_over_voltage_selected) || false,
+    is_lsig_selected: Boolean(pccPanelData?.is_lsig_selected) || false,
+    is_lsi_selected: Boolean(pccPanelData?.is_lsi_selected) || false,
     is_neural_link_with_disconnect_facility_selected:
-      pccPanelData?.is_neural_link_with_disconnect_facility_selected || 0,
+      Boolean(pccPanelData?.is_neural_link_with_disconnect_facility_selected) || false,
 
     is_led_type_lamp_selected:
       pccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected: Boolean(pccPanelData?.is_indication_on_selected),
+    is_indication_on_selected: Boolean(pccPanelData?.is_indication_on_selected) || false,
     led_type_on_input: pccPanelData?.led_type_on_input || "Green",
     is_indication_off_selected: Boolean(
       pccPanelData?.is_indication_off_selected
-    ),
+    ) || false,
     led_type_off_input: pccPanelData?.led_type_off_input || "Red",
     is_indication_trip_selected: Boolean(
       pccPanelData?.is_indication_trip_selected
-    ),
+    ) || false,
     led_type_trip_input: pccPanelData?.led_type_trip_input || "Amber",
 
     is_blue_cb_spring_charge_selected:
@@ -117,11 +116,11 @@ const getDefaultValues = (
       "a) Min width 400 mm & Above\nb) Separate Marshaling for each shiping section with Partition\nc) Signal from MCC to PLC DI/DO/AI/AO with Separate TB.\nd) DI, DO TB to be mounted on separate column\ne) Signal from MCC to Field with Separate TB.",
 
     is_cable_alley_section_selected:
-      pccPanelData?.is_cable_alley_section_selected || 1,
+     Boolean( pccPanelData?.is_cable_alley_section_selected )|| false,
     is_power_and_bus_separation_section_selected:
-      pccPanelData?.is_power_and_bus_separation_section_selected || 1,
+     Boolean(pccPanelData?.is_power_and_bus_separation_section_selected) || false,
     is_both_side_extension_section_selected:
-      pccPanelData?.is_both_side_extension_section_selected || 1,
+     Boolean(pccPanelData?.is_both_side_extension_section_selected) || false,
     ga_gland_plate_3mm_drill_type:
       pccPanelData?.ga_gland_plate_3mm_drill_type || "Knockout",
     ga_gland_plate_thickness:
@@ -234,6 +233,8 @@ const PCCPanel = ({
 
   const [loading, setLoading] = useState(false);
   const userInfo = useCurrentUser();
+
+  console.log("pccPanelData", pccPanelData)
 
   const isLoading =
     isPccPanelLoading || isProjectInfoLoading || isProjectMetaDataLoading;

@@ -53,6 +53,9 @@ export default function DocumentRevision() {
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
   const projectOwnerEmail = projectData?.owner;
 
+  const projectDivision = projectData?.division;
+  const userDivision = userInfo?.division;
+
   const handleReviewSubmission = async (record: any) => {
     const revision_id = record?.key;
     const projectApproverEmail = record?.approverEmail;
@@ -271,7 +274,7 @@ export default function DocumentRevision() {
       render: (_, record) => {
         return (
           <div className="text-center">
-            <Tooltip title={"Copy Revision"}>
+            <Tooltip title={"Create New Revision"}>
               <Button
                 type="link"
                 shape="circle"
@@ -288,7 +291,10 @@ export default function DocumentRevision() {
                   />
                 }
                 onClick={() => handleClone(record?.key)}
-                disabled={record.status !== DB_REVISION_STATUS.Released}
+                disabled={
+                  record.status !== DB_REVISION_STATUS.Released ||
+                  userDivision !== projectDivision
+                }
               />
             </Tooltip>
           </div>
@@ -358,7 +364,8 @@ export default function DocumentRevision() {
                       DB_REVISION_STATUS.Submitted,
                       DB_REVISION_STATUS.Approved,
                     ].includes(record?.status) ||
-                    userInfo?.email !== record.owner
+                    userInfo?.email !== record.owner ||
+                    userDivision !== projectDivision
                   }
                 />
               </Tooltip>
@@ -388,12 +395,15 @@ export default function DocumentRevision() {
                     />
                   }
                   onClick={() => setResubmitModalOpen(true)}
-                  disabled={[
-                    DB_REVISION_STATUS.Released,
-                    DB_REVISION_STATUS.Resubmitted,
-                    DB_REVISION_STATUS.Approved,
-                    DB_REVISION_STATUS.Unsubmitted,
-                  ].includes(record?.status)}
+                  disabled={
+                    [
+                      DB_REVISION_STATUS.Released,
+                      DB_REVISION_STATUS.Resubmitted,
+                      DB_REVISION_STATUS.Approved,
+                      DB_REVISION_STATUS.Unsubmitted,
+                    ].includes(record?.status) ||
+                    userDivision !== projectDivision
+                  }
                 />
               </Tooltip>
             </div>
@@ -422,12 +432,15 @@ export default function DocumentRevision() {
                     />
                   }
                   onClick={() => handleApprove(record)}
-                  disabled={[
-                    DB_REVISION_STATUS.Released,
-                    DB_REVISION_STATUS.Approved,
-                    DB_REVISION_STATUS.Unsubmitted,
-                    DB_REVISION_STATUS.Resubmitted,
-                  ].includes(record?.status)}
+                  disabled={
+                    [
+                      DB_REVISION_STATUS.Released,
+                      DB_REVISION_STATUS.Approved,
+                      DB_REVISION_STATUS.Unsubmitted,
+                      DB_REVISION_STATUS.Resubmitted,
+                    ].includes(record?.status) ||
+                    userDivision !== projectDivision
+                  }
                 />
               </Tooltip>
             </div>
@@ -448,7 +461,8 @@ export default function DocumentRevision() {
               disabled={
                 record.status === DB_REVISION_STATUS.Released ||
                 record.status !== DB_REVISION_STATUS.Approved ||
-                userInfo?.email !== record.owner
+                userInfo?.email !== record.owner ||
+                userDivision !== projectDivision
               }
               onClick={() => handleRelease(record.key)}
             >

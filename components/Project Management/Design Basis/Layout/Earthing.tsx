@@ -6,10 +6,11 @@ import * as zod from "zod";
 import { createData, getData, updateData } from "@/actions/crud-actions";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
-import { LAYOUT_EARTHING } from "@/configs/api-endpoints";
+import { LAYOUT_EARTHING, PROJECT_API } from "@/configs/api-endpoints";
 import { useGetData } from "@/hooks/useCRUD";
 import useEarthingDropdowns from "./EarthingDropdown";
 import { useParams, useRouter } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const cableTrayValidationSchema = zod.object({
   earthing_system: zod.string({
@@ -42,9 +43,15 @@ const getDefaultValues = (earthingData: any) => {
 const Earthing = ({ revision_id }: { revision_id: string }) => {
   const router = useRouter();
   const params = useParams();
+  const userInfo = useCurrentUser();
   const { data: layoutEarthingData } = useGetData(
     `${LAYOUT_EARTHING}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
   );
+
+  const { data: projectData } = useGetData(
+    `${PROJECT_API}/${params.project_id}`
+  );
+
   const [loading, setLoading] = useState(false);
 
   const dropdown = useEarthingDropdowns();
@@ -52,6 +59,10 @@ const Earthing = ({ revision_id }: { revision_id: string }) => {
   const earthing_system_options = dropdown["Earthing System"];
   const earth_strip_options = dropdown["Earth Strip"];
   const earthing_pit_options = dropdown["Earth Pit"];
+
+  const userDivision = userInfo?.division;
+  const projectDivision = projectData?.division;
+  // const projectDivision =
 
   const { control, handleSubmit, reset } = useForm({
     resolver: zodResolver(cableTrayValidationSchema),
@@ -76,20 +87,11 @@ const Earthing = ({ revision_id }: { revision_id: string }) => {
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
-      const layoutEarthingData = await getData(
-        `${LAYOUT_EARTHING}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
+      await updateData(
+        `${LAYOUT_EARTHING}/${layoutEarthingData[0].name}`,
+        false,
+        data
       );
-
-      if (layoutEarthingData && layoutEarthingData.length > 0) {
-        await updateData(
-          `${LAYOUT_EARTHING}/${layoutEarthingData[0].name}`,
-          false,
-          data
-        );
-      } else {
-        data["revision_id"] = revision_id;
-        await createData(LAYOUT_EARTHING, false, data);
-      }
 
       message.success("Earthing Data Saved Successfully");
     } catch (error) {
@@ -152,7 +154,12 @@ const Earthing = ({ revision_id }: { revision_id: string }) => {
           </div>
         </div>
         <div className="mt-2 flex w-full justify-end">
-          <Button type="primary" htmlType="submit" loading={loading}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            disabled={userDivision !== projectDivision}
+          >
             Save and Next
           </Button>
         </div>

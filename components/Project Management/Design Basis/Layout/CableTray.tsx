@@ -9,11 +9,13 @@ import * as zod from "zod";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomRadioSelect from "@/components/FormInputs/CustomRadioSelect";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
-import { CABLE_TRAY_LAYOUT } from "@/configs/api-endpoints";
+import { CABLE_TRAY_LAYOUT, PROJECT_API } from "@/configs/api-endpoints";
 import { useGetData } from "@/hooks/useCRUD";
 import useCableTrayDropdowns from "./CableTrayDropdown";
 import { cableTrayValidationSchema } from "./schemas";
 import CustomTextNumber from "@/components/FormInputs/CustomInputNumber";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useParams } from "next/navigation";
 
 const getDefaultValues = (cableTrayData: any) => {
   return {
@@ -147,6 +149,8 @@ const CableTray = ({
   revision_id: string;
   setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
+  const params = useParams();
+  const project_id = params.project_id;
   const [loading, setLoading] = useState(false);
 
   const { data: cableTrayData } = useGetData(
@@ -161,6 +165,11 @@ const CableTray = ({
   useEffect(() => {
     reset(getDefaultValues(cableTrayData?.[0]));
   }, [cableTrayData, reset]);
+
+  const userInfo = useCurrentUser();
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const userDivision = userInfo?.division;
+  const projectDivision = projectData?.division;
 
   const dropdown = useCableTrayDropdowns();
 
@@ -1347,7 +1356,12 @@ const CableTray = ({
       </div>
 
       <div className="mt-2 flex w-full justify-end">
-        <Button type="primary" htmlType="submit" loading={loading}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={loading}
+          disabled={userDivision !== projectDivision}
+        >
           Save and Next
         </Button>
       </div>

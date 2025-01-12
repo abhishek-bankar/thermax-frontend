@@ -213,10 +213,10 @@ const getDefaultValues = (
     hazardous_area_enclosure_ip_rating:
       defaultData?.hazardous_area_enclosure_ip_rating || "IP55",
     safe_area_max_temperature:
-      projectInfoData?.electrical_design_temperature ||
+      projectInfoData?.ambient_temperature_max ||
       defaultData?.safe_area_max_temperature,
     hazardous_area_max_temperature:
-      projectInfoData?.electrical_design_temperature ||
+      projectInfoData?.ambient_temperature_max ||
       defaultData?.hazardous_area_max_temperature,
     safe_area_min_temperature:
       projectInfoData?.ambient_temperature_min ||
@@ -238,7 +238,9 @@ const getDefaultValues = (
     hazardous_area_space_heater:
       defaultData?.hazardous_area_space_heater || "110",
     hazardous_area_certification:
-      defaultData?.hazardous_area_certification || mainPkgData?.standard,
+      defaultData?.hazardous_area_certification || mainPkgData?.standard
+        ? mainPkgData?.standard
+        : "IS",
     safe_area_bearing_rtd: defaultData?.safe_area_bearing_rtd || "110",
     hazardous_area_bearing_rtd:
       defaultData?.hazardous_area_bearing_rtd || "110",

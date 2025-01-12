@@ -43,19 +43,19 @@ const getDefaultValues = (
     is_lsig_selected: Boolean(pccPanelData?.is_lsig_selected) || false,
     is_lsi_selected: Boolean(pccPanelData?.is_lsi_selected) || false,
     is_neural_link_with_disconnect_facility_selected:
-      Boolean(pccPanelData?.is_neural_link_with_disconnect_facility_selected) || false,
+      Boolean(pccPanelData?.is_neural_link_with_disconnect_facility_selected) ||
+      false,
 
     is_led_type_lamp_selected:
       pccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected: Boolean(pccPanelData?.is_indication_on_selected) || false,
+    is_indication_on_selected:
+      Boolean(pccPanelData?.is_indication_on_selected) || false,
     led_type_on_input: pccPanelData?.led_type_on_input || "Green",
-    is_indication_off_selected: Boolean(
-      pccPanelData?.is_indication_off_selected
-    ) || false,
+    is_indication_off_selected:
+      Boolean(pccPanelData?.is_indication_off_selected) || false,
     led_type_off_input: pccPanelData?.led_type_off_input || "Red",
-    is_indication_trip_selected: Boolean(
-      pccPanelData?.is_indication_trip_selected
-    ) || false,
+    is_indication_trip_selected:
+      Boolean(pccPanelData?.is_indication_trip_selected) || false,
     led_type_trip_input: pccPanelData?.led_type_trip_input || "Amber",
 
     is_blue_cb_spring_charge_selected:
@@ -116,11 +116,12 @@ const getDefaultValues = (
       "a) Min width 400 mm & Above\nb) Separate Marshaling for each shiping section with Partition\nc) Signal from MCC to PLC DI/DO/AI/AO with Separate TB.\nd) DI, DO TB to be mounted on separate column\ne) Signal from MCC to Field with Separate TB.",
 
     is_cable_alley_section_selected:
-     Boolean( pccPanelData?.is_cable_alley_section_selected )|| false,
+      Boolean(pccPanelData?.is_cable_alley_section_selected) || false,
     is_power_and_bus_separation_section_selected:
-     Boolean(pccPanelData?.is_power_and_bus_separation_section_selected) || false,
+      Boolean(pccPanelData?.is_power_and_bus_separation_section_selected) ||
+      false,
     is_both_side_extension_section_selected:
-     Boolean(pccPanelData?.is_both_side_extension_section_selected) || false,
+      Boolean(pccPanelData?.is_both_side_extension_section_selected) || false,
     ga_gland_plate_3mm_drill_type:
       pccPanelData?.ga_gland_plate_3mm_drill_type || "Knockout",
     ga_gland_plate_thickness:
@@ -141,7 +142,7 @@ const getDefaultValues = (
       pccPanelData?.ppc_base_frame_paint_shade || "Black",
     ppc_minimum_coating_thickness:
       pccPanelData?.ppc_minimum_coating_thickness ||
-      "As per Client Specification",
+      "60 to 70 microns",
     ppc_pretreatment_panel_standard:
       pccPanelData?.ppc_pretreatment_panel_standard ||
       "- Panel Shall Be Degreased And Derusted(7 Tank Pretreatment)\n- Panel Shall Be Powder Coated.\nOR\n- OEM standard for pretreatment.    ",
@@ -236,7 +237,7 @@ const PCCPanel = ({
   const userDivision = userInfo?.division;
   const projectDivision = projectMetadata?.division;
 
-  console.log("pccPanelData", pccPanelData)
+  console.log("pccPanelData", pccPanelData);
 
   const isLoading =
     isPccPanelLoading || isProjectInfoLoading || isProjectMetaDataLoading;
@@ -341,7 +342,15 @@ const PCCPanel = ({
   const [hasACB, setHasACB] = useState(false);
   const incomer_type = watch("incomer_type");
   const currentTransformerNumber = watch("current_transformer_number");
+  const ga_gland_plate_3mm_drill_type = watch("ga_gland_plate_3mm_drill_type");
   const tabsCount = useRef("0");
+  useEffect(() => {
+    if (ga_gland_plate_3mm_drill_type === "NA") {
+      setValue("ga_gland_plate_thickness", "NA");
+    } else {
+      setValue("ga_gland_plate_thickness", "1.6 mm");
+    }
+  }, [ga_gland_plate_3mm_drill_type, setValue]);
   useEffect(() => {
     if (typeof window !== "undefined") {
       tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
@@ -448,7 +457,7 @@ const PCCPanel = ({
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount.current) {
           redirectToLayout();
-          return "1";
+          // return "1";
         }
 
         return (parseInt(prevKey, 10) + 1).toString();

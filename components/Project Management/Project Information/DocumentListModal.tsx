@@ -75,7 +75,19 @@ const getDefaultValues = (staticValues: any, dynamicValues: any) => {
   return { ...staticDefaultValues, ...dynamicDefaultValues };
 };
 
-export default function DocumentListModal({ open, setOpen, revision_id }: any) {
+export default function DocumentListModal({
+  open,
+  setOpen,
+  revision_id,
+  userDivision,
+  projectDivision,
+}: {
+  open: boolean;
+  setOpen: any;
+  revision_id: string;
+  userDivision: string;
+  projectDivision: string;
+}) {
   const params = useParams();
   const [loading, setLoading] = useState(false);
   const [staticDocumentData, setStaticDocumentData] = useState<any>({});
@@ -339,7 +351,7 @@ export default function DocumentListModal({ open, setOpen, revision_id }: any) {
             type="primary"
             htmlType="submit"
             loading={loading}
-            disabled={!formState.isValid}
+            disabled={userDivision !== projectDivision}
           >
             Save
           </Button>

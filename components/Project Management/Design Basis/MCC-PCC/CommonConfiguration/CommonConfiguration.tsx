@@ -207,7 +207,10 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     safe_lpbs_canopy: commonConfigData?.lpbs_canopy_on_top || "All",
     safe_lpbs_canopy_type: commonConfigData?.type || "On Top",
 
-    hazardous_lpbs_type: commonConfigData?.lpbs_type || mainPkgData?.standard,
+    hazardous_lpbs_type:
+      commonConfigData?.lpbs_type || mainPkgData?.standard
+        ? mainPkgData?.standard
+        : "IS",
     hazardous_lpbs_enclosure: commonConfigData?.lpbs_enclosure || "IP 65",
     hazardous_lpbs_material: commonConfigData?.lpbs_material || "CRCA",
     hazardous_lpbs_thickness: commonConfigData?.thickness || "1.6 mm",
@@ -2278,7 +2281,11 @@ const CommonConfiguration = ({
               control={control}
               name="hazardous_lpbs_material"
               label="MOC"
-              options={dropdown["Field Motor Isolator General Material"] || []}
+              options={
+                moveNAtoEnd(
+                  dropdown["Field Motor Isolator General Material"]
+                ) || []
+              }
               disabled={
                 is_local_push_button_station_selected === "0" ||
                 watch("is_hazardous_lpbs_selected") === "0"
@@ -2328,7 +2335,9 @@ const CommonConfiguration = ({
               name="hazardous_lpbs_color_shade"
               label="LPBS Color Shade"
               options={
-                dropdown["Local Push Button Station LPBS Color Shade"] || []
+                moveNAtoEnd(
+                  dropdown["Local Push Button Station LPBS Color Shade"]
+                ) || []
               }
               disabled={
                 is_local_push_button_station_selected === "0" ||

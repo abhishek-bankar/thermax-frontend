@@ -431,7 +431,7 @@ const MCCcumPCCPLCPanel = ({
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount.current) {
           redirectToLayout();
-          return "1";
+          // return "1";
         }
 
         return (parseInt(prevKey, 10) + 1).toString();
@@ -2006,6 +2006,7 @@ const MCCcumPCCPLCPanel = ({
                     name="hardware_between_plc_and_burner_controller_lmv"
                     label="Communication Cable & Hardware Between PLC CPU System & Burner Controller LMV"
                     size="small"
+                    disabled={!watch("is_burner_controller_lmv_mounting_selected")}
                   />
                 </div>
               </div>
@@ -2015,6 +2016,8 @@ const MCCcumPCCPLCPanel = ({
                     control={control}
                     name="burner_controller_lmv_mounting"
                     label="Burner Controller LMV is Mounted in PLC Panel"
+                    disabled={!watch("is_burner_controller_lmv_mounting_selected")}
+
                   />
                 </div>
                 <div className="flex-1">
@@ -2022,6 +2025,8 @@ const MCCcumPCCPLCPanel = ({
                     control={control}
                     name="burner_controller_lmv_note"
                     label="Burner Controller LMV Note"
+                    disabled={!watch("is_burner_controller_lmv_mounting_selected")}
+
                   />
                 </div>
               </div>

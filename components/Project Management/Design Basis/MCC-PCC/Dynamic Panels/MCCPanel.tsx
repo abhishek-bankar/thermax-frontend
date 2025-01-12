@@ -42,19 +42,19 @@ const getDefaultValues = (
     is_lsig_selected: Boolean(mccPanelData?.is_lsig_selected) || false,
     is_lsi_selected: Boolean(mccPanelData?.is_lsi_selected) || false,
     is_neural_link_with_disconnect_facility_selected:
-      Boolean(mccPanelData?.is_neural_link_with_disconnect_facility_selected) || false,
+      Boolean(mccPanelData?.is_neural_link_with_disconnect_facility_selected) ||
+      false,
 
     // is_led_type_lamp_selected:
     //   mccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected: Boolean(mccPanelData?.is_indication_on_selected) || false,
+    is_indication_on_selected:
+      Boolean(mccPanelData?.is_indication_on_selected) || false,
     led_type_on_input: mccPanelData?.led_type_on_input || "Green",
-    is_indication_off_selected: Boolean(
-      mccPanelData?.is_indication_off_selected
-    ) || false,
+    is_indication_off_selected:
+      Boolean(mccPanelData?.is_indication_off_selected) || false,
     led_type_off_input: mccPanelData?.led_type_off_input || "Red",
-    is_indication_trip_selected: Boolean(
-      mccPanelData?.is_indication_trip_selected
-    ) || false,
+    is_indication_trip_selected:
+      Boolean(mccPanelData?.is_indication_trip_selected) || false,
     led_type_trip_input: mccPanelData?.led_type_trip_input || "Amber",
 
     is_blue_cb_spring_charge_selected:
@@ -114,7 +114,8 @@ const getDefaultValues = (
     is_cable_alley_section_selected:
       Boolean(mccPanelData?.is_cable_alley_section_selected) || false,
     is_power_and_bus_separation_section_selected:
-      Boolean(mccPanelData?.is_power_and_bus_separation_section_selected) || false,
+      Boolean(mccPanelData?.is_power_and_bus_separation_section_selected) ||
+      false,
     is_both_side_extension_section_selected:
       Boolean(mccPanelData?.is_both_side_extension_section_selected) || false,
     ga_gland_plate_3mm_drill_type:
@@ -351,12 +352,22 @@ const MCCPanel = ({
   const incomer_type = watch("incomer_type");
   const incomer_above_type = watch("incomer_above_type");
   const currentTransformerNumber = watch("current_transformer_number");
+  const ga_gland_plate_3mm_drill_type = watch("ga_gland_plate_3mm_drill_type");
 
   useEffect(() => {
     if (control_transformer_coating_controlled === "NA") {
       setValue("control_transformer_configuration", "NA");
     }
-  }, [control_transformer_coating_controlled, setValue]);
+    if (ga_gland_plate_3mm_drill_type === "NA") {
+      setValue("ga_gland_plate_thickness", "NA");
+    } else {
+      setValue("ga_gland_plate_thickness", "1.6 mm");
+    }
+  }, [
+    control_transformer_coating_controlled,
+    ga_gland_plate_3mm_drill_type,
+    setValue,
+  ]);
   useEffect(() => {
     const hasACB =
       (incomer_type && incomer_type.includes("ACB")) ||
@@ -480,7 +491,7 @@ const MCCPanel = ({
       setActiveKey((prevKey: string) => {
         if (prevKey == tabsCount.current) {
           redirectToLayout();
-          return "1";
+          // return "1";
         }
 
         return (parseInt(prevKey, 10) + 1).toString();

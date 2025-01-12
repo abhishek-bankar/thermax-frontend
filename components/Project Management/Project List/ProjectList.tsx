@@ -50,6 +50,9 @@ const changeNameToKey = (projectList: any[]) => {
 };
 
 export default function ProjectList({ userInfo, isComplete }: any) {
+  const userDivision = userInfo?.division;
+  const isUserSuperUser = userInfo?.is_superuser;
+
   const [open, setOpen] = useState(false);
   const [uploadFileOpen, setUploadFileOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -57,24 +60,18 @@ export default function ProjectList({ userInfo, isComplete }: any) {
   const [projectListData, setProjectListData] = useState<any>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  let getProjectUrl = `${PROJECT_API}?fields=["*"]&limit=1000&filters=[["division", "=",  "${userInfo?.division}"], ["is_complete", "=", "${isComplete}"]]&order_by=creation desc`;
-  if (userInfo.is_superuser) {
+  let getProjectUrl = `${PROJECT_API}?fields=["*"]&limit=1000&filters=[["division", "=",  "${userDivision}"], ["is_complete", "=", "${isComplete}"]]&order_by=creation desc`;
+  if (isUserSuperUser) {
     getProjectUrl = `${PROJECT_API}?fields=["*"]&limit=1000&filters=[["is_complete", "=", "${isComplete}"]]&order_by=creation desc`;
   }
   const { data: projectList, isLoading } = useGetData(getProjectUrl);
 
   if (projectList) {
     projectList.sort((a: any, b: any) => {
-      if (
-        a.division === userInfo?.division &&
-        b.division !== userInfo?.division
-      ) {
+      if (a.division === userDivision && b.division !== userDivision) {
         return -1; // Place 'a' before 'b'
       }
-      if (
-        a.division !== userInfo?.division &&
-        b.division === userInfo?.division
-      ) {
+      if (a.division !== userDivision && b.division === userDivision) {
         return 1; // Place 'b' before 'a'
       }
       return 0; // No change in order if both are from the same division
@@ -83,7 +80,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
 
   const projectOCNos = projectList?.map(
     (project: any) =>
-      project.division === userInfo?.division && project.project_oc_number
+      project.division === userDivision && project.project_oc_number
   );
   const { setLoading: setModalLoading } = useLoading();
   useEffect(() => {
@@ -98,22 +95,14 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       )
     );
     setProjectListData(filteredList);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectList, searchQuery]);
-
-  // const truncateText = (text:string, maxLength = 6) => {
-  //   if (text.length > maxLength) {
-  //     return `${text.substring(0, maxLength)}...`;
-  //   }
-  //   return text;
-  // };
 
   const columns: ColumnsType<DataType> = [
     {
       title: () => <div className="text-center">Division</div>,
       dataIndex: "division",
       key: "division",
-      hidden: !userInfo.is_superuser,
+      hidden: !isUserSuperUser,
       render: (text: keyof typeof TagColors) => {
         return (
           <div className="text-center text-wrap">
@@ -125,7 +114,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
         return { text: division, value: division };
       }),
       onFilter: (value, record: any) => record?.division.indexOf(value) === 0,
-      defaultFilteredValue: [userInfo?.division],
+      defaultFilteredValue: [userDivision],
     },
     {
       title: () => <div className="text-center text-wrap">Project OC No</div>,
@@ -162,7 +151,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
     {
       title: "Created Date",
       dataIndex: "creation",
-      key: "creation", 
+      key: "creation",
       align: "center",
       render: (text) => {
         const date = new Date(text);
@@ -171,10 +160,10 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       },
     },
     {
-      title: "Modified Date",  
+      title: "Modified Date",
       dataIndex: "modified",
       key: "modified",
-      align: "center", 
+      align: "center",
       render: (text) => {
         const date = new Date(text);
         const stringDate = getThermaxDateFormat(date);
@@ -202,61 +191,71 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       ellipsis: true,
 
       hidden: isComplete === 1,
-      render: (text, record: any) => (
-        <div className="flex justify-center">
-          <Tooltip placement="top" title="Edit">
-            <Button
-              type="link"
-              shape="circle"
-              icon={<EditOutlined />}
-              onClick={() => handleEditProject(record)}
-            />
-          </Tooltip>
-          <Tooltip placement="top" title="Upload Files">
-            <Button
-              type="link"
-              shape="circle"
-              icon={<UploadOutlined />}
-              onClick={() => handleUploadFiles(record)}
-            />
-          </Tooltip>
-          {Boolean(userInfo.is_superuser) && (
-            <>
-              <Tooltip placement="top" title="Complete Project">
-                <Popconfirm
-                  title="Are you sure to mark this project as complete?"
-                  onConfirm={async () => await handleCompleteProject(record)}
-                  okText="Yes"
-                  cancelText="No"
-                  placement="topRight"
-                >
-                  <Button
-                    type="link"
-                    shape="circle"
-                    icon={<FileDoneOutlined />}
-                  />
-                </Popconfirm>
-              </Tooltip>
-              <Tooltip placement="top" title="Delete">
-                <Popconfirm
-                  title="Are you sure to delete this project?"
-                  onConfirm={async () => await handleDeleteProject(record.key)}
-                  okText="Yes"
-                  cancelText="No"
-                  placement="topRight"
-                >
-                  <Button
-                    type="link"
-                    shape="circle"
-                    icon={<DeleteOutlined />}
-                    danger
-                  />
-                </Popconfirm>
-              </Tooltip>
-            </>
-          )}
-        </div>
-      ),
+      render: (text, record: any) => {
+        return (
+          <div className="flex justify-center gap-2">
+            <Tooltip placement="top" title="Edit">
+              <Button
+                type="link"
+                shape="circle"
+                icon={<EditOutlined />}
+                onClick={() => handleEditProject(record)}
+                disabled={record?.division !== userDivision}
+              />
+            </Tooltip>
+            <Tooltip placement="top" title="Upload Files">
+              <Button
+                type="link"
+                shape="circle"
+                icon={<UploadOutlined />}
+                onClick={() => handleUploadFiles(record)}
+                disabled={record?.division !== userDivision}
+              />
+            </Tooltip>
+            {Boolean(isUserSuperUser) && (
+              <>
+                <Tooltip placement="top" title="Complete Project">
+                  <Popconfirm
+                    title="Are you sure to mark this project as complete?"
+                    onConfirm={async () => await handleCompleteProject(record)}
+                    okText="Yes"
+                    cancelText="No"
+                    placement="topRight"
+                    disabled={record?.division !== userDivision}
+                  >
+                    <Button
+                      type="link"
+                      shape="circle"
+                      icon={<FileDoneOutlined />}
+                      disabled={record?.division !== userDivision}
+                    />
+                  </Popconfirm>
+                </Tooltip>
+                <Tooltip placement="top" title="Delete">
+                  <Popconfirm
+                    title="Are you sure to delete this project?"
+                    onConfirm={async () =>
+                      await handleDeleteProject(record.key)
+                    }
+                    okText="Yes"
+                    cancelText="No"
+                    placement="topRight"
+                    disabled={record?.division !== userDivision}
+                  >
+                    <Button
+                      type="link"
+                      shape="circle"
+                      icon={<DeleteOutlined />}
+                      danger
+                      disabled={record?.division !== userDivision}
+                    />
+                  </Popconfirm>
+                </Tooltip>
+              </>
+            )}
+          </div>
+        );
+      },
     },
   ];
 

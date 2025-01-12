@@ -27,6 +27,7 @@ import {
   LOCAL_ISOLATOR_REVISION_HISTORY_API,
   MOTOR_CANOPY_REVISION_HISTORY_API,
   MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
+  PROJECT_API,
   STATIC_DOCUMENT_API,
 } from "@/configs/api-endpoints";
 import { DB_REVISION_STATUS } from "@/configs/constants";
@@ -37,6 +38,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { mutate } from "swr";
 import { getThermaxDateFormat } from "@/utils/helpers";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 interface Props {
   designBasisRevisionId: string;
@@ -49,18 +51,25 @@ const Download: React.FC<Props> = ({
 }) => {
   const { setLoading: setModalLoading } = useLoading();
   const router = useRouter();
+  const userInfo = useCurrentUser();
+
   const [downloadIconSpin, setDownloadIconSpin] = useState(false);
   // const [submitIconSpin, setSubmitIconSpin] = useState(false);
 
   const params = useParams();
   const project_id = params.project_id as string;
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
 
   const { data: documentList } = useGetData(
     `${STATIC_DOCUMENT_API}?fields=["*"]&filters=[["project_id", "=", "${project_id}"]]`
   );
 
+  const userDivision = userInfo?.division;
+  const projectDivision = projectData?.division;
+
   const dbLoadlistHistoryUrl = `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["*"]&order_by=creation asc`;
   const { data: revisionHistory } = useGetData(dbLoadlistHistoryUrl);
+
   const [dataSource, setDataSource] = useState<any[]>([]);
   const [commonConfigData, setCommonConfigData] = useState<any[]>([]);
   const [loadListData, setLoadListData] = useState<any[]>([]);
@@ -247,7 +256,10 @@ const Download: React.FC<Props> = ({
                 type="primary"
                 size="small"
                 name="Release"
-                disabled={record.status === DB_REVISION_STATUS.Released}
+                disabled={
+                  record.status === DB_REVISION_STATUS.Released ||
+                  userDivision !== projectDivision
+                }
                 onClick={() => handleRelease(record.key)}
               >
                 Release

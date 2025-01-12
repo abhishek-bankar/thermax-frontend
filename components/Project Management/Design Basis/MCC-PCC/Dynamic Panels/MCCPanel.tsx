@@ -236,6 +236,8 @@ const MCCPanel = ({
 
   const [loading, setLoading] = useState(false);
   const userInfo = useCurrentUser();
+  const userDivision = userInfo?.division;
+  const projectDivision = projectMetadata?.division;
 
   const isLoading =
     isMccPanelLoading || isProjectInfoLoading || isProjectMetaDataLoading;
@@ -334,7 +336,6 @@ const MCCPanel = ({
 
       reset(getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]));
     }
-    // reset(getDefaultValues(projectInfo, mccPanelData?.[0]))
   }, [mccPanelData, projectInfo, projectMetadata, reset]);
 
   const incomer_ampere_controlled = watch("incomer_ampere");
@@ -423,25 +424,6 @@ const MCCPanel = ({
       tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
     }
   }, []);
-
-  // to control the checkboxes
-
-  // useEffect(() => {
-  //   if (
-  //     incomer_type_controlled === "EDO ACB" ||
-  //     incomer_type_controlled === "MDO ACB" ||
-  //     incomer_type_controlled === "EF ACB" ||
-  //     incomer_type_controlled === "MF ACB" ||
-  //     incomer_above_type_controlled === "EDO ACB" ||
-  //     incomer_above_type_controlled === "MDO ACB" ||
-  //     incomer_above_type_controlled === "EF ACB" ||
-  //     incomer_above_type_controlled === "MF ACB"
-  //   ) {
-  //     setValue("is_blue_cb_spring_charge_selected", 1)
-  //     setValue("is_red_cb_in_service", 1)
-  //     setValue("is_white_healthy_trip_circuit_selected", 1)
-  //   }
-  // }, [incomer_type_controlled, incomer_above_type_controlled, setValue])
 
   useEffect(() => {
     if (incomer_ampere_controlled === "1000") {
@@ -1613,7 +1595,12 @@ const MCCPanel = ({
           />
         </div>
         <div className="mt-2 flex w-full justify-end">
-          <Button type="primary" htmlType="submit" loading={loading}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            disabled={userDivision !== projectDivision}
+          >
             Save and Next
           </Button>
         </div>

@@ -10,16 +10,18 @@ import CustomTextNumber from "@/components/FormInputs/CustomInputNumber";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
 import {
-  DESIGN_BASIS_GENERAL_INFO_API,
-  MOTOR_PARAMETER_API,
-  PROJECT_INFO_API,
   PROJECT_MAIN_PKG_LIST_API,
+  MOTOR_PARAMETER_API,
+  PROJECT_API,
+  PROJECT_INFO_API,
 } from "@/configs/api-endpoints";
+
 import { useGetData } from "@/hooks/useCRUD";
 import { useLoading } from "@/hooks/useLoading";
 import useMotorParametersDropdowns from "./MotorParametersDropdown";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import { sortDropdownOptions } from "@/utils/helpers";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const fieldSchema = zod.object({
   safe_area_efficiency_level: zod.string({
@@ -280,6 +282,7 @@ const getDefaultValues = (
 };
 
 const MotorParameters = ({ revision_id }: { revision_id: string }) => {
+  const userInfo = useCurrentUser();
   const router = useRouter();
   const params = useParams();
   const project_id = params.project_id;
@@ -291,6 +294,10 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
 
   const getProjectInfoUrl = `${PROJECT_INFO_API}/${project_id}`;
   const { data: projectInfoData } = useGetData(getProjectInfoUrl);
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+
+  const userDivision = userInfo?.division;
+  const projectDivision = projectData?.division;
 
   useEffect(() => {
     setModalLoading(false);
@@ -307,37 +314,13 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
     }
   }, [motorParameters]);
 
-  const {
-    dropdown,
-    // safeEfficiencyLevelOptions,
-    // hazardousEfficiencyLevelOptions,
-    // safeInsulationClassOptions,
-    // hazardousInsulationClassOptions,
-    // safeTempRiseOptions,
-    // hazardousTempRiseOptions,
-    // safeEnclosureIpRatingOptions,
-    // hazardousEnclosureIpRatingOptions,
-    // safeTerminalBoxIpRatingOptions,
-    // hazardousTerminalBoxIpRatingOptions,
-    // safeThermistorOptions,
-    // hazardousThermistorOptions,
-    // safeSpaceHeaterOptions,
-    // hazardousSpaceHeaterOptions,
-    // hazardousCertificationOptions,
-    // safeBearingRTDOptions,
-    // hazardousBearingRTDOptions,
-    // safeWindingRTDOptions,
-    // hazardousWindingRTDOptions,
-    // safeBodyMaterialOptions,
-    // hazardousBodyMaterialOptions,
-    // safeTerminalBoxOptions,
-    // hazardousTerminalBoxOptions,
-  } = useMotorParametersDropdowns();
+  const dropdown = useMotorParametersDropdowns();
 
   const getMainPkgUrl = `${PROJECT_MAIN_PKG_LIST_API}?revision_id=${revision_id}`;
 
   const { data: mainPkgData } = useGetData(getMainPkgUrl);
   const [mainPkg, setMainPkg] = useState();
+
   const { control, handleSubmit, reset, setValue } = useForm({
     resolver: zodResolver(fieldSchema),
     defaultValues: getDefaultValues(
@@ -1059,7 +1042,12 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           )}
         </div>
         <div className="mt-4 text-end">
-          <Button type="primary" htmlType="submit" loading={loading}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            disabled={userDivision !== projectDivision}
+          >
             Save and Next
           </Button>
         </div>

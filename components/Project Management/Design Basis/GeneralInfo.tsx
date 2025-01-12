@@ -15,6 +15,7 @@ import {
   DESIGN_BASIS_GENERAL_INFO_API,
   MAIN_PKG_API,
   MOTOR_PARAMETER_API,
+  PROJECT_API,
   PROJECT_MAIN_PKG_API,
   PROJECT_MAIN_PKG_LIST_API,
   SUB_PKG_API,
@@ -31,6 +32,11 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
   const userInfo = useCurrentUser();
   const params = useParams();
   const router = useRouter();
+  const project_id = params.project_id;
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const userDivision = userInfo?.division;
+  const projectDivision = projectData?.division;
+
   const [selectedMainPkgId, setSelectedMainPkgId] = useState("");
   const [addPkgLoading, setAddPkgLoading] = useState(false);
 
@@ -144,7 +150,8 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
           generalInfoData.is_package_selection_enabled,
         battery_limit: generalInfoData.battery_limit,
       });
-    } 
+    }
+
     const pkgList = generalInfoData?.pkgList;
 
     if (pkgList && pkgList.length > 0) {
@@ -167,9 +174,6 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
             return message.error(
               `Main package ${mainPkg.main_package_name} must have at least one subpackage selected`
             );
-            // throw new Error(
-            //   `Main package "${mainPkg.main_package_name}" must have at least one subpackage selected`
-            // );
           }
 
           for (const subPkg of subPkgList) {
@@ -283,7 +287,10 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
               type="primary"
               onClick={handleAddPkg}
               loading={addPkgLoading}
-              disabled={generalInfoData?.is_package_selection_enabled === 0}
+              disabled={
+                generalInfoData?.is_package_selection_enabled === 0 ||
+                userDivision !== projectDivision
+              }
             >
               Add
             </Button>
@@ -334,7 +341,12 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
       </div>
 
       <div className="flex w-full justify-end gap-4">
-        <Button type="primary" onClick={handleSave} loading={saveLoading}>
+        <Button
+          type="primary"
+          onClick={handleSave}
+          loading={saveLoading}
+          disabled={userDivision !== projectDivision}
+        >
           Save and Next
         </Button>
       </div>

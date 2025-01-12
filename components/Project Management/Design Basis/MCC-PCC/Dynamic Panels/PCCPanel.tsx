@@ -234,6 +234,8 @@ const PCCPanel = ({
 
   const [loading, setLoading] = useState(false);
   const userInfo = useCurrentUser();
+  const userDivision = userInfo?.division;
+  const projectDivision = projectMetadata?.division;
 
   console.log("pccPanelData", pccPanelData);
 
@@ -1557,7 +1559,12 @@ const PCCPanel = ({
         </div>
 
         <div className="mt-2 flex w-full justify-end">
-          <Button type="primary" htmlType="submit" loading={loading}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            disabled={userDivision !== projectDivision}
+          >
             Save and Next
           </Button>
         </div>

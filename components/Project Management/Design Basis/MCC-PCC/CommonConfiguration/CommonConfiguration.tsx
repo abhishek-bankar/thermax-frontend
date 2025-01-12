@@ -66,8 +66,8 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     control_transformer_primary_voltage:
       commonConfigData?.control_transformer_primary_voltage ||
       "230 VAC, 1-Phase, 2 wire",
-    control_transformer_secondary_voltage:
-      commonConfigData?.control_transformer_secondary_voltage ||
+    control_transformer_secondary_voltage_copy:
+      commonConfigData?.control_transformer_secondary_voltage_copy ||
       "230 VAC, 1-Phase, 2 wire",
     control_transformer_coating:
       commonConfigData?.control_transformer_coating || "Tape Wound",
@@ -90,8 +90,8 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     current_transformer: commonConfigData?.current_transformer || "0.37",
     current_transformer_coating:
       commonConfigData?.current_transformer_coating || "Cast Resin",
-    current_transformer_number:
-      commonConfigData?.current_transformer_number || "One",
+    current_transformer_quantity:
+      commonConfigData?.current_transformer_quantity || "One",
     current_transformer_configuration:
       commonConfigData?.current_transformer_configuration || "Y-Phase with CT",
 
@@ -277,7 +277,7 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
       "Through Separate Stud With Yellow-Green PVC stranded copper wire (2.5 sq.mm)",
     instrument_earth:
       commonConfigData?.instrument_earth ||
-      "1. Dark Green PVC Copper Wire 0.5/1 Sq.mm & Copper Busbar \n2. Every VFD section shall have isolated Isntrument Earth busbar",
+      "1. Dark Green PVC Copper Wire 0.5/1 Sq.mm & Copper Busbar \n2. Every VFD section shall have isolated Instrument Earth busbar",
     cooling_fans: commonConfigData?.cooling_fans || "Not Applicable",
     louvers_and_filters:
       commonConfigData?.louvers_and_filters || "Not Applicable",
@@ -381,7 +381,7 @@ const CommonConfiguration = ({
     reset(getDefaultValues(commonConfigurationData?.[0], mainPkg));
   }, [reset, commonConfigurationData, mainPkg]);
 
-  const currentTransformerNumber = watch("current_transformer_number");
+  const currentTransformerNumber = watch("current_transformer_quantity");
   const supply_feeder_standard_controlled = watch("supply_feeder_standard");
   const is_control_transformer_applicable = watch(
     "is_control_transformer_applicable"
@@ -730,7 +730,7 @@ const CommonConfiguration = ({
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
-              name="control_transformer_secondary_voltage"
+              name="control_transformer_secondary_voltage_copy"
               label="Control Transformer Secondary Voltage"
               options={
                 sortAlphaNumericArray(
@@ -1184,7 +1184,7 @@ const CommonConfiguration = ({
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
-              name="current_transformer_number"
+              name="current_transformer_quantity"
               label="Current Transformer Quantity "
               options={
                 moveNAtoEnd(

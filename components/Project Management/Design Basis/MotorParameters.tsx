@@ -892,6 +892,7 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
                 name="safe_area_service_factor"
                 placeholder="Enter safe area service factor"
                 label=""
+                min={0}
                 variant="borderless"
               />
             </div>
@@ -903,6 +904,7 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
                 name="hazardous_area_service_factor"
                 placeholder="Enter hazardous area service factor"
                 label=""
+                min={0}
                 variant={isHazardous ? "borderless" : "filled"}
                 disabled={!isHazardous}
               />

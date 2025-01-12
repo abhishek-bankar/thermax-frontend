@@ -10,16 +10,12 @@ import CustomTextNumber from "@/components/FormInputs/CustomInputNumber";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
 import {
-  DESIGN_BASIS_GENERAL_INFO_API,
-  MOTOR_PARAMETER_API,
-  PROJECT_INFO_API,
   PROJECT_MAIN_PKG_LIST_API,
-} from "@/configs/api-endpoints";
-import {
   MOTOR_PARAMETER_API,
   PROJECT_API,
   PROJECT_INFO_API,
 } from "@/configs/api-endpoints";
+
 import { useGetData } from "@/hooks/useCRUD";
 import { useLoading } from "@/hooks/useLoading";
 import useMotorParametersDropdowns from "./MotorParametersDropdown";
@@ -311,13 +307,17 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
 
   useEffect(() => {
     if (motorParameters?.[0]) {
-    if (motorParameters?.[0]) {
       setIsHazardous(Boolean(motorParameters?.[0].is_hazardous_area_present));
       setIsSafe(Boolean(motorParameters?.[0].is_safe_area_present));
     }
   }, [motorParameters]);
 
   const dropdown = useMotorParametersDropdowns();
+
+  const getMainPkgUrl = `${PROJECT_MAIN_PKG_LIST_API}?revision_id=${revision_id}`;
+
+  const { data: mainPkgData } = useGetData(getMainPkgUrl);
+  const [mainPkg, setMainPkg] = useState();
 
   const { control, handleSubmit, reset, setValue } = useForm({
     resolver: zodResolver(fieldSchema),

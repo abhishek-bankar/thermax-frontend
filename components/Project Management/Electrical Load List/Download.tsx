@@ -58,7 +58,7 @@ const Download: React.FC<Props> = ({
 
   const params = useParams();
   const project_id = params.project_id as string;
-  const projectData = useGetData(`${PROJECT_API}/${project_id}`);
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
 
   const { data: documentList } = useGetData(
     `${STATIC_DOCUMENT_API}?fields=["*"]&filters=[["project_id", "=", "${project_id}"]]`

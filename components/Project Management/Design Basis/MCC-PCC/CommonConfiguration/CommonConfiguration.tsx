@@ -15,6 +15,7 @@ import {
   COMMON_CONFIGURATION_2,
   COMMON_CONFIGURATION_3,
   PROJECT_API,
+  PROJECT_MAIN_PKG_LIST_API,
 } from "@/configs/api-endpoints";
 import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useCommonConfigDropdowns from "./CommonConfigDropdowns";
@@ -28,6 +29,7 @@ import {
   sortDropdownOptions,
 } from "@/utils/helpers";
 import { useParams } from "next/navigation";
+import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 
 const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
   return {
@@ -327,6 +329,7 @@ const CommonConfiguration = ({
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
   const projectDivision = projectData?.division;
   const userDivision = userInfo?.division;
+  const getMainPkgUrl = `${PROJECT_MAIN_PKG_LIST_API}?revision_id=${revision_id}`;
 
   const { data: mainPkgData } = useGetData(getMainPkgUrl);
   const [mainPkg, setMainPkg] = useState();

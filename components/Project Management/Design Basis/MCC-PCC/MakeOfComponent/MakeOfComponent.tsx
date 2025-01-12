@@ -14,7 +14,7 @@ import { useLoading } from "@/hooks/useLoading";
 import useMakeOfComponentDropdowns from "./MakeDropdowns";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
-import { moveNAtoEnd } from "@/utils/helpers";
+import { moveNAtoEnd, parseToArray } from "@/utils/helpers";
 import { useParams } from "next/navigation";
 
 // Define Zod schema for validation

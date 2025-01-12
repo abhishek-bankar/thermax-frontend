@@ -85,16 +85,6 @@ const makeOfComponentSchema = zod.object({
   }),
 });
 
-const parseToArray = (value: any) => {
-  try {
-    return Array.isArray(value) ? value : JSON.parse(value);
-  } catch (e) {
-    console.error(e);
-    // If parsing fails, return the value wrapped in an array
-    return Array.isArray(value) ? value : [value];
-  }
-};
-
 const getDefaultValues = (data: any) => {
   return {
     gland_make: parseToArray(data?.gland_make || ["Comet"]),

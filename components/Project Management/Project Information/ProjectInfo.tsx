@@ -277,7 +277,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
       // console.log("request payload:", data);
 
       await updateData(getProjectInfoUrl, false, data);
-      message.success("Project Information Updated Successfully");
+      message.success("Project Information Saved Successfully");
       // setModalLoading(true)
     } catch (error: any) {
       console.error("Error updating project information", error);

@@ -594,7 +594,7 @@ const CableTray = ({
               size="small"
             />
           </div>
-          <div className="flex-1">
+          {/* <div className="flex-1">
             <CustomSingleSelect
               control={control}
               name="orientation"
@@ -602,7 +602,7 @@ const CableTray = ({
               options={cable_tray_orientation_options || []}
               size="small"
             />
-          </div>
+          </div> */}
         </div>
         <div className="flex gap-4">
           <div className="flex-1">
@@ -632,7 +632,7 @@ const CableTray = ({
             />
           </div>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex-1 flex-col gap-2">
           <h4 className="text-sm font-bold">Cable Tray MOC</h4>
           <div className="flex gap-4">
             <div className="w-1/2 mt-[4px]">

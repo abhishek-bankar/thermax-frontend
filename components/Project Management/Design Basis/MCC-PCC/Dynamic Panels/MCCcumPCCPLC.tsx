@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as zod from "zod";
 import { Button, Divider, message } from "antd";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { updateData } from "@/actions/crud-actions";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
@@ -27,6 +27,7 @@ import {
   sortDropdownOptions,
 } from "@/utils/helpers";
 import { useParams, useRouter } from "next/navigation";
+import { PercentageOutlined } from "@ant-design/icons";
 
 const getDefaultValues = (plcData: any) => {
   const defaultValues = {
@@ -52,10 +53,9 @@ const getDefaultValues = (plcData: any) => {
     plc_cpu_system_series: plcData?.plc_cpu_system_series || "VTS",
     plc_cpu_system_input_voltage:
       plcData?.plc_cpu_system_input_voltage || "24 VDC",
-    plc_cpu_system_battery_backup:
-      plcData?.plc_cpu_system_battery_backup || "40%",
+    plc_cpu_system_battery_backup: plcData?.plc_cpu_system_battery_backup || "",
     plc_cpu_system_memory_free_space_after_program:
-      plcData?.plc_cpu_system_memory_free_space_after_program || "20%",
+      plcData?.plc_cpu_system_memory_free_space_after_program || "20",
     // Redundancy
     is_power_supply_plc_cpu_system_selected:
       plcData?.is_power_supply_plc_cpu_system_selected,
@@ -107,7 +107,7 @@ const getDefaultValues = (plcData: any) => {
     do_module_output_type:
       plcData?.do_module_output_type || "Potential Free Contacts",
     // Interposing Relay
-    interposing_relay: plcData?.interposing_relay || "Applicable",
+    interposing_relay: plcData?.interposing_relay || "Applicable for DI",
     output_contact_rating_of_interposing_relay:
       plcData?.output_contact_rating_of_interposing_relay || "230 VAC, 5AMP",
     is_no_of_contacts_selected: plcData?.is_no_of_contacts_selected,
@@ -175,7 +175,7 @@ const getDefaultValues = (plcData: any) => {
     // HMI
     is_hmi_selected: plcData?.is_hmi_selected,
     hmi_size: plcData?.hmi_size || "10",
-    hmi_quantity: plcData?.hmi_quantity || "",
+    hmi_quantity: plcData?.hmi_quantity || 1,
     hmi_hardware_make: plcData?.hmi_hardware_make || "Allen Bradley",
     hmi_series: plcData?.hmi_series || "",
     hmi_input_voltage: plcData?.hmi_input_voltage || "24 VDC",
@@ -183,27 +183,27 @@ const getDefaultValues = (plcData: any) => {
     // Human Interface Device
     is_engineering_station_quantity_selected:
       plcData?.is_engineering_station_quantity_selected,
-    engineering_station_quantity: plcData?.engineering_station_quantity || "",
+    engineering_station_quantity: plcData?.engineering_station_quantity || 1,
     is_engineering_cum_operating_station_quantity_selected:
       plcData?.is_engineering_cum_operating_station_quantity_selected,
     engineering_cum_operating_station_quantity:
-      plcData?.engineering_cum_operating_station_quantity || "",
+      plcData?.engineering_cum_operating_station_quantity || 1,
     is_operating_station_quantity_selected:
       plcData?.is_operating_station_quantity_selected,
-    operating_station_quantity: plcData?.operating_station_quantity || "",
+    operating_station_quantity: plcData?.operating_station_quantity || 1,
     // Software
     is_scada_program_development_license_quantity_selected:
       plcData?.is_scada_program_development_license_quantity_selected,
     scada_program_development_license_quantity:
-      plcData?.scada_program_development_license_quantity || "",
+      plcData?.scada_program_development_license_quantity || 1,
     is_scada_runtime_license_quantity_selected:
       plcData?.is_scada_runtime_license_quantity_selected,
     scada_runtime_license_quantity:
-      plcData?.scada_runtime_license_quantity || "",
+      plcData?.scada_runtime_license_quantity || 1,
     is_plc_progamming_software_license_quantity:
       plcData?.is_plc_progamming_software_license_quantity,
     plc_programming_software_license_quantity:
-      plcData?.plc_programming_software_license_quantity || "",
+      plcData?.plc_programming_software_license_quantity || 1,
 
     // Engineering / Operating SCADA Station
     system_hardware: plcData?.system_hardware || "Commercial Grade",
@@ -216,7 +216,7 @@ const getDefaultValues = (plcData: any) => {
       plcData?.hardware_between_plc_and_scada_pc || "Approx 50 meter per PC",
     printer_type: plcData?.printer_type || "Laser Printer",
     printer_size: plcData?.printer_size || "A4",
-    printer_quantity: plcData?.printer_quantity || "",
+    printer_quantity: plcData?.printer_quantity || 1,
     is_printer_with_suitable_communication_cable_selected:
       plcData?.is_printer_with_suitable_communication_cable_selected,
     is_furniture_selected: plcData?.is_furniture_selected,
@@ -318,6 +318,8 @@ const MCCcumPCCPLCPanel = ({
     [plcPanelData1, plcPanelData2, plcPanelData3]
   );
 
+  console.log("plcPanelData", plcPanelData)
+
   const [loading, setLoading] = useState(false);
   const dropdown = usePLCDropdowns();
   const userInfo: { division: string } = useCurrentUser();
@@ -355,14 +357,21 @@ const MCCcumPCCPLCPanel = ({
   const eo_system_hardware_options = dropdown["EO System Hardware"];
   const eo_monitor_size_options = dropdown["EO Monitor Size"];
 
-  const { control, handleSubmit, reset, watch, formState } = useForm({
+  const { control, handleSubmit, reset, watch, setValue, formState } = useForm({
     resolver: zodResolver(plcPanelValidationSchema),
     defaultValues: getDefaultValues(plcPanelData),
     mode: "onSubmit",
   });
-  console.log("form errors PLC", formState.errors);
+  const tabsCount = useRef("0");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
+    }
+  }, []);
+  console.log("form errors PLC", plcPanelData);
 
   const upsScope = watch("ups_scope");
+  const is_electronic_hooter_selected = watch("is_electronic_hooter_selected");
   const noOfContacts = [
     {
       name: "1NO + 1NC",
@@ -376,13 +385,18 @@ const MCCcumPCCPLCPanel = ({
     },
   ];
   useEffect(() => {
-    console.log(plcPanelData?.[0], "PLC DATA");
-
+    window.scroll(0, 0);
+  }, []);
+  useEffect(() => {
     reset(getDefaultValues(plcPanelData));
   }, [plcPanelData, reset]);
   useEffect(() => {
-    console.log(plcPanelData, "PLC DATA");
-  }, [plcPanelData]);
+    if (is_electronic_hooter_selected) {
+      setValue("electronic_hooter_acknowledge", "Black");
+    } else {
+      setValue("electronic_hooter_acknowledge", "NA");
+    }
+  }, [is_electronic_hooter_selected, setValue]);
 
   const handleError = (error: any) => {
     try {
@@ -415,10 +429,13 @@ const MCCcumPCCPLCPanel = ({
         data
       );
       message.success("PLC Data updated successfully");
-      const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
+      const redirectToLayout = () => {
+        router.push(`/project/${project_id}/design-basis/layout`);
+      };
+
       setActiveKey((prevKey: string) => {
-        if (prevKey == tabsCount) {
-          router.push(`/project/${project_id}/design-basis/layout`);
+        if (prevKey == tabsCount.current) {
+          redirectToLayout();
           return "1";
         }
 
@@ -447,7 +464,7 @@ const MCCcumPCCPLCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ups_control_voltage"
-              label="Control Voltage ( UPS )"
+              label="Incoming UPS Supply"
               options={plc_control_voltage_options || []}
               size="small"
             />
@@ -456,7 +473,7 @@ const MCCcumPCCPLCPanel = ({
             <CustomSingleSelect
               control={control}
               name="non_ups_control_voltage"
-              label="Control Voltage ( Non UPS )"
+              label="Incoming Non-UPS Supply"
               options={plc_control_voltage_options || []}
               size="small"
             />
@@ -497,7 +514,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Input Voltage 3-Phase"
                 options={dropdown["PLC UPS 3 Phase Voltage"] || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
             <div className="flex-1">
@@ -507,7 +524,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Input Voltage 1-Phase"
                 options={plc_ups_1p_voltage_options || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
           </div>
@@ -521,7 +538,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Output Voltage 1-Phase"
                 options={plc_ups_1p_voltage_options || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
             <div className="flex-1">
@@ -530,7 +547,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ups_type"
                 label="UPS Type"
                 options={plc_ups_type_options || []}
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
                 size="small"
               />
             </div>
@@ -540,7 +557,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ups_battery_type"
                 label="UPS Battery Type"
                 options={moveNAtoEnd(plc_ups_battery_type_options) || []}
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
                 size="small"
               />
             </div>
@@ -557,7 +574,7 @@ const MCCcumPCCPLCPanel = ({
                   { label: "Yes", value: 1 },
                   { label: "No", value: 0 },
                 ]}
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
             <div className="flex-1">
@@ -567,7 +584,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Battery Backup Time In Min"
                 options={plc_ups_battery_backup_time_options || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
             <div className="flex-1">
@@ -577,7 +594,7 @@ const MCCcumPCCPLCPanel = ({
                 label="UPS Redundancy"
                 options={moveNAtoEnd(plc_ups_redundancy_options) || []}
                 size="small"
-                disabled={upsScope !== "Panel Vendor Scope"}
+                disabled={upsScope === "Client Scope"}
               />
             </div>
           </div>
@@ -611,23 +628,16 @@ const MCCcumPCCPLCPanel = ({
                 <div className="flex-1">
                   <CustomTextInput
                     control={control}
-                    name="plc_cpu_system_battery_backup"
-                    label="PLC CPU System Battery Backup"
-                    size="small"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <CustomTextInput
-                    control={control}
                     name="plc_cpu_system_memory_free_space_after_program"
-                    label="PLC CPU System Memory Free Space after Program"
+                    label="PLC CPU Memory Free Space"
                     size="small"
+                    suffix={
+                      <>
+                        <PercentageOutlined style={{ color: "#3b82f6" }} />
+                      </>
+                    }
                   />
                 </div>
-                <div className="flex-1" />
-                <div className="flex-1" />
               </div>
             </div>
           </div>
@@ -1452,7 +1462,7 @@ const MCCcumPCCPLCPanel = ({
                     name="hmi_hardware_make"
                     label="HMI Hardware Make"
                     size="small"
-                    options={hmi_hardware_make_options || []}
+                    options={moveNAtoEnd(hmi_hardware_make_options) || []}
                     disabled={watch("is_hmi_selected") === 0}
                   />
                 </div>
@@ -1516,6 +1526,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="engineering_station_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch("is_engineering_station_quantity_selected") === 0
@@ -1542,6 +1553,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="engineering_cum_operating_station_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch(
@@ -1570,6 +1582,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="operating_station_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch("is_operating_station_quantity_selected") === 0
@@ -1605,6 +1618,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="scada_program_development_license_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch(
@@ -1633,6 +1647,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="scada_runtime_license_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch("is_scada_runtime_license_quantity_selected") ===
@@ -1661,6 +1676,7 @@ const MCCcumPCCPLCPanel = ({
                       name="plc_programming_software_license_quantity"
                       label=""
                       size="small"
+                      min={0}
                       disabled={
                         watch("is_plc_progamming_software_license_quantity") ===
                         0
@@ -1771,6 +1787,7 @@ const MCCcumPCCPLCPanel = ({
                 control={control}
                 name="printer_quantity"
                 label="Printer Quantity"
+                min={0}
                 disabled={
                   watch(
                     "is_printer_with_suitable_communication_cable_selected"
@@ -1911,6 +1928,7 @@ const MCCcumPCCPLCPanel = ({
                 name="hardware_between_plc_and_client_system"
                 label="Communication Cable & Hardware Between PLC CPU System & Client System"
                 size="small"
+                disabled={!watch("is_client_system_comm_with_plc_cpu_selected")}
               />
             </div>
             <div className="flex-1">
@@ -1919,6 +1937,7 @@ const MCCcumPCCPLCPanel = ({
                 name="client_system_communication"
                 label="Client System Communication"
                 rows={5}
+                disabled={!watch("is_client_system_comm_with_plc_cpu_selected")}
               />
             </div>
           </div>
@@ -1929,7 +1948,7 @@ const MCCcumPCCPLCPanel = ({
             <div className="flex-1">
               <div className="flex-1 pb-2">
                 <div className="flex item-center gap-5 pb-2">
-                  <div className="w-1/4 flex flex-row items-center justify-start gap-4">
+                  <div className="flex flex-row items-center justify-start gap-4">
                     <div className="font-semibold mt-1 text-slate-700">
                       IIOT
                     </div>
@@ -1953,6 +1972,7 @@ const MCCcumPCCPLCPanel = ({
                   name="iiot_gateway_note"
                   label="IIOT Gateway Note"
                   rows={5}
+                  disabled={!watch("is_iiot_selected")}
                 />
               </div>
             </div>
@@ -1963,6 +1983,7 @@ const MCCcumPCCPLCPanel = ({
                   name="iiot_gateway_mounting"
                   label="IIOT Gateway is Mounted in PLC Panel"
                   rows={5}
+                  disabled={!watch("is_iiot_selected")}
                 />
               </div>
             </div>

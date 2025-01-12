@@ -50,7 +50,7 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
       ),
     },
   ];
-  const sortedProjectPanelData = sortDatewise(projectPanelData); 
+  const sortedProjectPanelData = sortDatewise(projectPanelData);
 
   sortedProjectPanelData?.forEach((panel: any, index) => {
     if (panel.panel_main_type === MCC_PANEL_TYPE) {
@@ -91,12 +91,12 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
       });
     }
   });
+  if (typeof window !== "undefined") {
+    localStorage.setItem("dynamic-tabs-count", String(TabMCC.length));
+  }
 
-  localStorage.setItem("dynamic-tabs-count", String(TabMCC.length));
-
-  const onChange = (key: string) => { 
-
-    setActiveKey(key); 
+  const onChange = (key: string) => {
+    setActiveKey(key);
     localStorage.setItem("active-panels-tab", String(key));
   };
 
@@ -105,7 +105,7 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
       <Tabs
         activeKey={activeKey} // Set the active tab
         onChange={onChange}
-        type="card"
+        type="card" 
         items={TabMCC.map((tab) => ({
           label: tab.label,
           key: tab.key,

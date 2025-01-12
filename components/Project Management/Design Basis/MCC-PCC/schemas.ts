@@ -47,7 +47,7 @@ export const configItemValidationSchema = zod.object({
     required_error: "Control Transformer Primary Voltage is required",
     message: "Control Transformer Primary Voltage is required",
   }),
-  control_transformer_secondary_voltage: zod.string({
+  control_transformer_secondary_voltage_copy: zod.string({
     required_error: "Control Transformer Secondary Voltage is required",
     message: "Control Transformer Secondary Voltage is required",
   }),
@@ -68,13 +68,12 @@ export const configItemValidationSchema = zod.object({
     message: "Control Transformer Configuration is required",
   }),
 
-  digital_meters: zod.string({
+  digital_meters: zod.array(zod.string(), {
     required_error: "Digital Meters is required",
     message: "Digtial Meters is Required",
   }),
-  analog_meters: zod.string({
+  analog_meters: zod.array(zod.string(), {
     required_error: "Analog Meters is required",
-    message: "Analog Meters is Required",
   }),
   communication_protocol: zod.string({
     required_error: "Communication Protocol is required",
@@ -90,7 +89,7 @@ export const configItemValidationSchema = zod.object({
     required_error: "Current Transformer Coating is required",
     message: "Current Transformer Coating is Required",
   }),
-  current_transformer_number: zod.string({
+  current_transformer_quantity: zod.string({
     required_error: "Current Transformer Quantity is required",
     message: "Current Transformer Quantity is Required",
   }),
@@ -612,7 +611,6 @@ export const mccPanelValidationSchema = zod
       required_error: "Control Transformer Configuration is required",
       message: "Control Transformer Configuration is required",
     }),
-    is_other_selected: zod.number().optional(),
     led_type_other_input: zod.string().optional(),
     incomer_above_pole: zod.string({
       required_error: "Incomer Above Pole is required",
@@ -622,14 +620,14 @@ export const mccPanelValidationSchema = zod
       required_error: "Incomer Above Type is required",
       message: "Incomer Above Type is required",
     }),
-    is_under_or_over_voltage_selected: zod.number().optional(),
-    is_lsig_selected: zod.number().optional(),
-    is_lsi_selected: zod.number().optional(),
-    is_neural_link_with_disconnect_facility_selected: zod.number().optional(),
-    is_led_type_lamp_selected: zod.string({
-      required_error: "LED Type Lamp is required",
-      message: "LED Type Lamp is required",
-    }),
+    is_under_or_over_voltage_selected: zod.boolean().optional(),
+    is_lsig_selected: zod.boolean().optional(),
+    is_lsi_selected: zod.boolean().optional(),
+    is_neural_link_with_disconnect_facility_selected: zod.boolean().optional(),
+    // is_led_type_lamp_selected: zod.string({
+    //   required_error: "LED Type Lamp is required",
+    //   message: "LED Type Lamp is required",
+    // }),
     is_blue_cb_spring_charge_selected: zod.string({
       required_error: "This field is required",
       message: "This field is required",
@@ -638,7 +636,7 @@ export const mccPanelValidationSchema = zod
       required_error: "This field is required",
       message: "This field is required",
     }),
-    is_white_healthy_trip_circuit_selected: zod.number({
+    is_white_healthy_trip_circuit_selected: zod.string({
       required_error: "This field is required",
       message: "This field is required",
     }),
@@ -658,15 +656,15 @@ export const mccPanelValidationSchema = zod
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_on_selected: zod.number({
+    is_indication_on_selected: zod.boolean({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_off_selected: zod.number({
+    is_indication_off_selected: zod.boolean({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
-    is_indication_trip_selected: zod.number({
+    is_indication_trip_selected: zod.boolean({
       required_error: "Alarm Annunciator is required",
       message: "Alarm Annunciator is required",
     }),
@@ -683,11 +681,11 @@ export const mccPanelValidationSchema = zod
       required_error: "ON Indication Lamp is required",
       message: "ON Indication Lamp is required",
     }),
-    mi_analog: zod.string({
+    mi_analog: zod.array(zod.string(), {
       required_error: "Analog is required",
       message: "Analog is required",
     }),
-    mi_digital: zod.string({
+    mi_digital: zod.array(zod.string(), {
       required_error: "Digital is required",
       message: "Digital is required",
     }),
@@ -752,9 +750,9 @@ export const mccPanelValidationSchema = zod
       message: "Marshalling Section is required",
     }),
     marshalling_section_text_area: zod.string().optional(),
-    is_cable_alley_section_selected: zod.number().optional(),
-    is_power_and_bus_separation_section_selected: zod.number().optional(),
-    is_both_side_extension_section_selected: zod.number().optional(),
+    is_cable_alley_section_selected: zod.boolean().optional(),
+    is_power_and_bus_separation_section_selected: zod.boolean().optional(),
+    is_both_side_extension_section_selected: zod.boolean().optional(),
     ga_gland_plate_3mm_drill_type: zod.string({
       required_error: "Gland Plate Drill Type is required",
       message: "Gland Plate Drill Type is required",
@@ -968,7 +966,6 @@ export const pccPanelValidationSchema = zod.object({
     message: "Incomer Ampere is required",
   }),
   special_note: zod.string().optional(),
-  // is_other_selected: zod.number().optional(),
   incomer_pole: zod.string({
     required_error: "Incomer Pole is required",
     message: "Incomer Pole is required",
@@ -1011,10 +1008,10 @@ export const pccPanelValidationSchema = zod.object({
   //   required_error: "Control Transformer Configuration is required",
   //   message: "Control Transformer Configuration is required",
   // }),
-  is_under_or_over_voltage_selected: zod.number().optional(),
-  is_lsig_selected: zod.number().optional(),
-  is_lsi_selected: zod.number().optional(),
-  is_neural_link_with_disconnect_facility_selected: zod.number().optional(),
+  is_under_or_over_voltage_selected: zod.boolean().optional(),
+  is_lsig_selected: zod.boolean().optional(),
+  is_lsi_selected: zod.boolean().optional(),
+  is_neural_link_with_disconnect_facility_selected: zod.boolean().optional(),
   // is_led_type_lamp_selected: zod.string({
   //   required_error: "LED Type Lamp is required",
   //   message: "LED Type Lamp is required",
@@ -1062,11 +1059,11 @@ export const pccPanelValidationSchema = zod.object({
     message: "ON Indication Lamp is required",
   }),
 
-  mi_analog: zod.string({
+  mi_analog: zod.array(zod.string(),{
     required_error: "Analog is required",
     message: "Analog is required",
   }),
-  mi_digital: zod.string({
+  mi_digital: zod.array(zod.string(),{
     required_error: "Digital is required",
     message: "Digital is required",
   }),
@@ -1135,9 +1132,9 @@ export const pccPanelValidationSchema = zod.object({
     message: "Marshalling Section is required",
   }),
   marshalling_section_text_area: zod.string().optional(),
-  is_cable_alley_section_selected: zod.number().optional(),
-  is_power_and_bus_separation_section_selected: zod.number().optional(),
-  is_both_side_extension_section_selected: zod.number().optional(),
+  is_cable_alley_section_selected: zod.boolean().optional(),
+  is_power_and_bus_separation_section_selected: zod.boolean().optional(),
+  is_both_side_extension_section_selected: zod.boolean().optional(),
   ga_gland_plate_3mm_drill_type: zod.string({
     // gland plate type
     required_error: "Gland Plate Drill Type is required",
@@ -1674,10 +1671,18 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "HMI Size is required",
     message: "HMI Size is required",
   }),
-  hmi_quantity: zod.string({
+  hmi_quantity: zod.number({
     required_error: "HMI Quantity is required",
     message: "HMI Quantity is required",
-  }),
+  })
+  // .refine(
+  //   (value) => {
+  //     if (value < 0) return false;
+  //     else return true;
+  //   },
+  //   {message: "The value must be a positive number"}
+  // )
+  ,
   hmi_hardware_make: zod.string({
     required_error: "HMI Hardware Make is required",
     message: "HMI Hardware Make is required",
@@ -1698,7 +1703,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Engineering Station Quantity is required",
     message: "Engineering Station Quantity is required",
   }),
-  engineering_station_quantity: zod.string({
+  engineering_station_quantity: zod.number({
     required_error: "Engineering Station Quantity is required",
     message: "Engineering Station Quantity is required",
   }),
@@ -1706,7 +1711,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Engineering cum Operating Station Quantity is required",
     message: "Engineering cum Operating Station Quantity is required",
   }),
-  engineering_cum_operating_station_quantity: zod.string({
+  engineering_cum_operating_station_quantity: zod.number({
     required_error: "Engineering cum Operating Station Quantity is required",
     message: "Engineering cum Operating Station Quantity is required",
   }),
@@ -1714,7 +1719,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Operating Station Quantity is required",
     message: "Operating Station Quantity is required",
   }),
-  operating_station_quantity: zod.string({
+  operating_station_quantity: zod.number({
     required_error: "Operating Station Quantity is required",
     message: "Operating Station Quantity is required",
   }),
@@ -1722,7 +1727,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "SCADA Program Development License Quantity is required",
     message: "SCADA Program Development License Quantity is required",
   }),
-  scada_program_development_license_quantity: zod.string({
+  scada_program_development_license_quantity: zod.number({
     required_error: "SCADA Program Development License Quantity is required",
     message: "SCADA Program Development License Quantity is required",
   }),
@@ -1730,7 +1735,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "SCADA Runtime License Quantity is required",
     message: "SCADA Runtime License Quantity is required",
   }),
-  scada_runtime_license_quantity: zod.string({
+  scada_runtime_license_quantity: zod.number({
     required_error: "SCADA Runtime License Quantity is required",
     message: "SCADA Runtime License Quantity is required",
   }),
@@ -1738,7 +1743,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "PLC Programming Software License Quantity is required",
     message: "PLC Programming Software License Quantity is required",
   }),
-  plc_programming_software_license_quantity: zod.string({
+  plc_programming_software_license_quantity: zod.number({
     required_error: "PLC Programming Software License Quantity is required",
     message: "PLC Programming Software License Quantity is required",
   }),
@@ -1770,7 +1775,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Printer Size is required",
     message: "Printer Size is required",
   }),
-  printer_quantity: zod.string({
+  printer_quantity: zod.number({
     required_error: "Printer Quantity is required",
     message: "Printer Quantity is required",
   }),

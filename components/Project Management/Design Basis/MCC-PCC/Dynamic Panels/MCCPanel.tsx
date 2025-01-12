@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, message, Skeleton } from "antd"; // Import Select for dropdown
 import * as zod from "zod";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { createData, getData, updateData } from "@/actions/crud-actions";
 import CustomCheckboxInput from "@/components/FormInputs/CustomCheckbox";
@@ -21,7 +21,8 @@ import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
-import { moveNAtoEnd } from "@/utils/helpers";
+import { moveNAtoEnd, parseToArray } from "@/utils/helpers";
+import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 
 const getDefaultValues = (
   projectMetadata: any,
@@ -37,24 +38,23 @@ const getDefaultValues = (
     incomer_above_pole: mccPanelData?.incomer_above_pole || "4",
     incomer_above_type: mccPanelData?.incomer_above_type || "SFU",
     is_under_or_over_voltage_selected:
-      mccPanelData?.is_under_or_over_voltage_selected || 0,
-    is_other_selected: mccPanelData?.is_other_selected || 0,
-    is_lsig_selected: mccPanelData?.is_lsig_selected || 0,
-    is_lsi_selected: mccPanelData?.is_lsi_selected || 0,
+      Boolean(mccPanelData?.is_under_or_over_voltage_selected) || false,
+    is_lsig_selected: Boolean(mccPanelData?.is_lsig_selected) || false,
+    is_lsi_selected: Boolean(mccPanelData?.is_lsi_selected) || false,
     is_neural_link_with_disconnect_facility_selected:
-      mccPanelData?.is_neural_link_with_disconnect_facility_selected || 0,
+      Boolean(mccPanelData?.is_neural_link_with_disconnect_facility_selected) || false,
 
-    is_led_type_lamp_selected:
-      mccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected: Number(mccPanelData?.is_indication_on_selected),
+    // is_led_type_lamp_selected:
+    //   mccPanelData?.is_led_type_lamp_selected?.toString() || "1",
+    is_indication_on_selected: Boolean(mccPanelData?.is_indication_on_selected) || false,
     led_type_on_input: mccPanelData?.led_type_on_input || "Green",
-    is_indication_off_selected: Number(
+    is_indication_off_selected: Boolean(
       mccPanelData?.is_indication_off_selected
-    ),
+    ) || false,
     led_type_off_input: mccPanelData?.led_type_off_input || "Red",
-    is_indication_trip_selected: Number(
+    is_indication_trip_selected: Boolean(
       mccPanelData?.is_indication_trip_selected
-    ),
+    ) || false,
     led_type_trip_input: mccPanelData?.led_type_trip_input || "Amber",
 
     is_blue_cb_spring_charge_selected:
@@ -75,8 +75,12 @@ const getDefaultValues = (
     control_transformer_configuration:
       mccPanelData?.control_transformer_configuration || "Single",
     alarm_annunciator: mccPanelData?.alarm_annunciator || "Applicable",
-    mi_analog: mccPanelData?.mi_analog || "Ammeter with ASS",
-    mi_digital: mccPanelData?.mi_digital || "NA",
+    mi_analog: mccPanelData?.mi_analog
+      ? parseToArray(mccPanelData?.mi_analog)
+      : ["Ammeter with ASS"],
+    mi_digital: mccPanelData?.mi_digital
+      ? parseToArray(mccPanelData?.mi_digital)
+      : ["NA"],
     mi_communication_protocol: mccPanelData?.mi_communication_protocol || "NA",
     ga_moc_material: mccPanelData?.ga_moc_material || "Aluminium",
     ga_moc_thickness_door: mccPanelData?.ga_moc_thickness_door || "1.6 mm",
@@ -108,11 +112,11 @@ const getDefaultValues = (
       "a) Min width 400 mm & Above\nb) Separate Marshaling for each shiping section with Partition\nc) Signal from MCC to PLC DI/DO/AI/AO with Separate TB.\nd) DI, DO TB to be mounted on separate column\ne) Signal from MCC to Field with Separate TB.",
 
     is_cable_alley_section_selected:
-      mccPanelData?.is_cable_alley_section_selected || 1,
+      Boolean(mccPanelData?.is_cable_alley_section_selected) || false,
     is_power_and_bus_separation_section_selected:
-      mccPanelData?.is_power_and_bus_separation_section_selected || 1,
+      Boolean(mccPanelData?.is_power_and_bus_separation_section_selected) || false,
     is_both_side_extension_section_selected:
-      mccPanelData?.is_both_side_extension_section_selected || 1,
+      Boolean(mccPanelData?.is_both_side_extension_section_selected) || false,
     ga_gland_plate_3mm_drill_type:
       mccPanelData?.ga_gland_plate_3mm_drill_type || "Knockout",
     ga_gland_plate_thickness:
@@ -134,13 +138,12 @@ const getDefaultValues = (
     ppc_base_frame_paint_shade:
       mccPanelData?.ppc_base_frame_paint_shade || "Black",
     ppc_minimum_coating_thickness:
-      mccPanelData?.ppc_minimum_coating_thickness ||
-      "As per Client Specification",
+      mccPanelData?.ppc_minimum_coating_thickness || "60 to 70 microns",
     ppc_pretreatment_panel_standard:
       mccPanelData?.ppc_pretreatment_panel_standard ||
       "- Panel Shall Be Degreased And Derusted(7 Tank Pretreatment)\n- Panel Shall Be Powder Coated.\nOR\n- OEM standard for pretreatment.    ",
     general_requirments_for_construction:
-      mccPanelData?.general_requirments_for_construction || "NA",
+      mccPanelData?.general_requirments_for_construction || "Not Applicable",
     vfd_auto_manual_selection:
       mccPanelData?.vfd_auto_manual_selection || "Applicable",
     is_punching_details_for_boiler_selected:
@@ -171,7 +174,7 @@ const getDefaultValues = (
     heater_model: mccPanelData?.heater_model || "NA",
     heater_fuel: mccPanelData?.heater_fuel || "NA",
     heater_year: mccPanelData?.heater_year || "NA",
-    special_note: mccPanelData?.special_note || "NA",
+    special_note: mccPanelData?.special_note || "Not Applicable",
     heater_power_supply_vac:
       mccPanelData?.heater_power_supply_vac || projectInfo?.main_supply_lv,
     heater_power_supply_phase:
@@ -323,9 +326,13 @@ const MCCPanel = ({
   }, [currentTransformerCoating, setValue]);
 
   useEffect(() => {
-    // console.log(mccPanelData, "MCC DATA");
-
+    console.log(mccPanelData, "MCC DATA");
     if (projectInfo && mccPanelData) {
+      console.log(
+        getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]),
+        "Default Values MCC"
+      );
+
       reset(getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]));
     }
   }, [mccPanelData, projectInfo, projectMetadata, reset]);
@@ -400,6 +407,12 @@ const MCCPanel = ({
       setValue("current_transformer_number", "NA");
     }
   }, [current_transformer_coating_Controlled, setValue]);
+  const tabsCount = useRef("0");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
+    }
+  }, []);
 
   useEffect(() => {
     if (incomer_ampere_controlled === "1000") {
@@ -428,13 +441,27 @@ const MCCPanel = ({
   > = async (data) => {
     setLoading(true);
     try {
-      await updateData(`${MCC_PANEL}/${mccPanelData[0].name}`, false, data);
-      message.success("Panel Data Saved successfully.");
+      const fieldsToStringify = ["mi_analog", "mi_digital"];
 
-      const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
+      const transformedData: any = { ...data };
+
+      fieldsToStringify.forEach((field) => {
+        if (Array.isArray(transformedData[field])) {
+          transformedData[field] = JSON.stringify(transformedData[field]);
+        }
+      });
+      await updateData(
+        `${MCC_PANEL}/${mccPanelData[0].name}`,
+        false,
+        transformedData
+      );
+      message.success("Panel Data Saved Successfully");
+      const redirectToLayout = () => {
+        router.push(`/project/${project_id}/design-basis/layout`);
+      };
       setActiveKey((prevKey: string) => {
-        if (prevKey == tabsCount) {
-          router.push(`/project/${project_id}/design-basis/layout`);
+        if (prevKey == tabsCount.current) {
+          redirectToLayout();
           return "1";
         }
 
@@ -447,6 +474,9 @@ const MCCPanel = ({
       setLoading(false);
     }
   };
+  useEffect(() => {
+    window.scroll(0, 0);
+  }, []);
 
   if (isLoading) {
     return (
@@ -710,7 +740,7 @@ const MCCPanel = ({
         </Divider>
         <div className="flex items-center gap-4">
           <div className="flex-1">
-            <CustomSingleSelect
+            <CustomMultiSelect
               control={control}
               name="mi_analog"
               label="Analog Meter"
@@ -719,7 +749,7 @@ const MCCPanel = ({
             />
           </div>
           <div className="flex-1">
-            <CustomSingleSelect
+            <CustomMultiSelect
               control={control}
               name="mi_digital"
               label="Digital Meter"
@@ -904,18 +934,23 @@ const MCCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ga_panel_mounting_height"
-              label="Height of Base Frame (mm)"
+              label="Height of Base Frame"
               options={
                 (watch("ga_panel_mounting_frame") === "Base Frame"
                   ? base_frame_options
                   : extended_frame_options) || []
               }
               size="small"
+              suffixIcon={
+                <>
+                  <p className="font-semibold text-blue-500">mm</p>
+                </>
+              }
             />
           </div>
         </div>
         <div className="mt-2 flex items-center gap-4">
-          <h4 className="mr-2 font-semibold text-slate-700">Sections</h4>
+          {/* <h4 className="mr-2 font-semibold text-slate-700">Sections</h4> */}
           <div className="flex-1">
             <CustomRadioSelect
               control={control}
@@ -963,7 +998,7 @@ const MCCPanel = ({
               control={control}
               name="ga_gland_plate_3mm_drill_type"
               label="Gland Plate Type"
-              options={ga_gland_plate_3mm_drill_type_options || []}
+              options={moveNAtoEnd(ga_gland_plate_3mm_drill_type_options) || []}
               size="small"
             />
           </div>

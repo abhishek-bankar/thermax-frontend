@@ -104,7 +104,11 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       key: "division",
       hidden: !isUserSuperUser,
       render: (text: keyof typeof TagColors) => {
-        return <Tag color={TagColors[text]}>{text}</Tag>;
+        return (
+          <div className="text-center text-wrap">
+            <Tag color={TagColors[text]}>{text}</Tag>
+          </div>
+        );
       },
       filters: [HEATING, ENVIRO, WWS_IPG, WWS_SPG, SERVICES].map((division) => {
         return { text: division, value: division };
@@ -113,11 +117,12 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       defaultFilteredValue: [userDivision],
     },
     {
-      title: () => <div className="text-center">Project OC No</div>,
+      title: () => <div className="text-center text-wrap">Project OC No</div>,
       dataIndex: "project_oc_number",
       key: "project_oc_number",
+      ellipsis: true,
       render: (text) => {
-        return <div className="text-center">{text}</div>;
+        return <div className="text-center text-wrap">{text}</div>;
       },
     },
     {
@@ -155,7 +160,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       },
     },
     {
-      title: () => <div className="text-center">Modified Date</div>,
+      title: "Modified Date",
       dataIndex: "modified",
       key: "modified",
       align: "center",
@@ -183,6 +188,8 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       title: "Action",
       dataIndex: "action",
       align: "center",
+      ellipsis: true,
+
       hidden: isComplete === 1,
       render: (text, record: any) => {
         return (

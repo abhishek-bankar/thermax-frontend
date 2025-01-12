@@ -2,7 +2,7 @@
 import * as zod from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Divider, message, Skeleton } from "antd"; // Import Select for dropdown
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { updateData } from "@/actions/crud-actions";
 import CustomCheckboxInput from "@/components/FormInputs/CustomCheckbox";
@@ -21,7 +21,8 @@ import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
-import { moveNAtoEnd } from "@/utils/helpers";
+import { moveNAtoEnd, parseToArray } from "@/utils/helpers";
+import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 
 const getDefaultValues = (
   projectMetadata: any,
@@ -30,7 +31,7 @@ const getDefaultValues = (
 ) => {
   return {
     incomer_ampere: pccPanelData?.incomer_ampere || "1000",
-    special_note: pccPanelData?.special_note || "NA",
+    special_note: pccPanelData?.special_note || "Not Applicable",
     led_type_other_input: pccPanelData?.led_type_other_input || "NA",
     incomer_pole: pccPanelData?.incomer_pole || "3",
     incomer_type: pccPanelData?.incomer_type || "SFU",
@@ -38,24 +39,23 @@ const getDefaultValues = (
     incomer_above_pole: pccPanelData?.incomer_above_pole || "4",
     incomer_above_type: pccPanelData?.incomer_above_type || "SFU",
     is_under_or_over_voltage_selected:
-      pccPanelData?.is_under_or_over_voltage_selected || 0,
-    is_other_selected: pccPanelData?.is_other_selected || 0,
-    is_lsig_selected: pccPanelData?.is_lsig_selected || 0,
-    is_lsi_selected: pccPanelData?.is_lsi_selected || 0,
+      Boolean(pccPanelData?.is_under_or_over_voltage_selected) || false,
+    is_lsig_selected: Boolean(pccPanelData?.is_lsig_selected) || false,
+    is_lsi_selected: Boolean(pccPanelData?.is_lsi_selected) || false,
     is_neural_link_with_disconnect_facility_selected:
-      pccPanelData?.is_neural_link_with_disconnect_facility_selected || 0,
+      Boolean(pccPanelData?.is_neural_link_with_disconnect_facility_selected) || false,
 
     is_led_type_lamp_selected:
       pccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected: Boolean(pccPanelData?.is_indication_on_selected),
+    is_indication_on_selected: Boolean(pccPanelData?.is_indication_on_selected) || false,
     led_type_on_input: pccPanelData?.led_type_on_input || "Green",
     is_indication_off_selected: Boolean(
       pccPanelData?.is_indication_off_selected
-    ),
+    ) || false,
     led_type_off_input: pccPanelData?.led_type_off_input || "Red",
     is_indication_trip_selected: Boolean(
       pccPanelData?.is_indication_trip_selected
-    ),
+    ) || false,
     led_type_trip_input: pccPanelData?.led_type_trip_input || "Amber",
 
     is_blue_cb_spring_charge_selected:
@@ -77,8 +77,12 @@ const getDefaultValues = (
     control_transformer_configuration:
       pccPanelData?.control_transformer_configuration || "Single",
 
-    mi_analog: pccPanelData?.mi_analog || "Ammeter with ASS",
-    mi_digital: pccPanelData?.mi_digital || "Multifunction meter",
+    mi_analog: pccPanelData?.mi_analog
+      ? parseToArray(pccPanelData?.mi_analog)
+      : ["Ammeter with ASS"],
+    mi_digital: pccPanelData?.mi_digital
+      ? parseToArray(pccPanelData?.mi_digital)
+      : ["Multifunction meter"],
     mi_communication_protocol:
       pccPanelData?.mi_communication_protocol || "Ethernet",
 
@@ -112,11 +116,11 @@ const getDefaultValues = (
       "a) Min width 400 mm & Above\nb) Separate Marshaling for each shiping section with Partition\nc) Signal from MCC to PLC DI/DO/AI/AO with Separate TB.\nd) DI, DO TB to be mounted on separate column\ne) Signal from MCC to Field with Separate TB.",
 
     is_cable_alley_section_selected:
-      pccPanelData?.is_cable_alley_section_selected || 1,
+     Boolean( pccPanelData?.is_cable_alley_section_selected )|| false,
     is_power_and_bus_separation_section_selected:
-      pccPanelData?.is_power_and_bus_separation_section_selected || 1,
+     Boolean(pccPanelData?.is_power_and_bus_separation_section_selected) || false,
     is_both_side_extension_section_selected:
-      pccPanelData?.is_both_side_extension_section_selected || 1,
+     Boolean(pccPanelData?.is_both_side_extension_section_selected) || false,
     ga_gland_plate_3mm_drill_type:
       pccPanelData?.ga_gland_plate_3mm_drill_type || "Knockout",
     ga_gland_plate_thickness:
@@ -142,7 +146,7 @@ const getDefaultValues = (
       pccPanelData?.ppc_pretreatment_panel_standard ||
       "- Panel Shall Be Degreased And Derusted(7 Tank Pretreatment)\n- Panel Shall Be Powder Coated.\nOR\n- OEM standard for pretreatment.    ",
     general_requirments_for_construction:
-      pccPanelData?.general_requirments_for_construction || "NA",
+      pccPanelData?.general_requirments_for_construction || "Not Applicable",
     is_punching_details_for_boiler_selected:
       pccPanelData?.is_punching_details_for_boiler_selected?.toString() || "0",
     boiler_model: pccPanelData?.boiler_model || "NA",
@@ -232,6 +236,8 @@ const PCCPanel = ({
   const userDivision = userInfo?.division;
   const projectDivision = projectMetadata?.division;
 
+  console.log("pccPanelData", pccPanelData)
+
   const isLoading =
     isPccPanelLoading || isProjectInfoLoading || isProjectMetaDataLoading;
 
@@ -311,7 +317,9 @@ const PCCPanel = ({
   const router = useRouter();
 
   console.log("form errors", formState.errors);
-
+  useEffect(() => {
+    window.scroll(0, 0);
+  }, []);
   useEffect(() => {
     console.log(pccPanelData?.[0], "PCC");
     console.log(
@@ -333,7 +341,12 @@ const PCCPanel = ({
   const [hasACB, setHasACB] = useState(false);
   const incomer_type = watch("incomer_type");
   const currentTransformerNumber = watch("current_transformer_number");
-
+  const tabsCount = useRef("0");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
+    }
+  }, []);
   const incomer_above_type = watch("incomer_above_type");
   useEffect(() => {
     const hasACB =
@@ -413,12 +426,28 @@ const PCCPanel = ({
     try {
       // console.log(data);
 
-      await updateData(`${PCC_PANEL}/${pccPanelData[0].name}`, false, data);
+      const fieldsToStringify = ["mi_analog", "mi_digital"];
+
+      const transformedData: any = { ...data };
+
+      fieldsToStringify.forEach((field) => {
+        if (Array.isArray(transformedData[field])) {
+          transformedData[field] = JSON.stringify(transformedData[field]);
+        }
+      });
+      await updateData(
+        `${PCC_PANEL}/${pccPanelData[0].name}`,
+        false,
+        transformedData
+      );
       message.success("Panel Data Saved Successfully");
-      const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
+      const redirectToLayout = () => {
+        router.push(`/project/${project_id}/design-basis/layout`);
+      };
+      // const tabsCount = localStorage.getItem("dynamic-tabs-count") ?? "0";
       setActiveKey((prevKey: string) => {
-        if (prevKey == tabsCount) {
-          router.push(`/project/${project_id}/design-basis/layout`);
+        if (prevKey == tabsCount.current) {
+          redirectToLayout();
           return "1";
         }
 
@@ -689,7 +718,7 @@ const PCCPanel = ({
 
         <div className="flex gap-4">
           <div className="flex-1">
-            <CustomSingleSelect
+            <CustomMultiSelect
               control={control}
               name="mi_analog"
               label="Analog Meter"
@@ -698,7 +727,7 @@ const PCCPanel = ({
             />
           </div>
           <div className="flex-1">
-            <CustomSingleSelect
+            <CustomMultiSelect
               control={control}
               name="mi_digital"
               label="Digital Meter"
@@ -884,18 +913,23 @@ const PCCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ga_panel_mounting_height"
-              label="Height of Base Frame (mm)"
+              label="Height of Base Frame"
               options={
                 (watch("ga_panel_mounting_frame") === "Base Frame"
                   ? base_frame_options
                   : extended_frame_options) || []
               }
               size="small"
+              suffixIcon={
+                <>
+                  <p className="font-semibold text-blue-500">mm</p>
+                </>
+              }
             />
           </div>
         </div>
         <div className="mt-2 flex items-center gap-4">
-          <h4 className="mr-2 font-semibold text-slate-700">Sections</h4>
+          {/* <h4 className="mr-2 font-semibold text-slate-700">Sections</h4> */}
           <div className="flex-1">
             <CustomRadioSelect
               control={control}
@@ -943,7 +977,7 @@ const PCCPanel = ({
               control={control}
               name="ga_gland_plate_3mm_drill_type"
               label="Gland Plate Type"
-              options={ga_gland_plate_3mm_drill_type_options || []}
+              options={moveNAtoEnd(ga_gland_plate_3mm_drill_type_options) || []}
               size="small"
             />
           </div>

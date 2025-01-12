@@ -58,6 +58,7 @@ function renameNameToKey(pkgList: any[]) {
 export default function PackageList() {
   const userInfo = useCurrentUser();
   const division_name = userInfo?.division;
+  const is_superuser = userInfo.is_superuser as boolean;
   const [editModeMainPkg, setEditModeMainPkg] = useState(false);
   const [editModeSubPkg, setEditModeSubPkg] = useState(false);
   const [mainPkgopen, setMainPkgOpen] = useState(false);
@@ -92,7 +93,6 @@ export default function PackageList() {
     try {
       await deleteData(`${MAIN_PKG_API}/${selectedRowID}`, false);
       message.success("Main Package Deleted Successfully.");
-
     } catch (error: any) {
       handleError(error);
     } finally {
@@ -138,61 +138,76 @@ export default function PackageList() {
     setSubPkgRowData(values);
   };
 
-  const parentColumns: TableColumnsType<DataType> = [
-    {
-      title: "ID",
-      dataIndex: "name",
-      key: "name",
-      hidden: true,
-    },
-    {
-      title: "Main Package",
-      align: "center",
-      dataIndex: "package_name",
-      key: "package_name",
-    },
-    {
-      title: "Action",
-      align: "center",
-      key: "main_action",
-      hidden: userInfo.is_superuser !== 1,
-      render: (text, record) => (
-        <div className="flex justify-center gap-2">
-          <Tooltip placement="top" title="Add Sub Package">
-            <Button
-              type="link"
-              shape="circle"
-              icon={<PlusCircleOutlined />}
-              onClick={() => handleAddSubPkg(record)}
-            />
-          </Tooltip>
-          <Tooltip placement="top" title="Edit Main Package">
-            <Button
-              type="link"
-              shape="circle"
-              icon={<EditOutlined />}
-              onClick={() => handleEditMainPkg(record)}
-            />
-          </Tooltip>
-          <Tooltip placement="top" title="Delete Main Package">
-            <Popconfirm
-              title="Are you sure to delete this package?"
-              onConfirm={async () => await handleMainPkgDelete(record.key)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button
-                type="link"
-                shape="circle"
-                danger
-                icon={<DeleteOutlined />}
-              />
-            </Popconfirm>
-          </Tooltip>
-        </div>
-      ),
-    },
-  ];
+  const parentColumns: TableColumnsType<DataType> = is_superuser
+    ? [
+        {
+          title: "ID",
+          dataIndex: "name",
+          key: "name",
+          hidden: true,
+        },
+        {
+          title: "Main Package",
+          align: "center",
+          dataIndex: "package_name",
+          key: "package_name",
+        },
+        {
+          title: "Action",
+          align: "center",
+          key: "main_action",
+          hidden: userInfo.is_superuser !== 1,
+          render: (text, record) => (
+            <div className="flex justify-center gap-2">
+              <Tooltip placement="top" title="Add Sub Package">
+                <Button
+                  type="link"
+                  shape="circle"
+                  icon={<PlusCircleOutlined />}
+                  onClick={() => handleAddSubPkg(record)}
+                />
+              </Tooltip>
+              <Tooltip placement="top" title="Edit Main Package">
+                <Button
+                  type="link"
+                  shape="circle"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEditMainPkg(record)}
+                />
+              </Tooltip>
+              <Tooltip placement="top" title="Delete Main Package">
+                <Popconfirm
+                  title="Are you sure to delete this package?"
+                  onConfirm={async () => await handleMainPkgDelete(record.key)}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button
+                    type="link"
+                    shape="circle"
+                    danger
+                    icon={<DeleteOutlined />}
+                  />
+                </Popconfirm>
+              </Tooltip>
+            </div>
+          ),
+        },
+      ]
+    : [
+        {
+          title: "ID",
+          dataIndex: "name",
+          key: "name",
+          hidden: true,
+        },
+        {
+          title: "Main Package",
+          align: "center",
+          dataIndex: "package_name",
+          key: "package_name",
+        },
+      ];
 
   // Child table columns (sub-packages)
   const childColumns: TableColumnsType<ExpandedDataType> = [
@@ -287,9 +302,11 @@ export default function PackageList() {
               />
             </div>
           </Tooltip>
-          <Button type="primary" onClick={handleAddMainPkg}>
-            Add Main Package
-          </Button>
+          {is_superuser ? (
+            <Button type="primary" onClick={handleAddMainPkg}>
+              Add Main Package
+            </Button>
+          ) : null}
         </div>
       </div>
       <Table<DataType>

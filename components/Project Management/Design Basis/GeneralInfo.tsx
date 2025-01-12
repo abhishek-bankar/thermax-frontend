@@ -15,6 +15,7 @@ import {
   DESIGN_BASIS_GENERAL_INFO_API,
   MAIN_PKG_API,
   MOTOR_PARAMETER_API,
+  PROJECT_API,
   PROJECT_MAIN_PKG_API,
   PROJECT_MAIN_PKG_LIST_API,
   SUB_PKG_API,
@@ -31,6 +32,11 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
   const userInfo = useCurrentUser();
   const params = useParams();
   const router = useRouter();
+  const project_id = params.project_id;
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const userDivision = userInfo?.division;
+  const projectDivision = projectData?.division;
+
   const [selectedMainPkgId, setSelectedMainPkgId] = useState("");
   const [addPkgLoading, setAddPkgLoading] = useState(false);
 
@@ -145,78 +151,6 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
         battery_limit: generalInfoData.battery_limit,
       });
     }
-    // const pkgList = generalInfoData?.pkgList;
-    // if (pkgList && pkgList.length > 0) {
-    //   let hasHazardousArea = false;
-    //   let hasSafeArea = false;
-    //   for (const mainPkg of pkgList) {
-    //     const subPkgList = mainPkg?.sub_packages;
-    //     console.log(subPkgList);
-
-    //     const updateSubPkgList = [];
-    //     if (subPkgList && subPkgList.length > 0) {
-    //       for (const subPkg of subPkgList) {
-    //         if (
-    //           subPkg.area_of_classification === "Hazardous Area" &&
-    //           Boolean(subPkg.is_sub_package_selected)
-    //         ) {
-    //           hasHazardousArea = true;
-    //         }
-    //         if (
-    //           subPkg.area_of_classification === "Safe Area" &&
-    //           Boolean(subPkg.is_sub_package_selected)
-    //         ) {
-    //           hasSafeArea = true;
-    //         }
-    //         updateSubPkgList.push({
-    //           sub_package_name: subPkg.sub_package_name,
-    //           area_of_classification: subPkg.area_of_classification,
-    //           is_sub_package_selected: subPkg.is_sub_package_selected,
-    //         });
-    //       }
-    //     }
-
-    //     await updateData(`${PROJECT_MAIN_PKG_API}/${mainPkg.name}`, false, {
-    //       main_package_name: mainPkg.main_package_name,
-    //       sub_packages: updateSubPkgList,
-    //       standard: mainPkg?.standard,
-    //       zone: mainPkg?.zone,
-    //       gas_group: mainPkg?.gas_group,
-    //       temperature_class: mainPkg?.temperature_class,
-    //     });
-    //   }
-
-    //   const isHazardousAreaPresent = hasHazardousArea ? true : false;
-    //   const isSafeAreaPresent = hasSafeArea ? true : false;
-
-    //   if (motorParameters && motorParameters.length > 0) {
-    //     // Update existing motor parameters
-    //     await updateData(
-    //       `${MOTOR_PARAMETER_API}/${motorParameters[0].name}`,
-    //       false,
-    //       {
-    //         is_hazardous_area_present: isHazardousAreaPresent,
-    //         is_safe_area_present: isSafeAreaPresent,
-    //       }
-    //     );
-    //   } else {
-    //     // Create new motor parameters if none exist
-    //     await createData(MOTOR_PARAMETER_API, false, {
-    //       revision_id,
-    //       is_hazardous_area_present: isHazardousAreaPresent,
-    //       is_safe_area_present: isSafeAreaPresent,
-    //     });
-    //   }
-    // } else {
-    //   await updateData(
-    //     `${MOTOR_PARAMETER_API}/${motorParameters[0].name}`,
-    //     false,
-    //     {
-    //       is_hazardous_area_present: true,
-    //       is_safe_area_present: true,
-    //     }
-    //   );
-    // }
 
     const pkgList = generalInfoData?.pkgList;
 
@@ -240,9 +174,6 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
             return message.error(
               `Main package ${mainPkg.main_package_name} must have at least one subpackage selected`
             );
-            // throw new Error(
-            //   `Main package "${mainPkg.main_package_name}" must have at least one subpackage selected`
-            // );
           }
 
           for (const subPkg of subPkgList) {
@@ -356,7 +287,10 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
               type="primary"
               onClick={handleAddPkg}
               loading={addPkgLoading}
-              disabled={generalInfoData?.is_package_selection_enabled === 0}
+              disabled={
+                generalInfoData?.is_package_selection_enabled === 0 ||
+                userDivision !== projectDivision
+              }
             >
               Add
             </Button>
@@ -407,7 +341,12 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
       </div>
 
       <div className="flex w-full justify-end gap-4">
-        <Button type="primary" onClick={handleSave} loading={saveLoading}>
+        <Button
+          type="primary"
+          onClick={handleSave}
+          loading={saveLoading}
+          disabled={userDivision !== projectDivision}
+        >
           Save and Next
         </Button>
       </div>

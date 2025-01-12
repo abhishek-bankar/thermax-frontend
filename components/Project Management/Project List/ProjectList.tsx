@@ -185,7 +185,6 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       align: "center",
       hidden: isComplete === 1,
       render: (text, record: any) => {
-        console.log("record", record);
         return (
           <div className="flex justify-center gap-2">
             <Tooltip placement="top" title="Edit">

@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as zod from "zod";
 import { getData, updateData } from "@/actions/crud-actions";
-import { MAKE_OF_COMPONENT_API } from "@/configs/api-endpoints";
+import { MAKE_OF_COMPONENT_API, PROJECT_API } from "@/configs/api-endpoints";
 import { HEATING } from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -15,6 +15,7 @@ import useMakeOfComponentDropdowns from "./MakeDropdowns";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 import { moveNAtoEnd } from "@/utils/helpers";
+import { useParams } from "next/navigation";
 
 // Define Zod schema for validation
 const makeOfComponentSchema = zod.object({
@@ -128,7 +129,13 @@ const MakeOfComponent = ({
   setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const [loading, setLoading] = useState(false);
+  const params = useParams();
   const userInfo = useCurrentUser();
+  const project_id = params?.project_id;
+
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const userDivision = userInfo?.division;
+  const projectDivision = projectData?.division;
 
   const { data: makeOfComponent } = useGetData(
     `${MAKE_OF_COMPONENT_API}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
@@ -412,7 +419,12 @@ const MakeOfComponent = ({
       </div>
 
       <div className="flex justify-end">
-        <Button type="primary" htmlType="submit" loading={loading}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={loading}
+          disabled={userDivision !== projectDivision}
+        >
           Save and Next
         </Button>
       </div>

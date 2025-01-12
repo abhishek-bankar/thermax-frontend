@@ -14,6 +14,7 @@ import {
   COMMON_CONFIGURATION_1,
   COMMON_CONFIGURATION_2,
   COMMON_CONFIGURATION_3,
+  PROJECT_API,
 } from "@/configs/api-endpoints";
 import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useCommonConfigDropdowns from "./CommonConfigDropdowns";
@@ -25,6 +26,7 @@ import {
   sortAlphaNumericArray,
   sortDropdownOptions,
 } from "@/utils/helpers";
+import { useParams } from "next/navigation";
 
 const getDefaultValues = (commonConfigData: any) => {
   return {
@@ -310,7 +312,13 @@ const CommonConfiguration = ({
   const [loading, setLoading] = useState(false);
 
   const userInfo = useCurrentUser();
+  const params = useParams();
+  const project_id = params?.project_id;
   const dropdown = useCommonConfigDropdowns();
+
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const projectDivision = projectData?.division;
+  const userDivision = userInfo?.division;
 
   const dm_standard_options = dropdown["Supply Feeder DM Standard"];
   const pb_current_density_options = dropdown["Power Bus Current Density"];
@@ -2260,7 +2268,12 @@ const CommonConfiguration = ({
           </div>
         </div>
         <div className="mt-2 flex w-full justify-end">
-          <Button type="primary" htmlType="submit" loading={loading}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            disabled={userDivision !== projectDivision}
+          >
             Save and Next
           </Button>
         </div>

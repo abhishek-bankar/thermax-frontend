@@ -14,8 +14,9 @@ import {
   MCC_PCC_PLC_PANEL_1,
   MCC_PCC_PLC_PANEL_2,
   MCC_PCC_PLC_PANEL_3,
+  PROJECT_API,
 } from "@/configs/api-endpoints";
-import { useNewGetData } from "@/hooks/useCRUD";
+import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import usePLCDropdowns from "./PLCDropdown";
 import { plcPanelValidationSchema } from "../schemas";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -306,6 +307,8 @@ const MCCcumPCCPLCPanel = ({
   const project_id = params.project_id;
   const router = useRouter();
 
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+
   const plcPanelData = useMemo(
     () => ({
       ...(plcPanelData1?.[0] || {}),
@@ -318,6 +321,8 @@ const MCCcumPCCPLCPanel = ({
   const [loading, setLoading] = useState(false);
   const dropdown = usePLCDropdowns();
   const userInfo: { division: string } = useCurrentUser();
+  const projectDivision = projectData?.division;
+  const userDivision = userInfo?.division;
 
   const plc_control_voltage_options = dropdown["PLC Control Voltage"];
   const plc_ups_1p_voltage_options = dropdown["PLC UPS 1 Phase Voltage"];
@@ -2044,7 +2049,12 @@ const MCCcumPCCPLCPanel = ({
           </div>
         </div>
         <div className="mt-2 flex w-full justify-end">
-          <Button type="primary" loading={loading} htmlType="submit">
+          <Button
+            type="primary"
+            loading={loading}
+            htmlType="submit"
+            disabled={userDivision !== projectDivision}
+          >
             Save and Next
           </Button>
         </div>

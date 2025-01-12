@@ -20,6 +20,7 @@ import { useLoading } from "@/hooks/useLoading";
 import DocumentListModal from "./DocumentListModal";
 import PanelDataList from "./Panel/PanelDataList";
 import useProjectInfoDropdowns from "./ProjectInfoDropdowns";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const ProjectInfoSchema = zod.object({
   project_name: zod.string({
@@ -184,6 +185,8 @@ const getDefaultValues = (isEdit: boolean, projectData: any) => {
 };
 
 const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
+  const userInfo = useCurrentUser();
+  const userDivision = userInfo?.division;
   const router = useRouter();
   const params = useParams();
   const project_id = params.project_id;
@@ -198,6 +201,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
 
   const { data: projectMetadata } = useGetData(getProjectMetadataUrl);
   const { data: projectInfo } = useGetData(getProjectInfoUrl);
+
+  const projectDivision = projectMetadata?.division;
 
   const [loading, setLoading] = useState(false);
   const [openDocumentList, setOpenDocumentList] = useState(false);
@@ -782,6 +787,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
           <PanelDataList
             revision_id={revision_id}
             projectMetadata={projectMetadata}
+            userDivision={userDivision}
+            projectDivision={projectDivision}
           />
         </div>
 
@@ -797,7 +804,12 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
           </div>
           <div className="">
             <Tooltip title="Save" placement="top">
-              <Button type="primary" htmlType="submit" loading={loading}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                disabled={userDivision !== projectDivision}
+              >
                 Save
               </Button>
             </Tooltip>
@@ -812,7 +824,11 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             </Button>
           </div>
           <div className="">
-            <Button type="primary" htmlType="button">
+            <Button
+              type="primary"
+              htmlType="button"
+              disabled={userDivision !== projectDivision}
+            >
               Instrumental
             </Button>
           </div>
@@ -821,7 +837,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               <Button
                 type="primary"
                 htmlType="button"
-                disabled={!formState.isValid}
+                disabled={userDivision !== projectDivision}
                 onClick={() => {
                   handleSubmit(onSubmit);
                   router.push(
@@ -840,6 +856,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
         open={openDocumentList}
         setOpen={setOpenDocumentList}
         revision_id={revision_id}
+        userDivision={userDivision}
+        projectDivision={projectDivision}
       />
     </div>
   );

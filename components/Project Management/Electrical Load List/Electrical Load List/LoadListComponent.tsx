@@ -1245,6 +1245,7 @@ import {
   MAIN_SUPPLY_LV_API,
   MAKE_OF_COMPONENT_API,
   MOTOR_PARAMETER_API,
+  PROJECT_API,
   PROJECT_INFO_API,
   PROJECT_MAIN_PKG_LIST_API,
 } from "@/configs/api-endpoints";
@@ -1274,6 +1275,7 @@ import {
 } from "@/actions/electrical-load-list";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { WWS_SPG } from "@/configs/constants";
+import { useGetData } from "@/hooks/useCRUD";
 
 export const getStandByKw = (item2: any, item3: any) => {
   if (item2 == 0) {
@@ -1441,8 +1443,14 @@ const LoadList: React.FC<LoadListProps> = ({
   const spreadsheetRef = useRef<JspreadsheetInstance | null>(null);
   const params = useParams();
   const router = useRouter();
+  const userInfo: {
+    division: string;
+  } = useCurrentUser();
 
   const project_id = params.project_id as string;
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const userDivision = userInfo.division;
+  const projectDivision = projectData?.division;
 
   const {
     isLoading,
@@ -1472,9 +1480,7 @@ const LoadList: React.FC<LoadListProps> = ({
     useState(false);
   const [isLPBSModalOpen, setIsLPBSModalOpen] = useState(false);
   const [isValidatePanelLoadOpen, setIsValidatePanelLoadOpen] = useState(false);
-  const userInfo: {
-    division: string;
-  } = useCurrentUser();
+
   const { setLoading } = useLoading();
 
   const handleCellChange = (
@@ -2285,6 +2291,7 @@ const LoadList: React.FC<LoadListProps> = ({
           type="primary"
           onClick={() => setIsControlSchemeModalOpen(true)}
           className="hover:bg-blue-600"
+          disabled={userDivision !== projectDivision}
         >
           Control Scheme Configurator
         </Button>
@@ -2292,6 +2299,7 @@ const LoadList: React.FC<LoadListProps> = ({
           type="primary"
           onClick={() => setIsLPBSModalOpen(true)}
           className="hover:bg-blue-600"
+          disabled={userDivision !== projectDivision}
         >
           LPBS Configurator
         </Button>
@@ -2332,13 +2340,21 @@ const LoadList: React.FC<LoadListProps> = ({
       )}
 
       <div className="flex w-full flex-row justify-end gap-2">
-        <Button type="primary" onClick={handleCurrentCalculation}>
+        <Button
+          type="primary"
+          onClick={handleCurrentCalculation}
+          disabled={userDivision !== projectDivision}
+        >
           Get Current
         </Button>
-        <Button type="primary" onClick={handleValidatePanelLoad}>
+        <Button
+          type="primary"
+          onClick={handleValidatePanelLoad}
+          disabled={userDivision !== projectDivision}
+        >
           Validate Panel Load
         </Button>
-        <Button type="primary">
+        <Button type="primary" disabled={userDivision !== projectDivision}>
           Upload Load List
           <input
             type="file"
@@ -2356,17 +2372,29 @@ const LoadList: React.FC<LoadListProps> = ({
             onChange={handleFileChange}
           />
         </Button>
-        <Button type="primary" onClick={downloadCurrentData}>
+        <Button
+          type="primary"
+          onClick={downloadCurrentData}
+          disabled={userDivision !== projectDivision}
+        >
           Download Current Data
         </Button>
-        <Button type="primary" onClick={handleTemplateDownload}>
+        <Button
+          type="primary"
+          onClick={handleTemplateDownload}
+          disabled={userDivision !== projectDivision}
+        >
           {/* <a href="public/files/Motor_Details_Template.xlsx" download>
             Download Load List Template
 
           </a> */}
           Download Load List Template
         </Button>
-        <Button type="primary" onClick={handleLoadListSave}>
+        <Button
+          type="primary"
+          onClick={handleLoadListSave}
+          disabled={userDivision !== projectDivision}
+        >
           Save
         </Button>
         <Button

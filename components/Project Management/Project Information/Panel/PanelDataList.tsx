@@ -33,9 +33,13 @@ interface DataType {
 export default function PanelDataList({
   revision_id,
   projectMetadata,
+  userDivision,
+  projectDivision,
 }: {
   revision_id: string;
   projectMetadata: any;
+  userDivision: string;
+  projectDivision: string;
 }) {
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -84,6 +88,7 @@ export default function PanelDataList({
               shape="circle"
               icon={<EditOutlined />}
               onClick={() => handleEditPanel(record)}
+              disabled={userDivision !== projectDivision}
             />
           </Tooltip>
 
@@ -94,12 +99,14 @@ export default function PanelDataList({
               okText="Yes"
               cancelText="No"
               placement="topRight"
+              disabled={userDivision !== projectDivision}
             >
               <Button
                 type="link"
                 shape="circle"
                 icon={<DeleteOutlined />}
                 danger
+                disabled={userDivision !== projectDivision}
               />
             </Popconfirm>
           </Tooltip>
@@ -212,6 +219,7 @@ export default function PanelDataList({
             icon={<PlusOutlined />}
             size="small"
             onClick={() => handleAddPanel()}
+            disabled={userDivision !== projectDivision}
           >
             Add Panel
           </Button>

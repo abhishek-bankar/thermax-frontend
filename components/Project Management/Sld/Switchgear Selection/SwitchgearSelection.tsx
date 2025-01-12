@@ -786,14 +786,14 @@ const SwitchgearSelection: React.FC<Props> = ({
   } = useDataFetching(
     designBasisRevisionId,
     data,
-    userInfo.division,
+    userInfo?.division,
     revision_id
   );
   // console.log(swSelectionData, "switchegear data");
 
   const typedSwitchgearColumns = useMemo(
     () =>
-      switchGearSelectionColumns(userInfo.division).map((column) => ({
+      switchGearSelectionColumns(userInfo?.division).map((column) => ({
         ...column,
         type: column.type as ValidColumnType,
       })),
@@ -834,7 +834,7 @@ const SwitchgearSelection: React.FC<Props> = ({
     const sortedData = sortByBusSegregation(data);
 
     typedSwitchgearColumns.forEach((column) => {
-      if (userInfo.division === HEATING) {
+      if (userInfo?.division === HEATING) {
         if (column.name === "incomer") {
           column.source = ["Incomer 1", "Combine"];
         }
@@ -904,7 +904,7 @@ const SwitchgearSelection: React.FC<Props> = ({
         [],
         commonConfiguration,
         makeComponents,
-        userInfo.division
+        userInfo?.division
       );
       // setSwSelectionData(formattedData)
       // console.log(formattedData, "formattedData");
@@ -921,7 +921,7 @@ const SwitchgearSelection: React.FC<Props> = ({
 
     const payload = {
       switchgear_selection_data: data?.map((row: any) => {
-        if (userInfo.division === ENVIRO) {
+        if (userInfo?.division === ENVIRO) {
           return {
             tag_number: row[0],
             service_description: row[1],
@@ -944,7 +944,7 @@ const SwitchgearSelection: React.FC<Props> = ({
             cable_size: row[18],
             incomer: row[19],
           };
-        } else if (userInfo.division === HEATING) {
+        } else if (userInfo?.division === HEATING) {
           return {
             tag_number: row[0],
             service_description: row[1],
@@ -1000,19 +1000,19 @@ const SwitchgearSelection: React.FC<Props> = ({
     const swData = spreadsheetInstance?.getData();
     try {
       const payload = {
-        division: userInfo.division,
+        division: userInfo?.division,
         project_id,
         data: swData?.map((item: any) => {
           return {
             tag_number: item[0],
             kw: getStandByKw(item[3], item[4]),
-            starter_type: userInfo.division === ENVIRO ? item[7] : item[6],
-            make: userInfo.division === ENVIRO ? item[8] : item[7],
+            starter_type: userInfo?.division === ENVIRO ? item[7] : item[6],
+            make: userInfo?.division === ENVIRO ? item[8] : item[7],
             sw_type:
-              userInfo.division === ENVIRO || userInfo.division === HEATING
+              userInfo?.division === ENVIRO || userInfo?.division === HEATING
                 ? item[9]
                 : item[8],
-            starting_time: userInfo.division === HEATING ? item[8] : "",
+            starting_time: userInfo?.division === HEATING ? item[8] : "",
           };
         }),
       };
@@ -1026,7 +1026,7 @@ const SwitchgearSelection: React.FC<Props> = ({
 
         if (calculationResult) {
           const updatedRow = [...row];
-          if (userInfo.division === HEATING || userInfo.division === ENVIRO) {
+          if (userInfo?.division === HEATING || userInfo?.division === ENVIRO) {
             updatedRow[10] = calculationResult.vfd;
             updatedRow[11] = calculationResult.breaker_fuse;
             updatedRow[12] = calculationResult.fuse_holder;

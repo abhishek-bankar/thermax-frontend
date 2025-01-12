@@ -25,7 +25,7 @@ export default auth((req) => {
 
   const { userInfo } = req.auth as any;
 
-  if (userInfo.division === BTG && !pathname.includes(USER_MANAGEMENT_PAGE)) {
+  if (userInfo?.division === BTG && !pathname.includes(USER_MANAGEMENT_PAGE)) {
     return NextResponse.redirect(new URL(USER_MANAGEMENT_PAGE, req.url));
   }
 

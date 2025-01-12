@@ -1449,7 +1449,7 @@ const LoadList: React.FC<LoadListProps> = ({
 
   const project_id = params.project_id as string;
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
-  const userDivision = userInfo.division;
+  const userDivision = userInfo?.division;
   const projectDivision = projectData?.division;
 
   const {
@@ -2156,7 +2156,7 @@ const LoadList: React.FC<LoadListProps> = ({
     // setLoading(true);
     const loadList = spreadsheetRef?.current?.getData();
     const currentCalculations = await getCurrentCalculation({
-      divisionName: userInfo.division,
+      divisionName: userInfo?.division,
       data: loadList?.map((row: any) => {
         return {
           kw: getStandByKw(row[2], row[3]),

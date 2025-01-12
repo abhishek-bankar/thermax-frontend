@@ -38,24 +38,23 @@ const getDefaultValues = (
     incomer_above_pole: mccPanelData?.incomer_above_pole || "4",
     incomer_above_type: mccPanelData?.incomer_above_type || "SFU",
     is_under_or_over_voltage_selected:
-      mccPanelData?.is_under_or_over_voltage_selected || 0,
-    is_other_selected: mccPanelData?.is_other_selected || 0,
-    is_lsig_selected: mccPanelData?.is_lsig_selected || 0,
-    is_lsi_selected: mccPanelData?.is_lsi_selected || 0,
+      Boolean(mccPanelData?.is_under_or_over_voltage_selected) || false,
+    is_lsig_selected: Boolean(mccPanelData?.is_lsig_selected) || false,
+    is_lsi_selected: Boolean(mccPanelData?.is_lsi_selected) || false,
     is_neural_link_with_disconnect_facility_selected:
-      mccPanelData?.is_neural_link_with_disconnect_facility_selected || 0,
+      Boolean(mccPanelData?.is_neural_link_with_disconnect_facility_selected) || false,
 
     // is_led_type_lamp_selected:
     //   mccPanelData?.is_led_type_lamp_selected?.toString() || "1",
-    is_indication_on_selected: Number(mccPanelData?.is_indication_on_selected),
+    is_indication_on_selected: Boolean(mccPanelData?.is_indication_on_selected) || false,
     led_type_on_input: mccPanelData?.led_type_on_input || "Green",
-    is_indication_off_selected: Number(
+    is_indication_off_selected: Boolean(
       mccPanelData?.is_indication_off_selected
-    ),
+    ) || false,
     led_type_off_input: mccPanelData?.led_type_off_input || "Red",
-    is_indication_trip_selected: Number(
+    is_indication_trip_selected: Boolean(
       mccPanelData?.is_indication_trip_selected
-    ),
+    ) || false,
     led_type_trip_input: mccPanelData?.led_type_trip_input || "Amber",
 
     is_blue_cb_spring_charge_selected:
@@ -113,11 +112,11 @@ const getDefaultValues = (
       "a) Min width 400 mm & Above\nb) Separate Marshaling for each shiping section with Partition\nc) Signal from MCC to PLC DI/DO/AI/AO with Separate TB.\nd) DI, DO TB to be mounted on separate column\ne) Signal from MCC to Field with Separate TB.",
 
     is_cable_alley_section_selected:
-      mccPanelData?.is_cable_alley_section_selected || 1,
+      Boolean(mccPanelData?.is_cable_alley_section_selected) || false,
     is_power_and_bus_separation_section_selected:
-      mccPanelData?.is_power_and_bus_separation_section_selected || 1,
+      Boolean(mccPanelData?.is_power_and_bus_separation_section_selected) || false,
     is_both_side_extension_section_selected:
-      mccPanelData?.is_both_side_extension_section_selected || 1,
+      Boolean(mccPanelData?.is_both_side_extension_section_selected) || false,
     ga_gland_plate_3mm_drill_type:
       mccPanelData?.ga_gland_plate_3mm_drill_type || "Knockout",
     ga_gland_plate_thickness:

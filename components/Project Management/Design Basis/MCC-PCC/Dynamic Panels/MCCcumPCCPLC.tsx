@@ -174,7 +174,7 @@ const getDefaultValues = (plcData: any) => {
     // HMI
     is_hmi_selected: plcData?.is_hmi_selected,
     hmi_size: plcData?.hmi_size || "10",
-    hmi_quantity: plcData?.hmi_quantity || "",
+    hmi_quantity: plcData?.hmi_quantity || 1,
     hmi_hardware_make: plcData?.hmi_hardware_make || "Allen Bradley",
     hmi_series: plcData?.hmi_series || "",
     hmi_input_voltage: plcData?.hmi_input_voltage || "24 VDC",
@@ -182,27 +182,27 @@ const getDefaultValues = (plcData: any) => {
     // Human Interface Device
     is_engineering_station_quantity_selected:
       plcData?.is_engineering_station_quantity_selected,
-    engineering_station_quantity: plcData?.engineering_station_quantity || "",
+    engineering_station_quantity: plcData?.engineering_station_quantity || 1,
     is_engineering_cum_operating_station_quantity_selected:
       plcData?.is_engineering_cum_operating_station_quantity_selected,
     engineering_cum_operating_station_quantity:
-      plcData?.engineering_cum_operating_station_quantity || "",
+      plcData?.engineering_cum_operating_station_quantity || 1,
     is_operating_station_quantity_selected:
       plcData?.is_operating_station_quantity_selected,
-    operating_station_quantity: plcData?.operating_station_quantity || "",
+    operating_station_quantity: plcData?.operating_station_quantity || 1,
     // Software
     is_scada_program_development_license_quantity_selected:
       plcData?.is_scada_program_development_license_quantity_selected,
     scada_program_development_license_quantity:
-      plcData?.scada_program_development_license_quantity || "",
+      plcData?.scada_program_development_license_quantity || 1,
     is_scada_runtime_license_quantity_selected:
       plcData?.is_scada_runtime_license_quantity_selected,
     scada_runtime_license_quantity:
-      plcData?.scada_runtime_license_quantity || "",
+      plcData?.scada_runtime_license_quantity || 1,
     is_plc_progamming_software_license_quantity:
       plcData?.is_plc_progamming_software_license_quantity,
     plc_programming_software_license_quantity:
-      plcData?.plc_programming_software_license_quantity || "",
+      plcData?.plc_programming_software_license_quantity || 1,
 
     // Engineering / Operating SCADA Station
     system_hardware: plcData?.system_hardware || "Commercial Grade",
@@ -215,7 +215,7 @@ const getDefaultValues = (plcData: any) => {
       plcData?.hardware_between_plc_and_scada_pc || "Approx 50 meter per PC",
     printer_type: plcData?.printer_type || "Laser Printer",
     printer_size: plcData?.printer_size || "A4",
-    printer_quantity: plcData?.printer_quantity || "",
+    printer_quantity: plcData?.printer_quantity || 1,
     is_printer_with_suitable_communication_cable_selected:
       plcData?.is_printer_with_suitable_communication_cable_selected,
     is_furniture_selected: plcData?.is_furniture_selected,
@@ -315,6 +315,8 @@ const MCCcumPCCPLCPanel = ({
     [plcPanelData1, plcPanelData2, plcPanelData3]
   );
 
+  console.log("plcPanelData", plcPanelData)
+
   const [loading, setLoading] = useState(false);
   const dropdown = usePLCDropdowns();
   const userInfo: { division: string } = useCurrentUser();
@@ -361,7 +363,7 @@ const MCCcumPCCPLCPanel = ({
       tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
     }
   }, []);
-  console.log("form errors PLC", formState.errors);
+  console.log("form errors PLC", plcPanelData);
 
   const upsScope = watch("ups_scope");
   const is_electronic_hooter_selected = watch("is_electronic_hooter_selected");
@@ -381,8 +383,6 @@ const MCCcumPCCPLCPanel = ({
     window.scroll(0, 0);
   }, []);
   useEffect(() => {
-    console.log(plcPanelData?.[0], "PLC DATA");
-
     reset(getDefaultValues(plcPanelData));
   }, [plcPanelData, reset]);
   useEffect(() => {
@@ -1521,6 +1521,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="engineering_station_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch("is_engineering_station_quantity_selected") === 0
@@ -1547,6 +1548,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="engineering_cum_operating_station_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch(
@@ -1575,6 +1577,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="operating_station_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch("is_operating_station_quantity_selected") === 0
@@ -1610,6 +1613,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="scada_program_development_license_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch(
@@ -1638,6 +1642,7 @@ const MCCcumPCCPLCPanel = ({
                       control={control}
                       name="scada_runtime_license_quantity"
                       label=""
+                      min={0}
                       size="small"
                       disabled={
                         watch("is_scada_runtime_license_quantity_selected") ===
@@ -1666,6 +1671,7 @@ const MCCcumPCCPLCPanel = ({
                       name="plc_programming_software_license_quantity"
                       label=""
                       size="small"
+                      min={0}
                       disabled={
                         watch("is_plc_progamming_software_license_quantity") ===
                         0
@@ -1776,6 +1782,7 @@ const MCCcumPCCPLCPanel = ({
                 control={control}
                 name="printer_quantity"
                 label="Printer Quantity"
+                min={0}
                 disabled={
                   watch(
                     "is_printer_with_suitable_communication_cable_selected"

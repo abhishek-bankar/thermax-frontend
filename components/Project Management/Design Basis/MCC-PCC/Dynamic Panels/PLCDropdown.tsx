@@ -12,7 +12,7 @@ export default function usePLCDropdowns() {
   useEffect(() => {
     const getDropdown = async () => {
       const response = await createData(
-        "/method/plc_panel.get_plc_panel_dropdown",
+        "method/pcc_panel.get_pcc_panel_dropdown",
         true,
         {
           "PLC Control Voltage": "name",

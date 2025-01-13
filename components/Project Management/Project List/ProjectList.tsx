@@ -103,6 +103,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       dataIndex: "division",
       key: "division",
       hidden: !isUserSuperUser,
+      width: 100,
       render: (text: keyof typeof TagColors) => {
         return (
           <div className="text-center text-wrap">
@@ -153,6 +154,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       dataIndex: "creation",
       key: "creation",
       align: "center",
+      width: 100,
       render: (text) => {
         const date = new Date(text);
         const stringDate = getThermaxDateFormat(date);
@@ -164,6 +166,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       dataIndex: "modified",
       key: "modified",
       align: "center",
+      width: 100,
       render: (text) => {
         const date = new Date(text);
         const stringDate = getThermaxDateFormat(date);

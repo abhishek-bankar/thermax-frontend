@@ -219,10 +219,10 @@ export default function DocumentListModal({
     try {
       await handleStaticDocumentData(staticData);
       await handleDynamicDocumentData(dynamicData);
-      message.success("Document data saved successfully");
+      message.success("Document List Saved Successfully");
     } catch (error: any) {
       console.error("Error saving document data:", error);
-      message.error("Failed to save document data");
+      message.error("Failed to save document list");
     } finally {
       setLoading(false);
     }

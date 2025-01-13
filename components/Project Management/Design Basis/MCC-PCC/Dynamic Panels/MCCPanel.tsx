@@ -32,6 +32,7 @@ const getDefaultValues = (
   return {
     incomer_ampere: mccPanelData?.incomer_ampere || "1000",
     led_type_other_input: mccPanelData?.led_type_other_input || "NA",
+    door_thickness: mccPanelData?.door_thickness || "1.6 mm",
     incomer_pole: mccPanelData?.incomer_pole || "3",
     incomer_type: mccPanelData?.incomer_type || "SFU",
     incomer_above_ampere: mccPanelData?.incomer_above_ampere || "1001",
@@ -84,7 +85,6 @@ const getDefaultValues = (
     mi_communication_protocol: mccPanelData?.mi_communication_protocol || "NA",
     ga_moc_material: mccPanelData?.ga_moc_material || "Aluminium",
     ga_moc_thickness_door: mccPanelData?.ga_moc_thickness_door || "1.6 mm",
-    door_thickness: mccPanelData?.door_thickness || "1.6 mm",
     ga_moc_thickness_covers: mccPanelData?.ga_moc_thickness_covers || "1.6 mm",
     ga_mcc_compartmental:
       mccPanelData?.ga_mcc_compartmental || "Form-I A (Non Compartmental)",

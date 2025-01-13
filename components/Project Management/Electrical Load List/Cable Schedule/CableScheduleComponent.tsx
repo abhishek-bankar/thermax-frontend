@@ -24,6 +24,7 @@ import {
   GET_VOLTAGE_DROP_EXCEL_API,
   HEATING_CONTROL_SCHEMES_URI,
   LPBS_SCHEMES_URI,
+  PROJECT_API,
   SPG_SERVICES_CONTROL_SCHEMES_URI,
 } from "@/configs/api-endpoints";
 import { useLoading } from "@/hooks/useLoading";
@@ -45,6 +46,7 @@ import {
   WWS_IPG_data,
   WWS_SPG_DATA,
 } from "@/app/Data";
+import { useGetData } from "@/hooks/useCRUD";
 
 interface CableScheduleProps {
   loadListLatestRevisionId: string;
@@ -179,15 +181,15 @@ const useDataFetching = (
       getData(getApiEndpoint(userInfo?.division)).then((res) => {
         // console.log(res);
         let sortedSchemes;
-        if (userInfo.division === SERVICES || userInfo.division === WWS_SPG) {
+        if (userInfo?.division === SERVICES || userInfo?.division === WWS_SPG) {
           sortedSchemes = WWS_SPG_DATA;
-        } else if (userInfo.division === ENVIRO) {
+        } else if (userInfo?.division === ENVIRO) {
           sortedSchemes = [
             ...Enviro_ControlSchemeDataDol,
             ...Enviro_ControlSchemeDataSD,
             ...Enviro_ControlSchemeDataVFD,
           ];
-        } else if (userInfo.division === WWS_IPG) {
+        } else if (userInfo?.division === WWS_IPG) {
           sortedSchemes = WWS_IPG_data;
         } else {
           sortedSchemes = res;
@@ -213,7 +215,7 @@ const useDataFetching = (
     }
   }, [
     loadListLatestRevisionId,
-    userInfo.division,
+    userInfo?.division,
     cableScheduleRevisionId,
     designBasisRevisionId,
     setLoading,
@@ -252,6 +254,9 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
   } = useCurrentUser();
 
   const project_id = params.project_id as string;
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const userDivision = userInfo?.division;
+  const projectDivision = projectData?.division;
 
   const [isMulticoreModalOpen, setIsMulticoreModalOpen] = useState(false);
 
@@ -824,7 +829,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     const cableScheduleData = spreadsheetInstance?.getData();
     // console.log(cableTrayData, "cableTrayData");
     const cableSizeCalc = await getCableSizingCalculation({
-      divisionName: userInfo.division,
+      divisionName: userInfo?.division,
       layoutCableTray: {
         motor_voltage_drop_during_running:
           cableTrayData?.motor_voltage_drop_during_running,
@@ -941,6 +946,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           type="primary"
           onClick={() => setIsMulticoreModalOpen(true)}
           className="hover:bg-blue-600"
+          disabled={userDivision !== projectDivision}
         >
           Multicore Cable Configurator
         </Button>
@@ -967,16 +973,24 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       />
 
       <div className="flex w-full flex-row justify-end gap-2">
-        <Button type="primary" onClick={handleDownloadVD}>
+        <Button
+          type="primary"
+          onClick={handleDownloadVD}
+          disabled={userDivision !== projectDivision}
+        >
           Download Voltage Drop Calculations
         </Button>
-        <Button type="primary" onClick={getCableSizing}>
+        <Button
+          type="primary"
+          onClick={getCableSizing}
+          disabled={userDivision !== projectDivision}
+        >
           Get Cable Sizing
         </Button>
         <Button
           type="primary"
           onClick={handleCableScheduleSave}
-          disabled={isLoading}
+          disabled={isLoading || userDivision !== projectDivision}
         >
           Save
         </Button>

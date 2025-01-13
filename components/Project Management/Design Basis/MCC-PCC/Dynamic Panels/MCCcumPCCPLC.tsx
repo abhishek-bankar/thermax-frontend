@@ -1990,7 +1990,7 @@ const MCCcumPCCPLCPanel = ({
           </div>
         </div>
 
-        {userInfo.division === HEATING && (
+        {userInfo?.division === HEATING && (
           <>
             <div className="flex flex-col gap-6 pt-2">
               <div className="flex items-center justify-between gap-4">

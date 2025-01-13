@@ -145,7 +145,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
 
   const findOtherData = useCallback(
     (schemeTitle: string) => {
-      const division = userInfo.division;
+      const division = userInfo?.division;
 
       switch (division) {
         case HEATING:
@@ -164,7 +164,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
           return null;
       }
     },
-    [userInfo.division, controlSchemes] // Dependencies
+    [userInfo?.division, controlSchemes] // Dependencies
   );
 
   const initializeMulticoreUi = useCallback(
@@ -387,7 +387,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
     const processedData = loadListData?.map((item: any) => {
       const schemeData = findOtherData(item.control_scheme);
       // const divisionId = userData.divisionId // to be populated from dynamic
-      const division = userInfo.division;
+      const division = userInfo?.division;
 
       const getSchemeIndex = () => {
         switch (division) {
@@ -445,7 +445,7 @@ const MulticoreCableConfigurator: React.FC<MulticoreCableConfigProps> = ({
     initializeMulticoreUi,
     isOpen,
     loadListData,
-    userInfo.division,
+    userInfo?.division,
   ]);
   const handleClearSelection = () => {
     tbleSelected?.destroy();

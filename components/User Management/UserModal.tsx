@@ -264,15 +264,6 @@
 //   );
 // }
 
-
-
-
-
-
-
-
-
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, message, Modal } from "antd";
 import Image from "next/image";
@@ -310,25 +301,31 @@ const userFormSchema = z.object({
     required_error: "Last name is required",
     invalid_type_error: "Last name must be a string",
   }),
-  email: z.string({
-    required_error: "Email is required",
-  }).email("Invalid email format"),
-  name_initial: z.string({
-    required_error: "Initials is required",
-  }).max(3, "Initials should not exceed 3 characters"),
+  email: z
+    .string({
+      required_error: "Email is required",
+    })
+    .email("Invalid email format"),
+  name_initial: z
+    .string({
+      required_error: "Initials is required",
+    })
+    .max(3, "Initials should not exceed 3 characters"),
   digital_signature: z.any().optional(),
 });
 
 type UserFormData = z.infer<typeof userFormSchema>;
 
-const getDefaultValues = (editMode: boolean, values?: UserFormData): UserFormData => ({
+const getDefaultValues = (
+  editMode: boolean,
+  values?: UserFormData
+): UserFormData => ({
   first_name: editMode && values ? values.first_name : "",
   last_name: editMode && values ? values.last_name : "",
   email: editMode && values ? values.email : "",
   name_initial: editMode && values ? values.name_initial : "",
-  digital_signature: editMode && values?.digital_signature 
-    ? [values.digital_signature] 
-    : [],
+  digital_signature:
+    editMode && values?.digital_signature ? [values.digital_signature] : [],
 });
 
 const UserFormModal: React.FC<UserFormModalProps> = ({
@@ -341,7 +338,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
   onMutate,
 }) => {
   const [infoMessage, setInfoMessage] = useState("");
-  const [status, setStatus] = useState<"error" | "success" | "">(""); 
+  const [status, setStatus] = useState<"error" | "success" | "">("");
   const [loading, setLoading] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<UserFormData>({
@@ -361,23 +358,27 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
     setStatus("");
   };
 
-  const handleDigitalSignature = async (file: File | string | any[]): Promise<string> => {
+  const handleDigitalSignature = async (
+    file: File | string | any[]
+  ): Promise<string> => {
     if (Array.isArray(file)) return "";
     if (typeof file === "string" && file.startsWith("/files/")) return file;
-    
+
     const { data } = await uploadFile(file as File);
     return data.file_url;
   };
 
   const handleCreateUser = async (userData: UserFormData): Promise<void> => {
     try {
-      const digitalSignature = await handleDigitalSignature(userData.digital_signature);
+      const digitalSignature = await handleDigitalSignature(
+        userData.digital_signature
+      );
       userData.digital_signature = digitalSignature;
 
       const registerRes = await registerNewUser(
         userData,
         THERMAX_USER,
-        userInfo.division,
+        userInfo?.division,
         false,
         userData.name_initial
       );
@@ -392,27 +393,28 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
       message.success("User Created Successfully");
     } catch (error) {
       throw error;
-    } finally{
-      onMutate()
+    } finally {
+      onMutate();
     }
   };
 
   const handleUpdateUser = async (userData: UserFormData): Promise<void> => {
     try {
-      const digitalSignature = await handleDigitalSignature(userData.digital_signature);
+      const digitalSignature = await handleDigitalSignature(
+        userData.digital_signature
+      );
       userData.digital_signature = digitalSignature;
 
       await updateData(`${USER_API}/${values?.email}`, false, userData);
       await updateData(`${THERMAX_USER_API}/${values?.email}`, false, userData);
 
-      onMutate()
+      onMutate();
       handleCancel();
       message.success("User Updated Successfully");
-
     } catch (error) {
       throw error;
-    } finally{
-      onMutate()
+    } finally {
+      onMutate();
     }
   };
 
@@ -427,7 +429,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
       onMutate();
     } catch (error) {
       setStatus("error");
-      setInfoMessage(error instanceof Error ? error.message : "An unknown error occurred");
+      setInfoMessage(
+        error instanceof Error ? error.message : "An unknown error occurred"
+      );
     } finally {
       setLoading(false);
     }

@@ -974,7 +974,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
 
       const getColumnIndex = (key: string): number => {
         const columnMap: { [key: string]: number } = {
-          scheme: userInfo.division === HEATING ? 2 : 1,
+          scheme: userInfo?.division === HEATING ? 2 : 1,
           schemeTitle: 3,
           description: 5,
           breaker: 5,
@@ -988,7 +988,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
       };
 
       const getColumnsForDivision = useCallback(() => {
-        switch (userInfo.division) {
+        switch (userInfo?.division) {
           case HEATING:
             return controlSchemeColumnsForHeating;
           case WWS_SPG:
@@ -1001,7 +1001,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           default:
             return [];
         }
-      }, [userInfo.division, selectedFilter]);
+      }, [userInfo?.division, selectedFilter]);
 
       const typedControlSchemeColumns = useMemo(
         () =>
@@ -1052,13 +1052,13 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             let sortedSchemes;
 
             if (
-              userInfo.division === SERVICES ||
-              userInfo.division === WWS_SPG
+              userInfo?.division === SERVICES ||
+              userInfo?.division === WWS_SPG
             ) {
               sortedSchemes = WWS_SPG_DATA;
-            } else if (userInfo.division === ENVIRO) {
+            } else if (userInfo?.division === ENVIRO) {
               sortedSchemes = getEnviroSchemesData(selectedFilter);
-            } else if (userInfo.division === WWS_IPG) {
+            } else if (userInfo?.division === WWS_IPG) {
               sortedSchemes = getIPGSchemesData(selectedFilter);
             } else {
               sortedSchemes = res
@@ -1266,7 +1266,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
         });
 
         setIsControlSchemeEmpty(false);
-      }, [controlSchemeInstance, userInfo.division]);
+      }, [controlSchemeInstance, userInfo?.division]);
 
       const filterConfig: any[] = [
         {
@@ -1315,7 +1315,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
 
       const handleConfirm = useCallback(() => {
         const selectedSchemes = controlSchemesSelected.map((item) =>
-          userInfo.division === HEATING ? item[2] : item[1]
+          userInfo?.division === HEATING ? item[2] : item[1]
         );
         onConfigurationComplete([...selectedSchemes, "NA"]);
         onClose();
@@ -1323,7 +1323,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
         controlSchemesSelected,
         onConfigurationComplete,
         onClose,
-        userInfo.division,
+        userInfo?.division,
       ]);
 
       const handleFilter = useCallback(

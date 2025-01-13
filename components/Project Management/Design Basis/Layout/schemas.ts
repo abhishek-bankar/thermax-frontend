@@ -77,10 +77,10 @@ export const cableTrayValidationSchema = zod.object({
     required_error: "Cable placement is required",
     message: "Cable placement is required",
   }),
-  orientation: zod.string({
-    required_error: "Orientation is required",
-    message: "Orientation is required",
-  }),
+  // orientation: zod.string({
+  //   required_error: "Orientation is required",
+  //   message: "Orientation is required",
+  // }),
   vertical_distance: zod.string({
     required_error: "Vertical distance is required",
     message: "Vertical distance is required",

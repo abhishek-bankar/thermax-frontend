@@ -41,7 +41,7 @@ const getDefaultValues = (cableTrayData: any) => {
     type_of_gland: cableTrayData?.type_of_gland || "Single Compression",
     future_space_on_trays: cableTrayData?.future_space_on_trays || "10",
     cable_placement: cableTrayData?.cable_placement || "Single Layer",
-    orientation: cableTrayData?.orientation || "Layered",
+    // orientation: cableTrayData?.orientation || "Layered",
     vertical_distance: cableTrayData?.vertical_distance || "3",
     horizontal_distance: cableTrayData?.horizontal_distance || "3",
     is_dry_area_selected:
@@ -192,7 +192,7 @@ const CableTray = ({
   const type_of_gland_options = dropdown["Type Of Gland"];
   const future_space_on_trays_options = dropdown["Future Space on Trays"];
   const cable_placement_options = dropdown["Cable Placement"];
-  const cable_tray_orientation_options = dropdown["Cable Tray Orientation"];
+  // const cable_tray_orientation_options = dropdown["Cable Tray Orientation"];
   const cable_tray_moc_options = dropdown["Cable Tray MOC"];
   const cable_tray_width_options = dropdown["Cable Tray Width"];
   const cable_tray_height_options = dropdown["Cable Tray Height"];

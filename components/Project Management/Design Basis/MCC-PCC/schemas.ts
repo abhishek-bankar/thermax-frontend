@@ -941,6 +941,10 @@ export const mccPanelValidationSchema = zod
       required_error: "Part Code is required",
       message: "Part Code is required",
     }),
+    door_thickness: zod.string({
+      required_error: "Door Thickness  is required",
+      message: "Door Thickness is required",
+    }),
   })
   .refine((fieldsData) => !(fieldsData.mi_analog === fieldsData.mi_digital), {
     message: "Analog and Digital meter cannot be same",

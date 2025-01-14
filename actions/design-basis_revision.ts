@@ -103,7 +103,7 @@ export const copyDesignBasisRevision = async (
       false,
       {
         project_id: project_id,
-        status: DB_REVISION_STATUS.Unsubmitted,
+        status: DB_REVISION_STATUS.Copied,
         clone_notes,
       }
     );

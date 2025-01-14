@@ -210,7 +210,8 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
     () => ({ ...projectMetadata, ...projectInfo }),
     [projectMetadata, projectInfo]
   );
-  const { dropdown } = useProjectInfoDropdowns();
+  console.log("projectData", projectData);
+  const dropdown = useProjectInfoDropdowns();
 
   const { control, handleSubmit, reset, formState, watch, setValue } = useForm({
     resolver: zodResolver(ProjectInfoSchema),
@@ -276,7 +277,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
       }
       // console.log("request payload:", data);
 
-      await updateData(getProjectInfoUrl, false, data);
+      await updateData(getProjectInfoUrl, false, { ...data, is_saved: 1 });
       message.success("Project Information Saved Successfully");
       // setModalLoading(true)
     } catch (error: any) {
@@ -295,58 +296,6 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
   //     </div>
   //   )
   // }
-  const HumidityMax = [
-    {
-      name: "50",
-      value: "50",
-      label: "50",
-    },
-    {
-      name: "55",
-      value: "55",
-      label: "55",
-    },
-    {
-      name: "60",
-      value: "60",
-      label: "60",
-    },
-    {
-      name: "65",
-      value: "65",
-      label: "65",
-    },
-    {
-      name: "70",
-      value: "70",
-      label: "70",
-    },
-    {
-      name: "75",
-      value: "75",
-      label: "75",
-    },
-    {
-      name: "80",
-      value: "80",
-      label: "80",
-    },
-    {
-      name: "85",
-      value: "85",
-      label: "85",
-    },
-    {
-      name: "90",
-      value: "90",
-      label: "90",
-    },
-    {
-      name: "100",
-      value: "100",
-      label: "100",
-    },
-  ];
 
   return (
     <div className="flex flex-col gap-4 px-4">
@@ -703,7 +652,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               name="max_humidity"
               control={control}
               label="Humidity [Max]"
-              options={HumidityMax}
+              options={dropdown["Humidity Dropdown"] || []}
               suffixIcon={
                 <>
                   <PercentageOutlined
@@ -797,7 +746,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             <Button
               type="primary"
               htmlType="button"
-              disabled={!formState.isValid}
+              disabled={projectData?.is_saved === 0}
             >
               Go to SLD
             </Button>
@@ -819,6 +768,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               type="primary"
               htmlType="button"
               onClick={() => setOpenDocumentList(true)}
+              disabled={projectData?.is_saved === 0}
             >
               Document List
             </Button>
@@ -827,7 +777,9 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             <Button
               type="primary"
               htmlType="button"
-              disabled={userDivision !== projectDivision}
+              disabled={
+                userDivision !== projectDivision || projectData?.is_saved === 0
+              }
             >
               Instrumental
             </Button>
@@ -837,7 +789,10 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               <Button
                 type="primary"
                 htmlType="button"
-                disabled={userDivision !== projectDivision}
+                disabled={
+                  userDivision !== projectDivision ||
+                  projectData?.is_saved === 0
+                }
                 onClick={() => {
                   handleSubmit(onSubmit);
                   router.push(

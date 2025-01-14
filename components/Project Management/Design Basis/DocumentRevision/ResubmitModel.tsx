@@ -6,7 +6,6 @@ import { createData, getData, updateData } from "@/actions/crud-actions";
 import { Button, message, Modal } from "antd";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
 import CustomUpload from "@/components/FormInputs/CustomUpload";
-import { uploadFile } from "@/components/FormInputs/FileUpload";
 import {
   DESIGN_BASIS_REVISION_HISTORY_API,
   REVIEW_RESUBMISSION_EMAIL_API,
@@ -16,6 +15,7 @@ import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { mutate } from "swr";
 import * as zod from "zod";
+import { uploadFile } from "@/actions/file-upload";
 
 export default function ResubmitModel({
   open,
@@ -58,12 +58,15 @@ export default function ResubmitModel({
           status: DB_REVISION_STATUS.Resubmitted,
         }
       );
-      const email_attachment = data.email_attachment;
       let attachment_url = "";
-      if (email_attachment.length > 0) {
-        const { data } = await uploadFile(email_attachment[0] as File);
-        attachment_url = data.file_url;
+      const email_attachment = data.email_attachment;
+      if (email_attachment instanceof File) {
+        const formData = new FormData();
+        formData.append("file", email_attachment, email_attachment.name);
+        const fileUploadResponse = await uploadFile(formData);
+        attachment_url = fileUploadResponse.file_url;
       }
+
       await createData(REVIEW_RESUBMISSION_EMAIL_API, false, {
         approver_email: projectData?.approver,
         project_owner_email: projectData?.owner,

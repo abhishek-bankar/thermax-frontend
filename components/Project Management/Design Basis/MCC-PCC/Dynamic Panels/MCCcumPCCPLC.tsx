@@ -318,8 +318,6 @@ const MCCcumPCCPLCPanel = ({
     [plcPanelData1, plcPanelData2, plcPanelData3]
   );
 
-  console.log("plcPanelData", plcPanelData);
-
   const [loading, setLoading] = useState(false);
   const dropdown = usePLCDropdowns();
   const userInfo: { division: string } = useCurrentUser();

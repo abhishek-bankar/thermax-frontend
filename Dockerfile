@@ -30,10 +30,6 @@ COPY --from=builder /app/.next ./.next
 # Copy the .env.production file
 COPY .env.production .env
 
-# Copy SSL files
-COPY server.key /etc/ssl/private/
-COPY server.csr /etc/ssl/certs/
-
 # Install only production dependencies
 RUN npm install --only=production
 

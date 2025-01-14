@@ -1274,7 +1274,7 @@ import {
   getFrameSizeCalculation,
 } from "@/actions/electrical-load-list";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { WWS_SPG } from "@/configs/constants";
+import { HEATING, WWS_IPG, WWS_SPG } from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 
 export const getStandByKw = (item2: any, item3: any) => {
@@ -1466,16 +1466,12 @@ const LoadList: React.FC<LoadListProps> = ({
     designBasisRevisionId,
     loadListLatestRevisionId,
     project_id
-  );
-
+  ); 
   const panelList = useMemo(
     () => projectPanelData?.map((item: any) => item.panel_name) || [],
     [projectPanelData]
-  );
-
-  const [panelsSumData, setPanelsSumData] = useState<PanelSumData[]>([]);
-
-  // // Modal states
+  ); 
+  const [panelsSumData, setPanelsSumData] = useState<PanelSumData[]>([]); 
   const [isControlSchemeModalOpen, setIsControlSchemeModalOpen] =
     useState(false);
   const [isLPBSModalOpen, setIsLPBSModalOpen] = useState(false);
@@ -1490,9 +1486,7 @@ const LoadList: React.FC<LoadListProps> = ({
     rowIndex: string | number,
     newValue: CellValue
   ) => {
-    const data: any = spreadsheetRef?.current?.getData() || [];
-    // console.log(data, "load list data");
-    // console.log("col index :", typeof colIndex)
+    const data: any = spreadsheetRef?.current?.getData() || []; 
 
     if (colIndex === "21") {
       // console.log(subPackages, "sub package");
@@ -1648,7 +1642,7 @@ const LoadList: React.FC<LoadListProps> = ({
       filters: true,
       tableWidth: "100%",
 
-      tableHeight: "550px",
+      tableHeight: "440px",
       freezeColumns: 6,
       rowResize: true,
     }),
@@ -1834,11 +1828,69 @@ const LoadList: React.FC<LoadListProps> = ({
     });
     // updateLoadList()
   };
+  const exportSpreadsheet = (jexcelElement: any, format = "csv") => {
+    // Get the table headers
+    const headers: any = [];
+    const headerCells = jexcelElement.getHeaders().split(",");
+    headerCells.forEach((header: any) => {
+      headers.push(header.trim());
+    });
 
+    // Get the data from jexcel
+    const data = jexcelElement.getData();
+    const colWidths = [];
+    for (let i = 0; i < headers.length; i++) {
+      const width = jexcelElement.getWidth(i);
+      colWidths.push(width);
+    }
+    if (format === "csv") {
+      // Create CSV content with headers
+      let csvContent = headers.join(",") + "\n";
+
+      // Add data rows
+      data.forEach((row: any) => {
+        csvContent += row.join(",") + "\n";
+      });
+
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "export.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (format === "excel") {
+      // Require XLSX library
+      if (typeof XLSX === "undefined") {
+        console.error(
+          "XLSX library not loaded. Please include SheetJS library."
+        );
+        return;
+      }
+
+      // Combine headers and data
+      const workbookData = [headers, ...data];
+
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(workbookData);
+      ws["!cols"] = colWidths.map((width) => ({
+        // Convert pixel width to Excel column width (approximate conversion)
+        wch: Math.floor(width / 7), // 7 pixels per character width (approximate)
+      }));
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+      // Generate and download Excel file
+      XLSX.writeFile(wb, `Current Data ${projectData.project_oc_number}.xlsx`);
+    }
+  };
   const downloadCurrentData = () => {
-    // console.log(spreadsheetRef?.current);
-
-    spreadsheetRef?.current?.download();
+    if (spreadsheetRef?.current) {
+      exportSpreadsheet(spreadsheetRef?.current, "excel");
+    }
   };
   const validateUniqueFeederTag = () => {
     if (!spreadsheetRef) {
@@ -2097,12 +2149,20 @@ const LoadList: React.FC<LoadListProps> = ({
               : "No"; // winding rtd criteria
         }
         if (!item[32]) {
-          item[32] =
-            getStandByKw(item[2], item[3]) >=
-              Number(motorParameters[0]?.safe_area_thermister) &&
-            item[5]?.includes("VFD")
-              ? "Yes"
-              : "No"; // thermistor criteria
+          if (userInfo.division === WWS_IPG) {
+            item[32] =
+              getStandByKw(item[2], item[3]) >=
+                Number(motorParameters[0]?.safe_area_thermister) &&
+              item[5]?.includes("VFD")
+                ? "Yes"
+                : "No"; // thermistor criteria
+          } else {
+            item[32] =
+              getStandByKw(item[2], item[3]) >=
+              Number(motorParameters[0]?.safe_area_thermister)
+                ? "Yes"
+                : "No";
+          }
         }
         if (!item[34] && item[5] === "DOL-HTR") {
           item[34] = "1"; // power factor
@@ -2286,23 +2346,47 @@ const LoadList: React.FC<LoadListProps> = ({
   );
   return (
     <>
-      <div className="mb-4 flex justify-end gap-4">
-        <Button
-          type="primary"
-          onClick={() => setIsControlSchemeModalOpen(true)}
-          className="hover:bg-blue-600"
-          disabled={userDivision !== projectDivision}
-        >
-          Control Scheme Configurator
-        </Button>
-        <Button
-          type="primary"
-          onClick={() => setIsLPBSModalOpen(true)}
-          className="hover:bg-blue-600"
-          disabled={userDivision !== projectDivision}
-        >
-          LPBS Configurator
-        </Button>
+      <div className="mb-4 flex justify-between gap-4">
+        <div className="flex gap-4">
+          <Button
+            type="primary"
+            onClick={downloadCurrentData}
+            disabled={userDivision !== projectDivision}
+            size="small"
+          >
+            Download Current Data
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleTemplateDownload}
+            disabled={userDivision !== projectDivision}
+            size="small"
+          >
+            Load List Template
+          </Button>
+        </div>
+        <div className="flex gap-4">
+          <Button
+            type="primary"
+            onClick={() => setIsControlSchemeModalOpen(true)}
+            className="hover:bg-blue-600"
+            disabled={userDivision !== projectDivision}
+            size="small"
+          >
+            Control Scheme Configurator
+          </Button>
+          {(userDivision !== HEATING || projectDivision !== HEATING) && (
+            <Button
+              type="primary"
+              onClick={() => setIsLPBSModalOpen(true)}
+              className="hover:bg-blue-600"
+              disabled={userDivision !== projectDivision}
+              size="small"
+            >
+              LPBS Configurator
+            </Button>
+          )}
+        </div>
       </div>
       <div className="m-2 flex flex-col overflow-auto">
         <div ref={jRef} />
@@ -2344,6 +2428,7 @@ const LoadList: React.FC<LoadListProps> = ({
           type="primary"
           onClick={handleCurrentCalculation}
           disabled={userDivision !== projectDivision}
+          size="small"
         >
           Get Current
         </Button>
@@ -2351,10 +2436,15 @@ const LoadList: React.FC<LoadListProps> = ({
           type="primary"
           onClick={handleValidatePanelLoad}
           disabled={userDivision !== projectDivision}
+          size="small"
         >
           Validate Panel Load
         </Button>
-        <Button type="primary" disabled={userDivision !== projectDivision}>
+        <Button
+          type="primary"
+          disabled={userDivision !== projectDivision}
+          size="small"
+        >
           Upload Load List
           <input
             type="file"
@@ -2372,33 +2462,20 @@ const LoadList: React.FC<LoadListProps> = ({
             onChange={handleFileChange}
           />
         </Button>
-        <Button
-          type="primary"
-          onClick={downloadCurrentData}
-          disabled={userDivision !== projectDivision}
-        >
-          Download Current Data
-        </Button>
-        <Button
-          type="primary"
-          onClick={handleTemplateDownload}
-          disabled={userDivision !== projectDivision}
-        >
-          {/* <a href="public/files/Motor_Details_Template.xlsx" download>
-            Download Load List Template
 
-          </a> */}
-          Download Load List Template
-        </Button>
         <Button
           type="primary"
           onClick={handleLoadListSave}
           disabled={userDivision !== projectDivision}
+          size="small"
+
         >
           Save
         </Button>
         <Button
           type="primary"
+          size="small"
+
           onClick={() => {
             // setLoading(true);
             router.push(

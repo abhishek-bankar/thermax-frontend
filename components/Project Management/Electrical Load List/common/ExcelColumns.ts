@@ -30,8 +30,7 @@ export const LoadListcolumns = (division: string) => {
       type: "text",
       name: "standBy",
       title: "KVA",
-      width: "70",
-      // readOnly: true,
+      width: "50", 
       readOnly: division == ENVIRO ? false : true,
     },
     {
@@ -62,7 +61,7 @@ export const LoadListcolumns = (division: string) => {
       name: "supplyVoltage",
       source: [],
       title: "SUPPLY  VOLTAGE",
-      width: "140",
+      width: "100",
     },
     {
       type: "dropdown",
@@ -82,14 +81,14 @@ export const LoadListcolumns = (division: string) => {
       title: "STARTING TIME",
       readOnly: division === HEATING ? false : true,
 
-      width: "140",
+      width: "100",
     },
     {
       type: "dropdown",
       name: "eorc",
       source: ["Yes", "No"],
       title: "EOCR  APPLICABLE",
-      width: "110",
+      width: "90",
     },
     {
       type: "dropdown",
@@ -119,7 +118,7 @@ export const LoadListcolumns = (division: string) => {
       source: ["A", "B", "C", "NA"],
       title: "BUS  SEGREGATION",
       readOnly: division === HEATING ? true : false,
-      width: "120",
+      width: "90",
     },
     {
       type: "dropdown",

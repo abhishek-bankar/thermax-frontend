@@ -976,7 +976,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
         const columnMap: { [key: string]: number } = {
           scheme: userInfo?.division === HEATING ? 2 : 1,
           schemeTitle: 3,
-          description: 5,
+          description: 4,
           breaker: 5,
           lpbs: 17,
           di: 6,
@@ -1286,6 +1286,12 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           label: "Description",
           type: "input",
           placeholder: "Search by description",
+        },
+        {
+          key: "breaker",
+          label: "Breaker",
+          type: "input",
+          placeholder: "Search by Breaker",
         },
         {
           key: "di",

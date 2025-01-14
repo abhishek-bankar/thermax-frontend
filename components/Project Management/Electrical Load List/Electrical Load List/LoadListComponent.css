@@ -6,3 +6,6 @@ td {
 table {
   font-size: 13px;
 }
+/* .jexcel > thead > tr > td:nth-child(5) {
+  background-color: #ff0000;  
+} */

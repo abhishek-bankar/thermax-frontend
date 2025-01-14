@@ -273,11 +273,11 @@ import { z } from "zod";
 import { updateData } from "@/actions/crud-actions";
 import { registerNewUser } from "@/actions/register";
 import CustomUpload from "@/components/FormInputs/CustomUpload";
-import { uploadFile } from "@/components/FormInputs/FileUpload";
 import { THERMAX_USER_API, USER_API } from "@/configs/api-endpoints";
 import { THERMAX_USER } from "@/configs/constants";
 import AlertNotification from "../AlertNotification";
 import CustomTextInput from "../FormInputs/CustomInput";
+import { uploadFile } from "@/actions/file-upload";
 
 // Types and Interfaces
 interface UserFormModalProps {
@@ -358,22 +358,15 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
     setStatus("");
   };
 
-  const handleDigitalSignature = async (
-    file: File | string | any[]
-  ): Promise<string> => {
-    if (Array.isArray(file)) return "";
-    if (typeof file === "string" && file.startsWith("/files/")) return file;
-
-    const { data } = await uploadFile(file as File);
-    return data.file_url;
-  };
-
   const handleCreateUser = async (userData: UserFormData): Promise<void> => {
     try {
-      const digitalSignature = await handleDigitalSignature(
-        userData.digital_signature
-      );
-      userData.digital_signature = digitalSignature;
+      const digital_signature = userData.digital_signature;
+      if (digital_signature instanceof File) {
+        const formData = new FormData();
+        formData.append("file", digital_signature, digital_signature.name);
+        const fileUploadResponse = await uploadFile(formData);
+        userData.digital_signature = fileUploadResponse.file_url;
+      }
 
       const registerRes = await registerNewUser(
         userData,
@@ -400,10 +393,13 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
   const handleUpdateUser = async (userData: UserFormData): Promise<void> => {
     try {
-      const digitalSignature = await handleDigitalSignature(
-        userData.digital_signature
-      );
-      userData.digital_signature = digitalSignature;
+      const digital_signature = userData.digital_signature;
+      if (digital_signature instanceof File) {
+        const formData = new FormData();
+        formData.append("file", digital_signature, digital_signature.name);
+        const fileUploadResponse = await uploadFile(formData);
+        userData.digital_signature = fileUploadResponse.file_url;
+      }
 
       await updateData(`${USER_API}/${values?.email}`, false, userData);
       await updateData(`${THERMAX_USER_API}/${values?.email}`, false, userData);

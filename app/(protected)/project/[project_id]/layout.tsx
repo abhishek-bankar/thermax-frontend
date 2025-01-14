@@ -1,6 +1,4 @@
 "use client";
-import { QuestionCircleOutlined } from "@ant-design/icons";
-import { FloatButton } from "antd";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { useLoading } from "@/hooks/useLoading";
@@ -35,12 +33,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { data: designBasisRevisionData } = useGetData(
     `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${params?.project_id}"], ["status", "=", "${DB_REVISION_STATUS.Released}"]]`
   );
-  console.log(designBasisRevisionData, "designBasisRevisionData");
   const isProjectInfoSaved = projectData?.is_saved;
   const isDesignBasisReleased = designBasisRevisionData?.length > 0;
-  console.log("isProjectInfoSaved", isProjectInfoSaved);
-  console.log("isDesignBasisReleased", isDesignBasisReleased);
-  console.log("condition", isProjectInfoSaved === 0 && isDesignBasisReleased);
   return (
     <>
       <div className="flex h-full flex-col gap-4">
@@ -167,7 +161,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         <main className="flex-1 overflow-y-auto pb-4">{children}</main>
-        <FloatButton icon={<QuestionCircleOutlined />} />
       </div>
     </>
   );

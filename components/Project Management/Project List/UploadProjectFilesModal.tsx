@@ -67,9 +67,7 @@ export const UploadProjectFilesModal = ({
         cableSpec: cableSpec ? cableSpec?.length > 0 : false,
       });
     };
-    if (open) {
-      checkFileExist();
-    }
+    checkFileExist();
   }, [open, userInfo?.division, values]);
 
   return (

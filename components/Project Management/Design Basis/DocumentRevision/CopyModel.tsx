@@ -75,7 +75,7 @@ export default function CopyRevisionModel({
   return (
     <Modal
       open={open}
-      title={<h1 className="text-center font-bold">Clone Revision</h1>}
+      title={<h1 className="text-center font-bold">Create New Revision</h1>}
       onCancel={() => {
         setCopyRevisionId("");
         reset({
@@ -97,8 +97,8 @@ export default function CopyRevisionModel({
           <CustomTextAreaInput
             name="clone_notes"
             control={control}
-            label="Clone Notes"
-            placeholder="Clone Notes..."
+            label="Revision Description"
+            placeholder="Revision Description..."
           />
         </div>
         <div>
@@ -117,7 +117,7 @@ export default function CopyRevisionModel({
             loading={loading}
             icon={<CopyOutlined />}
           >
-            Clone Revision
+            Copy Revision
           </Button>
         </div>
       </form>

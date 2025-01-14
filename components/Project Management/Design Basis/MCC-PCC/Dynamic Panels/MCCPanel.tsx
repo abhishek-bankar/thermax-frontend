@@ -326,6 +326,9 @@ const MCCPanel = ({
     }
   }, [currentTransformerCoating, setValue]);
 
+  console.log(mccPanelData, "MCC DATA");
+
+
   useEffect(() => {
     console.log(mccPanelData, "MCC DATA");
     if (projectInfo && mccPanelData) {
@@ -373,15 +376,15 @@ const MCCPanel = ({
     const hasACB =
       (incomer_type && incomer_type.includes("ACB")) ||
       (incomer_above_type && incomer_above_type.includes("ACB"));
-    if (!hasACB) {
-      setValue("is_blue_cb_spring_charge_selected", "NA");
-      setValue("is_red_cb_in_service", "NA");
-      setValue("is_white_healthy_trip_circuit_selected", "NA");
-    } else {
-      setValue("is_blue_cb_spring_charge_selected", "Blue");
-      setValue("is_red_cb_in_service", "Red");
-      setValue("is_white_healthy_trip_circuit_selected", "White");
-    }
+    // if (!hasACB) {
+    //   setValue("is_blue_cb_spring_charge_selected", "NA");
+    //   setValue("is_red_cb_in_service", "NA");
+    //   setValue("is_white_healthy_trip_circuit_selected", "NA");
+    // } else {
+    //   setValue("is_blue_cb_spring_charge_selected", "Blue");
+    //   setValue("is_red_cb_in_service", "Red");
+    //   setValue("is_white_healthy_trip_circuit_selected", "White");
+    // }
     setHasACB(hasACB);
   }, [incomer_type, incomer_above_type, setValue]);
   useEffect(() => {

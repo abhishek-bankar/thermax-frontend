@@ -313,14 +313,15 @@ const CommonConfiguration = ({
     `${COMMON_CONFIGURATION_3}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
   );
 
-  const commonConfigurationData = useMemo(
-    () => [
-      ...(commonConfiguration1 || []),
-      ...(commonConfiguration2 || []),
-      ...(commonConfiguration3 || []),
-    ],
-    [commonConfiguration1, commonConfiguration2, commonConfiguration3]
-  );
+  const commonConfigurationData = useMemo(() => {
+    const config1 = commonConfiguration1?.[0] || {}; // Extract the first object or use an empty object
+    const config2 = commonConfiguration2?.[0] || {};
+    const config3 = commonConfiguration3?.[0] || {};
+ 
+    // Merge the objects
+    return { ...config1, ...config2, ...config3 };
+  }, [commonConfiguration1, commonConfiguration2, commonConfiguration3]);
+
 
   const [loading, setLoading] = useState(false);
 
@@ -382,14 +383,12 @@ const CommonConfiguration = ({
 
   const { control, handleSubmit, reset, watch, setValue } = useForm({
     resolver: zodResolver(configItemValidationSchema),
-    defaultValues: getDefaultValues(commonConfigurationData?.[0], mainPkg),
+    defaultValues: getDefaultValues(commonConfigurationData, mainPkg),
     mode: "onSubmit",
   });
 
   useEffect(() => {
-    console.log(commonConfigurationData, "common config data");
-
-    reset(getDefaultValues(commonConfigurationData?.[0], mainPkg));
+    reset(getDefaultValues(commonConfigurationData, mainPkg));
   }, [reset, commonConfigurationData, mainPkg]);
 
   const currentTransformerNumber = watch("current_transformer_quantity");
@@ -464,7 +463,7 @@ const CommonConfiguration = ({
 
     const configuration =
       transformerConfigMap[
-        currentTransformerNumber as keyof typeof transformerConfigMap
+      currentTransformerNumber as keyof typeof transformerConfigMap
       ] || "NA";
 
     setValue("current_transformer_configuration", configuration);
@@ -584,7 +583,7 @@ const CommonConfiguration = ({
 
     const mappedKeyValue =
       keyValueMapping[
-        control_bus_material_controlled as keyof typeof keyValueMapping
+      control_bus_material_controlled as keyof typeof keyValueMapping
       ] || "1.0 A/Sq. mm";
 
     setValue("control_bus_current_density", mappedKeyValue);
@@ -598,7 +597,7 @@ const CommonConfiguration = ({
     };
     const mappedKeyValue =
       keyValueMapping[
-        power_bus_material_controlled as keyof typeof keyValueMapping
+      power_bus_material_controlled as keyof typeof keyValueMapping
       ] || "1.0 A/Sq. mm";
 
     setValue("power_bus_current_density", mappedKeyValue);
@@ -612,7 +611,7 @@ const CommonConfiguration = ({
     };
     const mappedKeyValue =
       keyValueMapping[
-        earth_bus_material_controlled as keyof typeof keyValueMapping
+      earth_bus_material_controlled as keyof typeof keyValueMapping
       ] || "1.0 A/Sq. mm";
 
     setValue("earth_bus_current_density", mappedKeyValue);
@@ -643,7 +642,6 @@ const CommonConfiguration = ({
           transformedData[field] = JSON.stringify(transformedData[field]);
         }
       });
-      console.log(transformedData);
 
       await updateData(
         `${COMMON_CONFIGURATION_1}/${commonConfiguration1[0].name}`,
@@ -1081,9 +1079,9 @@ const CommonConfiguration = ({
                 label="Switchgear Combination"
                 disabled={
                   watch("mcc_switchgear_type") ===
-                    "Type II Coordination-Fuse" ||
+                  "Type II Coordination-Fuse" ||
                   watch("mcc_switchgear_type") ===
-                    "Type II Coordination-Fuse-One Size Higher"
+                  "Type II Coordination-Fuse-One Size Higher"
                 }
                 options={dropdown["Switchgear Combination"] || []}
                 size="small"
@@ -1770,8 +1768,8 @@ const CommonConfiguration = ({
                   watch("safe_field_motor_material")
                 )
                   ? dropdown["Field Motor Thickness"]?.filter(
-                      (item: any) => item.name !== "NA"
-                    )
+                    (item: any) => item.name !== "NA"
+                  )
                   : na_dropdown
               }
               size="small"
@@ -1910,8 +1908,8 @@ const CommonConfiguration = ({
                   watch("hazardous_field_motor_material")
                 )
                   ? dropdown["Field Motor Thickness"]?.filter(
-                      (item: any) => item.name !== "NA"
-                    )
+                    (item: any) => item.name !== "NA"
+                  )
                   : na_dropdown
               }
               size="small"
@@ -2168,8 +2166,8 @@ const CommonConfiguration = ({
                   watch("safe_lpbs_material")
                 )
                   ? dropdown["Field Motor Thickness"]?.filter(
-                      (item: any) => item.name !== "NA"
-                    )
+                    (item: any) => item.name !== "NA"
+                  )
                   : na_dropdown
               }
               disabled={
@@ -2311,8 +2309,8 @@ const CommonConfiguration = ({
                   watch("hazardous_lpbs_material")
                 )
                   ? dropdown["Field Motor Thickness"]?.filter(
-                      (item: any) => item.name !== "NA"
-                    )
+                    (item: any) => item.name !== "NA"
+                  )
                   : na_dropdown
               }
               disabled={

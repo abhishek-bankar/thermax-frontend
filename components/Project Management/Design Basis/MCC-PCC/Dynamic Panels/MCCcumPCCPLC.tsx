@@ -108,8 +108,8 @@ const getDefaultValues = (plcData: any) => {
       plcData?.do_module_output_type || "Potential Free Contacts",
     // Interposing Relay
     interposing_relay: plcData?.interposing_relay || "Applicable for DI",
-    output_contact_rating_of_interposing_relay:
-      plcData?.output_contact_rating_of_interposing_relay || "230 VAC, 5AMP",
+    interposing_relay_contacts_rating:
+      plcData?.interposing_relay_contacts_rating || "230 VAC, 5AMP",
     is_no_of_contacts_selected: plcData?.is_no_of_contacts_selected,
     no_of_contacts: plcData?.no_of_contacts || "1NO + 1NC",
     // AI Modules
@@ -318,7 +318,7 @@ const MCCcumPCCPLCPanel = ({
     [plcPanelData1, plcPanelData2, plcPanelData3]
   );
 
-  console.log("plcPanelData", plcPanelData)
+  console.log("plcPanelData", plcPanelData);
 
   const [loading, setLoading] = useState(false);
   const dropdown = usePLCDropdowns();
@@ -989,7 +989,7 @@ const MCCcumPCCPLCPanel = ({
             <div className="flex-1">
               <CustomTextInput
                 control={control}
-                name="output_contact_rating_of_interposing_relay"
+                name="interposing_relay_contacts_rating"
                 label="Interposing Relay Contacts Rating"
                 size="small"
               />
@@ -2011,7 +2011,9 @@ const MCCcumPCCPLCPanel = ({
                     name="hardware_between_plc_and_burner_controller_lmv"
                     label="Communication Cable & Hardware Between PLC CPU System & Burner Controller LMV"
                     size="small"
-                    disabled={!watch("is_burner_controller_lmv_mounting_selected")}
+                    disabled={
+                      !watch("is_burner_controller_lmv_mounting_selected")
+                    }
                   />
                 </div>
               </div>
@@ -2021,8 +2023,9 @@ const MCCcumPCCPLCPanel = ({
                     control={control}
                     name="burner_controller_lmv_mounting"
                     label="Burner Controller LMV is Mounted in PLC Panel"
-                    disabled={!watch("is_burner_controller_lmv_mounting_selected")}
-
+                    disabled={
+                      !watch("is_burner_controller_lmv_mounting_selected")
+                    }
                   />
                 </div>
                 <div className="flex-1">
@@ -2030,8 +2033,9 @@ const MCCcumPCCPLCPanel = ({
                     control={control}
                     name="burner_controller_lmv_note"
                     label="Burner Controller LMV Note"
-                    disabled={!watch("is_burner_controller_lmv_mounting_selected")}
-
+                    disabled={
+                      !watch("is_burner_controller_lmv_mounting_selected")
+                    }
                   />
                 </div>
               </div>

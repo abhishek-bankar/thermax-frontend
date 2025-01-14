@@ -95,8 +95,7 @@ const copyMccCumPccPLCPanelData = async (
 export const copyDesignBasisRevision = async (
   project_id: string,
   revision_id: string,
-  clone_notes: string,
-  approver_email: string
+  clone_notes: string
 ) => {
   try {
     const createRevisionData = await createData(
@@ -106,7 +105,6 @@ export const copyDesignBasisRevision = async (
         project_id: project_id,
         status: DB_REVISION_STATUS.Unsubmitted,
         clone_notes,
-        approver_email,
       }
     );
     const new_revision_id = createRevisionData.name;

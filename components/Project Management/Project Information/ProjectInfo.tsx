@@ -1,7 +1,11 @@
 "use client";
-import { DownOutlined, PercentageOutlined } from "@ant-design/icons";
+import {
+  DownOutlined,
+  PercentageOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, message, Tooltip } from "antd";
+import { Button, FloatButton, message, Modal, Tooltip } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -21,6 +25,7 @@ import DocumentListModal from "./DocumentListModal";
 import PanelDataList from "./Panel/PanelDataList";
 import useProjectInfoDropdowns from "./ProjectInfoDropdowns";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Video } from "@/components/FormInputs/Video";
 
 const ProjectInfoSchema = zod.object({
   project_name: zod.string({
@@ -206,11 +211,11 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
 
   const [loading, setLoading] = useState(false);
   const [openDocumentList, setOpenDocumentList] = useState(false);
+  const [openVideoModel, setOpenVideoModel] = useState(false);
   const projectData = React.useMemo(
     () => ({ ...projectMetadata, ...projectInfo }),
     [projectMetadata, projectInfo]
   );
-  console.log("projectData", projectData);
   const dropdown = useProjectInfoDropdowns();
 
   const { control, handleSubmit, reset, formState, watch, setValue } = useForm({
@@ -813,6 +818,26 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
         revision_id={revision_id}
         userDivision={userDivision}
         projectDivision={projectDivision}
+      />
+      <Modal
+        title="Help Video"
+        style={{ top: 20 }}
+        width={1000}
+        open={openVideoModel}
+        onCancel={() => setOpenVideoModel(false)}
+        footer={null}
+      >
+        <Video
+          src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/Project Information Video.mp4`}
+          shouldStop={!openVideoModel}
+        />
+      </Modal>
+      <FloatButton
+        icon={<QuestionCircleOutlined />}
+        type="default"
+        style={{ insetInlineEnd: 50, bottom: 60 }}
+        tooltip={<div>Help Video</div>}
+        onClick={() => setOpenVideoModel(true)}
       />
     </div>
   );

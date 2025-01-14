@@ -1063,11 +1063,11 @@ export const pccPanelValidationSchema = zod.object({
     message: "ON Indication Lamp is required",
   }),
 
-  mi_analog: zod.array(zod.string(),{
+  mi_analog: zod.array(zod.string(), {
     required_error: "Analog is required",
     message: "Analog is required",
   }),
-  mi_digital: zod.array(zod.string(),{
+  mi_digital: zod.array(zod.string(), {
     required_error: "Digital is required",
     message: "Digital is required",
   }),
@@ -1511,7 +1511,7 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Interposing Relay is required",
     message: "Interposing Relay is required",
   }),
-  output_contact_rating_of_interposing_relay: zod.string({
+  interposing_relay_contacts_rating: zod.string({
     required_error: "Output Contact Rating of Interposing Relay is required",
     message: "Output Contact Rating of Interposing Relay is required",
   }),
@@ -1678,7 +1678,7 @@ export const plcPanelValidationSchema = zod.object({
   hmi_quantity: zod.number({
     required_error: "HMI Quantity is required",
     message: "HMI Quantity is required",
-  })
+  }),
   // .refine(
   //   (value) => {
   //     if (value < 0) return false;
@@ -1686,7 +1686,6 @@ export const plcPanelValidationSchema = zod.object({
   //   },
   //   {message: "The value must be a positive number"}
   // )
-  ,
   hmi_hardware_make: zod.string({
     required_error: "HMI Hardware Make is required",
     message: "HMI Hardware Make is required",

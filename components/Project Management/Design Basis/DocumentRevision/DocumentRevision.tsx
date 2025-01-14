@@ -293,7 +293,8 @@ export default function DocumentRevision() {
                 onClick={() => handleClone(record?.key)}
                 disabled={
                   record.status !== DB_REVISION_STATUS.Released ||
-                  userDivision !== projectDivision
+                  userDivision !== projectDivision ||
+                  record?.status === DB_REVISION_STATUS.Copied
                 }
               />
             </Tooltip>

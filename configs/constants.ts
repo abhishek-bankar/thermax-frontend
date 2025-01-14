@@ -57,6 +57,7 @@ export const DB_REVISION_STATUS = {
   ResubmittedAgain: "Review Resubmitted Again",
   Approved: "Approved",
   Released: "Released",
+  Copied: "Copied",
 };
 export const LOAD_LIST_REVISION_STATUS = {
   NotReleased: "Not Released",

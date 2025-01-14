@@ -28,7 +28,7 @@ export default function CopyRevisionModel({
   dbRevisionHistoryUrl: string;
   setCopyRevisionId: (revision_id: string) => void;
 }) {
-  const { name: project_id, approver: defaultApprover } = projectData || {};
+  const { name: project_id } = projectData || {};
   const [loading, setLoading] = useState(false);
   const { dropdownOptions: approverOptions } = useDropdownOptions(
     `${THERMAX_USER_API}?fields=["*"]&filters=[["division", "=",  "${userInfo?.division}"], ["email", "!=", "${userInfo?.email}"]]`,
@@ -38,15 +38,10 @@ export default function CopyRevisionModel({
     resolver: zodResolver(
       zod.object({
         clone_notes: zod.string().optional(),
-        approver_email: zod.string({
-          required_error: "Approver is required",
-          message: "Approver is required",
-        }),
       })
     ),
     defaultValues: {
       clone_notes: "",
-      approver_email: defaultApprover,
     },
     mode: "onSubmit",
   });
@@ -55,13 +50,8 @@ export default function CopyRevisionModel({
     setLoading(true);
     try {
       // API call
-      const { clone_notes, approver_email } = data;
-      await copyDesignBasisRevision(
-        project_id,
-        revision_id,
-        clone_notes,
-        approver_email
-      );
+      const { clone_notes } = data;
+      await copyDesignBasisRevision(project_id, revision_id, clone_notes);
       mutate(dbRevisionHistoryUrl);
       message.success("Revision Copied Successfully");
       setOpen(false);
@@ -75,12 +65,11 @@ export default function CopyRevisionModel({
   return (
     <Modal
       open={open}
-      title={<h1 className="text-center font-bold">Clone Revision</h1>}
+      title={<h1 className="text-center font-bold">Create New Revision</h1>}
       onCancel={() => {
         setCopyRevisionId("");
         reset({
           clone_notes: "",
-          approver_email: defaultApprover,
         });
         setOpen(false);
       }}
@@ -97,16 +86,8 @@ export default function CopyRevisionModel({
           <CustomTextAreaInput
             name="clone_notes"
             control={control}
-            label="Clone Notes"
-            placeholder="Clone Notes..."
-          />
-        </div>
-        <div>
-          <CustomSingleSelect
-            name="approver_email"
-            control={control}
-            label="Approver"
-            options={approverOptions}
+            label="Revision Description"
+            placeholder="Revision Description..."
           />
         </div>
 
@@ -117,7 +98,7 @@ export default function CopyRevisionModel({
             loading={loading}
             icon={<CopyOutlined />}
           >
-            Clone Revision
+            Copy Revision
           </Button>
         </div>
       </form>

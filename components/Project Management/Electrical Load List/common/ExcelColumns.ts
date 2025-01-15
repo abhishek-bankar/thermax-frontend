@@ -1,4 +1,4 @@
-import { ENVIRO, HEATING } from "@/configs/constants";
+import { ENVIRO, HEATING, WWS_IPG, WWS_SPG } from "@/configs/constants";
 export const getStarterList = () => {
   return [
     "DOL STARTER",
@@ -390,6 +390,127 @@ export const LoadListcolumns = (division: string) => {
       width: "150",
     });
     columns.splice(40, 0, {
+      type: "text",
+      name: "partcode",
+      title: "MOTOR PART CODE",
+      width: "200",
+    });
+  }
+  if (division === WWS_IPG || division === WWS_SPG) {
+    columns.splice(
+      11,
+      0,
+      {
+        type: "dropdown",
+        name: "busSegregation",
+        source: ["A", "B", "C", "NA"],
+        title: "BUS  SEGREGATION",
+        width: "90",
+      },
+      {
+        type: "dropdown",
+        name: "motorRpm",
+        source: ["0", "750", "1000", "1500", "3000"],
+        title: "MOTOR  RPM",
+        width: "70",
+      },
+      {
+        type: "dropdown",
+        name: "typeMotorMounting",
+        source: [
+          "FOOT MOUNTED (B3)",
+          "FLANGE MOUNTED (B5)",
+          "FOOT & FLANGE MOUNTED (B35)",
+          "VERTICAL FLANGE MOUNTED (V1)",
+          "NA",
+        ],
+        title: "TYPE OF  MOTOR MOUNTING",
+        width: "150",
+      },
+      {
+        type: "dropdown",
+        source: [
+          "63",
+          "71",
+          "80",
+          "90S",
+          "90L",
+          "100L",
+          "112M",
+          "132S",
+          "160M",
+          "160L",
+          "180M",
+          "180L",
+          "225M",
+          "200L",
+          "225S",
+          "250M",
+          "280S",
+          "280M",
+          "315S",
+          "315M",
+          "315L",
+          "NA",
+        ],
+        name: "motorFrameSize",
+
+        title: "MOTOR  FRAME SIZE",
+        width: "150",
+      },
+      {
+        type: "text",
+        name: "motorGD2",
+        title: "MOTOR GD 2",
+        width: "150",
+      },
+      {
+        type: "text",
+        name: "drivenEqGD2",
+
+        title: "DRIVEN  EQUIPMENT GD2",
+        width: "150",
+      },
+      {
+        type: "text",
+        name: "bkw",
+        title: "BkW",
+        width: "150",
+      },
+      {
+        type: "dropdown",
+        name: "typeOfCoupling",
+        source: ["V-Belt", "Direct", "NA"],
+        title: "TYPE OF  COUPLING",
+
+        width: "150",
+      }
+    );
+    columns.splice(31, 0, {
+      type: "dropdown",
+      name: "typeOfBearing",
+      source: ["Roller", "Insulated", "Roller and Insulated", "NA"],
+      title: "TYPE OF BEARING",
+      width: "150",
+    });
+    columns.splice(36, 0, {
+      type: "dropdown",
+      source: [
+        "ABB",
+        "Bharat Bijlee",
+        "Crompton Greaves",
+        "Havells",
+        "Kirloskar",
+        "LHP",
+        "Siemens",
+        "Thermax Standard",
+        "NA",
+      ],
+      name: "motorMake",
+      title: "MOTOR MAKE",
+      width: "150",
+    });
+    columns.splice(39, 0, {
       type: "text",
       name: "partcode",
       title: "MOTOR PART CODE",

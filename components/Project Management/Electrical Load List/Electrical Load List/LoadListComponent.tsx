@@ -295,27 +295,102 @@ const LoadList: React.FC<LoadListProps> = ({
         standby_kw: 3,
         starter_type: projectDivision === ENVIRO ? 5 : 4,
         eocr: projectDivision === ENVIRO || projectDivision === HEATING ? 8 : 7,
-        panel: 11,
-        supply_voltage: projectDivision === HEATING ? 5 : 6,
-        motor_rated_current: projectDivision === HEATING ? 30 : projectDivision === ENVIRO ? 41 : 41,
-        phase: projectDivision === HEATING ? 6 : 7,
-        power_factor: projectDivision === HEATING ? 24 : 33,
-        motor_rpm: projectDivision === ENVIRO ? 13 : 100,
-        motor_make: projectDivision === ENVIRO ? 37 : 100,
-        motor_mounting_type: projectDivision === ENVIRO ? 14 : 101,
-        motor_frame_size: projectDivision === ENVIRO ? 15 : 101,
-        panel_ammeter: projectDivision === HEATING ? 27 : projectDivision === ENVIRO ? 36 : 101,
-        package: projectDivision === HEATING ? 12 : projectDivision === ENVIRO ? 20 : 101,
-        area: projectDivision === HEATING ? 13 : projectDivision === ENVIRO ? 21 : 101,
-        standard: projectDivision === HEATING ? 14 : projectDivision === ENVIRO ? 22 : 101,
-        zone: projectDivision === HEATING ? 15 : projectDivision === ENVIRO ? 23 : 101,
-        gas_group: projectDivision === HEATING ? 16 : projectDivision === ENVIRO ? 24 : 101,
-        temperature_class: projectDivision === HEATING ? 17 : projectDivision === ENVIRO ? 25 : 101,
-        motor_efficiency: projectDivision === HEATING ? 25 : projectDivision === ENVIRO ? 34 : 101,
-        space_heater: projectDivision === HEATING ? 20 : projectDivision === ENVIRO ? 28 : 101,
-        bearing_rtd: projectDivision === HEATING ? 21 : projectDivision === ENVIRO ? 29 : 101,
-        wiring_rtd: projectDivision === HEATING ? 22 : projectDivision === ENVIRO ? 30 : 101,
-        thermistor: projectDivision === HEATING ? 23 : projectDivision === ENVIRO ? 31 : 101,
+        panel:
+          projectDivision === ENVIRO
+            ? 11
+            : projectDivision === HEATING
+            ? 11
+            : 10,
+        supply_voltage: projectDivision === ENVIRO ? 6 : 5,
+        motor_rated_current:
+          projectDivision === HEATING
+            ? 30
+            : projectDivision === ENVIRO
+            ? 41
+            : 40,
+        phase: projectDivision === ENVIRO ? 7 : 6,
+        power_factor:
+          projectDivision === HEATING
+            ? 24
+            : projectDivision === ENVIRO
+            ? 33
+            : 32,
+        motor_rpm: projectDivision === ENVIRO ? 13 : 12,
+        motor_mounting_type: projectDivision === ENVIRO ? 14 : 13,
+        motor_make: projectDivision === ENVIRO ? 37 : 36,
+        motor_frame_size: projectDivision === ENVIRO ? 15 : 14,
+        panel_ammeter:
+          projectDivision === HEATING
+            ? 27
+            : projectDivision === ENVIRO
+            ? 36
+            : 35,
+        package:
+          projectDivision === HEATING
+            ? 12
+            : projectDivision === ENVIRO
+            ? 20
+            : 19,
+        area:
+          projectDivision === HEATING
+            ? 13
+            : projectDivision === ENVIRO
+            ? 21
+            : 20,
+        standard:
+          projectDivision === HEATING
+            ? 14
+            : projectDivision === ENVIRO
+            ? 22
+            : 21,
+        zone:
+          projectDivision === HEATING
+            ? 15
+            : projectDivision === ENVIRO
+            ? 23
+            : 22,
+        gas_group:
+          projectDivision === HEATING
+            ? 16
+            : projectDivision === ENVIRO
+            ? 24
+            : 23,
+        temperature_class:
+          projectDivision === HEATING
+            ? 17
+            : projectDivision === ENVIRO
+            ? 25
+            : 24,
+        motor_efficiency:
+          projectDivision === HEATING
+            ? 25
+            : projectDivision === ENVIRO
+            ? 34
+            : 33,
+        space_heater:
+          projectDivision === HEATING
+            ? 20
+            : projectDivision === ENVIRO
+            ? 28
+            : 27,
+        bearing_rtd:
+          projectDivision === HEATING
+            ? 21
+            : projectDivision === ENVIRO
+            ? 29
+            : 28,
+        wiring_rtd:
+          projectDivision === HEATING
+            ? 22
+            : projectDivision === ENVIRO
+            ? 30
+            : 29,
+        thermistor:
+          projectDivision === HEATING
+            ? 23
+            : projectDivision === ENVIRO
+            ? 31
+            : 30,
       };
       return columnMap[key] ?? -1;
     },
@@ -457,6 +532,78 @@ const LoadList: React.FC<LoadListProps> = ({
         }
       }
     }
+    if (projectDivision === WWS_SPG || projectDivision === WWS_IPG) {
+      if (colIndex === "19") {
+        subPackages?.forEach((pckg: any) => {
+          const selectedPckg = pckg?.sub_packages?.find(
+            (item: any) => item.sub_package_name == newValue
+          );
+
+          if (selectedPckg) {
+            if (selectedPckg?.area_of_classification === "Hazardous Area") {
+              data[rowIndex][getColumnIndex("area")] = "Hazardous";
+              data[rowIndex][getColumnIndex("standard")] = pckg?.standard;
+              data[rowIndex][getColumnIndex("zone")] = pckg?.zone;
+              data[rowIndex][getColumnIndex("gas_group")] = pckg?.gas_group;
+              data[rowIndex][getColumnIndex("temperature_class")] =
+                pckg?.temperature_class;
+              data[rowIndex][getColumnIndex("motor_efficiency")] =
+                motorParameters[0]?.hazardous_area_efficiency_level;
+            } else {
+              data[rowIndex][getColumnIndex("area")] = "Safe";
+              data[rowIndex][getColumnIndex("standard")] = "NA";
+              data[rowIndex][getColumnIndex("zone")] = "NA";
+              data[rowIndex][getColumnIndex("gas_group")] = "NA";
+              data[rowIndex][getColumnIndex("temperature_class")] = "NA";
+              data[rowIndex][getColumnIndex("motor_efficiency")] =
+                motorParameters[0]?.safe_area_efficiency_level;
+            }
+          }
+        });
+      }
+      if (colIndex == "19") {
+        if (
+          data[rowIndex][getColumnIndex("package")] === "NA" ||
+          newValue === "NA"
+        ) {
+          data[rowIndex][getColumnIndex("area")] = "NA";
+          data[rowIndex][getColumnIndex("standard")] = "NA";
+          data[rowIndex][getColumnIndex("zone")] = "NA";
+          data[rowIndex][getColumnIndex("gas_group")] = "NA";
+          data[rowIndex][getColumnIndex("temperature_class")] = "NA";
+        }
+      }
+
+      console.log(typeof getColumnIndex("starter_type"), typeof colIndex);
+
+      if (Number(colIndex) === getColumnIndex("starter_type")) {
+        if (newValue === "DOL-HTR") {
+          data[rowIndex][getColumnIndex("power_factor")] = "1";
+        }
+
+        if (newValue === "SUPPLY FEEDER" || newValue === "DOL-HTR") {
+          data[rowIndex][getColumnIndex("space_heater")] = "No";
+          data[rowIndex][getColumnIndex("bearing_rtd")] = "No";
+          data[rowIndex][getColumnIndex("wiring_rtd")] = "No";
+        } else {
+          data[rowIndex][getColumnIndex("space_heater")] =
+            getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
+            Number(motorParameters[0]?.safe_area_space_heater)
+              ? "Yes"
+              : "No";
+          data[rowIndex][getColumnIndex("bearing_rtd")] =
+            getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
+            Number(motorParameters[0]?.safe_area_bearing_rtd)
+              ? "Yes"
+              : "No";
+          data[rowIndex][getColumnIndex("wiring_rtd")] =
+            getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
+            Number(motorParameters[0]?.safe_area_winding_rtd)
+              ? "Yes"
+              : "No";
+        }
+      }
+    }
     if (projectDivision === ENVIRO) {
       if (colIndex === "20") {
         subPackages?.forEach((pckg: any) => {
@@ -511,7 +658,6 @@ const LoadList: React.FC<LoadListProps> = ({
           data[rowIndex][29] = "No";
           data[rowIndex][30] = "No";
         } else {
-          
           data[rowIndex][28] =
             getStandByKw(data[rowIndex][2], data[rowIndex][3]) >=
             Number(motorParameters[0]?.safe_area_space_heater)
@@ -596,6 +742,23 @@ const LoadList: React.FC<LoadListProps> = ({
         result.splice(32, 0, item.bearing_type);
         result.splice(37, 0, item.motor_make);
         result.splice(40, 0, item.motor_part_code);
+      }
+      if (projectDivision === WWS_IPG || projectDivision === WWS_SPG) {
+        result.splice(
+          11,
+          0,
+          item.bus_segregation,
+          item.motor_rpm,
+          item.motor_rpm != 0 ? item.motor_mounting_type : "NA",
+          item.motor_rpm != 0 ? item.motor_frame_size : "NA",
+          item.motor_gd2,
+          item.motor_driven_equipment_gd2,
+          item.bkw,
+          item.coupling_type
+        );
+        result.splice(31, 0, item.bearing_type);
+        result.splice(36, 0, item.motor_make);
+        result.splice(39, 0, item.motor_part_code);
       }
 
       return result;
@@ -941,9 +1104,6 @@ const LoadList: React.FC<LoadListProps> = ({
     }
 
     const payload = {
-      project_id: project_id,
-      status: "Not Released",
-      description: "test",
       electrical_load_list_data: spreadsheetRef?.current
         ?.getData()
         .map((row: any) => {
@@ -952,7 +1112,7 @@ const LoadList: React.FC<LoadListProps> = ({
               tag_number: row[0],
               service_description: row[1],
               working_kw: row[2],
-              standby_kw: row[3], 
+              standby_kw: row[3],
               starter_type: row[4],
               supply_voltage: row[5].split(" ")[0],
               phase: row[6],
@@ -960,7 +1120,7 @@ const LoadList: React.FC<LoadListProps> = ({
               eocr_applicable: row[8],
               lpbs_type: row[9],
               control_scheme: row[10],
-              panel: row[11], 
+              panel: row[11],
               package: row[12],
               area: row[13],
               standard: row[14],
@@ -972,13 +1132,13 @@ const LoadList: React.FC<LoadListProps> = ({
               space_heater: row[20],
               bearing_rtd: row[21],
               wiring_rtd: row[22],
-              thermistor: row[23], 
+              thermistor: row[23],
               power_factor: row[24],
               motor_efficiency: row[25],
               local_isolator: row[26],
-              panel_ammeter: row[27], 
+              panel_ammeter: row[27],
               motor_scope: row[28],
-              motor_location: row[29], 
+              motor_location: row[29],
               motor_rated_current: row[30],
             };
           }
@@ -1028,6 +1188,53 @@ const LoadList: React.FC<LoadListProps> = ({
               motor_rated_current: row[41],
             };
           }
+          if (projectDivision === WWS_IPG || projectDivision === WWS_SPG) {
+            return {
+              tag_number: row[0],
+              service_description: row[1],
+              working_kw: row[2],
+              standby_kw: row[3],
+              starter_type: row[4],
+              supply_voltage: row[5].split(" ")[0],
+              phase: row[6],
+              eocr_applicable: row[7],
+              lpbs_type: row[8],
+              control_scheme: row[9],
+              panel: row[10],
+              bus_segregation: row[11],
+              motor_rpm: row[12],
+              motor_mounting_type: row[13],
+              motor_frame_size: row[14],
+              motor_gd2: row[15],
+              motor_driven_equipment_gd2: row[16],
+              bkw: row[17],
+              coupling_type: row[18],
+              package: row[19],
+              area: row[20],
+              standard: row[21],
+              zone: row[22],
+              gas_group: row[23],
+              temperature_class: row[24],
+              remark: row[25],
+              rev: row[26],
+              space_heater: row[27],
+              bearing_rtd: row[28],
+              wiring_rtd: row[29],
+              thermistor: row[30],
+              bearing_type: row[31],
+              power_factor: row[32],
+              motor_efficiency: row[33],
+              local_isolator: row[34],
+              panel_ammeter: row[35],
+              motor_make: row[36],
+              motor_scope: row[37],
+              motor_location: row[38],
+              motor_part_code: row[39],
+              motor_rated_current: row[40],
+            };
+          } else {
+            return {};
+          }
         }),
     };
     try {
@@ -1037,7 +1244,7 @@ const LoadList: React.FC<LoadListProps> = ({
         payload
       );
       console.log(respose);
-      
+
       message.success("Electrical Load List Saved");
     } catch (error) {
       message.error("Unable to save electrical load list");
@@ -1054,47 +1261,53 @@ const LoadList: React.FC<LoadListProps> = ({
         getStandByKw(item[2], item[3]) <=
         Number(commonConfigurationData[0]?.dol_starter)
       ) {
-        item[getColumnIndex('starter_type')] = "DOL STARTER";
+        item[getColumnIndex("starter_type")] = "DOL STARTER";
       }
       if (
         getStandByKw(item[2], item[3]) >=
         Number(commonConfigurationData[0]?.star_delta_starter)
       ) {
-        item[getColumnIndex('starter_type')] = "STAR-DELTA";
+        item[getColumnIndex("starter_type")] = "STAR-DELTA";
       }
-      item[getColumnIndex('supply_voltage')] = projectInfo?.main_supply_lv || "";
+      item[getColumnIndex("supply_voltage")] =
+        projectInfo?.main_supply_lv || "";
       if (
         getStandByKw(item[2], item[3]) >=
         Number(commonConfigurationData[0]?.ammeter)
       ) {
-        item[getColumnIndex('panel_ammeter')] = commonConfigurationData[0]?.ammeter_configuration; //ametter config selection
+        item[getColumnIndex("panel_ammeter")] =
+          commonConfigurationData[0]?.ammeter_configuration; //ametter config selection
       }
-      item[getColumnIndex('motor_make')] = makeOfComponent[0]?.preferred_motor; // preferred motor make
+      item[getColumnIndex("motor_make")] = makeOfComponent[0]?.preferred_motor; // preferred motor make
 
       let isSafePackage = false;
       let isHazardousPackage = false;
-      if (item[getColumnIndex('package')]) {
+      if (item[getColumnIndex("package")]) {
         subPackages?.forEach((pckg: any) => {
           const selectedPckg = pckg?.sub_packages?.find(
-            (item: any) => item.sub_package_name == item[getColumnIndex('package')]
+            (item: any) =>
+              item.sub_package_name == item[getColumnIndex("package")]
           );
 
           if (selectedPckg) {
             if (selectedPckg?.area_of_classification === "Hazardous Area") {
-              item[getColumnIndex('area')] = "Hazardous";
-              item[getColumnIndex('standard')] = pckg?.standard;
-              item[getColumnIndex('zone')] = pckg?.zone;
-              item[getColumnIndex('gas_group')] = pckg?.gas_group;
-              item[getColumnIndex('temperature_class')] = pckg?.temperature_class;
-              item[getColumnIndex('motor_efficiency')] = motorParameters[0]?.hazardous_area_efficiency_level;
+              item[getColumnIndex("area")] = "Hazardous";
+              item[getColumnIndex("standard")] = pckg?.standard;
+              item[getColumnIndex("zone")] = pckg?.zone;
+              item[getColumnIndex("gas_group")] = pckg?.gas_group;
+              item[getColumnIndex("temperature_class")] =
+                pckg?.temperature_class;
+              item[getColumnIndex("motor_efficiency")] =
+                motorParameters[0]?.hazardous_area_efficiency_level;
               isHazardousPackage = true;
             } else {
-              item[getColumnIndex('area')] = "Safe";
-              item[getColumnIndex('standard')] = "NA";
-              item[getColumnIndex('zone')] = "NA";
-              item[getColumnIndex('gas_group')] = "NA";
-              item[getColumnIndex('temperature_class')] = "NA";
-              item[getColumnIndex('motor_efficiency')] = motorParameters[0]?.safe_area_efficiency_level;
+              item[getColumnIndex("area")] = "Safe";
+              item[getColumnIndex("standard")] = "NA";
+              item[getColumnIndex("zone")] = "NA";
+              item[getColumnIndex("gas_group")] = "NA";
+              item[getColumnIndex("temperature_class")] = "NA";
+              item[getColumnIndex("motor_efficiency")] =
+                motorParameters[0]?.safe_area_efficiency_level;
               isSafePackage = true;
             }
           }
@@ -1105,7 +1318,7 @@ const LoadList: React.FC<LoadListProps> = ({
         : isHazardousPackage
         ? motorParameters[0]?.hazardous_area_space_heater
         : 0;
-      item[getColumnIndex('space_heater')] =
+      item[getColumnIndex("space_heater")] =
         getStandByKw(item[2], item[3]) >= Number(spcae_heater_criteria)
           ? "Yes"
           : "No"; // space heater criteria
@@ -1115,7 +1328,7 @@ const LoadList: React.FC<LoadListProps> = ({
         : isHazardousPackage
         ? motorParameters[0]?.hazardous_area_bearing_rtd
         : 0;
-      item[getColumnIndex('bearing_rtd')] =
+      item[getColumnIndex("bearing_rtd")] =
         getStandByKw(item[2], item[3]) >= Number(bearing_rtd_criteria)
           ? "Yes"
           : "No"; // bearing rtd criteria
@@ -1125,7 +1338,7 @@ const LoadList: React.FC<LoadListProps> = ({
         : isHazardousPackage
         ? motorParameters[0]?.hazardous_area_winding_rtd
         : 0;
-      item[getColumnIndex('wiring_rtd')] =
+      item[getColumnIndex("wiring_rtd")] =
         getStandByKw(item[2], item[3]) >= Number(winding_rtd_criteria)
           ? "Yes"
           : "No"; // winding rtd criteria
@@ -1136,13 +1349,13 @@ const LoadList: React.FC<LoadListProps> = ({
         ? motorParameters[0]?.hazardous_area_thermister
         : 0;
       if (userInfo.division === WWS_IPG) {
-        item[getColumnIndex('thermistor')] =
+        item[getColumnIndex("thermistor")] =
           getStandByKw(item[2], item[3]) >= Number(thermister_criteria) &&
-          item[getColumnIndex('starter_type')]?.includes("VFD")
+          item[getColumnIndex("starter_type")]?.includes("VFD")
             ? "Yes"
             : "No"; // thermistor criteria
       } else {
-        item[getColumnIndex('thermistor')] =
+        item[getColumnIndex("thermistor")] =
           getStandByKw(item[2], item[3]) >= Number(thermister_criteria)
             ? "Yes"
             : "No";
@@ -1353,7 +1566,49 @@ const LoadList: React.FC<LoadListProps> = ({
             "", // motor rated current
           ];
         } else {
-          return [];
+          return [
+            item[getColumnIndex("tag_number")],
+            item[getColumnIndex("service_description")],
+            item[getColumnIndex("working_kw")],
+            item[getColumnIndex("standby_kw")],
+            item[5], // starter type
+            item[6], // supply voltage
+            item[7], // phase
+            item[9], // eocr
+            "", //lpbs type
+            "", // control scheme
+            "", // panel
+            "", // bus segrigation
+            "", // motor rpm
+            "", // type of mounting
+            "", // frame size
+            "", // gd2
+            "", // driven equipment
+            "", //bkw
+            "", //type of coupling
+            "", // pkg
+            "", // area
+            "", // standard
+            "", // zone
+            "", // gas group
+            "", // temp class
+            "", // remark
+            "", // rev
+            item[29],
+            item[30],
+            item[31],
+            item[32],
+            "", // type of bearing
+            item[34], //24th power factor
+            item[35], //motor efficiency
+            item[36], //local isolator
+            item[37], // panel ameter
+            item[38], // prefered motor make
+            "", // motor scope
+            "", // motor location
+            "", // motor part code
+            "", // motor rated current
+          ];
         }
       });
       spreadsheetRef?.current?.setData(sheet_data);
@@ -1366,46 +1621,52 @@ const LoadList: React.FC<LoadListProps> = ({
     setLoading(true);
     try {
       const loadList = spreadsheetRef?.current?.getData();
-      console.log(loadList?.map((row: any) => {
-        return {
-          kw: getStandByKw(row[2], row[3]),
-          supplyVoltage: Number(row[getColumnIndex('supply_voltage')].split(" ")[0]),
-          phase: row[getColumnIndex('phase')],
-          powerFactor: Number(row[getColumnIndex('power_factor')]),
-          motorFrameSize: "",
-          motorPartCode: "",
-          motorRatedCurrent: "",
-          tagNo: row[0],
-          starterType: row[getColumnIndex('phase')],
-        };
-      }));
-      
-      const currentCalculations = await getCurrentCalculation({
-        divisionName: userInfo?.division,
-        data: loadList?.map((row: any) => {
+      console.log(
+        loadList?.map((row: any) => {
           return {
             kw: getStandByKw(row[2], row[3]),
-            supplyVoltage: Number(row[getColumnIndex('supply_voltage')].split(" ")[0]),
-            phase: row[getColumnIndex('phase')],
-            powerFactor: Number(row[getColumnIndex('power_factor')]),
+            supplyVoltage: Number(
+              row[getColumnIndex("supply_voltage")].split(" ")[0]
+            ),
+            phase: row[getColumnIndex("phase")],
+            powerFactor: Number(row[getColumnIndex("power_factor")]),
             motorFrameSize: "",
             motorPartCode: "",
             motorRatedCurrent: "",
             tagNo: row[0],
-            starterType: row[getColumnIndex('phase')],
+            starterType: row[getColumnIndex("phase")],
+          };
+        })
+      );
+
+      const currentCalculations = await getCurrentCalculation({
+        divisionName: projectDivision,
+        data: loadList?.map((row: any) => {
+          return {
+            kw: getStandByKw(row[2], row[3]),
+            supplyVoltage: Number(
+              row[getColumnIndex("supply_voltage")].split(" ")[0]
+            ),
+            phase: row[getColumnIndex("phase")],
+            powerFactor: Number(row[getColumnIndex("power_factor")]),
+            motorFrameSize: "",
+            motorPartCode: "",
+            motorRatedCurrent: "",
+            tagNo: row[0],
+            starterType: row[getColumnIndex("starter_type")],
           };
         }),
       });
       let getFrameSize: any[];
-      if (userDivision !== HEATING && projectDivision !== HEATING) {
+      if (projectDivision !== HEATING) {
         getFrameSize = await getFrameSizeCalculation({
-          divisionName: WWS_SPG,
+          divisionName: projectDivision,
           data: loadList?.map((row: any) => {
             return {
               kw: getStandByKw(row[2], row[3]),
               tagNo: row[0],
-              speed: Number(row[getColumnIndex('motor_rpm')]),
-              mounting_type: row[getColumnIndex('motor_mounting_type')],
+              speed: Number(row[getColumnIndex("motor_rpm")]),
+              mounting_type: row[getColumnIndex("motor_mounting_type")],
             };
           }),
         });
@@ -1420,10 +1681,13 @@ const LoadList: React.FC<LoadListProps> = ({
         if (calculationResult) {
           const updatedRow = [...row];
           if (projectDivision !== HEATING) {
-            updatedRow[getColumnIndex('motor_rated_current')] = calculationResult.motorRatedCurrent;
-            updatedRow[getColumnIndex('motor_frame_size')] = frameSizeResult.frameSize;
+            updatedRow[getColumnIndex("motor_rated_current")] =
+              calculationResult.motorRatedCurrent;
+            updatedRow[getColumnIndex("motor_frame_size")] =
+              frameSizeResult.frameSize;
           } else {
-            updatedRow[getColumnIndex('motor_rated_current')] = calculationResult.motorRatedCurrent;
+            updatedRow[getColumnIndex("motor_rated_current")] =
+              calculationResult.motorRatedCurrent;
           }
 
           return updatedRow;

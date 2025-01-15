@@ -58,11 +58,12 @@ const TableFilter: React.FC<TableFilterProps> = ({
   }, [onFilter]);
 
   const renderFilterInput = useCallback((filter: FilterConfig) => {
+    console.log(filter);
+    
     switch (filter.type) {
       case 'select':
         return (
-          <Select
-            allowClear
+          <Select 
             placeholder={filter.placeholder || `Select ${filter.label}`}
             style={{ width: '100%' }}
           >
@@ -86,8 +87,7 @@ const TableFilter: React.FC<TableFilterProps> = ({
       default:
         return (
           <Input
-            placeholder={filter.placeholder || `Enter ${filter.label}`}
-            allowClear
+            placeholder={filter.placeholder || `Enter ${filter.label}`} 
           />
         );
     }

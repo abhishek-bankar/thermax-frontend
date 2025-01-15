@@ -961,8 +961,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
       const [controlSchemes, setControlSchemes] = useState<any[]>([]);
       const [controlSchemesSelected, setControlSchemesSelected] = useState<
         any[]
-      >([]);
-      const [filteredData, setFilteredData] = useState(controlSchemes);
+      >([]); 
       const [isControlSchemeEmpty, setIsControlSchemeEmpty] = useState(false);
       const [isDataFetched, setIsDataFetched] = useState(false);
 
@@ -1111,25 +1110,8 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
                 return [true, ...scheme.slice(1)];
               }
               return scheme;
-            });
-            // console.log(temp);
-
-            // sortedSchemes.map((el: any) => {
-            //   if (selected.includes(el[schemeIndex])) {
-            //     return [
-
-            //     ]
-            //     // console.log(el, 'selected');
-            //   }
-            // });
-            // if (selected.length) {
-            //   setControlSchemesSelected(
-            //     temp.filter((el: any) => el[0] === true)
-            //   );
-            // }
-            setControlSchemes(temp);
-            // setControlSchemes(sortedSchemes);
-            setFilteredData(sortedSchemes);
+            }); 
+            setControlSchemes(temp); 
             setIsDataFetched(true);
             setLoading(false);
           } catch (error) {
@@ -1364,8 +1346,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
               });
             }
           });
-
-          setFilteredData(filtered);
+ 
           if (controlSchemeInstance) {
             controlSchemeInstance.setData(filtered);
           }

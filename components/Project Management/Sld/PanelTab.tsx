@@ -503,18 +503,6 @@
 
 // export default PanelTab;
 
-
-
-
-
-
-
-
-
-
-
-
-
 // import {
 //   CloudDownloadOutlined,
 //   FolderOpenOutlined,
@@ -645,7 +633,7 @@
 //   console.log(panelData, "panel data ");
 //   const getLatestRevision = () => {
 //     console.log(sldRevisions,'sld rev');
-    
+
 //     return sldRevisions?.find((item: any) => !item.is_released) ?? {}
 //   }
 
@@ -722,19 +710,30 @@
 
 // export default PanelTab;
 
-
-
 import {
   CloudDownloadOutlined,
   FolderOpenOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
-import { Button, Table, TableColumnsType, Tabs, Tag, Tooltip } from "antd";
+import {
+  Button,
+  message,
+  Table,
+  TableColumnsType,
+  Tabs,
+  Tag,
+  Tooltip,
+} from "antd";
 import React, { useMemo, Suspense, lazy } from "react";
 import { getThermaxDateFormat } from "@/utils/helpers";
+import { SLD_REVISION_STATUS } from "@/configs/constants";
+import { updateData } from "@/actions/crud-actions";
+import { SLD_REVISIONS_API } from "@/configs/api-endpoints";
 
 // Lazy load tab components
-const SwitchgearSelection = lazy(() => import("./Switchgear Selection/SwitchgearSelection"));
+const SwitchgearSelection = lazy(
+  () => import("./Switchgear Selection/SwitchgearSelection")
+);
 const Incomer = lazy(() => import("./Incomer/Incomer"));
 const BusbarSizing = lazy(() => import("./Busbar Sizing/BusbarSizing"));
 
@@ -746,6 +745,7 @@ interface Props {
 }
 
 interface SLDRevision {
+  sld_path: any;
   name: string;
   status: string;
   is_released: boolean;
@@ -758,99 +758,133 @@ const PanelTab: React.FC<Props> = ({
   projectPanelData,
   designBasisRevisionId,
 }) => {
-  const columns: TableColumnsType = useMemo(() => [
-    {
-      title: () => <div className="text-center">Document Name</div>,
-      dataIndex: "documentName",
-      align: "center",
-      render: (text) => (
-        <Tooltip title="Edit Revision" placement="top">
-          <Button
-            type="link"
-            iconPosition="start"
-            onClick={() => {}}
-            icon={
-              <FolderOpenOutlined
-                style={{ color: "#fef65b", fontSize: "1.2rem" }}
-              />
-            }
-          >
-            {text}
-          </Button>
-        </Tooltip>
-      ),
-    },
-    {
-      title: () => <div className="text-center">Status</div>,
-      dataIndex: "status",
-      render: (text) => (
-        <div className="text-center">
-          <Tag color="green">{text}</Tag>
-        </div>
-      ),
-    },
-    {
-      title: () => <div className="text-center">Document Revision</div>,
-      dataIndex: "documentRevision",
-      render: (text) => <div className="text-center">{text}</div>,
-    },
-    {
-      title: () => <div className="text-center">Created Date</div>,
-      dataIndex: "createdDate",
-      render: (text) => getThermaxDateFormat(new Date(text)),
-    },
-    {
-      title: () => <div className="text-center">Download</div>,
-      dataIndex: "download",
-      render: () => (
-        <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
-          <Tooltip title="Download">
+  console.log(sldRevisions);
+
+  const handleDownload = async (record: any) => {
+    console.log(record);
+    if (record.status === SLD_REVISION_STATUS.DEFAULT) {
+      try {
+        const respose = await updateData(
+          `${SLD_REVISIONS_API}/${record.key}`,
+          false,
+          { status: SLD_REVISION_STATUS.DOWNLOAD_READY }
+        );
+        // setLoading(false);
+        console.log(respose);
+
+        message.success("SLD is Being Prepared Please Wait For A While");
+      } catch (error) {
+      } finally {
+      }
+    } else if (record.status === SLD_REVISION_STATUS.SUCCESS) {
+      const link = document.createElement("a");
+      link.href = record.sld_path;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+  const columns: TableColumnsType = useMemo(
+    () => [
+      {
+        title: () => <div className="text-center">Document Name</div>,
+        dataIndex: "documentName",
+        align: "center",
+        render: (text) => (
+          <Tooltip title="Edit Revision" placement="top">
             <Button
               type="link"
-              shape="circle"
+              iconPosition="start"
+              onClick={() => {}}
               icon={
-                <CloudDownloadOutlined
-                  style={{
-                    fontSize: "1.3rem",
-                    color: "green",
-                  }}
+                <FolderOpenOutlined
+                  style={{ color: "#fef65b", fontSize: "1.2rem" }}
                 />
               }
-            />
+            >
+              {text}
+            </Button>
           </Tooltip>
-        </div>
-      ),
-    },
-    {
-      title: () => <div className="text-center">Release</div>,
-      dataIndex: "release",
-      render: () => (
-        <div className="text-center">
-          <Button
-            type="primary"
-            size="small"
-            name="Release"
-          >
-            Release
-          </Button>
-        </div>
-      ),
-    },
-  ], []);
+        ),
+      },
+      {
+        title: () => <div className="text-center">Status</div>,
+        dataIndex: "status",
+        render: (text) => (
+          <div className="text-center">
+            <Tag color="green">{text}</Tag>
+          </div>
+        ),
+      },
+      {
+        title: () => <div className="text-center">Document Revision</div>,
+        dataIndex: "documentRevision",
+        render: (text) => <div className="text-center">{text}</div>,
+      },
+      {
+        title: () => <div className="text-center">Created Date</div>,
+        dataIndex: "createdDate",
+        render: (text) => getThermaxDateFormat(new Date(text)),
+      },
+      {
+        title: () => <div className="text-center">Download</div>,
+        dataIndex: "download",
+        render: (text, record) => (
+          <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
+            <Tooltip
+              title={
+                record.status === SLD_REVISION_STATUS.DEFAULT
+                  ? "Submit To Download"
+                  : "Download"
+              }
+            >
+              <Button
+                type="link"
+                shape="circle"
+                icon={
+                  <CloudDownloadOutlined
+                    style={{
+                      fontSize: "1.3rem",
+                      color: "green",
+                    }}
+                    onClick={() => handleDownload(record)}
+                  />
+                }
+              />
+            </Tooltip>
+          </div>
+        ),
+      },
+      {
+        title: () => <div className="text-center">Release</div>,
+        dataIndex: "release",
+        render: () => (
+          <div className="text-center">
+            <Button type="primary" size="small" name="Release">
+              Release
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
-  const dataSource = useMemo(() => 
-    sldRevisions?.map((item: SLDRevision, index: number) => ({
-      key: item.name,
-      documentName: "SLD",
-      status: item.status,
-      documentRevision: `R${index}`,
-      createdDate: item.creation,
-    })),
+  const dataSource = useMemo(
+    () =>
+      sldRevisions?.map((item: SLDRevision, index: number) => ({
+        key: item.name,
+        documentName: "SLD",
+        status: item.status,
+        documentRevision: `R${index}`,
+        createdDate: item.creation,
+        sld_path: item.sld_path,
+      })),
     [sldRevisions]
   );
 
-  const latestRevision = useMemo(() => 
-    sldRevisions?.find((item: SLDRevision) => !item.is_released) ?? {},
+  const latestRevision = useMemo(
+    () => sldRevisions?.find((item: SLDRevision) => !item.is_released) ?? {},
     [sldRevisions]
   );
 
@@ -863,9 +897,7 @@ const PanelTab: React.FC<Props> = ({
   const SLDRevisionTab = () => (
     <>
       <div className="text-end">
-        <Button icon={<SyncOutlined color="#492971" />}>
-          Refresh
-        </Button>
+        <Button icon={<SyncOutlined color="#492971" />}>Refresh</Button>
       </div>
       <div className="mt-2">
         <Table columns={columns} dataSource={dataSource} size="small" />
@@ -911,9 +943,7 @@ const PanelTab: React.FC<Props> = ({
       key: "4",
       children: (
         <Suspense fallback={<LoadingFallback />}>
-          <BusbarSizing 
-            designBasisRevisionId={designBasisRevisionId}
-          />
+          <BusbarSizing designBasisRevisionId={designBasisRevisionId} />
         </Suspense>
       ),
     },

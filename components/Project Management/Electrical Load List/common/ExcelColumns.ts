@@ -275,7 +275,7 @@ export const LoadListcolumns = (division: string) => {
       width: "80",
     });
   }
-  if (division !== HEATING) {
+  if (division === ENVIRO) {
     columns.splice(
       12,
       0,
@@ -365,14 +365,14 @@ export const LoadListcolumns = (division: string) => {
         width: "150",
       }
     );
-    columns.splice(24, 0, {
+    columns.splice(32, 0, {
       type: "dropdown",
       name: "typeOfBearing",
       source: ["Roller", "Insulated", "Roller and Insulated", "NA"],
       title: "TYPE OF BEARING",
       width: "150",
     });
-    columns.splice(28, 0, {
+    columns.splice(37, 0, {
       type: "dropdown",
       source: [
         "ABB",
@@ -389,7 +389,7 @@ export const LoadListcolumns = (division: string) => {
       title: "MOTOR MAKE",
       width: "150",
     });
-    columns.splice(30, 0, {
+    columns.splice(40, 0, {
       type: "text",
       name: "partcode",
       title: "MOTOR PART CODE",

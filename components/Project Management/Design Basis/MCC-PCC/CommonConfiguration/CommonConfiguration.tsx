@@ -59,7 +59,7 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
       commonConfigData?.ammeter_configuration || "All Phase With CT",
     mcc_switchgear_type:
       commonConfigData?.mcc_switchgear_type ||
-      "Type II Coordination-Fuseless-One Size Higher",
+      "Type II Coordination-Fuseless",
     switchgear_combination:
       commonConfigData?.switchgear_combination || "Without MCB",
 
@@ -745,7 +745,7 @@ const CommonConfiguration = ({
               label="Control Transformer Secondary Voltage"
               options={
                 sortAlphaNumericArray(
-                  dropdown["Control Transformer primary voltage"]
+                  dropdown["Control Transformer secondary voltage"]
                 ) || []
               }
               size="small"
@@ -1081,9 +1081,7 @@ const CommonConfiguration = ({
                 label="Switchgear Combination"
                 disabled={
                   watch("mcc_switchgear_type") ===
-                  "Type II Coordination-Fuse" ||
-                  watch("mcc_switchgear_type") ===
-                  "Type II Coordination-Fuse-One Size Higher"
+                  "Type II Coordination-Fuse"
                 }
                 options={dropdown["Switchgear Combination"] || []}
                 size="small"

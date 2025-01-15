@@ -111,14 +111,14 @@ const Download: React.FC<Props> = ({
 
   const handleDownload = async (revision_id: string) => {
     setDownloadIconSpin(true);
-    // console.log(revision_id);
+    console.log(revision_id);
     // console.log(getDownLoadEndpoint());
     try {
       const base64Data: any = await downloadFile(
         GET_ISOLATOR_EXCEL_API,
         true,
         {
-          revision_id,
+          "revision_id": "0g9iq2ii91",
         }
       );
 

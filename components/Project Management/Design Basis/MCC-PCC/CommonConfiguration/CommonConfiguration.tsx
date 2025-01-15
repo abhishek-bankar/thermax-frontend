@@ -67,7 +67,7 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
       commonConfigData?.is_control_transformer_applicable?.toString() || "1",
     control_transformer_primary_voltage:
       commonConfigData?.control_transformer_primary_voltage ||
-      "230 VAC, 1-Phase, 2 wire",
+      "415 VAC",
     control_transformer_secondary_voltage_copy:
       commonConfigData?.control_transformer_secondary_voltage_copy ||
       "230 VAC, 1-Phase, 2 wire",
@@ -414,6 +414,7 @@ const CommonConfiguration = ({
   const hazardous__field_motor_type_controlled = watch(
     "hazardous_field_motor_type"
   );
+  const dm_standard_controlled = watch("dm_standard");
   const safe_lpbs_material_controlled = watch("safe_lpbs_material");
   const hazardous_lpbs_material_controlled = watch("hazardous_lpbs_material");
   const hazardous_lpbs_type_controlled = watch("hazardous_lpbs_type");
@@ -430,6 +431,7 @@ const CommonConfiguration = ({
     setValue("control_bus_main_busbar_selection", dm_standard);
     setValue("earth_bus_main_busbar_selection", dm_standard);
   }, [dm_standard, setValue]);
+  
   useEffect(() => {
     if (["SS 316", "SS 304", "CRCA"].includes(safe_field_motor_material)) {
       setValue("safe_field_motor_thickness", "3 mm");

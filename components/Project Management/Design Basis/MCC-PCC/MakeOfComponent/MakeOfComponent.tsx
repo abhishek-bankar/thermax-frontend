@@ -373,7 +373,7 @@ const MakeOfComponent = ({
             control={control}
             name="plc"
             label="PLC"
-            options={moveNAtoEnd(gland_make_options) || []}
+            options={moveNAtoEnd(plc_make_options) || []}
             size="small"
           />
         </div>

@@ -15,6 +15,7 @@ interface CustomAutoCompleteProps {
   disabled?: boolean;
   createOptionUrl: string;
   defaultOption?: string;
+  reset?: boolean;
 }
 
 export default function CustomAutoComplete({
@@ -27,6 +28,7 @@ export default function CustomAutoComplete({
   disabled,
   createOptionUrl,
   defaultOption,
+  reset,
 }: CustomAutoCompleteProps) {
   const [typedValue, setTypedValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,11 +36,14 @@ export default function CustomAutoComplete({
 
   // Use useEffect to update filteredOptions whenever the options prop changes
   useEffect(() => {
+    if (reset) {
+      setTypedValue("");
+    }
     if (defaultOption) {
       setTypedValue(defaultOption);
     }
     setFilteredOptions(options); // Sync filteredOptions with the new options from parent
-  }, [defaultOption, options]);
+  }, [defaultOption, options, reset]);
 
   const handleCreateOption = async (
     value: string,

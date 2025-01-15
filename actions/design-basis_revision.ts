@@ -22,7 +22,7 @@ import {
 import { DB_REVISION_STATUS } from "@/configs/constants";
 import { createData, getData } from "./crud-actions";
 
-const copyCommonConfigData = async (
+export const copyCommonConfigData = async (
   revision_id: string,
   new_revision_id: string
 ) => {
@@ -54,7 +54,7 @@ const copyCommonConfigData = async (
   });
 };
 
-const copyMccCumPccPLCPanelData = async (
+export const copyMccCumPccPLCPanelData = async (
   revision_id: string,
   new_revision_id: string
 ) => {

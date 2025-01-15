@@ -1,5 +1,6 @@
 "use client";
 import {
+  CopyOutlined,
   DeleteOutlined,
   EditOutlined,
   FileDoneOutlined,
@@ -28,6 +29,7 @@ import {
   WWS_IPG,
   WWS_SPG,
 } from "@/configs/constants";
+import CopyProjectModel from "./CopyProjectModel";
 
 interface DataType {
   key: string;
@@ -55,6 +57,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
 
   const [open, setOpen] = useState(false);
   const [uploadFileOpen, setUploadFileOpen] = useState(false);
+  const [copyModelOpen, setCopyModelOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [projectRow, setProjectRow] = useState<any>(null);
   const [projectListData, setProjectListData] = useState<any>([]);
@@ -98,6 +101,12 @@ export default function ProjectList({ userInfo, isComplete }: any) {
   }, [projectList, searchQuery]);
 
   const columns: ColumnsType<DataType> = [
+    {
+      title: () => <div className="text-center">Project ID</div>,
+      dataIndex: "name",
+      key: "name",
+      hidden: true,
+    },
     {
       title: () => <div className="text-center">Division</div>,
       dataIndex: "division",
@@ -192,11 +201,10 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       dataIndex: "action",
       align: "center",
       ellipsis: true,
-
       hidden: isComplete === 1,
       render: (text, record: any) => {
         return (
-          <div className="flex justify-center gap-2">
+          <div className="flex justify-center gap-1">
             <Tooltip placement="top" title="Edit">
               <Button
                 type="link"
@@ -212,6 +220,15 @@ export default function ProjectList({ userInfo, isComplete }: any) {
                 shape="circle"
                 icon={<UploadOutlined />}
                 onClick={() => handleUploadFiles(record)}
+                disabled={record?.division !== userDivision}
+              />
+            </Tooltip>
+            <Tooltip placement="top" title="Copy Project">
+              <Button
+                type="link"
+                shape="circle"
+                icon={<CopyOutlined />}
+                onClick={() => handleCopyProject(record)}
                 disabled={record?.division !== userDivision}
               />
             </Tooltip>
@@ -276,6 +293,11 @@ export default function ProjectList({ userInfo, isComplete }: any) {
 
   const handleUploadFiles = (selectedRow: any) => {
     setUploadFileOpen(true);
+    setProjectRow(selectedRow);
+  };
+
+  const handleCopyProject = async (selectedRow: any) => {
+    setCopyModelOpen(true);
     setProjectRow(selectedRow);
   };
 
@@ -362,6 +384,14 @@ export default function ProjectList({ userInfo, isComplete }: any) {
         setOpen={setUploadFileOpen}
         values={projectRow}
         userInfo={userInfo}
+      />
+      <CopyProjectModel
+        open={copyModelOpen}
+        setOpen={setCopyModelOpen}
+        projectRowData={projectRow}
+        projectOCNos={projectOCNos}
+        userInfo={userInfo}
+        getProjectUrl={getProjectUrl}
       />
     </div>
   );

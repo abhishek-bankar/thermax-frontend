@@ -22,6 +22,7 @@ import {
   COMMON_CONFIGURATION_3,
   ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
   GET_CABLE_SCHEDULE_EXCEL_API,
+  GET_ISOLATOR_EXCEL_API,
   GET_LOAD_LIST_EXCEL_API,
   LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
   LOCAL_ISOLATOR_REVISION_HISTORY_API,
@@ -112,6 +113,37 @@ const Download: React.FC<Props> = ({
     setDownloadIconSpin(true);
     // console.log(revision_id);
     // console.log(getDownLoadEndpoint());
+    try {
+      const base64Data: any = await downloadFile(
+        GET_ISOLATOR_EXCEL_API,
+        true,
+        {
+          revision_id,
+        }
+      );
+
+      // Create a Blob from the Base64 string
+      const binaryData = Buffer.from(base64Data, "base64");
+      const blob = new Blob([binaryData], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      // Create a download link and trigger the download
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      const document_revision_length =
+        revisionHistory.length > 0 ? revisionHistory.length : 0;
+
+      // Use Content-Disposition header to get the filename
+      const filename = `response.xlsx`;
+
+      link.download = filename.replace(/"/g, ""); // Remove quotes if present
+
+      link.click();
+    } catch (error) {
+      message.error("Error processing Excel file");
+      console.error("Error processing Excel file:", error);
+    }
 
     try {
       const base64Data: any = await downloadFile(getDownLoadEndpoint(), true, {

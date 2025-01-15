@@ -1,7 +1,11 @@
 "use client";
-import { DownOutlined, PercentageOutlined } from "@ant-design/icons";
+import {
+  DownOutlined,
+  PercentageOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, message, Tooltip } from "antd";
+import { Button, FloatButton, message, Modal, Tooltip } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -21,6 +25,7 @@ import DocumentListModal from "./DocumentListModal";
 import PanelDataList from "./Panel/PanelDataList";
 import useProjectInfoDropdowns from "./ProjectInfoDropdowns";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Video } from "@/components/FormInputs/Video";
 
 const ProjectInfoSchema = zod.object({
   project_name: zod.string({
@@ -206,11 +211,12 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
 
   const [loading, setLoading] = useState(false);
   const [openDocumentList, setOpenDocumentList] = useState(false);
+  const [openVideoModel, setOpenVideoModel] = useState(false);
   const projectData = React.useMemo(
     () => ({ ...projectMetadata, ...projectInfo }),
     [projectMetadata, projectInfo]
   );
-  const { dropdown } = useProjectInfoDropdowns();
+  const dropdown = useProjectInfoDropdowns();
 
   const { control, handleSubmit, reset, formState, watch, setValue } = useForm({
     resolver: zodResolver(ProjectInfoSchema),
@@ -276,7 +282,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
       }
       // console.log("request payload:", data);
 
-      await updateData(getProjectInfoUrl, false, data);
+      await updateData(getProjectInfoUrl, false, { ...data, is_saved: 1 });
       message.success("Project Information Saved Successfully");
       // setModalLoading(true)
     } catch (error: any) {
@@ -295,58 +301,6 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
   //     </div>
   //   )
   // }
-  const HumidityMax = [
-    {
-      name: "50",
-      value: "50",
-      label: "50",
-    },
-    {
-      name: "55",
-      value: "55",
-      label: "55",
-    },
-    {
-      name: "60",
-      value: "60",
-      label: "60",
-    },
-    {
-      name: "65",
-      value: "65",
-      label: "65",
-    },
-    {
-      name: "70",
-      value: "70",
-      label: "70",
-    },
-    {
-      name: "75",
-      value: "75",
-      label: "75",
-    },
-    {
-      name: "80",
-      value: "80",
-      label: "80",
-    },
-    {
-      name: "85",
-      value: "85",
-      label: "85",
-    },
-    {
-      name: "90",
-      value: "90",
-      label: "90",
-    },
-    {
-      name: "100",
-      value: "100",
-      label: "100",
-    },
-  ];
 
   return (
     <div className="flex flex-col gap-4 px-4">
@@ -703,7 +657,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               name="max_humidity"
               control={control}
               label="Humidity [Max]"
-              options={HumidityMax}
+              options={dropdown["Humidity Dropdown"] || []}
               suffixIcon={
                 <>
                   <PercentageOutlined
@@ -797,7 +751,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             <Button
               type="primary"
               htmlType="button"
-              disabled={!formState.isValid}
+              disabled={projectData?.is_saved === 0}
             >
               Go to SLD
             </Button>
@@ -819,6 +773,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               type="primary"
               htmlType="button"
               onClick={() => setOpenDocumentList(true)}
+              disabled={projectData?.is_saved === 0}
             >
               Document List
             </Button>
@@ -827,7 +782,9 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
             <Button
               type="primary"
               htmlType="button"
-              disabled={userDivision !== projectDivision}
+              disabled={
+                userDivision !== projectDivision || projectData?.is_saved === 0
+              }
             >
               Instrumental
             </Button>
@@ -837,7 +794,10 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               <Button
                 type="primary"
                 htmlType="button"
-                disabled={userDivision !== projectDivision}
+                disabled={
+                  userDivision !== projectDivision ||
+                  projectData?.is_saved === 0
+                }
                 onClick={() => {
                   handleSubmit(onSubmit);
                   router.push(
@@ -858,6 +818,26 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
         revision_id={revision_id}
         userDivision={userDivision}
         projectDivision={projectDivision}
+      />
+      <Modal
+        title="Help Video"
+        style={{ top: 20 }}
+        width={1000}
+        open={openVideoModel}
+        onCancel={() => setOpenVideoModel(false)}
+        footer={null}
+      >
+        <Video
+          src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/Project Information Video.mp4`}
+          shouldStop={!openVideoModel}
+        />
+      </Modal>
+      <FloatButton
+        icon={<QuestionCircleOutlined />}
+        type="default"
+        style={{ insetInlineEnd: 50, bottom: 60 }}
+        tooltip={<div>Help Video</div>}
+        onClick={() => setOpenVideoModel(true)}
       />
     </div>
   );

@@ -1,6 +1,5 @@
 "use client";
 import { QuestionCircleOutlined } from "@ant-design/icons";
-import { FloatButton } from "antd";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { PROJECT_API } from "@/configs/api-endpoints";
@@ -96,7 +95,6 @@ export default function DesignBasisLayout({
       </div>
 
       <main className="flex-1 overflow-y-auto">{children}</main>
-      <FloatButton icon={<QuestionCircleOutlined />} />
     </div>
   );
 }

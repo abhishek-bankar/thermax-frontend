@@ -20,6 +20,7 @@ export default function useProjectInfoDropdowns() {
           "Voltage Variation": "variation",
           "Main Supply LV": "name",
           "Frequency Variation": "variation",
+          "Humidity Dropdown": "name",
           Frequency: "name",
           "Main Supply Phase": "phase",
           "Control and Utility Supply Phase": "phase",
@@ -38,7 +39,5 @@ export default function useProjectInfoDropdowns() {
 
     getDropdown();
   }, []);
-  return {
-    dropdown,
-  };
+  return dropdown;
 }

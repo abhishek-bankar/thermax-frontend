@@ -1,7 +1,24 @@
 import { ENVIRO, HEATING } from "@/configs/constants";
-
-export const LoadListcolumns = (division: string) => {
+export const getStarterList = () => {
   return [
+    "DOL STARTER",
+    "STAR-DELTA",
+    "VFD",
+    "R-DOL",
+    "VFD BYPASS-S/D",
+    "SOFT STARTER",
+    "SOFT STARTER BYPASS - S/D",
+    "SUPPLY FEEDER",
+    "VFD Bypass DOL",
+    "SS Bypass DOL",
+    "DOL-HTR",
+    "DOL-ZSS",
+    "SP-DOL MCB",
+    "SP-DOL MPCB",
+  ];
+};
+export const LoadListcolumns = (division: string) => {
+  const columns = [
     {
       type: "text",
       name: "feederTag",
@@ -17,42 +34,20 @@ export const LoadListcolumns = (division: string) => {
     {
       type: "text",
       name: "working",
-      title: "WORKING  LOAD IN KW",
+      title: "WORKING LOAD (kW)",
       width: "80",
     },
     {
       type: "text",
       name: "standBy",
-      title: "STAND-BY  LOAD IN KW",
+      title: "STAND-BY LOAD (kW)",
       width: "80",
     },
-    {
-      type: "text",
-      name: "standBy",
-      title: "KVA",
-      width: "70",
-      // readOnly: true,
-      readOnly: division == ENVIRO ? false : true,
-    },
+
     {
       type: "dropdown",
       name: "starter",
-      source: [
-        "DOL STARTER",
-        "STAR-DELTA",
-        "VFD",
-        "R-DOL",
-        "VFD BYPASS-S/D",
-        "SOFT STARTER",
-        "SOFT STARTER BYPASS - S/D",
-        "SUPPLY FEEDER",
-        "VFD Bypass DOL",
-        "SS Bypass DOL",
-        "DOL-HTR",
-        "DOL-ZSS",
-        "SP-DOL MCB",
-        "SP-DOL MPCB",
-      ],
+      source: getStarterList(),
       title: "STARTER TYPE",
       width: "130",
     },
@@ -62,7 +57,7 @@ export const LoadListcolumns = (division: string) => {
       name: "supplyVoltage",
       source: [],
       title: "SUPPLY  VOLTAGE",
-      width: "140",
+      width: "100",
     },
     {
       type: "dropdown",
@@ -75,21 +70,13 @@ export const LoadListcolumns = (division: string) => {
       title: "PHASE",
       width: "90",
     },
-    {
-      type: "dropdown",
-      name: "startingTime",
-      source: ["10 Sec", "30 Sec", "60 Sec", "NA"],
-      title: "STARTING TIME",
-      readOnly: division === HEATING ? false : true,
 
-      width: "140",
-    },
     {
       type: "dropdown",
       name: "eorc",
       source: ["Yes", "No"],
       title: "EOCR  APPLICABLE",
-      width: "110",
+      width: "90",
     },
     {
       type: "dropdown",
@@ -113,99 +100,7 @@ export const LoadListcolumns = (division: string) => {
       width: "80",
       height: "60",
     },
-    {
-      type: "dropdown",
-      name: "busSegregation",
-      source: ["A", "B", "C", "NA"],
-      title: "BUS  SEGREGATION",
-      readOnly: division === HEATING ? true : false,
-      width: "120",
-    },
-    {
-      type: "dropdown",
-      name: "motorRpm",
-      source: ["0", "750", "1000", "1500", "3000"],
-      title: "MOTOR  RPM",
-      readOnly: division === HEATING ? true : false,
-      width: "70",
-    },
-    {
-      type: "dropdown",
-      name: "typeMotorMounting",
-      source: [
-        "FOOT MOUNTED (B3)",
-        "FLANGE MOUNTED (B5)",
-        "FOOT & FLANGE MOUNTED (B35)",
-        "VERTICAL FLANGE MOUNTED (V1)",
-        "NA",
-      ],
-      title: "TYPE OF  MOTOR MOUNTING",
-      width: "150",
-      readOnly: division === HEATING ? true : false,
-    },
-    {
-      type: "dropdown",
-      source: [
-        "63",
-        "71",
-        "80",
-        "90S",
-        "90L",
-        "100L",
-        "112M",
-        "132S",
-        "160M",
-        "160L",
-        "180M",
-        "180L",
-        "225M",
-        "200L",
-        "225S",
-        "250M",
-        "280S",
-        "280M",
-        "315S",
-        "315M",
-        "315L",
-        "NA",
-      ],
-      name: "motorFrameSize",
-      readOnly: division === HEATING ? true : false,
 
-      title: "MOTOR  FRAME SIZE",
-      width: "150",
-    },
-    {
-      type: "text",
-      name: "motorGD2",
-      readOnly: division === HEATING ? true : false,
-      title: "MOTOR GD 2",
-      width: "150",
-    },
-    {
-      type: "text",
-      name: "drivenEqGD2",
-      readOnly: division === HEATING ? true : false,
-
-      title: "DRIVEN  EQUIPMENT GD2",
-      width: "150",
-    },
-    {
-      type: "text",
-      name: "bkw",
-      readOnly: division === HEATING ? true : false,
-      title: "BKW",
-      width: "150",
-    },
-    {
-      type: "dropdown",
-      name: "typeOfCoupling",
-      source: ["V-Belt", "Direct", "NA"],
-      title: "TYPE OF  COUPLING",
-      readOnly: division === HEATING ? true : false,
-
-      width: "150",
-    },
     {
       type: "dropdown",
       name: "pkg",
@@ -308,15 +203,6 @@ export const LoadListcolumns = (division: string) => {
     },
 
     {
-      type: "dropdown",
-      name: "typeOfBearing",
-      source: ["Roller", "Insulated", "Roller and Insulated", "NA"],
-      title: "TYPE OF  BEARING",
-      readOnly: division === HEATING ? true : false,
-
-      width: "150",
-    },
-    {
       type: "text",
       name: "powerFactor",
       title: "POWER FACTOR",
@@ -349,25 +235,6 @@ export const LoadListcolumns = (division: string) => {
       title: "PANEL AMMETER",
       width: "150",
     },
-    {
-      type: "dropdown",
-      source: [
-        "ABB",
-        "Bharat Bijlee",
-        "Crompton Greaves",
-        "Havells",
-        "Kirloskar",
-        "LHP",
-        "Siemens",
-        "Thermax Standard",
-        "NA",
-      ],
-      name: "motorMake",
-      title: "MOTOR MAKE",
-      readOnly: division === HEATING ? true : false,
-
-      width: "150",
-    },
 
     {
       type: "dropdown",
@@ -383,14 +250,7 @@ export const LoadListcolumns = (division: string) => {
       title: "MOTOR LOCATION",
       width: "200",
     },
-    {
-      type: "text",
-      name: "partcode",
-      title: "MOTOR PART CODE",
-      readOnly: division === HEATING ? true : false,
 
-      width: "200",
-    },
     {
       type: "text",
       name: "partcode",
@@ -398,6 +258,146 @@ export const LoadListcolumns = (division: string) => {
       width: "200",
     },
   ];
+  if (division === ENVIRO) {
+    columns.splice(4, 0, {
+      type: "text",
+      name: "kva",
+      title: "KVA",
+      width: "70",
+    });
+  }
+  if (division === HEATING) {
+    columns.splice(7, 0, {
+      type: "dropdown",
+      name: "startingTime",
+      source: ["10 Sec", "30 Sec", "60 Sec", "NA"],
+      title: "STARTING TIME",
+      width: "80",
+    });
+  }
+  if (division !== HEATING) {
+    columns.splice(
+      12,
+      0,
+      {
+        type: "dropdown",
+        name: "busSegregation",
+        source: ["A", "B", "C", "NA"],
+        title: "BUS  SEGREGATION",
+        width: "90",
+      },
+      {
+        type: "dropdown",
+        name: "motorRpm",
+        source: ["0", "750", "1000", "1500", "3000"],
+        title: "MOTOR  RPM",
+        width: "70",
+      },
+      {
+        type: "dropdown",
+        name: "typeMotorMounting",
+        source: [
+          "FOOT MOUNTED (B3)",
+          "FLANGE MOUNTED (B5)",
+          "FOOT & FLANGE MOUNTED (B35)",
+          "VERTICAL FLANGE MOUNTED (V1)",
+          "NA",
+        ],
+        title: "TYPE OF  MOTOR MOUNTING",
+        width: "150",
+      },
+      {
+        type: "dropdown",
+        source: [
+          "63",
+          "71",
+          "80",
+          "90S",
+          "90L",
+          "100L",
+          "112M",
+          "132S",
+          "160M",
+          "160L",
+          "180M",
+          "180L",
+          "225M",
+          "200L",
+          "225S",
+          "250M",
+          "280S",
+          "280M",
+          "315S",
+          "315M",
+          "315L",
+          "NA",
+        ],
+        name: "motorFrameSize",
+
+        title: "MOTOR  FRAME SIZE",
+        width: "150",
+      },
+      {
+        type: "text",
+        name: "motorGD2",
+        title: "MOTOR GD 2",
+        width: "150",
+      },
+      {
+        type: "text",
+        name: "drivenEqGD2",
+
+        title: "DRIVEN  EQUIPMENT GD2",
+        width: "150",
+      },
+      {
+        type: "text",
+        name: "bkw",
+        title: "BkW",
+        width: "150",
+      },
+      {
+        type: "dropdown",
+        name: "typeOfCoupling",
+        source: ["V-Belt", "Direct", "NA"],
+        title: "TYPE OF  COUPLING",
+
+        width: "150",
+      }
+    );
+    columns.splice(24, 0, {
+      type: "dropdown",
+      name: "typeOfBearing",
+      source: ["Roller", "Insulated", "Roller and Insulated", "NA"],
+      title: "TYPE OF BEARING",
+      width: "150",
+    });
+    columns.splice(28, 0, {
+      type: "dropdown",
+      source: [
+        "ABB",
+        "Bharat Bijlee",
+        "Crompton Greaves",
+        "Havells",
+        "Kirloskar",
+        "LHP",
+        "Siemens",
+        "Thermax Standard",
+        "NA",
+      ],
+      name: "motorMake",
+      title: "MOTOR MAKE",
+      width: "150",
+    });
+    columns.splice(30, 0, {
+      type: "text",
+      name: "partcode",
+      title: "MOTOR PART CODE",
+      width: "200",
+    });
+  }
+
+  return columns;
 };
 export const CableSchedulecolumns = () => {
   return [
@@ -434,7 +434,7 @@ export const CableSchedulecolumns = () => {
       type: "text",
       name: "kva",
       title: "KVA",
-      width: "70",
+      width: "50",
       readOnly: true,
     },
     {
@@ -457,7 +457,7 @@ export const CableSchedulecolumns = () => {
         "SP-DOL MPCB",
       ],
       title: "STARTER TYPE",
-      width: "80",
+      width: "130",
       readOnly: true,
     },
     //value not provided
@@ -466,7 +466,7 @@ export const CableSchedulecolumns = () => {
       name: "supplyVoltage",
       // source: [],
       title: "SUPPLY VOLTAGE",
-      width: "80",
+      width: "100",
       readOnly: true,
     },
     // { type: "text", name: "panel", title: "PANEL", width: "150" },
@@ -475,87 +475,13 @@ export const CableSchedulecolumns = () => {
       name: "phase",
       // source: ["", "3 Phase", "1 Phase"],
       title: "MOTOR RATED CURRENT IN AMP",
-      width: "140",
-    },
-    {
-      type: "dropdown",
-      name: "cableMaterial",
-      source: ["Copper", "Aluminium"],
-      title: "CABLE MATERIAL",
       width: "100",
-    },
-
-    {
-      type: "text",
-      name: "cosRunning",
-      title: "COSφ (Running)",
-      width: "100",
-    },
-    {
-      type: "text",
-      name: "cosStarting",
-      title: "COSφ (starting)",
-      width: "100",
-    },
-    {
-      type: "text",
-      name: "resistanceMtr",
-      title: "RESISTANCE / Mtr",
-      width: "130",
-    },
-    {
-      type: "text",
-      name: "reactanceMtr",
-      title: "REACTANCE / Mtr",
-      width: "130",
     },
     {
       type: "text",
       name: "apxLength",
-      title: " APX. LENGTH (m)",
+      title: "CABLE LENGTH (m)",
       width: "100",
-    },
-    {
-      type: "text",
-      name: "vdRunning",
-      title: " V.D (RUNNING)",
-      width: "100",
-    },
-    {
-      type: "text",
-      name: "vdStarting",
-      title: " V.D (STARTING)",
-      width: "100",
-    },
-    {
-      type: "text",
-      name: "percentVdAtRunning",
-      title: " % VD AT RUNNING ",
-      width: "100",
-    },
-    {
-      type: "text",
-      name: "percentVdAtStart",
-      title: " % VD AT STARTING ",
-      width: "100",
-    },
-    {
-      type: "text",
-      name: "selectedCableCarryCapacity",
-      title: "SELECTED CABLE CURRENT CARRYING CAPACITY (Amp)",
-      width: "220",
-    },
-    {
-      type: "text",
-      name: "deratingFactor",
-      title: "DERATING FACTOR",
-      width: "200",
-    },
-    {
-      type: "text",
-      name: "finalCurrentCarryCapacity",
-      title: "FINAL CURRENT CARRYING CAPACITY (Amp)",
-      width: "160",
     },
     {
       type: "text",
@@ -603,16 +529,92 @@ export const CableSchedulecolumns = () => {
     },
     {
       type: "dropdown",
-      name: "cableAsPerFl",
-      source: ["Fail", "Safe"],
-      title: "CABLE SELECTED STATUS",
-      width: "140",
+      name: "cableMaterial",
+      source: ["Copper", "Aluminium"],
+      title: "CABLE MATERIAL",
+      width: "100",
     },
+
     {
       type: "text",
       name: "cableAsPerFl",
       title: "CABLE SIZE AS PER HEATING CHART ",
       width: "150",
+    },
+    {
+      type: "text",
+      name: "cosRunning",
+      title: "COSφ (Running)",
+      width: "100",
+    },
+    {
+      type: "text",
+      name: "cosStarting",
+      title: "COSφ (starting)",
+      width: "100",
+    },
+    {
+      type: "text",
+      name: "resistanceMtr",
+      title: "RESISTANCE / Mtr",
+      width: "130",
+    },
+    {
+      type: "text",
+      name: "reactanceMtr",
+      title: "REACTANCE / Mtr",
+      width: "130",
+    },
+
+    {
+      type: "text",
+      name: "vdRunning",
+      title: "VOLTAGE DROP (RUNNING)",
+      width: "100",
+    },
+    {
+      type: "text",
+      name: "vdStarting",
+      title: "VOLTAGE DROP (STARTING)",
+      width: "100",
+    },
+    {
+      type: "text",
+      name: "percentVdAtRunning",
+      title: "% VOLTAGE DROP AT RUNNING ",
+      width: "100",
+    },
+    {
+      type: "text",
+      name: "percentVdAtStart",
+      title: "% VOLTAGE DROP AT STARTING ",
+      width: "100",
+    },
+    {
+      type: "text",
+      name: "selectedCableCarryCapacity",
+      title: "SELECTED CABLE CURRENT CARRYING CAPACITY (Amp)",
+      width: "220",
+    },
+    {
+      type: "text",
+      name: "deratingFactor",
+      title: "DERATING FACTOR",
+      width: "200",
+    },
+    {
+      type: "text",
+      name: "finalCurrentCarryCapacity",
+      title: "FINAL CURRENT CARRYING CAPACITY (Amp)",
+      width: "160",
+    },
+
+    {
+      type: "dropdown",
+      name: "cableAsPerFl",
+      source: ["Fail", "Safe"],
+      title: "CABLE SELECTED STATUS",
+      width: "140",
     },
   ];
 };

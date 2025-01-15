@@ -242,7 +242,7 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
 
     apfc_relay: commonConfigData?.apfc_relay || "4",
     power_bus_main_busbar_selection:
-      commonConfigData?.power_bus_main_busbar_selection || "As per IS8623",
+      commonConfigData?.power_bus_main_busbar_selection || "IEC 61439",
     power_bus_heat_pvc_sleeve:
       commonConfigData?.power_bus_heat_pvc_sleeve || "Red, Yellow, Blue, Black",
     power_bus_material: commonConfigData?.power_bus_material || "Aluminium",
@@ -252,7 +252,7 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
       commonConfigData?.power_bus_rating_of_busbar ||
       "(Min - 1R x 65 mm X 10 mm)",
     control_bus_main_busbar_selection:
-      commonConfigData?.control_bus_main_busbar_selection || "As per IS8623",
+      commonConfigData?.control_bus_main_busbar_selection || "IEC 61439",
     control_bus_heat_pvc_sleeve:
       commonConfigData?.control_bus_heat_pvc_sleeve || "Red, Black",
     control_bus_material: commonConfigData?.control_bus_material || "Aluminium",
@@ -262,7 +262,7 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     control_bus_rating_of_busbar:
       commonConfigData?.control_bus_rating_of_busbar || "VTS",
     earth_bus_main_busbar_selection:
-      commonConfigData?.earth_bus_main_busbar_selection || "As per IS8623",
+      commonConfigData?.earth_bus_main_busbar_selection || "IEC 61439",
     earth_bus_busbar_position:
       commonConfigData?.earth_bus_busbar_position || "Top",
 

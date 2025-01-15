@@ -34,13 +34,13 @@ export const LoadListcolumns = (division: string) => {
     {
       type: "text",
       name: "working",
-      title: "WORKING  LOAD IN KW",
+      title: "WORKING LOAD (kW)",
       width: "80",
     },
     {
       type: "text",
       name: "standBy",
-      title: "STAND-BY  LOAD IN KW",
+      title: "STAND-BY LOAD (kW)",
       width: "80",
     },
 
@@ -235,25 +235,6 @@ export const LoadListcolumns = (division: string) => {
       title: "PANEL AMMETER",
       width: "150",
     },
-    {
-      type: "dropdown",
-      source: [
-        "ABB",
-        "Bharat Bijlee",
-        "Crompton Greaves",
-        "Havells",
-        "Kirloskar",
-        "LHP",
-        "Siemens",
-        "Thermax Standard",
-        "NA",
-      ],
-      name: "motorMake",
-      title: "MOTOR MAKE",
-      readOnly: division === HEATING ? true : false,
-
-      width: "150",
-    },
 
     {
       type: "dropdown",
@@ -269,14 +250,7 @@ export const LoadListcolumns = (division: string) => {
       title: "MOTOR LOCATION",
       width: "200",
     },
-    {
-      type: "text",
-      name: "partcode",
-      title: "MOTOR PART CODE",
-      readOnly: division === HEATING ? true : false,
 
-      width: "200",
-    },
     {
       type: "text",
       name: "partcode",
@@ -379,7 +353,7 @@ export const LoadListcolumns = (division: string) => {
       {
         type: "text",
         name: "bkw",
-        title: "BKW",
+        title: "BkW",
         width: "150",
       },
       {
@@ -395,8 +369,31 @@ export const LoadListcolumns = (division: string) => {
       type: "dropdown",
       name: "typeOfBearing",
       source: ["Roller", "Insulated", "Roller and Insulated", "NA"],
-      title: "TYPE OF BEARING", 
+      title: "TYPE OF BEARING",
       width: "150",
+    });
+    columns.splice(28, 0, {
+      type: "dropdown",
+      source: [
+        "ABB",
+        "Bharat Bijlee",
+        "Crompton Greaves",
+        "Havells",
+        "Kirloskar",
+        "LHP",
+        "Siemens",
+        "Thermax Standard",
+        "NA",
+      ],
+      name: "motorMake",
+      title: "MOTOR MAKE",
+      width: "150",
+    });
+    columns.splice(30, 0, {
+      type: "text",
+      name: "partcode",
+      title: "MOTOR PART CODE",
+      width: "200",
     });
   }
 

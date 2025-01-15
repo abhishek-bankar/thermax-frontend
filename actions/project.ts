@@ -30,7 +30,12 @@ import {
   MCC_PCC_PLC_PANEL_3,
   SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
-import { createData, deleteData, getData } from "./crud-actions";
+import { createData, deleteData, getData, updateData } from "./crud-actions";
+import {
+  copyCommonConfigData,
+  copyMccCumPccPLCPanelData,
+} from "./design-basis_revision";
+import { DB_REVISION_STATUS } from "@/configs/constants";
 
 export const createProject = async (projectData: any, userInfo: any) => {
   try {
@@ -100,9 +105,256 @@ export const createProject = async (projectData: any, userInfo: any) => {
       sent_by: `${userInfo?.first_name} ${userInfo?.last_name}`,
       subject: "Approver - EnIMAX",
     });
+    return project_id;
   } catch (error: any) {
     throw error;
   }
+};
+
+export const copyProject = async (
+  oldProjectId: string,
+  projectData: any,
+  userInfo: any
+) => {
+  // Create copy of project
+  const projectCreatedata = await createData(PROJECT_API, false, projectData);
+  const { name: new_project_id, approver: approver_email } = projectCreatedata;
+
+  // Create copy of project information
+  const projectInfoData = await getData(`${PROJECT_INFO_API}/${oldProjectId}`);
+  await createData(PROJECT_INFO_API, false, {
+    projectInfoData,
+    project_id: new_project_id,
+  });
+
+  const staticDocumentData = await getData(
+    `${STATIC_DOCUMENT_API}/${oldProjectId}`
+  );
+  await createData(STATIC_DOCUMENT_API, false, {
+    ...staticDocumentData,
+    project_id: new_project_id,
+  });
+
+  const oldDBRevisionHistory = await getData(
+    `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${oldProjectId}"]]&fields=["*"]&order_by=creation desc`
+  );
+  const oldDBRevisionHistoryData = oldDBRevisionHistory[0];
+  const oldDBRevisionID = oldDBRevisionHistoryData.name;
+
+  // Create Design Basis Revision History
+  const designBasisRevisionHistoryData = await createData(
+    DESIGN_BASIS_REVISION_HISTORY_API,
+    false,
+    {
+      project_id: new_project_id,
+      status: DB_REVISION_STATUS.Unsubmitted,
+      approver_email,
+    }
+  );
+  const newDBRevisionID = designBasisRevisionHistoryData.name;
+
+  const generalInfo = await getData(
+    `${DESIGN_BASIS_GENERAL_INFO_API}/?filters=[["revision_id", "=", "${oldDBRevisionID}"]]&fields=["*"]`
+  );
+  const generalInfoData = generalInfo[0];
+  await createData(DESIGN_BASIS_GENERAL_INFO_API, false, {
+    ...generalInfoData,
+    revision_id: newDBRevisionID,
+  });
+
+  const projectMainPkgData = await getData(
+    `${PROJECT_MAIN_PKG_API}?filters=[["revision_id", "=", "${oldDBRevisionID}"]]&fields=["*"]`
+  );
+
+  for (const projectMainPkg of projectMainPkgData || []) {
+    const mainPkgId = projectMainPkg.name;
+    const mainPkgData = await getData(`${PROJECT_MAIN_PKG_API}/${mainPkgId}`);
+    await createData(`${PROJECT_MAIN_PKG_API}`, false, {
+      ...mainPkgData,
+      revision_id: newDBRevisionID,
+    });
+  }
+
+  const motorParameter = await getData(
+    `${MOTOR_PARAMETER_API}?fields=["*"]&filters=[["revision_id", "=", "${oldDBRevisionID}"]]`
+  );
+  const motorParameterData = motorParameter[0];
+  await createData(MOTOR_PARAMETER_API, false, {
+    ...motorParameterData,
+    revision_id: newDBRevisionID,
+  });
+
+  const makeOfComponent = await getData(
+    `${MAKE_OF_COMPONENT_API}?fields=["*"]&filters=[["revision_id", "=", "${oldDBRevisionID}"]]`
+  );
+  const makeOfComponentData = makeOfComponent[0];
+  await createData(MAKE_OF_COMPONENT_API, false, {
+    ...makeOfComponentData,
+    revision_id: newDBRevisionID,
+  });
+
+  await copyCommonConfigData(oldDBRevisionID, newDBRevisionID);
+
+  const projectPanelData = await getData(
+    `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${oldDBRevisionID}"]]&fields=["*"]`
+  );
+
+  for (const projectPanel of projectPanelData || []) {
+    const old_panel_id = projectPanel.name;
+    const createPanelData = await createData(PROJECT_PANEL_API, false, {
+      ...projectPanel,
+      revision_id: newDBRevisionID,
+    });
+    const new_panel_id = createPanelData.name;
+    await createData(DYNAMIC_DOCUMENT_API, false, {
+      panel_id: new_panel_id,
+    });
+
+    const mccPanelData = await getData(
+      `${MCC_PANEL}?filters=[["revision_id", "=", "${oldDBRevisionID}"], ["panel_id", "=", "${old_panel_id}"]]&fields=["*"]`
+    );
+
+    for (const mccPanel of mccPanelData || []) {
+      await createData(MCC_PANEL, false, {
+        ...mccPanel,
+        revision_id: newDBRevisionID,
+        panel_id: new_panel_id,
+      });
+    }
+
+    const pccPanelData = await getData(
+      `${PCC_PANEL}?filters=[["revision_id", "=", "${oldDBRevisionID}"], ["panel_id", "=", "${old_panel_id}"]]&fields=["*"]`
+    );
+
+    for (const pccPanel of pccPanelData || []) {
+      await createData(PCC_PANEL, false, {
+        ...pccPanel,
+        revision_id: newDBRevisionID,
+        panel_id: new_panel_id,
+      });
+    }
+
+    const mccCumPccMccPanelData = await getData(
+      `${MCC_PANEL}?filters=[["revision_id", "=", "${oldDBRevisionID}"], ["panel_id", "=", "${old_panel_id}"]]&fields=["*"]`
+    );
+
+    for (const mccCumPccMccPanel of mccCumPccMccPanelData || []) {
+      await createData(MCC_PANEL, false, {
+        ...mccCumPccMccPanel,
+        revision_id: newDBRevisionID,
+        panel_id: new_panel_id,
+      });
+    }
+
+    await copyMccCumPccPLCPanelData(oldDBRevisionID, newDBRevisionID);
+  }
+
+  const cableTrayLayout = await getData(
+    `${CABLE_TRAY_LAYOUT}?filters=[["revision_id", "=", "${oldDBRevisionID}"]]&fields=["*"]`
+  );
+  const cableTrayLayoutData = cableTrayLayout[0];
+
+  await createData(CABLE_TRAY_LAYOUT, false, {
+    ...cableTrayLayoutData,
+    revision_id: newDBRevisionID,
+  });
+
+  const earthingLayout = await getData(
+    `${LAYOUT_EARTHING}?filters=[["revision_id", "=", "${oldDBRevisionID}"]]&fields=["*"]`
+  );
+  const earthingLayoutData = earthingLayout[0];
+
+  await createData(LAYOUT_EARTHING, false, {
+    ...earthingLayoutData,
+    revision_id: newDBRevisionID,
+  });
+
+  const loadListRevision = await getData(
+    `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}?filters=[["project_id", "=", "${oldProjectId}"]]&fields=["name"]&order_by=creation desc`
+  );
+  const loadListRevisionData = loadListRevision[0];
+  const loadListRevisionID = loadListRevisionData.name;
+  const newLoadListRevisionData = await getData(
+    `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${loadListRevisionID}`
+  );
+  await createData(ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API, false, {
+    ...newLoadListRevisionData,
+    project_id: new_project_id,
+  });
+
+  const cableScheduleRevision = await getData(
+    `${CABLE_SCHEDULE_REVISION_HISTORY_API}?filters=[["project_id", "=", "${oldProjectId}"]]&fields=["name"]&order_by=creation desc`
+  );
+  const cableScheduleRevisionData = cableScheduleRevision[0];
+  const cableScheduleRevisionID = cableScheduleRevisionData.name;
+  const newCableScheduleRevisionData = await getData(
+    `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${cableScheduleRevisionID}`
+  );
+  await createData(CABLE_SCHEDULE_REVISION_HISTORY_API, false, {
+    ...newCableScheduleRevisionData,
+    project_id: new_project_id,
+  });
+
+  const motorCanopyRevision = await getData(
+    `${MOTOR_CANOPY_REVISION_HISTORY_API}?filters=[["project_id", "=", "${oldProjectId}"]]&fields=["name"]&order_by=creation desc`
+  );
+  const motorCanopyRevisionData = motorCanopyRevision[0];
+  const motorCanopyRevisionID = motorCanopyRevisionData.name;
+  const newMotorCanopyRevisionData = await getData(
+    `${MOTOR_CANOPY_REVISION_HISTORY_API}/${motorCanopyRevisionID}`
+  );
+  await createData(MOTOR_CANOPY_REVISION_HISTORY_API, false, {
+    ...newMotorCanopyRevisionData,
+    project_id: new_project_id,
+  });
+
+  const motorSpecificationsRevision = await getData(
+    `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${oldProjectId}"]]&fields=["name"]&order_by=creation desc`
+  );
+  const motorSpecificationsRevisionData = motorSpecificationsRevision[0];
+  const motorSpecificationsRevisionID = motorSpecificationsRevisionData.name;
+  const newMotorSpecificationsRevisionData = await getData(
+    `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}/${motorSpecificationsRevisionID}`
+  );
+  await createData(MOTOR_SPECIFICATIONS_REVISION_HISTORY_API, false, {
+    ...newMotorSpecificationsRevisionData,
+    project_id: new_project_id,
+  });
+
+  const lbpsSpecificationsRevision = await getData(
+    `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${oldProjectId}"]]&fields=["name"]&order_by=creation desc`
+  );
+  const lbpsSpecificationsRevisionData = lbpsSpecificationsRevision[0];
+  const lbpsSpecificationsRevisionID = lbpsSpecificationsRevisionData.name;
+  const newLbpsSpecificationsRevisionData = await getData(
+    `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}/${lbpsSpecificationsRevisionID}`
+  );
+  await createData(LBPS_SPECIFICATIONS_REVISION_HISTORY_API, false, {
+    ...newLbpsSpecificationsRevisionData,
+    project_id: new_project_id,
+  });
+
+  const localIsolatorRevision = await getData(
+    `${LOCAL_ISOLATOR_REVISION_HISTORY_API}?filters=[["project_id", "=", "${oldProjectId}"]]&fields=["name"]&order_by=creation desc`
+  );
+  const localIsolatorRevisionData = localIsolatorRevision[0];
+  const localIsolatorRevisionID = localIsolatorRevisionData.name;
+  const newLocalIsolatorRevisionData = await getData(
+    `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${localIsolatorRevisionID}`
+  );
+  await createData(LOCAL_ISOLATOR_REVISION_HISTORY_API, false, {
+    ...newLocalIsolatorRevisionData,
+    project_id: new_project_id,
+  });
+
+  await createData(APPROVER_EMAIL_NOTIFICATION_API, false, {
+    approvar_email: projectData?.approver,
+    creator_email: userInfo?.email,
+    project_oc_number: projectData.project_oc_number,
+    project_name: projectData.project_name,
+    sent_by: `${userInfo?.first_name} ${userInfo?.last_name}`,
+    subject: "Approver - EnIMAX",
+  });
 };
 
 export const deleteProject = async (project_id: string) => {

@@ -2715,13 +2715,13 @@ export const columnsForWwsSPG = [
     type: "dropdown",
     source: ["DOL", "Star/Delta", "VFD", "SOFT STARTER"],
     name: "type",
-    title: "Type",
+    title: "Starter Type",
     width: "90",
   },
   {
     type: "text",
     name: "starter",
-    title: "Sub Type Filter",
+    title: "Scheme Title",
     width: "250",
   },
   {
@@ -4461,13 +4461,13 @@ export const columnsForEnviroVFD: any[] = [
   {
     type: "text",
     name: "type",
-    title: "Type",
+    title: "Starter Type",
     width: "90",
   },
   {
     type: "text",
     name: "starter",
-    title: "Starter",
+    title: "Scheme Title",
     width: "150",
   },
   {
@@ -4608,13 +4608,13 @@ export const columnsForEnviroDOL: any[] = [
     type: "dropdown",
     source: ["DOL", "CONTROL TRANSFORMER"],
     name: "type",
-    title: "Type",
+    title: "Starter Type",
     width: "90",
   },
   {
     type: "text",
     name: "starter",
-    title: "Starter",
+    title: "Scheme Title",
     width: "200",
   },
   {
@@ -4755,13 +4755,13 @@ export const columnsForEnviroSD: any[] = [
     type: "dropdown",
     source: ["S/D"],
     name: "type",
-    title: "Type",
+    title: "Starter Type",
     width: "90",
   },
   {
     type: "text",
-    name: "starter",
-    title: "Starter",
+    name: "schemetitle",
+    title: "Scheme Title",
     width: "150",
   },
   {
@@ -11242,16 +11242,16 @@ export const columnsForWwsIpgSDAndDol = [
     width: "100",
   },
   {
-    type: "dropdown",
-    source: ["DOL", "S/D", "VFD"],
+    type: "text",
+    // source: ["DOL", "S/D", "VFD"],
     name: "type",
-    title: "Type",
+    title: "Starter Type",
     width: "90",
   },
   {
     type: "text",
     name: "starter",
-    title: "Starter",
+    title: "Scheme Title",
     width: "150",
   },
   {
@@ -11372,16 +11372,16 @@ export const columnsForWwsIpgVFD = [
     width: "100",
   },
   {
-    type: "dropdown",
-    source: ["DOL", "S/D", "VFD"],
+    type: "text",
+    // source: ["DOL", "S/D", "VFD"],
     name: "type",
-    title: "Type",
+    title: "Starter Type",
     width: "90",
   },
   {
     type: "text",
     name: "starter",
-    title: "Starter",
+    title: "Scheme Title",
     width: "150",
   },
   {

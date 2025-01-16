@@ -1350,7 +1350,6 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     return () => {
       spreadsheetInstance?.destroy();
       localStorage.clear();
-
     };
   }, [isLoading, cableScheduleOptions]);
   const getCableType = (tag_number: any) => {
@@ -1360,11 +1359,15 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     return feeder ? feeder.type : "";
   };
   const getCableOd = (tag_number: any) => {
-    const feeder = cableSizeCalcData?.find((item) => item.tagNo == tag_number);
+    const feeder = cableSizeCalcData?.find(
+      (item) => item.tag_number == tag_number
+    );
     return feeder ? feeder.cableOd : "";
   };
   const getCableGlandSize = (tag_number: any) => {
-    const feeder = cableSizeCalcData?.find((item) => item.tagNo == tag_number);
+    const feeder = cableSizeCalcData?.find(
+      (item) => item.tag_number == tag_number
+    );
     return feeder ? feeder.gladSize : "";
   };
   const getOdLcs = (core: any, size: any) => {
@@ -1401,6 +1404,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       const isPresentInGrouping = false;
       const isSpaceHeater = loadListItem.space_heater === "Yes";
       const isThermister = loadListItem.thermistor === "Yes";
+      console.log(cableSizeCalcData);
 
       const cables = [];
       const motorCable = {
@@ -1539,7 +1543,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           type_of_cable: "Control - 2XWY",
           scope: "",
           number_of_runs: "1",
-          pair_core: controlScheme.di * 2,
+          pair_core: controlScheme.di * 2 + "C",
           sizemm2: "0.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
@@ -1564,7 +1568,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           type_of_cable: "Control - 2XWY",
           scope: "",
           number_of_runs: "1",
-          pair_core: controlScheme.do * 2,
+          pair_core: controlScheme.do * 2 + "C",
           sizemm2: "1.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
@@ -1589,7 +1593,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           type_of_cable: "Signal - 2XWY",
           scope: "",
           number_of_runs: "1",
-          pair_core: controlScheme.ai,
+          pair_core: controlScheme.ai + "P",
           sizemm2: "0.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
@@ -1614,7 +1618,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           type_of_cable: "Signal - 2XWY",
           scope: "",
           number_of_runs: "1",
-          pair_core: controlScheme.ao,
+          pair_core: controlScheme.ao + "P",
           sizemm2: "0.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
@@ -1666,7 +1670,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     const groupPayload = [];
     if (grouping) {
       console.log(grouping);
-      
+
       for (let i = 0; i < grouping.length; i++) {
         console.log(grouping[i]);
         const cableSchedule: any = data?.filter(
@@ -1676,7 +1680,6 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         const Do = grouping[i++][4];
         const Ai = grouping[i++][4];
         const Ao = grouping[i++][4];
-        
 
         const cables: any[] = [];
         console.log(Di, Do, Ai, Ao, "DIDOAIAO");
@@ -1905,13 +1908,16 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         updatedRow[22] = calculationResult.current_air;
         updatedRow[24] = calculationResult.final_current_carrying_capacity;
         updatedRow[25] = calculationResult.final_current_carrying_capacity;
-
-        sizingCalcData.push({
-          tag_number: calculationResult.tagNo,
-          cableOd: calculationResult.od,
-          gladSize: "ET″",
-          type: calculationResult.cable_type,
-        });
+        console.log(calculationResult);
+        // heating_chart_cable_od,
+          // heating_chart_cable_gland_size,
+          sizingCalcData.push({
+            tag_number: calculationResult.tagNo,
+            cableOd:
+              calculationResult.od ?? calculationResult?.heating_chart_cable_od,
+            gladSize:  calculationResult?.heating_chart_cable_gland_size,
+            type: calculationResult.cable_type,
+          });
 
         return updatedRow;
       }

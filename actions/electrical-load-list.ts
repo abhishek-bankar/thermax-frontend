@@ -265,11 +265,15 @@ const findCableHeatingUpto100M = (
 
   const cable = sortedByKW.find((item: any) => item.kw >= kw);
   let cabel_size = "";
+  let cabel_od = "";
+  let cabel_gland_size = "";
   if (cable) {
     if (Object.keys(cable).length > 0) {
       let size = cable.size;
       if (size && size.includes("/")) {
         size = size.split("/")[0];
+        cabel_od = size.approx_cable_od;
+        cabel_gland_size = size.et;
       }
 
       const sizeNumber = +parseFloat(size).toFixed(2);
@@ -288,13 +292,15 @@ const findCableHeatingUpto100M = (
         const cable = sortedByKW.find((item: any) => item.kw >= kw);
         if (cable) {
           cabel_size = cable.size;
+          cabel_od = size.approx_cable_od;
+          cabel_gland_size = size.et;
         }
       }
     }
   }
 
   // return cable ? cable.size : "";
-  return cabel_size;
+  return { cabel_size, cabel_od, cabel_gland_size };
 };
 
 const findCable = (
@@ -394,8 +400,10 @@ const findCable = (
     }
   }
   let heating_chart_cable_size = "";
+  let heating_chart_cable_od = "";
+  let heating_chart_cable_gland_size = "";
   if (division === HEATING && appxLength <= 100 && supplyVoltage === 415) {
-    heating_chart_cable_size = findCableHeatingUpto100M(
+    const result = findCableHeatingUpto100M(
       cableAsPerHeatingChart,
       kw,
       supplyVoltage,
@@ -405,8 +413,16 @@ const findCable = (
       numberOfCores,
       layoutCableTray?.copper_conductor
     );
+    heating_chart_cable_size = result.cabel_size;
+    heating_chart_cable_od = result.cabel_od;
+    heating_chart_cable_gland_size = result.cabel_gland_size;
   }
-  return { ...finalCable, heating_chart_cable_size };
+  return {
+    ...finalCable,
+    heating_chart_cable_size,
+    heating_chart_cable_od,
+    heating_chart_cable_gland_size,
+  };
 };
 
 export const getCableSizingCalculation = async (cableScheduleData: any) => {

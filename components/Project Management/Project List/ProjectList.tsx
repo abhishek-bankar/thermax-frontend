@@ -201,7 +201,6 @@ export default function ProjectList({ userInfo, isComplete }: any) {
       dataIndex: "action",
       align: "center",
       ellipsis: true,
-      hidden: isComplete === 1,
       render: (text, record: any) => {
         return (
           <div className="flex justify-center gap-1">
@@ -212,6 +211,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
                 icon={<EditOutlined />}
                 onClick={() => handleEditProject(record)}
                 disabled={record?.division !== userDivision}
+                style={{ display: isComplete === 1 ? "none" : "" }}
               />
             </Tooltip>
             <Tooltip placement="top" title="Upload Files">
@@ -221,6 +221,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
                 icon={<UploadOutlined />}
                 onClick={() => handleUploadFiles(record)}
                 disabled={record?.division !== userDivision}
+                style={{ display: isComplete === 1 ? "none" : "" }}
               />
             </Tooltip>
             <Tooltip placement="top" title="Copy Project">
@@ -248,6 +249,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
                       shape="circle"
                       icon={<FileDoneOutlined />}
                       disabled={record?.division !== userDivision}
+                      style={{ display: isComplete === 1 ? "none" : "" }}
                     />
                   </Popconfirm>
                 </Tooltip>
@@ -268,6 +270,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
                       icon={<DeleteOutlined />}
                       danger
                       disabled={record?.division !== userDivision}
+                      style={{ display: isComplete === 1 ? "none" : "" }}
                     />
                   </Popconfirm>
                 </Tooltip>

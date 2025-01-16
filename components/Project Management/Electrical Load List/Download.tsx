@@ -5,7 +5,7 @@ import {
   SaveTwoTone,
   SyncOutlined,
 } from "@ant-design/icons";
-import { downloadFile, getData } from "@/actions/crud-actions";
+import { downloadFile, getData, updateData } from "@/actions/crud-actions";
 import {
   Button,
   message,
@@ -39,6 +39,7 @@ import { useEffect, useState } from "react";
 import { mutate } from "swr";
 import { getThermaxDateFormat } from "@/utils/helpers";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getStandByKw } from "./Electrical Load List/LoadListComponent";
 
 interface Props {
   designBasisRevisionId: string;
@@ -71,8 +72,8 @@ const Download: React.FC<Props> = ({
   const { data: revisionHistory } = useGetData(dbLoadlistHistoryUrl);
 
   const [dataSource, setDataSource] = useState<any[]>([]);
-  const [commonConfigData, setCommonConfigData] = useState<any[]>([]);
-  const [loadListData, setLoadListData] = useState<any[]>([]);
+  const [commonConfigData, setCommonConfigData] = useState<any>([]);
+  const [loadListData, setLoadListData] = useState<any>([]);
   const [tabKey, setTabKey] = useState("1");
   // const userInfo: {
   //   division: string;
@@ -92,11 +93,15 @@ const Download: React.FC<Props> = ({
   }, [documentList, revisionHistory]);
 
   const getDownLoadEndpoint = () => {
+    console.log(tabKey);
+
     switch (tabKey) {
       case "1":
         return GET_LOAD_LIST_EXCEL_API;
 
       case "2":
+        return GET_CABLE_SCHEDULE_EXCEL_API;
+      case "6":
         return GET_CABLE_SCHEDULE_EXCEL_API;
       default:
         return "";
@@ -309,71 +314,161 @@ const Download: React.FC<Props> = ({
     return columns;
   };
 
-  // const getSaveEndPoint = (id: any, tab: any) => {
-  //   switch (tab) {
-  //     case "local-isolator":
-  //       return `${LOCAL_ISOLATOR_REVISION_HISTORY_API}${id}`;
+  const getSaveEndPoint = (id: any, tab: any) => {
+    switch (tab) {
+      case "local-isolator":
+        return `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${id}`;
+      case "lpbs-specs":
+        return `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}/${id}`;
 
-  //     default:
-  //       return "";
-  //   }
-  // };
+      default:
+        return "";
+    }
+  };
 
   const handleSave = async (key: any, tab: any) => {
     if (tab === "local-isolator") {
+      // console.log(commonConfigData);
+      // console.log(loadListData);
+      const payload = {
+        local_isolator_data: [
+          {
+            fmi_type: commonConfigData?.safe_field_motor_type,
+            fmi_ip_protection: commonConfigData?.safe_field_motor_enclosure,
+            fmi_enclouser_moc: commonConfigData?.safe_field_motor_material,
+            fmi_enclouser_thickness:
+              commonConfigData?.safe_field_motor_thickness,
+            fmi_qty: commonConfigData?.safe_field_motor_qty,
+            ifm_isolator_color_shade:
+              commonConfigData?.safe_field_motor_isolator_color_shade,
+            ifm_cable_entry: commonConfigData?.safe_field_motor_cable_entry,
+            canopy: commonConfigData?.safe_field_motor_canopy,
+            canopy_type: commonConfigData?.safe_field_motor_canopy_type,
+            area: "Safe",
+          },
+          {
+            fmi_type: commonConfigData?.hazardous_field_motor_type,
+            fmi_ip_protection:
+              commonConfigData?.hazardous_field_motor_enclosure,
+            fmi_enclouser_moc: commonConfigData?.hazardous_field_motor_material,
+            fmi_enclouser_thickness:
+              commonConfigData?.hazardous_field_motor_thickness,
+            fmi_qty: commonConfigData?.hazardous_field_motor_qty,
+            ifm_isolator_color_shade:
+              commonConfigData?.hazardous_field_motor_isolator_color_shade,
+            ifm_cable_entry:
+              commonConfigData?.hazardous_field_motor_cable_entry,
+            canopy: commonConfigData?.hazardous_field_motor_canopy,
+            canopy_type: commonConfigData?.hazardous_field_motor_canopy_type,
+            area: "Hazardous",
+          },
+        ],
+        local_isolator_motor_details_data:
+          loadListData?.electrical_load_list_data?.map(
+            (item: any, index: number) => ({
+              serial_number: index + 1,
+              tag_number: item.tag_number,
+              service_description: item.service_description,
+              working_kw: getStandByKw(item.working_kw, item.standby_kw),
+              motor_rated_current: item.motor_rated_current,
+              local_isolator: item.local_isolator,
+              motor_location: item.motor_location,
+              isolator_rating: "to be added",
+              gland_size: `2 No X 1 "ET 1No X 3/4 "ET`,
+              package: item.package,
+              area: item.area,
+              standard: item.standard,
+              zone: item.zone,
+              temprature_class: item.temperature_class,
+              gas_group: item.gas_group,
+            })
+          ),
+      };
+      try {
+        const respose = await updateData(
+          getSaveEndPoint(key, tab),
+          false,
+          payload
+        );
+        message.success("Local Isolator Specifications Saved");
+      } catch (error) {
+        message.error("Unable to Save Local Isolator Specifications");
+      }
+    }
+    if (tab === "lpbs-specs") {
       console.log(commonConfigData);
       console.log(loadListData);
-      // const payload = {
-      //   project_id: project_id,
-      //   status: "Not Released",
-      //   description: "test",
-      //   local_isolator_data: [
-          // {
-          //   fmi_type: "",
-          //   fmi_ip_protection: "",
-          //   fmi_enclouser_moc: "",
-          //   fmi_enclouser_thickness: "",
-          //   fmi_qty: "",
-          //   ifm_isolator_color_shade: "",
-          //   ifm_cable_entry: "",
-          //   canopy: "",
-          //   canopy_type: "",
-          //   area: "Safe"
-          // }
-          // ,
-      //     {
-      //       fmi_type: "",
-      //       fmi_ip_protection: "",
-      //       fmi_material: "",
-      //       fmi_qty: "",
-      //       fmi_isolator_color_shade: "",
-      //       fmi_cable_entry: "",
-      //       canopy: "",
-      //       canopy_type: "",
-      //       area: "Hazardous"
-      //     },
-      //   ],
-      //   local_isolator_motor_details_data: [
-          // {
-          //   serial_number: "",
-          //   tag_number: "",
-          //   service_description: "",
-          //   working_kw: "",
-          //   motor_rated_current: "",
-          //   local_isolator: "",
-          //   motor_location: "",
-          //   isolator_rating: "to be added"
-          //   gland_size: "2 No X 1 "ET 1No X 3/4 "ET"
-          //   package: "", 
-          //   area: "", 
-          //   standard: "", 
-          //   zone: "", 
-          //   temprature_class: "", 
-          //   gas_group: "", 
-          // },
-      //   ],
-      // };
-      // const respose = await updateData(getSaveEndPoint(key, tab), false, payload)
+      const payload = {
+        lpbs_specification_data: [
+          {
+            safe_lpbs_type: commonConfigData?.safe_lpbs_type,
+            safe_lpbs_ip_protection: commonConfigData?.safe_lpbs_enclosure,
+            safe_lpbs_moc: commonConfigData?.safe_lpbs_material,
+            safe_lpbs_quantity: commonConfigData?.safe_lpbs_qty,
+            safe_lpbs_thickness: commonConfigData?.safe_lpbs_thickness,
+            safe_lpbs_color_shade: commonConfigData?.safe_lpbs_color_shade,
+            safe_lpbs_canopy: commonConfigData?.safe_lpbs_canopy,
+            safe_lpbs_canopy_type: commonConfigData?.safe_lpbs_canopy_type,
+            hazardous_lpbs_type: commonConfigData?.hazardous_lpbs_type,
+            hazardous_ip_protection: commonConfigData?.hazardous_lpbs_enclosure,
+            hazardous_lpbs_moc: commonConfigData?.hazardous_lpbs_material,
+            hazardous_lpbs_qty: commonConfigData?.hazardous_lpbs_qty,
+            hazardous_lpbs_thickness:
+              commonConfigData?.hazardous_lpbs_thickness,
+            hazardous_lpbs_color_shade:
+              commonConfigData?.hazardous_lpbs_color_shade,
+            hazardous_lpbs_canopy: commonConfigData?.hazardous_lpbs_canopy,
+            hazardous_lpbs_canopy_type:
+              commonConfigData?.hazardous_lpbs_canopy_type,
+            lpbs_push_button_start_color:
+              commonConfigData?.lpbs_push_button_start_color,
+            lpbs_forward_push_button_start:
+              commonConfigData?.lpbs_forward_push_button_start,
+            lpbs_reverse_push_button_start:
+              commonConfigData?.lpbs_reverse_push_button_start,
+            lpbs_push_button_ess: commonConfigData?.lpbs_push_button_ess,
+            lpbs_speed_increase: commonConfigData?.lpbs_speed_increase,
+            lpbs_speed_decrease: commonConfigData?.lpbs_speed_decrease,
+            lpbs_indication_lamp_start_color:
+              commonConfigData?.lpbs_indication_lamp_start_color,
+            lpbs_indication_lamp_stop_color:
+              commonConfigData?.lpbs_indication_lamp_stop_color,
+          },
+        ],
+        lpbs_specs_motor_details_data:
+          loadListData?.electrical_load_list_data?.map(
+            (item: any, index: number) => ({
+              serial_number: index + 1,
+              tag_number: item.tag_number,
+              service_description: item.service_description,
+              working_kw: getStandByKw(item.working_kw, item.standby_kw),
+              lpbs_type: "",
+              canopy_required:"",
+              motor_location: item.motor_location,
+
+              motor_rated_current: item.motor_rated_current,
+              local_isolator: item.local_isolator,
+              isolator_rating: "to be added",
+              gland_size: `2 No X 1 "ET 1No X 3/4 "ET`,
+              package: item.package,
+              area: item.area,
+              standard: item.standard,
+              zone: item.zone,
+              temprature_class: item.temperature_class,
+              gas_group: item.gas_group,
+            })
+          ),
+      };
+      // try {
+      //   const respose = await updateData(
+      //     getSaveEndPoint(key, tab),
+      //     false,
+      //     payload
+      //   );
+      //   message.success("LPBS Specifications & List Saved");
+      // } catch (error) {
+      //   message.error("Unable to Save LPBS Specifications & List");
+      // }
       // console.log(respose)
     }
     if (tab === "motor-specs") {
@@ -655,7 +750,7 @@ const Download: React.FC<Props> = ({
         documentRevision: `R${index}`,
         createdDate: item.creation,
       }));
-      if (key === "6") {
+      if (key === "6" || key === "5") {
         await getIsolatorData();
       }
       // console.log(dataSource);

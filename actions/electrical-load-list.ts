@@ -332,7 +332,7 @@ const findCable = (
 
   let motorStartingCurrent = 0;
 
-  if (starterType === "DOL") {
+  if (starterType === "DOL STARTER") {
     motorStartingCurrent = +(motorRatedCurrent * 7.5).toFixed(2);
   } else if (starterType === "Supply Feeder") {
     motorStartingCurrent = motorRatedCurrent;

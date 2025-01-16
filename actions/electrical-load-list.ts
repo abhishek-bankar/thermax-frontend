@@ -251,18 +251,50 @@ const findCableHeatingUpto100M = (
   phase: string,
   starterType: string,
   cableMaterial: string,
-  numberOfCores: number
+  numberOfCores: number,
+  copper_conductor: number
 ) => {
-  const cable = cableAsPerHeatingChart.find(
+  const cables = cableAsPerHeatingChart.filter(
     (data: any) =>
-      data.kw === kw &&
       data.voltage === supplyVoltage &&
-      // data.phase === phase &&
       data.starter === starterType &&
       data.material === cableMaterial &&
       data.no_of_runs_core === `${numberOfCores}C`
   );
-  return cable ? cable.size : "";
+  const sortedByKW = cables?.sort((a: any, b: any) => a.kw - b.kw);
+
+  const cable = sortedByKW.find((item: any) => item.kw >= kw);
+  let cabel_size = "";
+  if (cable) {
+    if (Object.keys(cable).length > 0) {
+      let size = cable.size;
+      if (size && size.includes("/")) {
+        size = size.split("/")[0];
+      }
+
+      const sizeNumber = +parseFloat(size).toFixed(2);
+      if (sizeNumber <= copper_conductor) {
+        cabel_size = cable.size;
+      } else {
+        const cables = cableAsPerHeatingChart.filter(
+          (data: any) =>
+            data.voltage === supplyVoltage &&
+            data.starter === starterType &&
+            data.material === "Aluminium" &&
+            data.no_of_runs_core === `${numberOfCores}C`
+        );
+        const sortedByKW = cables?.sort((a: any, b: any) => a.kw - b.kw);
+
+        const cable = sortedByKW.find((item: any) => item.kw >= kw);
+        if (cable) {
+          cabel_size = cable.size;
+        }
+      }
+    }
+  }
+
+  // return cable ? cable.size : "";
+  return cabel_size;
 };
 
 const findCable = (
@@ -362,7 +394,7 @@ const findCable = (
     }
   }
   let heating_chart_cable_size = "";
-  if (division === HEATING && appxLength < 100) {
+  if (division === HEATING && appxLength <= 100 && supplyVoltage === 415) {
     heating_chart_cable_size = findCableHeatingUpto100M(
       cableAsPerHeatingChart,
       kw,
@@ -370,7 +402,8 @@ const findCable = (
       phase,
       starterType,
       cableMaterial,
-      numberOfCores
+      numberOfCores,
+      layoutCableTray?.copper_conductor
     );
   }
   return { ...finalCable, heating_chart_cable_size };
@@ -381,10 +414,10 @@ export const getCableSizingCalculation = async (cableScheduleData: any) => {
   const cableScheduleRows = cableScheduleData.data;
   const layoutCableTray = cableScheduleData.layoutCableTray;
   const cableAsPerHeatingChart = await getData(
-    `${CABLE_SIZE_HEATING_API}?fields=["*"]&limit=1000`
+    `${CABLE_SIZE_HEATING_API}?fields=["*"]&limit=3000`
   );
   const cableSizingData = await getData(
-    `${CABLE_SIZING_DATA_API}?fields=["*"]&limit=1000`
+    `${CABLE_SIZING_DATA_API}?fields=["*"]&limit=3000`
   );
 
   const copperCableSize = cableSizingData

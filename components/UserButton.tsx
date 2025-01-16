@@ -35,6 +35,7 @@ export const UserButton = () => {
   };
 
   const handleSignOut = async () => {
+    localStorage.clear();
     await updateData(`${THERMAX_USER_API}/${userInfo?.email}`, true, {
       hashed_token: "",
     });

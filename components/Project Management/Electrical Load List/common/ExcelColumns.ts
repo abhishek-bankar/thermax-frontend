@@ -254,7 +254,7 @@ export const LoadListcolumns = (division: string) => {
     {
       type: "text",
       name: "partcode",
-      title: "Motor Rated Current (AMP) ",
+      title: "MOTOR RATED CURRENT (Amp) ",
       width: "200",
     },
   ];

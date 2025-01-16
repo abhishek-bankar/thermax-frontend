@@ -321,42 +321,65 @@ const Download: React.FC<Props> = ({
 
   const handleSave = async (key: any, tab: any) => {
     if (tab === "local-isolator") {
-      // console.log(commonConfigData);
-      // console.log(loadListData);
+      console.log(commonConfigData);
+      console.log(loadListData);
       // const payload = {
       //   project_id: project_id,
       //   status: "Not Released",
       //   description: "test",
       //   local_isolator_data: [
+          // {
+          //   fmi_type: "",
+          //   fmi_ip_protection: "",
+          //   fmi_enclouser_moc: "",
+          //   fmi_enclouser_thickness: "",
+          //   fmi_qty: "",
+          //   ifm_isolator_color_shade: "",
+          //   ifm_cable_entry: "",
+          //   canopy: "",
+          //   canopy_type: "",
+          //   area: "Safe"
+          // }
+          // ,
       //     {
       //       fmi_type: "",
-      //       fmi_inclosure: "",
+      //       fmi_ip_protection: "",
       //       fmi_material: "",
       //       fmi_qty: "",
-      //       ifm_isolator_color_shade: "",
-      //       ifm_cable_entry: "",
-      //       canopy_on_top: "",
+      //       fmi_isolator_color_shade: "",
+      //       fmi_cable_entry: "",
+      //       canopy: "",
+      //       canopy_type: "",
+      //       area: "Hazardous"
       //     },
       //   ],
       //   local_isolator_motor_details_data: [
-      //     {
-      //       serial_number: "",
-      //       tag_number: "",
-      //       service_description: "",
-      //       working_kw: "",
-      //       motor_rated_current: "",
-      //       local_isolator: "",
-      //       motor_location: "",
-      //     },
+          // {
+          //   serial_number: "",
+          //   tag_number: "",
+          //   service_description: "",
+          //   working_kw: "",
+          //   motor_rated_current: "",
+          //   local_isolator: "",
+          //   motor_location: "",
+          //   isolator_rating: "to be added"
+          //   gland_size: "2 No X 1 "ET 1No X 3/4 "ET"
+          //   package: "", 
+          //   area: "", 
+          //   standard: "", 
+          //   zone: "", 
+          //   temprature_class: "", 
+          //   gas_group: "", 
+          // },
       //   ],
       // };
       // const respose = await updateData(getSaveEndPoint(key, tab), false, payload)
       // console.log(respose)
-    } 
+    }
     if (tab === "motor-specs") {
       // console.log(commonConfigData);
       // console.log(loadListData);
-      // const payload = { 
+      // const payload = {
       //   motor_specification_data: [
       //     {
       //       fmi_type: "",
@@ -374,6 +397,8 @@ const Download: React.FC<Props> = ({
       //       tag_number: "",
       //       service_description: "",
       //       working_kw: "",
+      //       isolator_rating: "to be added"
+      //       gland_size: "to be added"
       //       motor_rated_current: "",
       //       local_isolator: "",
       //       motor_location: "",
@@ -382,7 +407,7 @@ const Download: React.FC<Props> = ({
       // };
       // const respose = await updateData(getSaveEndPoint(key, tab), false, payload)
       // console.log(respose)
-    } 
+    }
   };
   const DownloadTabs = [
     {

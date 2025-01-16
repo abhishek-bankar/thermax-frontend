@@ -7,7 +7,7 @@ table {
   font-size: 13px;
 }
  
-.jexcel > thead > tr > td:nth-child(2) {
+/* .jexcel > thead > tr > td:nth-child(2) {
   background-color: #d9ff66;  
 }
 .jexcel > thead > tr > td:nth-child(3) {
@@ -21,4 +21,4 @@ table {
 }
 .jexcel > thead > tr > td:nth-child(6) {
   background-color: #d9ff66;  
-}
+} */

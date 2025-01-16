@@ -1787,22 +1787,22 @@ const LoadList: React.FC<LoadListProps> = ({
         <div className="flex gap-4">
           <Button
             type="primary"
-            onClick={downloadCurrentData}
-            disabled={userDivision !== projectDivision}
-            size="small"
-          >
-            Download Current Data
-          </Button>
-          <Button
-            type="primary"
             onClick={handleTemplateDownload}
             disabled={userDivision !== projectDivision}
             size="small"
           >
             Load List Template
           </Button>
+          <Button
+            type="primary"
+            onClick={downloadCurrentData}
+            disabled={userDivision !== projectDivision}
+            size="small"
+          >
+            Download Current Data
+          </Button>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4"> 
           <Button
             type="primary"
             onClick={updateLinkedData}
@@ -1849,6 +1849,7 @@ const LoadList: React.FC<LoadListProps> = ({
             onClose={() => setIsControlSchemeModalOpen(false)}
             selectedControlSchemes={getSelectedSchemes()}
             onConfigurationComplete={handleControlSchemeComplete}
+            division={projectDivision}
           />
         </Suspense>
       )}

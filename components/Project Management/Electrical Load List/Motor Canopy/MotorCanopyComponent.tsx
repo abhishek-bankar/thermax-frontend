@@ -17,7 +17,7 @@ import {
   MOTOR_CANOPY_REVISION_HISTORY_API,
 } from "@/configs/api-endpoints";
 import { useLoading } from "@/hooks/useLoading";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getStandByKw } from "../Electrical Load List/LoadListComponent";
 import { motorCanopyCalculation } from "@/actions/electrical-load-list";
 
@@ -28,7 +28,7 @@ interface MotorCanopyProps {
 
 const getArrayOfMotorCanopyData = (data: any, motorCanopySavedData: any) => {
   if (!data?.electrical_load_list_data) return [];
-  // console.log(data.electrical_load_list_data, "load list");
+  console.log(data.electrical_load_list_data, "load list");
 
   return data.electrical_load_list_data
     ?.filter(
@@ -112,7 +112,7 @@ const useDataFetching = (
     } finally {
       setIsLoading(false);
     }
-  }, [loadListLatestRevisionId, motorCanopyRevisionId]);
+  }, [loadListLatestRevisionId]);
 
   useEffect(() => {
     fetchData();
@@ -130,6 +130,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
     useState<JspreadsheetInstance | null>(null);
   const { setLoading } = useLoading();
   const params = useParams();
+  const router = useRouter();
 
   const project_id = params.project_id as string;
 
@@ -195,17 +196,14 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
     return () => {
       spreadsheetInstance?.destroy();
     };
-  }, [isLoading, cableScheduleOptions, spreadsheetInstance, setLoading]);
+  }, [isLoading, cableScheduleOptions]);
 
   const handleMotorCanopySave = async () => {
     const data = spreadsheetInstance?.getData();
 
-    // console.log(data, "all load list data");
+    console.log(data, "all load list data");
 
     const payload = {
-      project_id: project_id,
-      status: "Not Released",
-      description: "test",
       motor_canopy_data: data?.map((row: any) => {
         return {
           tag_number: row[0],
@@ -227,7 +225,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
       }),
     };
     try {
-      // console.log(payload, "cable schedule payload");
+      console.log(payload, "cable schedule payload");
 
       const respose = await updateData(
         `${MOTOR_CANOPY_REVISION_HISTORY_API}/${motorCanopyRevisionId}`,
@@ -235,9 +233,9 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
         payload
       );
       setLoading(false);
-      message.success("Motor Canopy Saved !");
+      message.success("Motor Canopy Saved");
 
-      // console.log(respose, "Motor Canopy response");
+      console.log(respose, "Motor Canopy response");
     } catch (error) {
       console.error("Error saving Motor Canopy:", error);
       message.error("Unable to save Motor Canopy list");
@@ -268,7 +266,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
         const calculationResult = motorData?.find(
           (item: any) => item.tag_number === row[0]
         );
-        // console.log(calculationResult);
+        console.log(calculationResult);
 
         if (calculationResult) {
           const updatedRow = [...row];
@@ -280,8 +278,8 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
         }
         return row;
       });
-      // console.log("updated calc", motorData);
-      // console.log("updated calc", updatedLoadList);
+      console.log("updated calc", motorData);
+      console.log("updated calc", updatedLoadList);
 
       spreadsheetInstance?.setData(updatedLoadList);
       // console.log(res,'motor calculations');
@@ -316,7 +314,13 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
         >
           Save
         </Button>
-        <Button type="primary" onClick={() => {}} disabled={isLoading}>
+        <Button
+          type="primary"
+          onClick={() =>
+            router.push(`/project/${project_id}/electrical-load-list`)
+          }
+          disabled={isLoading}
+        >
           Next
         </Button>
       </div>

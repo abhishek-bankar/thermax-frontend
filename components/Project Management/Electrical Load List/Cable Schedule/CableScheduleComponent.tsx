@@ -1665,7 +1665,10 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     );
     const groupPayload = [];
     if (grouping) {
+      console.log(grouping);
+      
       for (let i = 0; i < grouping.length; i++) {
+        console.log(grouping[i]);
         const cableSchedule: any = data?.filter(
           (el) => el[1] === grouping[i][6].split(",")[0]
         )[0];
@@ -1673,7 +1676,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         const Do = grouping[i++][4];
         const Ai = grouping[i++][4];
         const Ao = grouping[i++][4];
-        i += 4;
+        
 
         const cables: any[] = [];
         console.log(Di, Do, Ai, Ao, "DIDOAIAO");
@@ -1778,11 +1781,12 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           motor_name: grouping[i][6],
           cables: cables,
         });
+        i += 4;
       }
     }
-    console.log(individualFeeders, "final payload");
-    console.log(groupPayload, "final payload group");
-    console.log({ ...individualFeeders, ...groupPayload }, "final payload all");
+    console.log(individualFeeders, "individual payload");
+    console.log(groupPayload, "payload group");
+    console.log({ ...individualFeeders, ...groupPayload }, "excel payload");
 
     const payload = {
       project_id: project_id,
@@ -1828,12 +1832,12 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         false,
         payload
       );
-      message.success("Cable Schedule Saved !");
+      message.success("Cable Schedule Saved");
 
       console.log(respose, "Cable Schedule response");
     } catch (error) {
       console.error(error);
-      message.error("Unable to save Cable Schedule list");
+      message.error("Unable to save Cable Schedule");
     } finally {
       setLoading(false);
       setIscableSizeFetched(false);

@@ -118,7 +118,7 @@ const Download: React.FC<Props> = ({
         GET_ISOLATOR_EXCEL_API,
         true,
         {
-          "revision_id": "0g9iq2ii91",
+          "revision_id": revision_id,
         }
       );
 

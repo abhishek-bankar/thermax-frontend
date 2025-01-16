@@ -1090,7 +1090,6 @@ const getArrayOfCableScheduleData = (
       item.starter_type,
       item.supply_voltage + ` VAC`,
       item.motor_rated_current,
-
       cableScheduleData?.apex_length,
       cableScheduleData?.number_of_runs
         ? cableScheduleData?.number_of_runs
@@ -1350,6 +1349,8 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
 
     return () => {
       spreadsheetInstance?.destroy();
+      localStorage.clear();
+
     };
   }, [isLoading, cableScheduleOptions]);
   const getCableType = (tag_number: any) => {
@@ -1408,19 +1409,19 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         name: row[0] + " MOTOR",
         tag_number: row[0],
         service_description: row[1],
-        voltage: division === HEATING ? row[6] : null,
+        voltage: row[6],
         kw: getStandByKw(row[2], row[3]),
         type_of_cable: `${`Power - ${getCableType(row[0])}`}`,
         scope: "",
-        number_of_runs: row[21],
-        pair_core: row[22],
-        sizemm2: row[23],
-        cable_material: row[8],
+        number_of_runs: row[9],
+        pair_core: row[10],
+        sizemm2: row[11],
+        cable_material: row[12],
         type_of_insulation: "XLPE",
-        appx_length: row[13],
+        appx_length: row[8],
         cable_od: getCableOd(row[0]),
         gland_size: getCableGlandSize(row[0]),
-        gland_qty: (Number(row[21]) * 2).toString(),
+        gland_qty: (Number(row[9]) * 2).toString(),
         comment: "POWER TO MOTOR",
       };
       cables.push(motorCable);
@@ -1442,7 +1443,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           sizemm2: "2.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
-          appx_length: row[13],
+          appx_length: row[8],
           cable_od: "8.0 - 13mm",
           gland_size: "3/4″",
           gland_qty: "2",
@@ -1467,7 +1468,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           sizemm2: "1.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
-          appx_length: row[13],
+          appx_length: row[8],
           cable_od: getOdLcs(lpbsScheme.lcs, "1.5"),
           gland_size: getGladSizeLcs(lpbsScheme.lcs, "1.5"),
           gland_qty: "2",
@@ -1492,7 +1493,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           sizemm2: "0.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
-          appx_length: row[13],
+          appx_length: row[8],
           cable_od: getOdLcs(lpbsScheme.lcs_inc_dec, "1.5"),
           gland_size: getGladSizeLcs(lpbsScheme.lcs_inc_dec, "1.5"),
           gland_qty: "2",
@@ -1517,7 +1518,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           sizemm2: "0.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
-          appx_length: row[13],
+          appx_length: row[8],
           cable_od: "8.0 - 13mm",
           gland_size: "3/4″",
           gland_qty: "2",
@@ -1542,7 +1543,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           sizemm2: "0.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
-          appx_length: row[13],
+          appx_length: row[8],
           cable_od: getOdLcs(controlScheme.di * 2 + "C", "0.5"),
           gland_size: getGladSizeLcs(controlScheme.di * 2 + "C", "0.5"),
           gland_qty: "2",
@@ -1567,7 +1568,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           sizemm2: "1.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
-          appx_length: row[13],
+          appx_length: row[8],
           cable_od: getOdLcs(controlScheme.do * 2 + "C", "0.5"),
           gland_size: getGladSizeLcs(controlScheme.do * 2 + "C", "0.5"),
           gland_qty: "2",
@@ -1592,7 +1593,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           sizemm2: "0.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
-          appx_length: row[13],
+          appx_length: row[8],
           cable_od: "8.0 - 13mm",
           gland_size: "3/4″",
           gland_qty: "2",
@@ -1617,7 +1618,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           sizemm2: "0.5",
           cable_material: "CU",
           type_of_insulation: "XLPE",
-          appx_length: row[13],
+          appx_length: row[8],
           cable_od: "8.0 - 13mm",
           gland_size: "3/4″",
           gland_qty: "2",
@@ -1644,7 +1645,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
             division === HEATING ? "0.5" : division === ENVIRO ? "1.5" : "",
           cable_material: "CU",
           type_of_insulation: "XLPE",
-          appx_length: row[13],
+          appx_length: row[8],
           cable_od: "8.0 - 13mm",
           gland_size: "3/4″",
           gland_qty: "2",
@@ -1693,7 +1694,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
             sizemm2: "0.5",
             cable_material: "CU",
             type_of_insulation: "XLPE",
-            appx_length: cableSchedule[13],
+            appx_length: cableSchedule[8],
             cable_od: getOdLcs(Di, "0.5"),
             gland_size: getGladSizeLcs(Di, "0.5"),
             gland_qty: "2",
@@ -1717,7 +1718,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
             sizemm2: "1.5",
             cable_material: "CU",
             type_of_insulation: "XLPE",
-            appx_length: cableSchedule[13],
+            appx_length: cableSchedule[8],
             cable_od: getOdLcs(Do, "0.5"),
             gland_size: getGladSizeLcs(Do, "0.5"),
             gland_qty: "2",
@@ -1741,7 +1742,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
             sizemm2: "0.5",
             cable_material: "CU",
             type_of_insulation: "XLPE",
-            appx_length: cableSchedule[13],
+            appx_length: cableSchedule[8],
             cable_od: "8.0 - 13mm",
             gland_size: "3/4″",
             gland_qty: "2",
@@ -1765,7 +1766,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
             sizemm2: "0.5",
             cable_material: "CU",
             type_of_insulation: "XLPE",
-            appx_length: cableSchedule[13],
+            appx_length: cableSchedule[8],
             cable_od: "8.0 - 13mm",
             gland_size: "3/4″",
             gland_qty: "2",
@@ -1797,24 +1798,24 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           starter_type: row[5],
           supply_voltage: Number(row[6].split(" ")[0]),
           motor_rated_current: Number(row[7]),
-          cable_material: row[8],
-          cos_running: Number(row[9]),
-          cos_starting: Number(row[10]),
-          resistance_meter: parseFloat(row[11]),
-          reactance_meter: parseFloat(row[12]),
-          apex_length: parseFloat(row[13]),
-          vd_running: parseFloat(row[14]),
-          vd_starting: parseFloat(row[15]),
-          percent_vd_running: parseFloat(row[16]),
-          percent_vd_starting: parseFloat(row[17]),
-          selected_cable_capacity_amp: parseFloat(row[18]),
-          derating_factor: Number(row[19]),
-          final_capacity: Number(row[20]),
-          number_of_runs: Number(row[21]),
-          number_of_cores: row[22],
-          final_cable_size: row[23],
-          cable_selected_status: row[24],
-          cable_size_heating_chart: row[25],
+          apex_length: parseFloat(row[8]),
+          number_of_runs: Number(row[9]),
+          number_of_cores: row[10],
+          final_cable_size: row[11],
+          cable_material: row[12],
+          cable_size_heating_chart: row[13],
+          cos_running: Number(row[14]),
+          cos_starting: Number(row[15]),
+          resistance_meter: parseFloat(row[16]),
+          reactance_meter: parseFloat(row[17]),
+          vd_running: parseFloat(row[18]),
+          vd_starting: parseFloat(row[19]),
+          percent_vd_running: parseFloat(row[20]),
+          percent_vd_starting: parseFloat(row[21]),
+          selected_cable_capacity_amp: parseFloat(row[22]),
+          derating_factor: Number(row[23]),
+          final_capacity: Number(row[24]),
+          cable_selected_status: row[25],
         };
       }),
       excel_payload: { ...individualFeeders, ...groupPayload },
@@ -1866,16 +1867,14 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           kw: getStandByKw(row[2], row[3]),
           starterType: row[5],
           supplyVoltage: Number(row[6].split(" ")[0]),
-          phase: row[7],
-          powerFactor: Number(row[34]),
           motorRatedCurrent: Number(row[7]),
-          cableMaterial: row[12],
-          startingCos: Number(row[15]),
-          runningCos: Number(row[14]),
+          appx_length: Number(row[8]),
           numberOfRuns: Number(row[9]),
           numberOfCores: row[10],
+          cableMaterial: row[12],
+          runningCos: Number(row[14]),
+          startingCos: Number(row[15]),
           deratingFactor: Number(row[23]),
-          appx_length: Number(row[8]),
         };
       }),
     });
@@ -1888,20 +1887,21 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       );
       if (calculationResult) {
         const updatedRow = [...row];
-
-        updatedRow[8] = calculationResult.moc;
-        updatedRow[11] = calculationResult.dbl_r;
-        updatedRow[12] = calculationResult.dbl_x;
-        updatedRow[14] = calculationResult.vd_run;
-        updatedRow[15] = calculationResult.vd_start;
-        updatedRow[16] = calculationResult.vd_run_percentage;
-        updatedRow[17] = calculationResult.vd_start_percentage;
-        updatedRow[18] = calculationResult.current_air;
-        updatedRow[20] = calculationResult.final_current_carrying_capacity;
-        updatedRow[23] = calculationResult.sizes.includes("/")
+        updatedRow[11] = calculationResult.sizes.includes("/")
           ? calculationResult.sizes
           : parseFloat(calculationResult.sizes).toFixed(1);
-        updatedRow[25] = calculationResult.heating_chart_cable_size; //cable size as per heating value
+        updatedRow[12] = calculationResult.moc;
+        updatedRow[13] = calculationResult.heating_chart_cable_size; //cable size as per heating value
+        updatedRow[16] = calculationResult.dbl_r;
+        updatedRow[17] = calculationResult.dbl_x;
+        updatedRow[18] = calculationResult.vd_run;
+        updatedRow[19] = calculationResult.vd_start;
+        updatedRow[20] = calculationResult.vd_run_percentage;
+        updatedRow[21] = calculationResult.vd_start_percentage;
+        updatedRow[22] = calculationResult.current_air;
+        updatedRow[24] = calculationResult.final_current_carrying_capacity;
+        updatedRow[25] = calculationResult.final_current_carrying_capacity;
+
         sizingCalcData.push({
           tag_number: calculationResult.tagNo,
           cableOd: calculationResult.od,

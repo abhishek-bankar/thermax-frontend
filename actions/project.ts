@@ -117,7 +117,10 @@ export const copyProject = async (
   userInfo: any
 ) => {
   // Create copy of project
-  const projectCreatedata = await createData(PROJECT_API, false, projectData);
+  const projectCreatedata = await createData(PROJECT_API, false, {
+    ...projectData,
+    is_complete: 0,
+  });
   const { name: new_project_id, approver: approver_email } = projectCreatedata;
 
   // Create copy of project information

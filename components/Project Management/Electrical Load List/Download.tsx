@@ -352,8 +352,37 @@ const Download: React.FC<Props> = ({
       // };
       // const respose = await updateData(getSaveEndPoint(key, tab), false, payload)
       // console.log(respose)
-    }
-    // console.log(key, tab);
+    } 
+    if (tab === "motor-specs") {
+      // console.log(commonConfigData);
+      // console.log(loadListData);
+      // const payload = { 
+      //   motor_specification_data: [
+      //     {
+      //       fmi_type: "",
+      //       fmi_inclosure: "",
+      //       fmi_material: "",
+      //       fmi_qty: "",
+      //       ifm_isolator_color_shade: "",
+      //       ifm_cable_entry: "",
+      //       canopy_on_top: "",
+      //     },
+      //   ],
+      //   motor_details_data: [
+      //     {
+      //       serial_number: "",
+      //       tag_number: "",
+      //       service_description: "",
+      //       working_kw: "",
+      //       motor_rated_current: "",
+      //       local_isolator: "",
+      //       motor_location: "",
+      //     },
+      //   ],
+      // };
+      // const respose = await updateData(getSaveEndPoint(key, tab), false, payload)
+      // console.log(respose)
+    } 
   };
   const DownloadTabs = [
     {

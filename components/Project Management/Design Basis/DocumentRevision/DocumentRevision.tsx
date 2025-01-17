@@ -317,6 +317,25 @@ export default function DocumentRevision() {
       dataIndex: "download",
       render(text, record) {
         const projectApproverEmail = record.approverEmail;
+        console.log("DocumentRevision -> record", record);
+        console.log("DocumentRevision -> userInfo", userInfo);
+        console.log("DocumentRevision -> projectDivision", projectDivision);
+        console.log(
+          "[DB_REVISION_STATUS.Released, DB_REVISION_STATUS.Submitted,DB_REVISION_STATUS.Approved,].includes(record?.status)",
+          [
+            DB_REVISION_STATUS.Released,
+            DB_REVISION_STATUS.Submitted,
+            DB_REVISION_STATUS.Approved,
+          ].includes(record?.status)
+        );
+        console.log(
+          "userInfo?.email !== record.owner",
+          userInfo?.email !== record.owner
+        );
+        console.log(
+          "userDivision !== projectDivision",
+          userDivision !== projectDivision
+        );
         return (
           <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
             <div>

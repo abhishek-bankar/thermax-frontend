@@ -102,8 +102,10 @@ const Download: React.FC<Props> = ({
 
       case "2":
         return GET_CABLE_SCHEDULE_EXCEL_API;
-      case "6":
+      case "5":
         return GET_CABLE_SCHEDULE_EXCEL_API;
+      case "6":
+        return GET_ISOLATOR_EXCEL_API;
       default:
         return "";
     }
@@ -111,8 +113,8 @@ const Download: React.FC<Props> = ({
 
   const handleDownload = async (revision_id: string) => {
     setDownloadIconSpin(true);
-    // console.log(revision_id);
-    // console.log(getDownLoadEndpoint());
+    console.log(revision_id);
+    
 
     try {
       const base64Data: any = await downloadFile(getDownLoadEndpoint(), true, {

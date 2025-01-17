@@ -90,7 +90,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           output_choke: 24,
           selector_switch: 6,
           indication: 8,
-          rating: 15
+          rating: 15,
           // starter_type: division === ENVIRO ? 4 : 0,
         };
         return columnMap[key] ?? -1;
@@ -124,13 +124,13 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
       const getApiEndpoint = useCallback((division: string) => {
         switch (division) {
           case HEATING:
-            return `${HEATING_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
+            return `${HEATING_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
           case WWS_SPG:
           case SERVICES:
-            return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
+            return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
           case ENVIRO:
           case WWS_IPG:
-            return `${HEATING_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
+            return `${HEATING_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
           default:
             return "";
         }
@@ -167,6 +167,8 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             } else if (division === WWS_IPG) {
               sortedSchemes = getIPGSchemesData(selectedFilter);
             } else {
+              console.log(res);
+
               sortedSchemes = res
                 .map((item: any) => [
                   false,
@@ -440,15 +442,12 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           );
         }
         if (division === WWS_IPG) {
-          config.push(
-            {
-              key: "rating",
-              label: "Rating",
-              type: "input",
-              placeholder: "Search by Rating",
-            }
-            
-          );
+          config.push({
+            key: "rating",
+            label: "Rating",
+            type: "input",
+            placeholder: "Search by Rating",
+          });
         }
         return config;
       };
@@ -457,6 +456,15 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
         const selectedSchemes = controlSchemesSelected.map((item) =>
           division === HEATING ? item[2] : item[1]
         );
+        if (division === HEATING) {
+          const selectedSchemesWithLpbs = controlSchemesSelected.map((item) => {
+            return { control_scheme: item[2], lpbs_type: item[6] };
+          });
+          localStorage.setItem(
+            "control_schemes_lpbs",
+            JSON.stringify(selectedSchemesWithLpbs)
+          );
+        }
         onConfigurationComplete([...selectedSchemes, "NA"]);
         onClose();
       }, [controlSchemesSelected, onConfigurationComplete, onClose, division]);

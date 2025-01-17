@@ -2528,8 +2528,8 @@ export const controlSchemeColumnsForHeating = [
     width: "130",
   },
   {
-    type: "dropdown",
-    source: ["No", "Yes"],
+    type: "text",
+    // source: ["No", "Yes"],
     name: "lpbs",
     title: "LPBS",
     width: "90",

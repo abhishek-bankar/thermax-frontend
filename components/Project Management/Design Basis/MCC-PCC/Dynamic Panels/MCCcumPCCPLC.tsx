@@ -81,9 +81,9 @@ const getDefaultValues = (plcData: any) => {
     is_electronic_hooter_selected: plcData?.is_electronic_hooter_selected,
     electronic_hooter_acknowledge:
       plcData?.electronic_hooter_acknowledge || "NA",
-    panel_power_supply_on_color: plcData?.panel_power_supply_on_color || "NA",
+    panel_power_supply_on_color: plcData?.panel_power_supply_on_color || "Green",
     panel_power_supply_off_color:
-      plcData?.panel_power_supply_off_color || "Green",
+      plcData?.panel_power_supply_off_color || "Red",
     indicating_lamp_color_for_nonups_power_supply:
       plcData?.indicating_lamp_color_for_nonups_power_supply || "Red",
     indicating_lamp_colour_for_ups_power_supply:
@@ -820,7 +820,7 @@ const MCCcumPCCPLCPanel = ({
                     control={control}
                     name="panel_power_supply_on_color"
                     label="Panel Power Supply On"
-                    options={moveNAtoEnd(panel_power_supply_on_options) || []}
+                    options={moveNAtoEnd(panel_power_supply_off_options) || []}
                     size="small"
                   />
                 </div>
@@ -831,7 +831,7 @@ const MCCcumPCCPLCPanel = ({
                     control={control}
                     name="panel_power_supply_off_color"
                     label="Panel Power Supply Off"
-                    options={moveNAtoEnd(panel_power_supply_off_options) || []}
+                    options={moveNAtoEnd(indicating_lamp_color_options) || []}
                     size="small"
                   />
                 </div>

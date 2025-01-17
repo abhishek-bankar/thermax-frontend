@@ -4,9 +4,6 @@ server.csr
 
 .env.*
 
-# Allow .env.production
-!.env.production
-
 # dependencies
 /node_modules
 /.pnp

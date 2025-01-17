@@ -295,6 +295,8 @@ const LoadList: React.FC<LoadListProps> = ({
         working_kw: 2,
         standby_kw: 3,
         starter_type: projectDivision === ENVIRO ? 5 : 4,
+        lpbs_type: projectDivision === HEATING ? 9 : 100,
+        control_scheme: projectDivision === HEATING ? 10 : 100,
         eocr: projectDivision === ENVIRO || projectDivision === HEATING ? 8 : 7,
         panel:
           projectDivision === ENVIRO
@@ -470,6 +472,20 @@ const LoadList: React.FC<LoadListProps> = ({
     const data: any = spreadsheetRef?.current?.getData() || [];
     if (projectDivision === HEATING) {
       let isHazardousPackage = false;
+      if (Number(colIndex) === getColumnIndex("control_scheme")) {
+        const lpbs_data = JSON.parse(
+          localStorage.getItem("control_schemes_lpbs") as string
+        );
+        const lpbs_scheme = lpbs_data?.find(
+          (item: any) => item.control_scheme === newValue
+        ); 
+        if (lpbs_scheme) {
+          data[rowIndex][getColumnIndex("lpbs_type")] = lpbs_scheme?.lpbs_type;
+        }else if(newValue === "NA"){
+          data[rowIndex][getColumnIndex("lpbs_type")] = "NA";
+
+        }
+      }
       if (colIndex === "12") {
         subPackages?.forEach((pckg: any) => {
           const selectedPckg = pckg?.sub_packages?.find(
@@ -506,7 +522,7 @@ const LoadList: React.FC<LoadListProps> = ({
           data[rowIndex][17] = "NA";
         }
       }
- 
+
       if (Number(colIndex) === getColumnIndex("starter_type")) {
         subPackages?.forEach((pckg: any) => {
           const selectedPckg = pckg?.sub_packages?.find(
@@ -519,7 +535,7 @@ const LoadList: React.FC<LoadListProps> = ({
               isHazardousPackage = true;
             }
           }
-        }); 
+        });
 
         if (newValue === "DOL-HTR") {
           data[rowIndex][getColumnIndex("power_factor")] = "1";
@@ -777,7 +793,7 @@ const LoadList: React.FC<LoadListProps> = ({
         }
       }
 
-      if (Number(colIndex) === getColumnIndex('starter_type') ) {
+      if (Number(colIndex) === getColumnIndex("starter_type")) {
         subPackages?.forEach((pckg: any) => {
           const selectedPckg = pckg?.sub_packages?.find(
             (item: any) =>
@@ -1490,68 +1506,72 @@ const LoadList: React.FC<LoadListProps> = ({
       const spcae_heater_criteria = isHazardousPackage
         ? motorParameters[0]?.hazardous_area_space_heater
         : motorParameters[0]?.safe_area_space_heater;
-
-      item[getColumnIndex("space_heater")] =
-        spcae_heater_criteria === "As per OEM Standard"
-          ? "As per OEM Standard"
-          : spcae_heater_criteria === "All"
-          ? "Yes"
-          : spcae_heater_criteria === "No"
-          ? "No"
-          : getStandByKw(item[2], item[3]) >= Number(spcae_heater_criteria)
-          ? "Yes"
-          : "No"; // space heater criteria
-
-      const bearing_rtd_criteria = isHazardousPackage
-        ? motorParameters[0]?.hazardous_area_bearing_rtd
-        : motorParameters[0]?.safe_area_bearing_rtd;
-      item[getColumnIndex("bearing_rtd")] =
-        bearing_rtd_criteria === "All"
-          ? "Yes"
-          : bearing_rtd_criteria === "No"
-          ? "No"
-          : getStandByKw(item[2], item[3]) >= Number(bearing_rtd_criteria)
-          ? "Yes"
-          : "No"; // bearing rtd criteria
-
-      const winding_rtd_criteria = isHazardousPackage
-        ? motorParameters[0]?.hazardous_area_winding_rtd
-        : motorParameters[0]?.safe_area_winding_rtd;
-      item[getColumnIndex("wiring_rtd")] =
-        winding_rtd_criteria === "All"
-          ? "Yes"
-          : winding_rtd_criteria === "No"
-          ? "No"
-          : getStandByKw(item[2], item[3]) >= Number(winding_rtd_criteria)
-          ? "Yes"
-          : "No"; // winding rtd criteria
-
-      const thermister_criteria = isHazardousPackage
-        ? motorParameters[0]?.hazardous_area_thermister
-        : motorParameters[0]?.safe_area_thermister;
-      if (projectDivision === WWS_IPG) {
-        item[getColumnIndex("thermistor")] =
-          thermister_criteria === "As per OEM Standard"
+      if (
+        item[getColumnIndex("starter_type")] !== "DOL-HTR" ||
+        item[getColumnIndex("starter_type")] !== "SUPPLY FEEDER"
+      ) {
+        item[getColumnIndex("space_heater")] =
+          spcae_heater_criteria === "As per OEM Standard"
             ? "As per OEM Standard"
-            : thermister_criteria === "All"
+            : spcae_heater_criteria === "All"
             ? "Yes"
-            : thermister_criteria === "No"
+            : spcae_heater_criteria === "No"
             ? "No"
-            : getStandByKw(item[2], item[3]) >= Number(thermister_criteria) &&
-              item[getColumnIndex("starter_type")]?.includes("VFD")
+            : getStandByKw(item[2], item[3]) >= Number(spcae_heater_criteria)
             ? "Yes"
-            : "No"; // thermistor criteria
-      } else {
-        item[getColumnIndex("thermistor")] =
-          thermister_criteria === "As per OEM Standard"
-            ? "As per OEM Standard"
-            : thermister_criteria === "All"
+            : "No"; // space heater criteria
+
+        const bearing_rtd_criteria = isHazardousPackage
+          ? motorParameters[0]?.hazardous_area_bearing_rtd
+          : motorParameters[0]?.safe_area_bearing_rtd;
+        item[getColumnIndex("bearing_rtd")] =
+          bearing_rtd_criteria === "All"
             ? "Yes"
-            : thermister_criteria === "No"
+            : bearing_rtd_criteria === "No"
             ? "No"
-            : getStandByKw(item[2], item[3]) >= Number(thermister_criteria)
+            : getStandByKw(item[2], item[3]) >= Number(bearing_rtd_criteria)
             ? "Yes"
-            : "No";
+            : "No"; // bearing rtd criteria
+
+        const winding_rtd_criteria = isHazardousPackage
+          ? motorParameters[0]?.hazardous_area_winding_rtd
+          : motorParameters[0]?.safe_area_winding_rtd;
+        item[getColumnIndex("wiring_rtd")] =
+          winding_rtd_criteria === "All"
+            ? "Yes"
+            : winding_rtd_criteria === "No"
+            ? "No"
+            : getStandByKw(item[2], item[3]) >= Number(winding_rtd_criteria)
+            ? "Yes"
+            : "No"; // winding rtd criteria
+
+        const thermister_criteria = isHazardousPackage
+          ? motorParameters[0]?.hazardous_area_thermister
+          : motorParameters[0]?.safe_area_thermister;
+        if (projectDivision === WWS_IPG) {
+          item[getColumnIndex("thermistor")] =
+            thermister_criteria === "As per OEM Standard"
+              ? "As per OEM Standard"
+              : thermister_criteria === "All"
+              ? "Yes"
+              : thermister_criteria === "No"
+              ? "No"
+              : getStandByKw(item[2], item[3]) >= Number(thermister_criteria) &&
+                item[getColumnIndex("starter_type")]?.includes("VFD")
+              ? "Yes"
+              : "No"; // thermistor criteria
+        } else {
+          item[getColumnIndex("thermistor")] =
+            thermister_criteria === "As per OEM Standard"
+              ? "As per OEM Standard"
+              : thermister_criteria === "All"
+              ? "Yes"
+              : thermister_criteria === "No"
+              ? "No"
+              : getStandByKw(item[2], item[3]) >= Number(thermister_criteria)
+              ? "Yes"
+              : "No";
+        }
       }
       const efficiency = isHazardousPackage
         ? motorParameters[0]?.hazardous_area_efficiency_level
@@ -1606,6 +1626,12 @@ const LoadList: React.FC<LoadListProps> = ({
           if (!item[5]) {
             item[5] = "STAR-DELTA";
           }
+        }
+        if (item[5] === "DOL-HTR" || item[5] === "SUPPLY FEEDER") {
+          item[29] = "No";
+          item[30] = "No";
+          item[31] = "No";
+          item[32] = "No";
         }
         if (!item[6]) {
           item[6] = projectInfo?.main_supply_lv || ""; // main supply lv

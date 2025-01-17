@@ -297,6 +297,12 @@ export const CREDENTIALS_EMAIL_API =
 
 export const HEATING_CONTROL_SCHEMES_URI =
   "/document/Heating Control System Index";
+
+export const ENVIRO_CONTROL_SCHEMES_URI =
+  "/document/Enviro Control System Index";
+
+export const IPG_CONTROL_SCHEMES_URI =
+  "/document/IPG Control System Index";
 export const SPG_SERVICES_CONTROL_SCHEMES_URI =
   "/document/WWS SPG Control System Index";
 export const LPBS_SCHEMES_URI = "/document/LPBS Combination";

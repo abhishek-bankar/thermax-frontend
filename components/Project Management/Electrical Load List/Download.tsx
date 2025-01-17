@@ -368,8 +368,9 @@ const Download: React.FC<Props> = ({
           },
         ],
         local_isolator_motor_details_data:
-          loadListData?.electrical_load_list_data?.map(
-            (item: any, index: number) => ({
+          loadListData?.electrical_load_list_data
+            ?.filter((el: any) => el.local_isolator === "Yes")
+            .map((item: any, index: number) => ({
               serial_number: index + 1,
               tag_number: item.tag_number,
               service_description: item.service_description,
@@ -385,8 +386,7 @@ const Download: React.FC<Props> = ({
               zone: item.zone,
               temprature_class: item.temperature_class,
               gas_group: item.gas_group,
-            })
-          ),
+            })),
       };
       try {
         const respose = await updateData(
@@ -421,7 +421,7 @@ const Download: React.FC<Props> = ({
             const lpbsScheme = lpbsSchemes?.find(
               (el: any) => el.lpbs_type === item.lpbs_type
             );
-            
+
             if (lpbsScheme) {
               console.log(item.lpbs_type + ">>>>>>>>>", lpbsScheme);
               if (lpbsScheme.start_push_button !== "NA") {
@@ -535,6 +535,7 @@ const Download: React.FC<Props> = ({
       // console.log(respose)
     }
     if (tab === "motor-specs") {
+      // area clasification from general info
       // console.log(commonConfigData);
       // console.log(loadListData);
       // const payload = {

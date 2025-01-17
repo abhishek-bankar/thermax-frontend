@@ -2712,8 +2712,8 @@ export const columnsForWwsSPG = [
     height: "100",
   },
   {
-    type: "dropdown",
-    source: ["DOL", "Star/Delta", "VFD", "SOFT STARTER"],
+    type: "text",
+    // source: ["DOL", "Star/Delta", "VFD", "SOFT STARTER"],
     name: "type",
     title: "Starter Type",
     width: "90",
@@ -2737,22 +2737,22 @@ export const columnsForWwsSPG = [
     width: "200",
   },
   {
-    type: "dropdown",
-    source: ["Auto / Manual", "L/H/Manual Mode", "NA", "Local / Remote"],
+    type: "text",
+    // source: ["Auto / Manual", "L/H/Manual Mode", "NA", "Local / Remote"],
     name: "mccb",
     title: "Selector Switch",
     width: "120",
   },
   {
-    type: "dropdown",
-    source: ["N", "Y"],
+    type: "text",
+    // source: ["N", "Y"],
     name: "mpcb",
     title: "LPBS",
     width: "90",
   },
   {
-    type: "dropdown",
-    source: ["On, Off, Trip", "On, Trip"],
+    type: "text",
+    // source: ["On, Off, Trip", "On, Trip"],
     name: "ammeterwith3ct",
     title: "Indication",
     width: "100",
@@ -4591,22 +4591,10 @@ export const columnsForEnviroDOL: any[] = [
     width: "150",
     height: "100",
   },
+   
   {
     type: "text",
-    name: "main sr no",
-    title: "Main Sr. No",
-    width: "100",
-  },
-
-  {
-    type: "text",
-    name: "setsrno",
-    title: "Set Sr. No",
-    width: "100",
-  },
-  {
-    type: "dropdown",
-    source: ["DOL", "CONTROL TRANSFORMER"],
+    // source: ["DOL", "CONTROL TRANSFORMER"],
     name: "type",
     title: "Starter Type",
     width: "90",
@@ -4621,60 +4609,60 @@ export const columnsForEnviroDOL: any[] = [
     type: "text",
     name: "DI",
     title: "DI",
-    width: "100",
+    width: "60",
   },
   {
     type: "text",
     name: "DO",
     title: "DO",
-    width: "100",
+    width: "60",
   },
   {
     type: "text",
     name: "AI",
     title: "AI",
-    width: "100",
+    width: "60",
   },
   {
     type: "text",
     name: "AO",
     title: "AO",
+    width: "60",
+  },
+  {
+    type: "text",
+    // source: ["No", "Yes"],
+    name: "mccb",
+    title: "MCCB",
+    width: "80",
+  },
+  {
+    type: "text",
+    // source: ["Yes", "No"],
+    name: "mpcb",
+    title: "MPCB",
+    width: "80",
+  },
+  {
+    type: "text",
+    // source: ["No", "Yes"],
+    name: "ammeterwith3ct",
+    title: "Ammeter",
+    width: "90",
+  },
+  {
+    type: "text",
+    name: "currenttr",
+    // source: ["No", "Yes"],
+    title: "CURRENT TRANSDUCER",
     width: "100",
   },
   {
-    type: "dropdown",
-    source: ["No", "Yes"],
-    name: "mccb",
-    title: "MCCB",
-    width: "90",
-  },
-  {
-    type: "dropdown",
-    source: ["Yes", "No"],
-    name: "mpcb",
-    title: "MPCB",
-    width: "90",
-  },
-  {
-    type: "dropdown",
-    source: ["No", "Yes"],
-    name: "ammeterwith3ct",
-    title: "Ammeter With 3 CT",
-    width: "90",
-  },
-  {
-    type: "dropdown",
-    name: "currenttr",
-    source: ["No", "Yes"],
-    title: "CURRENT TRANSDUCER",
-    width: "130",
-  },
-  {
-    type: "dropdown",
-    source: ["Yes", "No"],
+    type: "text",
+    // source: ["Yes", "No"],
     name: "olr",
     title: "OLR",
-    width: "90",
+    width: "60",
   },
   {
     type: "textt",
@@ -4683,43 +4671,43 @@ export const columnsForEnviroDOL: any[] = [
     width: "100",
   },
   {
-    type: "dropdown",
-    source: ["Yes", "No"],
+    type: "text",
+    // source: ["Yes", "No"],
     name: "lpbs",
     title: "LPBS",
-    width: "90",
+    width: "60",
   },
   {
-    type: "dropdown",
-    source: ["Yes", "No"],
+    type: "text",
+    // source: ["Yes", "No"],
     name: "spaceheater",
     title: "Space Heater",
     width: "90",
   },
   {
-    type: "dropdown",
-    source: ["No", "Yes"],
+    type: "text",
+    // source: ["No", "Yes"],
     name: "eocr",
     title: "EOCR/EOLR",
     width: "90",
   },
   {
-    type: "dropdown",
-    source: ["Yes", "No"],
+    type: "text",
+    // source: ["Yes", "No"],
     name: "sfu",
     title: "SFU",
-    width: "90",
+    width: "70",
   },
   {
-    type: "dropdown",
-    source: ["Yes", "No"],
+    type: "text",
+    // source: ["Yes", "No"],
     name: "hrc",
     title: "HRC",
-    width: "90",
+    width: "70",
   },
   {
-    type: "dropdown",
-    source: ["Yes", "No"],
+    type: "text",
+    // source: ["Yes", "No"],
     name: "thermistor",
     title: "DIRECT CONNECTED AMMETER 3N0s.",
     width: "90",
@@ -11150,18 +11138,21 @@ export const Enviro_ControlSchemeDataVFD: any[][] = [
   ],
 ]
 
-export const getEnviroColumns = (starter: any) => {
-  if (starter === "DOL") {
-    return columnsForEnviroDOL
-  }
-  if (starter === "VFD") {
-    return columnsForEnviroVFD
-  }
-  if (starter === "SD") {
-    return columnsForEnviroSD
-  } else {
-    return []
-  }
+// export const getEnviroColumns = (starter: any) => {
+//   if (starter === "DOL") {
+//     return columnsForEnviroDOL
+//   }
+//   if (starter === "VFD") {
+//     return columnsForEnviroVFD
+//   }
+//   if (starter === "SD") {
+//     return columnsForEnviroSD
+//   } else {
+//     return []
+//   }
+// }
+export const getEnviroColumns = () => {
+  return columnsForEnviroDOL
 }
 export const lcs_od_gland_data = [
   ["2C", "8.0 - 13mm", "3/4″", "1.5"],
@@ -29213,7 +29204,7 @@ export const WWS_IPG_data: any[][] = [
     "Yes",
   ],
 ]
-export const getIPGSchemesData = (starter: any) => {
+export const getIPGSchemesData = (starter?: any) => {
   if (starter === "DOL") {
     return WWS_IPG_data.slice(0, 216)
   }
@@ -29223,7 +29214,7 @@ export const getIPGSchemesData = (starter: any) => {
   if (starter === "SD") {
     return WWS_IPG_data.slice(216, 432)
   } else {
-    return []
+    return WWS_IPG_data
   }
 }
 export const getIPGColumns = (starter: any) => {

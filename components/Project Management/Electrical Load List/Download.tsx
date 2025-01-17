@@ -26,6 +26,7 @@ import {
   GET_LOAD_LIST_EXCEL_API,
   LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
   LOCAL_ISOLATOR_REVISION_HISTORY_API,
+  LPBS_SCHEMES_URI,
   MOTOR_CANOPY_REVISION_HISTORY_API,
   MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
   PROJECT_API,
@@ -75,6 +76,7 @@ const Download: React.FC<Props> = ({
   const [dataSource, setDataSource] = useState<any[]>([]);
   const [commonConfigData, setCommonConfigData] = useState<any>([]);
   const [loadListData, setLoadListData] = useState<any>([]);
+  const [lpbsSchemes, setLpbsSchemes] = useState<any>([]);
   const [tabKey, setTabKey] = useState("1");
   // const userInfo: {
   //   division: string;
@@ -114,7 +116,6 @@ const Download: React.FC<Props> = ({
   const handleDownload = async (revision_id: string) => {
     setDownloadIconSpin(true);
     console.log(revision_id);
-    
 
     try {
       const base64Data: any = await downloadFile(getDownLoadEndpoint(), true, {
@@ -401,41 +402,103 @@ const Download: React.FC<Props> = ({
     if (tab === "lpbs-specs") {
       console.log(commonConfigData);
       console.log(loadListData);
+      let start_push_button = "";
+      // let forward_start_push_button = "";
+      // let reverse_start_push_button = "";
+      let emergency_stop_push_button = "";
+      let analogue_ammeter_push_button = "";
+      let speed_inc_push_button = "";
+      let speed_dec_push_button = "";
+      let analogue_rpm_push_button = "";
+      let on_indication_lamp_push_button = "";
+      let off_indication_lamp_push_button = "";
+
+      console.log(lpbsSchemes);
+      loadListData?.electrical_load_list_data?.forEach(
+        (item: any, index: number) => {
+          if (item.lpbs_type !== "NA") {
+            console.log(item.lpbs_type);
+            const lpbsScheme = lpbsSchemes?.find(
+              (el: any) => el.lpbs_type === item.lpbs_type
+            );
+            
+            if (lpbsScheme) {
+              console.log(item.lpbs_type + ">>>>>>>>>", lpbsScheme);
+              if (lpbsScheme.start_push_button !== "NA") {
+                start_push_button = "Yes";
+              }
+              if (lpbsScheme.emergency_stop_push_button !== "NA") {
+                emergency_stop_push_button = "Yes";
+              }
+              if (lpbsScheme.analog_ammeter !== "NA") {
+                analogue_ammeter_push_button = "Yes";
+              }
+              if (lpbsScheme.speed_push_button !== "NA") {
+                speed_inc_push_button = "Yes";
+                speed_dec_push_button = "Yes";
+              }
+              if (lpbsScheme.analog_rpm_meter !== "NA") {
+                analogue_rpm_push_button = "Yes";
+              }
+              if (lpbsScheme.start_indication_button !== "NA") {
+                on_indication_lamp_push_button = "Yes";
+              }
+              if (lpbsScheme.stop_indication_button !== "NA") {
+                off_indication_lamp_push_button = "Yes";
+              }
+            }
+          }
+        }
+      );
       const payload = {
         lpbs_specification_data: [
           {
-            safe_lpbs_type: commonConfigData?.safe_lpbs_type,
-            safe_lpbs_ip_protection: commonConfigData?.safe_lpbs_enclosure,
-            safe_lpbs_moc: commonConfigData?.safe_lpbs_material,
-            safe_lpbs_quantity: commonConfigData?.safe_lpbs_qty,
-            safe_lpbs_thickness: commonConfigData?.safe_lpbs_thickness,
-            safe_lpbs_color_shade: commonConfigData?.safe_lpbs_color_shade,
-            safe_lpbs_canopy: commonConfigData?.safe_lpbs_canopy,
-            safe_lpbs_canopy_type: commonConfigData?.safe_lpbs_canopy_type,
-            hazardous_lpbs_type: commonConfigData?.hazardous_lpbs_type,
-            hazardous_ip_protection: commonConfigData?.hazardous_lpbs_enclosure,
-            hazardous_lpbs_moc: commonConfigData?.hazardous_lpbs_material,
-            hazardous_lpbs_qty: commonConfigData?.hazardous_lpbs_qty,
-            hazardous_lpbs_thickness:
-              commonConfigData?.hazardous_lpbs_thickness,
-            hazardous_lpbs_color_shade:
-              commonConfigData?.hazardous_lpbs_color_shade,
-            hazardous_lpbs_canopy: commonConfigData?.hazardous_lpbs_canopy,
-            hazardous_lpbs_canopy_type:
-              commonConfigData?.hazardous_lpbs_canopy_type,
+            lpbs_type: commonConfigData?.safe_lpbs_type,
+            lpbs_ip_protection: commonConfigData?.safe_lpbs_enclosure,
+            lpbs_moc: commonConfigData?.safe_lpbs_material,
+            lpbs_quantity: commonConfigData?.safe_lpbs_qty,
+            lpbs_thickness: commonConfigData?.safe_lpbs_thickness,
+            lpbs_color_shade: commonConfigData?.safe_lpbs_color_shade,
+            lpbs_canopy: commonConfigData?.safe_lpbs_canopy,
+            lpbs_canopy_type: commonConfigData?.safe_lpbs_canopy_type,
+            area: "Safe",
+          },
+          {
+            lpbs_type: commonConfigData?.hazardous_lpbs_type,
+            lpbs_ip_protection: commonConfigData?.hazardous_lpbs_enclosure,
+            lpbs_moc: commonConfigData?.hazardous_lpbs_material,
+            lpbs_qty: commonConfigData?.hazardous_lpbs_qty,
+            lpbs_thickness: commonConfigData?.hazardous_lpbs_thickness,
+            lpbs_color_shade: commonConfigData?.hazardous_lpbs_color_shade,
+            lpbs_canopy: commonConfigData?.hazardous_lpbs_canopy,
+            lpbs_canopy_type: commonConfigData?.hazardous_lpbs_canopy_type,
+            area: "Hazardous",
+          },
+          {
             lpbs_push_button_start_color:
               commonConfigData?.lpbs_push_button_start_color,
-            lpbs_forward_push_button_start:
+            lpbs_forward_push_button_start_color:
               commonConfigData?.lpbs_forward_push_button_start,
-            lpbs_reverse_push_button_start:
+            lpbs_reverse_push_button_start_color:
               commonConfigData?.lpbs_reverse_push_button_start,
-            lpbs_push_button_ess: commonConfigData?.lpbs_push_button_ess,
-            lpbs_speed_increase: commonConfigData?.lpbs_speed_increase,
-            lpbs_speed_decrease: commonConfigData?.lpbs_speed_decrease,
+            lpbs_push_button_ess_color: commonConfigData?.lpbs_push_button_ess,
+            lpbs_speed_increase_color: commonConfigData?.lpbs_speed_increase,
+            lpbs_speed_decrease_color: commonConfigData?.lpbs_speed_decrease,
             lpbs_indication_lamp_start_color:
               commonConfigData?.lpbs_indication_lamp_start_color,
             lpbs_indication_lamp_stop_color:
               commonConfigData?.lpbs_indication_lamp_stop_color,
+
+            start_push_button,
+            //  forward_start_push_button ,
+            //  reverse_start_push_button ,
+            emergency_stop_push_button,
+            analogue_ammeter_push_button,
+            speed_inc_push_button,
+            speed_dec_push_button,
+            analogue_rpm_push_button,
+            on_indication_lamp_push_button,
+            off_indication_lamp_push_button,
           },
         ],
         lpbs_specs_motor_details_data:
@@ -446,12 +509,7 @@ const Download: React.FC<Props> = ({
               service_description: item.service_description,
               working_kw: getStandByKw(item.working_kw, item.standby_kw),
               lpbs_type: "",
-              canopy_required:"",
               motor_location: item.motor_location,
-
-              motor_rated_current: item.motor_rated_current,
-              local_isolator: item.local_isolator,
-              isolator_rating: "to be added",
               gland_size: `2 No X 1 "ET 1No X 3/4 "ET`,
               package: item.package,
               area: item.area,
@@ -462,6 +520,8 @@ const Download: React.FC<Props> = ({
             })
           ),
       };
+      console.log(payload);
+
       // try {
       //   const respose = await updateData(
       //     getSaveEndPoint(key, tab),
@@ -702,7 +762,10 @@ const Download: React.FC<Props> = ({
       const loadListData = await getData(
         `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${loadListLatestRevisionId}`
       );
-
+      const lpbsResponse = await getData(
+        `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${projectDivision}"]]&fields=["*"]`
+      );
+      setLpbsSchemes(lpbsResponse);
       setLoadListData(loadListData);
       setCommonConfigData(commonConfigData);
       // console.log(loadListData, "loadlist");

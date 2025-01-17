@@ -79,11 +79,12 @@ export const LoadListcolumns = (division: string) => {
       width: "90",
     },
     {
-      type: "dropdown",
+      type: division === HEATING ? "text" : "dropdown",
       name: "lbpsType",
       source: [],
       title: "LPBS  TYPE",
       width: "70",
+      readOnly: division === HEATING ? true : false,
     },
     {
       type: "dropdown",

@@ -75,16 +75,18 @@ export default function ProjectFormModal({
   getProjectUrl,
   projectOCNos,
 }: any) {
+  const { division } = userInfo;
+
   const [infoMessage, setInfoMessage] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { dropdownOptions: clientNameOptions } = useDropdownOptions(
-    CLIENT_NAME_API,
+    `${CLIENT_NAME_API}?fields=["*"]&filters=[["division", "=", "${division}"]]`,
     "client_name"
   );
   const { dropdownOptions: consultantNameOptions } = useDropdownOptions(
-    CONSULTANT_NAME_API,
+    `${CONSULTANT_NAME_API}?fields=["*"]&filters=[["division", "=", "${division}"]]`,
     "consultant_name"
   );
   const { dropdownOptions: approverOptions } = useDropdownOptions(
@@ -105,12 +107,11 @@ export default function ProjectFormModal({
 
   useEffect(() => {
     reset(getDefaultValues(editMode, values));
-    
   }, [editMode, reset, values]);
 
   const handleCancel = () => {
     setOpen(false);
-    reset(getDefaultValues(false, values));
+    reset(getDefaultValues(false, {}));
     setInfoMessage("");
     setStatus("");
   };
@@ -213,6 +214,7 @@ export default function ProjectFormModal({
               optionKeyName="client_name"
               createOptionUrl={CLIENT_NAME_API}
               placeholder="Select or create a new client by typing..."
+              extraParams={{ division }}
             />
           </div>
           <div className="flex-1">
@@ -225,6 +227,7 @@ export default function ProjectFormModal({
               optionKeyName="consultant_name"
               createOptionUrl={CONSULTANT_NAME_API}
               placeholder="Select or create a new consultant by typing..."
+              extraParams={{ division }}
             />
           </div>
         </div>

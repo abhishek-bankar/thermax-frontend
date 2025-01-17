@@ -2,8 +2,8 @@ export const GET_PKG_API = `/method/thermax_backend.thermax_backend.doctype.main
 export const MAIN_PKG_API = "/document/Main Package";
 export const SUB_PKG_API = "/document/Sub Package";
 export const AREA_CLASSIFICATION_API = "/document/Area of Classification";
-export const CLIENT_NAME_API = `/document/Client?fields=["*"]`;
-export const CONSULTANT_NAME_API = `/document/Consultant?fields=["*"]`;
+export const CLIENT_NAME_API = `/document/Client`;
+export const CONSULTANT_NAME_API = `/document/Consultant`;
 
 export const PROJECT_API = `/document/Project`;
 export const PROJECT_INFO_API = `/document/Project Information`;

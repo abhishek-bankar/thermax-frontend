@@ -41,7 +41,7 @@ const config = {
           return {
             first_name: userInfo?.first_name,
             last_name: userInfo?.last_name,
-            email: email,
+            email: email.toLowerCase(),
             email_verified: userInfo?.email_verified,
             division: userInfo?.division,
             is_superuser: userInfo?.is_superuser,

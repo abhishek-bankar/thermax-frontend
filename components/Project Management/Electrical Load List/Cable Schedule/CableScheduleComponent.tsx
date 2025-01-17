@@ -1113,14 +1113,15 @@ const getArrayOfCableScheduleData = (
             "SP-DOL MPCB",
           ].includes(item.starter_type)
         ? "3C"
-        : getStandByKw(item.working_kw, item.standby_kw) <= 22 && [
-          "VFD",
-          "VFD BYPASS-S/D",
-          "VFD Bypass DOL",
-          "SOFT STARTER",
-          "SOFT STARTER BYPASS - S/D",
-          "SS Bypass DOL"
-        ].includes(item.starter_type)
+        : getStandByKw(item.working_kw, item.standby_kw) <= 22 &&
+          [
+            "VFD",
+            "VFD BYPASS-S/D",
+            "VFD Bypass DOL",
+            "SOFT STARTER",
+            "SOFT STARTER BYPASS - S/D",
+            "SS Bypass DOL",
+          ].includes(item.starter_type)
         ? "4C"
         : item.starter_type === "SUPPLY FEEDER"
         ? "4C"
@@ -1330,7 +1331,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       columnResize: true,
       tableOverflow: true,
       lazyLoading: true,
-      loadingSpin: true, 
+      loadingSpin: true,
       tableWidth: "100%",
       tableHeight: "440px",
       freezeColumns: 6,
@@ -1917,14 +1918,14 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         updatedRow[25] = calculationResult.final_current_carrying_capacity;
         console.log(calculationResult);
         // heating_chart_cable_od,
-          // heating_chart_cable_gland_size,
-          sizingCalcData.push({
-            tag_number: calculationResult.tagNo,
-            cableOd:
-              calculationResult.od ?? calculationResult?.heating_chart_cable_od,
-            gladSize:  calculationResult?.heating_chart_cable_gland_size,
-            type: calculationResult.cable_type,
-          });
+        // heating_chart_cable_gland_size,
+        sizingCalcData.push({
+          tag_number: calculationResult.tagNo,
+          cableOd:
+            calculationResult.od ?? calculationResult?.heating_chart_cable_od,
+          gladSize: calculationResult?.heating_chart_cable_gland_size,
+          type: calculationResult.cable_type,
+        });
 
         return updatedRow;
       }
@@ -2016,7 +2017,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         <Button
           type="primary"
           onClick={getCableSizing}
-          disabled={iscableSizeFetched}
+          // disabled={iscableSizeFetched}
           size="small"
         >
           Get Cable Sizing

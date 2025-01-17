@@ -443,12 +443,37 @@ export const getCableSizingCalculation = async (cableScheduleData: any) => {
     .filter((data: any) => data.moc === "Aluminium")
     .sort((a: any, b: any) => a.current_air - b.current_air);
 
-  const copper_conductor = +parseFloat(
-    layoutCableTray.copper_conductor
-  ).toFixed(2);
-
   const calculatedData = cableScheduleRows?.map((row: any) => {
     let finalCable: any = {};
+
+    const copperConductor = layoutCableTray.copper_conductor;
+    const aluminiumConductor = layoutCableTray.aluminium_conductor;
+
+    if (copperConductor === "All") {
+      finalCable = findCable(
+        copperCableSize,
+        row,
+        layoutCableTray,
+        division,
+        cableAsPerHeatingChart
+      );
+      return { ...finalCable };
+    }
+
+    if (aluminiumConductor === "All") {
+      finalCable = findCable(
+        aluminiumCableSize,
+        row,
+        layoutCableTray,
+        division,
+        cableAsPerHeatingChart
+      );
+      return { ...finalCable };
+    }
+
+    const copper_conductor = +parseFloat(
+      layoutCableTray.copper_conductor
+    ).toFixed(2);
 
     if (copper_conductor <= 4) {
       finalCable = findCable(

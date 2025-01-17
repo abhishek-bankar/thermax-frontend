@@ -506,8 +506,8 @@ const LoadList: React.FC<LoadListProps> = ({
           data[rowIndex][17] = "NA";
         }
       }
-
-      if (colIndex === "5") {
+ 
+      if (Number(colIndex) === getColumnIndex("starter_type")) {
         subPackages?.forEach((pckg: any) => {
           const selectedPckg = pckg?.sub_packages?.find(
             (item: any) =>
@@ -519,21 +519,21 @@ const LoadList: React.FC<LoadListProps> = ({
               isHazardousPackage = true;
             }
           }
-        });
+        }); 
 
         if (newValue === "DOL-HTR") {
-          data[rowIndex][34] = "1";
+          data[rowIndex][getColumnIndex("power_factor")] = "1";
         }
         if (newValue === "SUPPLY FEEDER" || newValue === "DOL-HTR") {
-          data[rowIndex][29] = "No";
-          data[rowIndex][30] = "No";
-          data[rowIndex][31] = "No";
-          data[rowIndex][32] = "No";
+          data[rowIndex][getColumnIndex("space_heater")] = "No";
+          data[rowIndex][getColumnIndex("bearing_rtd")] = "No";
+          data[rowIndex][getColumnIndex("wiring_rtd")] = "No";
+          data[rowIndex][getColumnIndex("thermistor")] = "No";
         } else {
           const space_heater_criteria = isHazardousPackage
             ? motorParameters[0]?.hazardous_area_space_heater
             : motorParameters[0]?.safe_area_space_heater;
-          data[rowIndex][29] =
+          data[rowIndex][getColumnIndex("space_heater")] =
             space_heater_criteria === "As per OEM Standard"
               ? "As per OEM Standard"
               : space_heater_criteria === "All"
@@ -548,7 +548,7 @@ const LoadList: React.FC<LoadListProps> = ({
           const bearing_rtd_criteria = isHazardousPackage
             ? motorParameters[0]?.hazardous_area_bearing_rtd
             : motorParameters[0]?.safe_area_bearing_rtd;
-          data[rowIndex][30] =
+          data[rowIndex][getColumnIndex("bearing_rtd")] =
             bearing_rtd_criteria === "All"
               ? "Yes"
               : bearing_rtd_criteria === "No"
@@ -561,7 +561,7 @@ const LoadList: React.FC<LoadListProps> = ({
           const winding_rtd_criteria = isHazardousPackage
             ? motorParameters[0]?.hazardous_area_winding_rtd
             : motorParameters[0]?.safe_area_winding_rtd;
-          data[rowIndex][31] =
+          data[rowIndex][getColumnIndex("wiring_rtd")] =
             winding_rtd_criteria === "All"
               ? "Yes"
               : winding_rtd_criteria === "No"
@@ -647,6 +647,7 @@ const LoadList: React.FC<LoadListProps> = ({
           data[rowIndex][getColumnIndex("space_heater")] = "No";
           data[rowIndex][getColumnIndex("bearing_rtd")] = "No";
           data[rowIndex][getColumnIndex("wiring_rtd")] = "No";
+          data[rowIndex][getColumnIndex("thermistor")] = "No";
         } else {
           const space_heater_criteria = isHazardousPackage
             ? motorParameters[0]?.hazardous_area_space_heater
@@ -776,7 +777,7 @@ const LoadList: React.FC<LoadListProps> = ({
         }
       }
 
-      if (colIndex === "5") {
+      if (Number(colIndex) === getColumnIndex('starter_type') ) {
         subPackages?.forEach((pckg: any) => {
           const selectedPckg = pckg?.sub_packages?.find(
             (item: any) =>
@@ -790,19 +791,19 @@ const LoadList: React.FC<LoadListProps> = ({
           }
         });
         if (newValue === "DOL-HTR") {
-          data[rowIndex][33] = "1";
+          data[rowIndex][getColumnIndex("power_factor")] = "1";
         }
         if (newValue === "SUPPLY FEEDER" || newValue === "DOL-HTR") {
-          data[rowIndex][28] = "No";
-          data[rowIndex][29] = "No";
-          data[rowIndex][30] = "No";
-          data[rowIndex][31] = "No";
+          data[rowIndex][getColumnIndex("space_heater")] = "No";
+          data[rowIndex][getColumnIndex("bearing_rtd")] = "No";
+          data[rowIndex][getColumnIndex("wiring_rtd")] = "No";
+          data[rowIndex][getColumnIndex("thermistor")] = "No";
         } else {
           const space_heater_criteria = isHazardousPackage
             ? motorParameters[0]?.hazardous_area_space_heater
             : motorParameters[0]?.safe_area_space_heater;
 
-          data[rowIndex][28] =
+          data[rowIndex][getColumnIndex("space_heater")] =
             space_heater_criteria === "As per OEM Standard"
               ? "As per OEM Standard"
               : space_heater_criteria === "All"
@@ -818,7 +819,7 @@ const LoadList: React.FC<LoadListProps> = ({
             ? motorParameters[0]?.hazardous_area_bearing_rtd
             : motorParameters[0]?.safe_area_bearing_rtd;
 
-          data[rowIndex][29] =
+          data[rowIndex][getColumnIndex("bearing_rtd")] =
             bearing_rtd_criteria === "All"
               ? "Yes"
               : bearing_rtd_criteria === "No"
@@ -831,7 +832,7 @@ const LoadList: React.FC<LoadListProps> = ({
           const winding_rtd_criteria = isHazardousPackage
             ? motorParameters[0]?.hazardous_area_winding_rtd
             : motorParameters[0]?.safe_area_winding_rtd;
-          data[rowIndex][30] =
+          data[rowIndex][getColumnIndex("wiring_rtd")] =
             winding_rtd_criteria === "All"
               ? "Yes"
               : winding_rtd_criteria === "No"
@@ -869,6 +870,8 @@ const LoadList: React.FC<LoadListProps> = ({
     []
   );
   const getArrayOfLoadListData = (data: any, revision?: any) => {
+    console.log(data?.electrical_load_list_data);
+
     return data?.electrical_load_list_data?.map((item: any) => {
       const result = [
         item.tag_number,
@@ -1653,7 +1656,7 @@ const LoadList: React.FC<LoadListProps> = ({
               : "No"; // winding rtd criteria
         }
         if (!item[32]) {
-          if (userInfo.division === WWS_IPG) {
+          if (projectDivision === WWS_IPG) {
             item[32] =
               motorParameters[0]?.safe_area_thermister === "As per OEM Standard"
                 ? "As per OEM Standard"
@@ -1738,7 +1741,6 @@ const LoadList: React.FC<LoadListProps> = ({
             item[35], //motor efficiency
             item[36],
             item[37],
-            item[38],
           ];
         } else if (projectDivision === ENVIRO) {
           return [

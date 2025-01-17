@@ -1060,6 +1060,7 @@ import {
   WWS_IPG_data,
   WWS_SPG_DATA,
 } from "@/app/Data";
+import { getStandByKw } from "../Electrical Load List/LoadListComponent";
 
 interface CableScheduleProps {
   loadListLatestRevisionId: string;
@@ -1112,11 +1113,18 @@ const getArrayOfCableScheduleData = (
             "SP-DOL MPCB",
           ].includes(item.starter_type)
         ? "3C"
-        : item.starter_type === "VFD"
+        : getStandByKw(item.working_kw, item.standby_kw) <= 22 && [
+          "VFD",
+          "VFD BYPASS-S/D",
+          "VFD Bypass DOL",
+          "SOFT STARTER",
+          "SOFT STARTER BYPASS - S/D",
+          "SS Bypass DOL"
+        ].includes(item.starter_type)
         ? "4C"
         : item.starter_type === "SUPPLY FEEDER"
         ? "4C"
-        : "",
+        : "3.5C",
       cableScheduleData?.final_cable_size,
       cableScheduleData?.cable_material || "Copper",
       cableScheduleData?.cable_size_heating_chart,
@@ -1322,8 +1330,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       columnResize: true,
       tableOverflow: true,
       lazyLoading: true,
-      loadingSpin: true,
-      filters: true,
+      loadingSpin: true, 
       tableWidth: "100%",
       tableHeight: "440px",
       freezeColumns: 6,

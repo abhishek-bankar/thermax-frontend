@@ -24,7 +24,9 @@ import { ValidColumnType } from "../../types";
 import { useLoading } from "@/hooks/useLoading";
 import { getData } from "@/actions/crud-actions";
 import {
+  ENVIRO_CONTROL_SCHEMES_URI,
   HEATING_CONTROL_SCHEMES_URI,
+  IPG_CONTROL_SCHEMES_URI,
   SPG_SERVICES_CONTROL_SCHEMES_URI,
 } from "@/configs/api-endpoints";
 import {
@@ -73,29 +75,6 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
       const schemeIndex = division === HEATING ? 2 : 1;
       const options = useMemo(() => ["VFD", "DOL", "SD"], []);
 
-      const getColumnIndex = (key: string): number => {
-        const columnMap: { [key: string]: number } = {
-          scheme: division === HEATING ? 2 : 1,
-          schemeTitle: 3,
-          description: 4,
-          breaker: 5,
-          // lpbs: 17,
-          di: 6,
-          do: 7,
-          ai: 8,
-          ao: 9,
-          field_isolator: 17,
-          mcc_start_stop: 22,
-          input_choke: 23,
-          output_choke: 24,
-          selector_switch: 6,
-          indication: 8,
-          rating: 15,
-          // starter_type: division === ENVIRO ? 4 : 0,
-        };
-        return columnMap[key] ?? -1;
-      };
-
       const getColumnsForDivision = useCallback(() => {
         switch (division) {
           case HEATING:
@@ -106,7 +85,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           case WWS_IPG:
             return getIPGColumns(selectedFilter);
           case ENVIRO:
-            return getEnviroColumns(selectedFilter);
+            return getEnviroColumns();
           default:
             return [];
         }
@@ -129,8 +108,9 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           case SERVICES:
             return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
           case ENVIRO:
+            return `${ENVIRO_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
           case WWS_IPG:
-            return `${HEATING_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
+            return `${IPG_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
           default:
             return "";
         }
@@ -149,6 +129,97 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           setControlSchemesSelected(selectedRows);
         }
       }, [isOpen, selectedControlSchemes, controlSchemes, schemeIndex]);
+      const getSortedControlSchemes = (data: any) => {
+        if (division === ENVIRO) {
+          const schemes = data?.map((scheme: any) => [
+            false,
+            scheme.scheme,
+            scheme.type,
+            scheme.starter,
+            scheme.di,
+            scheme.do,
+            scheme.ai,
+            scheme.ao,
+            scheme.mccb,
+            scheme.mpcb,
+            scheme.ammeter,
+            scheme.current_transducer,
+            scheme.olr,
+            scheme.rating,
+            scheme.lpbs,
+            scheme.space_heater,
+            scheme.eocr_eolr,
+            scheme.sfu,
+            scheme.hrc,
+            scheme.direct_connected_ammeter_3_nos,
+          ]);
+          const sortedData = schemes?.sort((a: any, b: any) => {
+            // Extract numbers after 'D' from the second element of each subarray
+            const numA = parseInt(a[1].split("-")[0].substring(1));
+            const numB = parseInt(b[1].split("-")[0].substring(1));
+
+            // Sort in ascending order (a - b)
+            return numA - numB;
+          });
+          console.log(sortedData);
+          return schemes;
+        }
+        if (division === WWS_IPG) {
+          const schemes = data?.map((scheme: any) => [
+            false,
+            scheme.scheme,
+            scheme.type,
+            scheme.starter,
+            scheme.di,
+            scheme.do,
+            scheme.ai,
+            scheme.ao,
+            scheme.mccb,
+            scheme.mpcb,
+            scheme.ammeter,
+            scheme.current_transducer,
+            scheme.olr,
+            scheme.rating,
+            scheme.lpbs,
+            scheme.space_heater,
+            scheme.eocr_eolr,
+            scheme.sfu,
+            scheme.hrc,
+            scheme.direct_connected_ammeter_3_nos,
+          ]);
+          // const sortedData = schemes?.sort((a: any, b: any) => {
+          //   // Extract numbers after 'D' from the second element of each subarray
+          //   const numA = parseInt(a[1].split("-")[0].substring(1));
+          //   const numB = parseInt(b[1].split("-")[0].substring(1));
+
+          //   // Sort in ascending order (a - b)
+          //   return numA - numB;
+          // });
+          // console.log(sortedData);
+          return schemes;
+        }
+        if (division === WWS_SPG || division === SERVICES) {
+          const schemes = data?.map((scheme: any) => [
+            false,
+            scheme.scheme,
+            scheme.starter_type,
+            scheme.sub_type_filter,
+            scheme.description,
+            scheme.type,
+            scheme.selector_switch,
+            scheme.lbps,
+            scheme.indication,
+            scheme.di,
+            scheme.do,
+            scheme.ao,
+            scheme.ai,
+            scheme.plc_feedback,
+            scheme.plc_dcs_cmd,
+          ]);
+
+          return schemes;
+        }
+      };
 
       // Fetch control schemes
       useEffect(() => {
@@ -159,16 +230,15 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             setLoading(true);
             const res = await getData(getApiEndpoint(division));
             let sortedSchemes;
-
+            console.log(res, "control schemes data");
             if (division === SERVICES || division === WWS_SPG) {
-              sortedSchemes = WWS_SPG_DATA;
+              sortedSchemes = getSortedControlSchemes(res);
             } else if (division === ENVIRO) {
-              sortedSchemes = getEnviroSchemesData(selectedFilter);
+              sortedSchemes = getSortedControlSchemes(res);
             } else if (division === WWS_IPG) {
-              sortedSchemes = getIPGSchemesData(selectedFilter);
-            } else {
-              console.log(res);
-
+              sortedSchemes = getIPGSchemesData();
+            } else if (division === HEATING) {
+        
               sortedSchemes = res
                 .map((item: any) => [
                   false,
@@ -213,7 +283,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             const selected: string[] = Array.from(
               new Set(selectedControlSchemes)
             );
-            // console.log(selected);
+            console.log(selected);
             const temp = sortedSchemes.map((scheme: string[]) => {
               if (selected.includes(scheme[schemeIndex])) {
                 return [true, ...scheme.slice(1)];
@@ -358,6 +428,29 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
 
         setIsControlSchemeEmpty(false);
       }, [controlSchemeInstance, division]);
+      const getColumnIndex = (key: string): number => {
+        const columnMap: { [key: string]: number } = {
+          scheme: division === HEATING ? 2 : 1,
+          schemeTitle: 3,
+          description: 4,
+          breaker: 5,
+          // lpbs: 17,
+          di: 6,
+          do: 7,
+          ai: 8,
+          ao: 9,
+          field_isolator: 17,
+          mcc_start_stop: 22,
+          input_choke: 23,
+          output_choke: 24,
+          selector_switch: 6,
+          indication: 8,
+          rating: 15,
+          type: division === WWS_SPG || division === SERVICES ? 5 : 100,
+          starter_type: division === ENVIRO ? 2 : division === WWS_IPG ? 4 : 2,
+        };
+        return columnMap[key] ?? -1;
+      };
 
       const filterConfig: any = () => {
         const config = [
@@ -370,12 +463,12 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
                 ? "Search by Sub Scheme No"
                 : "Search by Scheme No",
           },
-          {
-            key: "schemeTitle",
-            label: "Scheme Title",
-            type: "input",
-            placeholder: "Search by Scheme Title",
-          },
+          // {
+          //   key: "schemeTitle",
+          //   label: "Scheme Title",
+          //   type: "input",
+          //   placeholder: "Search by Scheme Title",
+          // },
         ];
         if (division === HEATING) {
           config.push(
@@ -417,31 +510,45 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             }
           );
         }
-        // if (division === ENVIRO) {
-        //   config.splice(1, 0, {
-        //     key: "starter_type",
-        //     label: "Starter Type",
-        //     type: "input",
-        //     placeholder: "Search by Starter Type",
-        //   });
-        // }
+        if (division === ENVIRO) {
+          config.push({
+            key: "starter_type",
+            label: "Starter Type",
+            type: "input",
+            placeholder: "Search by Starter Type",
+          });
+        }
         if (division === WWS_SPG) {
           config.push(
             {
-              key: "selector_switch",
-              label: "Selector Switch",
+              key: "starter_type",
+              label: "Starter Type",
               type: "input",
-              placeholder: "Search by Selector Switch",
+              placeholder: "Search by Starter Type",
             },
             {
-              key: "indication",
-              label: "Indication",
+              key: "description",
+              label: "Scheme Description",
               type: "input",
-              placeholder: `"On, Off, Trip" or "On, Trip"`,
+              placeholder: "Search by Scheme Description",
+            },
+            {
+              key: "type",
+              label: "Type",
+              type: "input",
+              placeholder: "Search by Type",
             }
           );
         }
         if (division === WWS_IPG) {
+         
+          config.push({
+            key: "starter_type",
+            label: "Starter Type",
+            type: "input",
+            placeholder: "Search by Starter Type",
+          });
+
           config.push({
             key: "rating",
             label: "Rating",
@@ -527,7 +634,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
               Control Scheme Configurator
             </h2>
             <div className="w-1/4 py-1">
-              {(division === ENVIRO || division === WWS_IPG) && (
+              {/* {(division === ENVIRO || division === WWS_IPG) && (
                 <select
                   value={selectedFilter}
                   onChange={handleFilterChange}
@@ -539,7 +646,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
                     </option>
                   ))}
                 </select>
-              )}
+              )} */}
             </div>
             <MemoizedTableFilter
               filters={filterConfig()}

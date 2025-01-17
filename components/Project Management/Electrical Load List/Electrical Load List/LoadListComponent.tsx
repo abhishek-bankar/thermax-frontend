@@ -25,6 +25,7 @@ import {
   PROJECT_MAIN_PKG_LIST_API,
 } from "@/configs/api-endpoints";
 import {
+  downloadFile,
   downloadFrappeCloudFile,
   getData,
   updateData,
@@ -1921,20 +1922,22 @@ const LoadList: React.FC<LoadListProps> = ({
     }
   };
   const handleTemplateDownload = async () => {
-    const result = await downloadFrappeCloudFile(
+    const base64Data: any = await downloadFrappeCloudFile(
       `${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/Final_Motor_Details_Template.xlsx`
     );
-    const byteArray = new Uint8Array(result?.data?.data); // Convert the array into a Uint8Array
-    const excelBlob = new Blob([byteArray.buffer], {
+    // Create a Blob from the Base64 string
+    const binaryData = Buffer.from(base64Data, "base64");
+    const blob = new Blob([binaryData], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    const url = window.URL.createObjectURL(excelBlob);
+
+    // Create a download link and trigger the download
     const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `Motor Details Template.xlsx`); // Filename
-    document.body.appendChild(link);
+    link.href = URL.createObjectURL(blob);
+    // Use Content-Disposition header to get the filename
+
+    link.download = "Motor Details Template.xlsx";
     link.click();
-    document.body.removeChild(link);
   };
   const handleValidatePanelLoad = () => {
     if (spreadsheetRef?.current) {

@@ -110,11 +110,11 @@ export const downloadFrappeCloudFile = async (url: string) => {
       responseType: "arraybuffer",
     });
 
+    // Convert binary data to Base64
+    const base64Data = Buffer.from(response.data).toString("base64");
+
     // Return binary data and headers
-    return {
-      data: response.data, // Binary content
-      headers: response.headers, // Response headers
-    };
+    return base64Data;
   } catch (error: any) {
     handleAPIError(error);
   }

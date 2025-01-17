@@ -102,8 +102,10 @@ const Download: React.FC<Props> = ({
 
       case "2":
         return GET_CABLE_SCHEDULE_EXCEL_API;
-      case "6":
+      case "5":
         return GET_CABLE_SCHEDULE_EXCEL_API;
+      case "6":
+        return GET_ISOLATOR_EXCEL_API;
       default:
         return "";
     }
@@ -112,38 +114,7 @@ const Download: React.FC<Props> = ({
   const handleDownload = async (revision_id: string) => {
     setDownloadIconSpin(true);
     console.log(revision_id);
-    // console.log(getDownLoadEndpoint());
-    try {
-      const base64Data: any = await downloadFile(
-        GET_ISOLATOR_EXCEL_API,
-        true,
-        {
-          "revision_id": revision_id,
-        }
-      );
-
-      // Create a Blob from the Base64 string
-      const binaryData = Buffer.from(base64Data, "base64");
-      const blob = new Blob([binaryData], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      // Create a download link and trigger the download
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      const document_revision_length =
-        revisionHistory.length > 0 ? revisionHistory.length : 0;
-
-      // Use Content-Disposition header to get the filename
-      const filename = `response.xlsx`;
-
-      link.download = filename.replace(/"/g, ""); // Remove quotes if present
-
-      link.click();
-    } catch (error) {
-      message.error("Error processing Excel file");
-      console.error("Error processing Excel file:", error);
-    }
+    
 
     try {
       const base64Data: any = await downloadFile(getDownLoadEndpoint(), true, {

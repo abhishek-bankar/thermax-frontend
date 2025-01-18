@@ -329,6 +329,7 @@ export const GET_LOAD_LIST_EXCEL_API = `/method/load_list_revisions.get_load_lis
 export const GET_CABLE_SCHEDULE_EXCEL_API = `/method/cable_schedule_revisions.get_cable_schedule_excel`;
 export const GET_VOLTAGE_DROP_EXCEL_API = `/method/cable_schedule_revisions.get_voltage_drop_excel`;
 export const GET_ISOLATOR_EXCEL_API = `/method/local_isolator_revisions.get_local_isolator_excel`;
+export const GET_LPBS_SPECS_EXCEL_API = `/method/lpbs_specification_revisions.get_lpbs_specification_excel`;
 export const GET_CB_COUNT = `/method/frappe.client.get_count?doctype=Circuit Breaker`;
 export const GET_SFU_COUNT = `/method/frappe.client.get_count?doctype=SFU`;
 

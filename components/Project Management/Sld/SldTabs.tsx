@@ -281,9 +281,7 @@ const useDataFetching = (
       const cableScheduleData = await getData(
         `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${cableScheduleRevisionId}`
       );
-      // console.log(cableScheduleData, "cableScheduleData");
-      // console.log(projectPanelData, "projectPanelData");
-      // console.log(loadList);
+     
       setCableScheduleData(cableScheduleData.cable_schedule_data);
       setProjectPanelData(projectPanelData);
       setLoadListData(loadList?.electrical_load_list_data);
@@ -313,8 +311,7 @@ const SLDTabs: React.FC<Props> = ({
   cableScheduleRevisionId,
   loadListLatestRevisionId,
   sldRevisions,
-}) => {
-  // console.log(sldRevisions, "getAllSldRevisions");
+}) => { 
 
   const { setLoading: setModalLoading } = useLoading();
   const [sLDTabs, setSLDTabs] = useState<any[]>([]);
@@ -326,8 +323,7 @@ const SLDTabs: React.FC<Props> = ({
   );
 
   const [panelWiseData, setPanelWiseData] = useState<any[]>([]);
-  useEffect(() => {
-    // console.log(panelWiseData);
+  useEffect(() => { 
 
     const updatedTabs = panelWiseData.map((tab: any, index: number) => {
       return {
@@ -389,8 +385,7 @@ const SLDTabs: React.FC<Props> = ({
         return acc;
       }, []);
 
-      setPanelWiseData(panelWiseData);
-      // console.log(panelWiseData);
+      setPanelWiseData(panelWiseData); 
     }
   }, [loadListData, projectPanelData]);
 
@@ -443,40 +438,10 @@ const SLDTabs: React.FC<Props> = ({
         return acc;
       }, []);
 
-      setPanelWiseData(panelWiseData);
-      // console.log(panelWiseData);
+      setPanelWiseData(panelWiseData); 
     }
   };
-
-  // const onChange = async (key: string) => {
-  // setModalLoading(true)
-  // console.log(key)
-  // console.log(documentList)
-  // console.log(getApiEndpoint(key))
-  // try {
-  //   // const documentList = await getData()
-  //   // console.log(staticData,"staticData");
-  //   const data = await getData(getApiEndpoint(key))
-  //   console.log(data)
-  //   const dataSource = data?.map((item: any, index: number) => ({
-  //     key: item.name,
-  //     documentName: getName(key),
-  //     status: item.status,
-  //     documentRevision: `R${index}`,
-  //     createdDate: item.creation,
-  //   }))
-  //   if (key === "6") {
-  //     await getIsolatorData()
-  //   }
-  //   console.log(dataSource)
-  //   setDataSource(dataSource)
-  //   console.log(data)
-  // } catch (error) {
-  // } finally {
-  //   setModalLoading(false)
-  // }
-  // setTabKey(key)
-  // };
+ 
 
   return (
     <div className="">
@@ -488,12 +453,9 @@ const SLDTabs: React.FC<Props> = ({
         >
           Get Load List Details
         </Button>
-        {/* <Button type="primary" onClick={() => {}} className="hover:bg-blue-600">
-          Panel Mapping
-        </Button> */}
+      
       </div>
-      <Tabs
-        // onChange={onChange}
+      <Tabs 
         type="card"
         style={{ fontSize: "11px !important" }}
         items={sLDTabs}

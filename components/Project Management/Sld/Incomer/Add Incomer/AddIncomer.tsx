@@ -78,7 +78,7 @@ const useDataFetching = (
         return PCC_PANEL;
 
       default:
-        return "";
+        return MCC_PANEL;
     }
   };
 
@@ -88,10 +88,11 @@ const useDataFetching = (
       const makeComponents = await getData(
         `${MAKE_OF_COMPONENT_API}?fields=["preferred_lv_switchgear"]&filters=[["revision_id", "=", "${revision_id}"]]`
       );
+     
       const projectPanelData = await getData(
         `${getPanelDoctype(
           panelType
-        )}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
+        )}?fields=["*"]&filters=[["panel_id", "=", "${panel_id}"]]`
       );
       const sg_data = await getData(`${SLD_REVISIONS_API}/${sld_revision_id}`);
       // console.log(projectPanelData, "vishal");

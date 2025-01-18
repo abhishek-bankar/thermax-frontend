@@ -24,6 +24,7 @@ import {
   GET_CABLE_SCHEDULE_EXCEL_API,
   GET_ISOLATOR_EXCEL_API,
   GET_LOAD_LIST_EXCEL_API,
+  GET_LPBS_SPECS_EXCEL_API,
   LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
   LOCAL_ISOLATOR_REVISION_HISTORY_API,
   LPBS_SCHEMES_URI,
@@ -105,7 +106,7 @@ const Download: React.FC<Props> = ({
       case "2":
         return GET_CABLE_SCHEDULE_EXCEL_API;
       case "5":
-        return GET_CABLE_SCHEDULE_EXCEL_API;
+        return GET_LPBS_SPECS_EXCEL_API;
       case "6":
         return GET_ISOLATOR_EXCEL_API;
       default:
@@ -238,6 +239,12 @@ const Download: React.FC<Props> = ({
                   <Button
                     type="link"
                     shape="circle"
+                    disabled={
+                      (tab === "lpbs-specs" &&
+                        !commonConfigData?.is_local_push_button_station_selected) ||
+                      (tab === "local-isolator" &&
+                        !commonConfigData?.is_field_motor_isolator_selected)
+                    }
                     icon={
                       <CloudDownloadOutlined
                         style={{
@@ -267,7 +274,11 @@ const Download: React.FC<Props> = ({
                 name="Release"
                 disabled={
                   record.status === DB_REVISION_STATUS.Released ||
-                  userDivision !== projectDivision
+                  userDivision !== projectDivision ||
+                  (tab === "lpbs-specs" &&
+                    !commonConfigData?.is_local_push_button_station_selected) ||
+                  (tab === "local-isolator" &&
+                    !commonConfigData?.is_field_motor_isolator_selected)
                 }
                 onClick={() => handleRelease(record.key)}
               >
@@ -289,6 +300,12 @@ const Download: React.FC<Props> = ({
                 <Button
                   type="link"
                   shape="circle"
+                  disabled={
+                    (tab === "lpbs-specs" &&
+                      !commonConfigData?.is_local_push_button_station_selected) ||
+                    (tab === "local-isolator" &&
+                      !commonConfigData?.is_field_motor_isolator_selected)
+                  }
                   icon={
                     <SaveTwoTone
                       style={{
@@ -452,31 +469,31 @@ const Download: React.FC<Props> = ({
       );
       const payload = {
         is_safe_lpbs_selected: commonConfigData?.is_safe_lpbs_selected,
-        is_hazardous_lpbs_selected: commonConfigData?.is_hazardous_lpbs_selected,
+        is_hazardous_lpbs_selected:
+          commonConfigData?.is_hazardous_lpbs_selected,
         lpbs_specification_data: [
           {
-            lpbs_type: commonConfigData?.safe_lpbs_type,
-            lpbs_ip_protection: commonConfigData?.safe_lpbs_enclosure,
-            lpbs_moc: commonConfigData?.safe_lpbs_material,
-            lpbs_quantity: commonConfigData?.safe_lpbs_qty,
-            lpbs_thickness: commonConfigData?.safe_lpbs_thickness,
-            lpbs_color_shade: commonConfigData?.safe_lpbs_color_shade,
-            lpbs_canopy: commonConfigData?.safe_lpbs_canopy,
-            lpbs_canopy_type: commonConfigData?.safe_lpbs_canopy_type,
-            area: "Safe",
-          },
-          {
-            lpbs_type: commonConfigData?.hazardous_lpbs_type,
-            lpbs_ip_protection: commonConfigData?.hazardous_lpbs_enclosure,
-            lpbs_moc: commonConfigData?.hazardous_lpbs_material,
-            lpbs_qty: commonConfigData?.hazardous_lpbs_qty,
-            lpbs_thickness: commonConfigData?.hazardous_lpbs_thickness,
-            lpbs_color_shade: commonConfigData?.hazardous_lpbs_color_shade,
-            lpbs_canopy: commonConfigData?.hazardous_lpbs_canopy,
-            lpbs_canopy_type: commonConfigData?.hazardous_lpbs_canopy_type,
-            area: "Hazardous",
-          },
-          {
+            safe_lpbs_type: commonConfigData?.safe_lpbs_type,
+            safe_lpbs_ip_protection: commonConfigData?.safe_lpbs_enclosure,
+            safe_lpbs_moc: commonConfigData?.safe_lpbs_material,
+            safe_lpbs_quantity: commonConfigData?.safe_lpbs_qty,
+            safe_lpbs_thickness: commonConfigData?.safe_lpbs_thickness,
+            safe_lpbs_color_shade: commonConfigData?.safe_lpbs_color_shade,
+            safe_lpbs_canopy: commonConfigData?.safe_lpbs_canopy,
+            safe_lpbs_cable_entry: "3",
+            safe_lpbs_canopy_type: commonConfigData?.safe_lpbs_canopy_type,
+            hazardous_lpbs_type: commonConfigData?.hazardous_lpbs_type,
+            hazardous_ip_protection: commonConfigData?.hazardous_lpbs_enclosure,
+            hazardous_lpbs_moc: commonConfigData?.hazardous_lpbs_material,
+            hazardous_lpbs_qty: commonConfigData?.hazardous_lpbs_qty,
+            hazardous_lpbs_thickness:
+              commonConfigData?.hazardous_lpbs_thickness,
+            hazardous_lpbs_color_shade:
+              commonConfigData?.hazardous_lpbs_color_shade,
+            hazardous_lpbs_canopy: commonConfigData?.hazardous_lpbs_canopy,
+            hazardous_lpbs_cable_entry: "3",
+            hazardous_lpbs_canopy_type:
+              commonConfigData?.hazardous_lpbs_canopy_type,
             lpbs_push_button_start_color:
               commonConfigData?.lpbs_push_button_start_color,
             lpbs_forward_push_button_start_color:
@@ -490,23 +507,26 @@ const Download: React.FC<Props> = ({
               commonConfigData?.lpbs_indication_lamp_start_color,
             lpbs_indication_lamp_stop_color:
               commonConfigData?.lpbs_indication_lamp_stop_color,
-
-            start_push_button,
+          },
+          {
+            lpbs_start_push_button: start_push_button,
             // forward_start_push_button,
             // reverse_start_push_button,
+            forward_start_push_button: "",
+            reverse_start_push_button: "",
             emergency_stop_push_button,
-            analogue_ammeter_push_button,
-            speed_inc_push_button,
-            speed_dec_push_button,
-            analogue_rpm_push_button,
-            on_indication_lamp_push_button,
-            off_indication_lamp_push_button,
-            area: "Push Buttons",
+            analog_ammeter_push_button: analogue_ammeter_push_button,
+            speed_increase_push_button: speed_inc_push_button,
+            speed_decrease_push_button: speed_dec_push_button,
+            analog_rpm_push_button: analogue_rpm_push_button,
+            on_indication_lamp_push_button: on_indication_lamp_push_button,
+            off_indication_lamp_push_button: off_indication_lamp_push_button,
           },
         ],
         lpbs_specifications_motor_details:
-          loadListData?.electrical_load_list_data?.filter((el:any)=> el.lpbs_type !== "NA").map(
-            (item: any, index: number) => ({
+          loadListData?.electrical_load_list_data
+            ?.filter((el: any) => el.lpbs_type !== "NA")
+            .map((item: any, index: number) => ({
               serial_number: index + 1,
               tag_number: item.tag_number,
               service_description: item.service_description,
@@ -520,8 +540,7 @@ const Download: React.FC<Props> = ({
               zone: item.zone,
               temprature_class: item.temperature_class,
               gas_group: item.gas_group,
-            })
-          ),
+            })),
       };
       console.log(payload);
 
@@ -531,7 +550,7 @@ const Download: React.FC<Props> = ({
           false,
           payload
         );
-        console.log(respose)
+        console.log(respose);
         message.success("LPBS Specifications & List Saved");
       } catch (error) {
         message.error("Unable to Save LPBS Specifications & List");

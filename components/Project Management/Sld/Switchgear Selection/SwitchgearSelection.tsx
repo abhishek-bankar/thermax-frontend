@@ -590,6 +590,7 @@ import { getSwSelectionDetails } from "@/actions/sld";
 interface Props {
   designBasisRevisionId: string;
   data: any[];
+  otherData: any[];
   revision_id: string;
 }
 
@@ -763,6 +764,7 @@ const useDataFetching = (
 const SwitchgearSelection: React.FC<Props> = ({
   designBasisRevisionId,
   data,
+  otherData,
   revision_id,
 }) => {
   // console.log(data, "switchgear");
@@ -774,6 +776,7 @@ const SwitchgearSelection: React.FC<Props> = ({
   const { setLoading } = useLoading();
   const params = useParams();
   const userInfo: { division: string } = useCurrentUser();
+  const [updatedSgData, setUpdatedSgData] = useState<any>([]);
 
   const project_id = params.project_id as string;
 
@@ -913,15 +916,20 @@ const SwitchgearSelection: React.FC<Props> = ({
       // initSpreadsheet()
     }
   }, [data]);
-
+ 
   const handleSgSave = async () => {
+    console.log(commonConfiguration);
+    
     const data = spreadsheetInstance?.getData();
-
-    // console.log(data, "all load list data");
-
     const payload = {
       switchgear_selection_data: data?.map((row: any) => {
-        if (userInfo?.division === ENVIRO) {
+        const otherInfo = updatedSgData?.find(
+          (item: any) => item.tag_number === row[0]
+        );
+        const loadListItem = otherData?.find(
+          (item: any) => item.tag_number === row[0]
+        );
+        if (userInfo.division === ENVIRO) {
           return {
             tag_number: row[0],
             service_description: row[1],
@@ -943,15 +951,21 @@ const SwitchgearSelection: React.FC<Props> = ({
             terminal_part_number: row[17],
             cable_size: row[18],
             incomer: row[19],
+            unit_2: otherInfo.unit_2 ?? "",
+            unit_3: otherInfo.unit_3 ?? "",
+            unit_4: otherInfo.unit_4 ?? "",
+            section: loadListItem.package ?? "",
+            emergency_name: "No",
+            control_scheme: loadListItem.control_scheme ?? "",
+            push_button_station: loadListItem.lpbs_type ?? "",
           };
-        } else if (userInfo?.division === HEATING) {
+        } else if (userInfo.division === HEATING) {
           return {
             tag_number: row[0],
             service_description: row[1],
             hp: Number(row[2]),
             working_kw: Number(row[3]),
             standby_kw: Number(row[4]),
-            // kva: Number(row[5]),
             current: Number(row[5]),
             starter: row[6],
             make: row[7],
@@ -967,12 +981,48 @@ const SwitchgearSelection: React.FC<Props> = ({
             terminal_part_number: row[17],
             cable_size: row[18],
             incomer: row[19],
+            unit_2: otherInfo.unit_2 ?? "",
+            unit_3: otherInfo.unit_3 ?? "",
+            unit_4: otherInfo.unit_4 ?? "",
+            section: loadListItem.package ?? "",
+            emergency_name: "No",
+            control_scheme: loadListItem.control_scheme ?? "",
+            push_button_station: loadListItem.lpbs_type ?? "",
+          };
+        } else {
+          //for other divisions
+          return {
+            tag_number: row[0],
+            service_description: row[1],
+            hp: Number(row[2]),
+            working_kw: Number(row[3]),
+            standby_kw: Number(row[4]),
+            current: Number(row[5]),
+            starter: row[6],
+            make: row[7],
+            mcc_switchgear_type: row[8],
+            vfd: row[9],
+            breaker_fuse: row[10],
+            fuse_holder: row[11],
+            contractor_main: row[12],
+            contractor_star: row[13],
+            contractor_delta: row[14],
+            overlay_relay: row[15],
+            terminal_part_number: row[16],
+            cable_size: row[17],
+            incomer: row[18],
+            unit_2: otherInfo.unit_2 ?? "",
+            unit_3: otherInfo.unit_3 ?? "",
+            unit_4: otherInfo.unit_4 ?? "",
+            section: loadListItem.package ?? "",
+            emergency_name: "No",
+            control_scheme: loadListItem.control_scheme ?? "",
+            push_button_station: loadListItem.lpbs_type ?? "",
           };
         }
       }),
     };
     try {
-      // console.log(payload, "sg payload");
       setLoading(true);
 
       const respose = await updateData(
@@ -982,10 +1032,7 @@ const SwitchgearSelection: React.FC<Props> = ({
       );
       setLoading(false);
       message.success("Switchgear Selection Saved !");
-
-      // console.log(respose, "Switchgear Selection response");
     } catch (error) {
-      console.error("Error saving Switchgear Selection list:", error);
       message.error("Unable to save Switchgear Selection list");
 
       setLoading(false);
@@ -1052,8 +1099,11 @@ const SwitchgearSelection: React.FC<Props> = ({
       });
       // console.log("updated sg_data", sg_data);
       // console.log("updated calc", updatedSgData);
-
+      
       spreadsheetInstance?.setData(updatedSgData);
+      if (sg_data.length) {
+        setUpdatedSgData(sg_data);
+      }
       setLoading(false);
       // console.log(res,'motor calculations');
     } catch (error) {

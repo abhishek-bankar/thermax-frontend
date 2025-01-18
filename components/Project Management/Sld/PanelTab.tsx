@@ -919,6 +919,7 @@ const PanelTab: React.FC<Props> = ({
           <SwitchgearSelection
             designBasisRevisionId={designBasisRevisionId}
             data={panelData.data}
+            otherData={panelData.otherData}
             revision_id={latestRevision.name}
           />
         </Suspense>

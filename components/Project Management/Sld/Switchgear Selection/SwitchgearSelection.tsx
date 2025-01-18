@@ -584,7 +584,7 @@ import { switchGearSelectionColumns } from "@/components/Project Management/Elec
 import { ValidColumnType } from "@/components/Project Management/Electrical Load List/types";
 import { getStandByKw } from "@/components/Project Management/Electrical Load List/Electrical Load List/LoadListComponent";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { ENVIRO, HEATING } from "@/configs/constants";
+import { ENVIRO, HEATING, SLD_REVISION_STATUS } from "@/configs/constants";
 import { getSwSelectionDetails } from "@/actions/sld";
 
 interface Props {
@@ -777,7 +777,7 @@ const SwitchgearSelection: React.FC<Props> = ({
   const params = useParams();
   const userInfo: { division: string } = useCurrentUser();
   const [updatedSgData, setUpdatedSgData] = useState<any>([]);
-
+  const [isSgDetailsFetched, setIsSgDetailsFetched] = useState<boolean>(false);
   const project_id = params.project_id as string;
 
   const {
@@ -916,12 +916,13 @@ const SwitchgearSelection: React.FC<Props> = ({
       // initSpreadsheet()
     }
   }, [data]);
- 
+
   const handleSgSave = async () => {
     console.log(commonConfiguration);
-    
+
     const data = spreadsheetInstance?.getData();
     const payload = {
+      status: SLD_REVISION_STATUS.DEFAULT,
       switchgear_selection_data: data?.map((row: any) => {
         const otherInfo = updatedSgData?.find(
           (item: any) => item.tag_number === row[0]
@@ -1099,10 +1100,11 @@ const SwitchgearSelection: React.FC<Props> = ({
       });
       // console.log("updated sg_data", sg_data);
       // console.log("updated calc", updatedSgData);
-      
+
       spreadsheetInstance?.setData(updatedSgData);
       if (sg_data.length) {
         setUpdatedSgData(sg_data);
+        setIsSgDetailsFetched(true);
       }
       setLoading(false);
       // console.log(res,'motor calculations');
@@ -1112,6 +1114,7 @@ const SwitchgearSelection: React.FC<Props> = ({
   };
   useEffect(() => {
     console.log(isLoading);
+    console.log(updatedSgData?.length === 0);
   }, [isLoading]);
 
   return (
@@ -1137,7 +1140,11 @@ const SwitchgearSelection: React.FC<Props> = ({
         >
           Get Switchgear Details
         </Button>
-        <Button type="primary" onClick={handleSgSave} disabled={isLoading}>
+        <Button
+          type="primary"
+          onClick={handleSgSave}
+          disabled={isLoading || updatedSgData?.length === 0}
+        >
           Save
         </Button>
         <Button type="primary" onClick={() => {}} disabled={isLoading}>

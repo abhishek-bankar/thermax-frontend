@@ -724,11 +724,13 @@ import {
   Tag,
   Tooltip,
 } from "antd";
-import React, { useMemo, Suspense, lazy } from "react";
+import React, { useMemo, Suspense, lazy, useState } from "react";
 import { getThermaxDateFormat } from "@/utils/helpers";
 import { SLD_REVISION_STATUS } from "@/configs/constants";
 import { updateData } from "@/actions/crud-actions";
 import { SLD_REVISIONS_API } from "@/configs/api-endpoints";
+import { getAllSldRevisions } from "@/actions/electrical-load-list";
+import { useParams } from "next/navigation";
 
 // Lazy load tab components
 const SwitchgearSelection = lazy(
@@ -758,8 +760,19 @@ const PanelTab: React.FC<Props> = ({
   projectPanelData,
   designBasisRevisionId,
 }) => {
-  console.log(sldRevisions);
+  const params = useParams();
+  const project_id = params.project_id as string;
+  // const [sldRevisionsData, setSldRevisionsData] = useState(sldRevisions)
 
+  const getSLDRevision = async () => {
+    try {
+      const response = await getAllSldRevisions(project_id);
+
+      // setSldRevisionsData(response.filter(
+      //   (item: any) => item.panel_name === panelData.panelName
+      // ))
+    } catch (error) {}
+  };
   const handleDownload = async (record: any) => {
     console.log(record);
     if (record.status === SLD_REVISION_STATUS.DEFAULT) {
@@ -771,8 +784,20 @@ const PanelTab: React.FC<Props> = ({
         );
         // setLoading(false);
         console.log(respose);
-
         message.success("SLD is Being Prepared Please Wait For A While");
+        const interval = setInterval(async () => {
+          getSLDRevision();
+          // const revisionData:any = await getSLDRevision();
+          // const updatedRecord = revisionData.find((r:any) => r.key === record.key); // Find the specific record by key
+          // if (updatedRecord && updatedRecord.status === SLD_REVISION_STATUS.SUCCESS) {
+          //   clearInterval(interval); // Stop the interval when the status is SUCCESS
+          //   const link = document.createElement("a");
+          //   link.href = updatedRecord.sld_path;
+          //   document.body.appendChild(link);
+          //   link.click();
+          //   document.body.removeChild(link);
+          // }
+        }, 30000); // 30 seconds interval
       } catch (error) {
       } finally {
       }
@@ -824,7 +849,11 @@ const PanelTab: React.FC<Props> = ({
       {
         title: () => <div className="text-center">Created Date</div>,
         dataIndex: "createdDate",
-        render: (text) => getThermaxDateFormat(new Date(text)),
+        render: (text) => (
+          <div className="text-center">
+            {getThermaxDateFormat(new Date(text))}
+          </div>
+        ),
       },
       {
         title: () => <div className="text-center">Download</div>,

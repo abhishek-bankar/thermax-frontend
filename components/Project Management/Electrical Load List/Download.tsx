@@ -490,8 +490,8 @@ const Download: React.FC<Props> = ({
               commonConfigData?.lpbs_indication_lamp_stop_color,
 
             start_push_button,
-            //  forward_start_push_button ,
-            //  reverse_start_push_button ,
+            // forward_start_push_button,
+            // reverse_start_push_button,
             emergency_stop_push_button,
             analogue_ammeter_push_button,
             speed_inc_push_button,

@@ -213,6 +213,7 @@ export const motorCanopyCalculation = async (loadListData: any) => {
         canopy_leg_length: sameSizeKw.leg_length,
         canopy_cut_out: sameSizeKw.cut_out,
         part_code: sameSizeKw.canopy_model_number,
+        description: sameSizeKw.description,
       };
     }
 
@@ -229,6 +230,7 @@ export const motorCanopyCalculation = async (loadListData: any) => {
         canopy_leg_length: nextHigherKwFrame.leg_length,
         canopy_cut_out: nextHigherKwFrame.cut_out,
         part_code: nextHigherKwFrame.canopy_model_number,
+        description: nextHigherKwFrame.description, 
       };
     }
 

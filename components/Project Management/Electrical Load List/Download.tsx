@@ -451,6 +451,8 @@ const Download: React.FC<Props> = ({
         }
       );
       const payload = {
+        is_safe_lpbs_selected: commonConfigData?.is_safe_lpbs_selected,
+        is_hazardous_lpbs_selected: commonConfigData?.is_hazardous_lpbs_selected,
         lpbs_specification_data: [
           {
             lpbs_type: commonConfigData?.safe_lpbs_type,
@@ -499,16 +501,17 @@ const Download: React.FC<Props> = ({
             analogue_rpm_push_button,
             on_indication_lamp_push_button,
             off_indication_lamp_push_button,
+            area: "Push Buttons",
           },
         ],
-        lpbs_specs_motor_details_data:
-          loadListData?.electrical_load_list_data?.map(
+        lpbs_specifications_motor_details:
+          loadListData?.electrical_load_list_data?.filter((el:any)=> el.lpbs_type !== "NA").map(
             (item: any, index: number) => ({
               serial_number: index + 1,
               tag_number: item.tag_number,
               service_description: item.service_description,
               working_kw: getStandByKw(item.working_kw, item.standby_kw),
-              lpbs_type: "",
+              lpbs_type: item.lpbs_type,
               motor_location: item.motor_location,
               gland_size: `2 No X 1 "ET 1No X 3/4 "ET`,
               package: item.package,
@@ -522,17 +525,17 @@ const Download: React.FC<Props> = ({
       };
       console.log(payload);
 
-      // try {
-      //   const respose = await updateData(
-      //     getSaveEndPoint(key, tab),
-      //     false,
-      //     payload
-      //   );
-      //   message.success("LPBS Specifications & List Saved");
-      // } catch (error) {
-      //   message.error("Unable to Save LPBS Specifications & List");
-      // }
-      // console.log(respose)
+      try {
+        const respose = await updateData(
+          getSaveEndPoint(key, tab),
+          false,
+          payload
+        );
+        console.log(respose)
+        message.success("LPBS Specifications & List Saved");
+      } catch (error) {
+        message.error("Unable to Save LPBS Specifications & List");
+      }
     }
     if (tab === "motor-specs") {
       // area clasification from general info

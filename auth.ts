@@ -38,10 +38,12 @@ const config = {
             `${THERMAX_USER_API}?fields=["division", "is_superuser"]&filters=[["email", "=", "${email}"]]`
           );
           const userInfo = { ...nextUser[0], ...frappeUser, ...thermaxUser[0] };
+          console.log(email.toLowerCase());
+          
           return {
             first_name: userInfo?.first_name,
             last_name: userInfo?.last_name,
-            email: email.toLowerCase(),
+            email: email,
             email_verified: userInfo?.email_verified,
             division: userInfo?.division,
             is_superuser: userInfo?.is_superuser,

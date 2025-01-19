@@ -29,6 +29,7 @@ interface Props {
   data: any[];
   otherData: any[];
   revision_id: string;
+  setActiveTab: any;
 }
 
 const getArrayOfSwitchgearSelectionData = (
@@ -201,6 +202,7 @@ const useDataFetching = (
 const SwitchgearSelection: React.FC<Props> = ({
   designBasisRevisionId,
   data,
+  setActiveTab,
   otherData,
   revision_id,
 }) => {
@@ -469,7 +471,10 @@ const SwitchgearSelection: React.FC<Props> = ({
         payload
       );
       setLoading(false);
+
       message.success("Switchgear Selection Saved !");
+     
+
     } catch (error) {
       message.error("Unable to save Switchgear Selection list");
 
@@ -584,7 +589,7 @@ const SwitchgearSelection: React.FC<Props> = ({
         >
           Save
         </Button>
-        <Button type="primary" onClick={() => {}} disabled={isLoading}>
+        <Button type="primary" onClick={() =>  setActiveTab("3")} disabled={isLoading}>
           Next
         </Button>
       </div>

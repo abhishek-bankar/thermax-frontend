@@ -25,12 +25,15 @@ import {
   GET_ISOLATOR_EXCEL_API,
   GET_LOAD_LIST_EXCEL_API,
   GET_LPBS_SPECS_EXCEL_API,
+  GET_MOTOR_SPECS_EXCEL_API,
   LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
   LOCAL_ISOLATOR_REVISION_HISTORY_API,
   LPBS_SCHEMES_URI,
   MOTOR_CANOPY_REVISION_HISTORY_API,
+  MOTOR_PARAMETER_API,
   MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
   PROJECT_API,
+  PROJECT_MAIN_PKG_LIST_API,
   STATIC_DOCUMENT_API,
 } from "@/configs/api-endpoints";
 import { DB_REVISION_STATUS } from "@/configs/constants";
@@ -47,10 +50,12 @@ import { getStandByKw } from "./Electrical Load List/LoadListComponent";
 interface Props {
   designBasisRevisionId: string;
   loadListLatestRevisionId: string;
+  cableScheduleRevisionId: string;
 }
 
 const Download: React.FC<Props> = ({
   designBasisRevisionId,
+  cableScheduleRevisionId,
   loadListLatestRevisionId,
 }) => {
   const { setLoading: setModalLoading } = useLoading();
@@ -76,7 +81,9 @@ const Download: React.FC<Props> = ({
 
   const [dataSource, setDataSource] = useState<any[]>([]);
   const [commonConfigData, setCommonConfigData] = useState<any>([]);
+  const [motorSpecsData, setMotorSpecsData] = useState<any>([]);
   const [loadListData, setLoadListData] = useState<any>([]);
+  const [cableScheduleData, setCableScheduleData] = useState<any>([]);
   const [lpbsSchemes, setLpbsSchemes] = useState<any>([]);
   const [tabKey, setTabKey] = useState("1");
   // const userInfo: {
@@ -105,6 +112,10 @@ const Download: React.FC<Props> = ({
 
       case "2":
         return GET_CABLE_SCHEDULE_EXCEL_API;
+      case "3":
+        return "";
+      case "4":
+        return GET_MOTOR_SPECS_EXCEL_API;
       case "5":
         return GET_LPBS_SPECS_EXCEL_API;
       case "6":
@@ -341,6 +352,8 @@ const Download: React.FC<Props> = ({
         return `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${id}`;
       case "lpbs-specs":
         return `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}/${id}`;
+      case "motor-specs":
+        return `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}/${id}`;
 
       default:
         return "";
@@ -557,37 +570,150 @@ const Download: React.FC<Props> = ({
       }
     }
     if (tab === "motor-specs") {
-      // area clasification from general info
-      // console.log(commonConfigData);
-      // console.log(loadListData);
-      // const payload = {
-      //   motor_specification_data: [
-      //     {
-      //       fmi_type: "",
-      //       fmi_inclosure: "",
-      //       fmi_material: "",
-      //       fmi_qty: "",
-      //       ifm_isolator_color_shade: "",
-      //       ifm_cable_entry: "",
-      //       canopy_on_top: "",
-      //     },
-      //   ],
-      //   motor_details_data: [
-      //     {
-      //       serial_number: "",
-      //       tag_number: "",
-      //       service_description: "",
-      //       working_kw: "",
-      //       isolator_rating: "to be added"
-      //       gland_size: "to be added"
-      //       motor_rated_current: "",
-      //       local_isolator: "",
-      //       motor_location: "",
-      //     },
-      //   ],
-      // };
-      // const respose = await updateData(getSaveEndPoint(key, tab), false, payload)
-      // console.log(respose)
+      console.log(motorSpecsData);
+      console.log(loadListData);
+      console.log(cableScheduleData);
+      const payload = {
+        motor_specification_data: [
+          {
+            area_classification: "",
+            // standard: motorSpecsData.standard,
+            // zone: motorSpecsData.zone,
+            // gas_group: motorSpecsData.gas_group,
+            // temperature_class: motorSpecsData.temperature_class,
+            // dm_standard: motorSpecsData.dm_standard,
+            // safe_area_enclosure_ip_rating: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_enclosure_ip_rating: motorSpecsData.safe_area_enclosure_ip_rating,
+            // safe_area_duty: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_duty: motorSpecsData.safe_area_enclosure_ip_rating,
+            // safe_area_insulation_class: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_insulation_class: motorSpecsData.safe_area_enclosure_ip_rating,
+            // safe_area_temperature_rise: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_temperature_rise: motorSpecsData.safe_area_enclosure_ip_rating,
+            // safe_area_start_hour_permissible: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_start_hour_permissible: motorSpecsData.safe_area_enclosure_ip_rating,
+            // safe_area_service_factor: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_service_factor: motorSpecsData.safe_area_enclosure_ip_rating,
+            // safe_area_cooling_type: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_cooling_type: motorSpecsData.safe_area_enclosure_ip_rating,
+            // safe_area_body_material: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_body_material: motorSpecsData.safe_area_enclosure_ip_rating,
+            // safe_area_terminal_box_material: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_terminal_box_material: motorSpecsData.safe_area_enclosure_ip_rating,
+            // safe_area_paint_type_and_shade: motorSpecsData.safe_area_enclosure_ip_rating,
+            // hazardous_area_paint_type_and_shade: motorSpecsData.safe_area_enclosure_ip_rating,
+
+            gas_group: motorSpecsData?.data?.gas_group,
+            temperature_class: motorSpecsData?.data?.temperature_class,
+            standard: motorSpecsData?.data?.standard,
+            zone: motorSpecsData?.data?.zone,
+            dm_standard: motorSpecsData?.data?.dm_standard,
+            safe_area_enclosure_ip_rating:
+              motorSpecsData?.data?.safe_area_enclosure_ip_rating,
+            hazardous_area_enclosure_ip_rating:
+              motorSpecsData?.data?.hazardous_area_enclosure_ip_rating,
+            safe_area_duty: motorSpecsData?.data?.safe_area_duty,
+            hazardous_area_duty: motorSpecsData?.data?.safe_area_duty,
+            safe_area_insulation_class:
+              motorSpecsData?.data?.safe_area_insulation_class,
+            hazardous_area_insulation_class:
+              motorSpecsData?.data?.hazardous_area_insulation_class,
+
+            safe_area_temperature_rise:
+              motorSpecsData?.data?.safe_area_temperature_rise,
+            hazardous_area_temperature_rise:
+              motorSpecsData?.data?.hazardous_area_temperature_rise,
+            safe_area_starts_hour_permissible:
+              motorSpecsData?.data?.safe_area_starts_hour_permissible,
+            hazardous_area_starts_hour_permissible:
+              motorSpecsData?.data?.hazardous_area_starts_hour_permissible,
+            safe_area_service_factor:
+              motorSpecsData?.data?.safe_area_service_factor,
+            hazardous_area_service_factor:
+              motorSpecsData?.data?.hazardous_area_service_factor,
+            safe_area_cooling_type:
+              motorSpecsData?.data?.safe_area_cooling_type,
+            hazardous_area_cooling_type:
+              motorSpecsData?.data?.hazardous_area_cooling_type,
+
+            safe_area_body_material:
+              motorSpecsData?.data?.safe_area_body_material,
+            hazardous_area_body_material:
+              motorSpecsData?.data?.hazardous_area_body_material,
+            safe_area_terminal_box_material:
+              motorSpecsData?.data?.safe_area_terminal_box_material,
+            hazardous_area_terminal_box_material:
+              motorSpecsData?.data?.hazardous_area_terminal_box_material,
+            safe_area_paint_type_and_shade:
+              motorSpecsData?.data?.safe_area_paint_type_and_shade,
+            hazardous_area_paint_type_and_shade:
+              motorSpecsData?.data?.hazardous_area_paint_type_and_shade,
+          },
+        ],
+        motor_details_data:
+          motorSpecsData?.loadListData?.electrical_load_list_data?.map(
+            (feeder: any) => {
+              const cableScheduleRow =
+                cableScheduleData?.cable_schedule_data?.find(
+                  (el: any) => el.tag_number === feeder.tag_number
+                );
+              const cable_material =
+                cableScheduleRow?.cable_material === "Copper" ? "Cu" : "Al";
+              const cable_size =
+                cableScheduleRow?.number_of_runs +
+                "R" +
+                " X " +
+                cableScheduleRow?.number_of_cores +
+                " X " +
+                cableScheduleRow?.final_cable_size +
+                " Sqmm " +
+                cable_material +
+                " Armoured";
+              return {
+                tag_number: feeder.tag_number,
+                service_description: feeder.service_description,
+                working_kw: feeder.working_kw,
+                standby_kw: feeder.standby_kw,
+                starter_type: feeder.starter_type,
+                supply_voltage: feeder.supply_voltage,
+                rpm: feeder.motor_rpm,
+                type_of_mounting: feeder.motor_mounting_type,
+                motor_frame_size: feeder.motor_frame_size,
+                motor_gd2: feeder.motor_gd2,
+                gd2_of_driven_equipment: feeder.motor_driven_equipment_gd2,
+                bkw: feeder.bkw,
+                type_of_couplings: feeder.coupling_type,
+                motor_location: feeder.motor_location,
+                space_heater: feeder.space_heater,
+                thermistor: feeder.thermistor,
+                type_of_bearing: feeder.bearing_type,
+                motor_rated_current: feeder.motor_rated_current,
+                winding_rtd: feeder.wiring_rtd,
+                bearing_rtd: feeder.bearing_rtd,
+                efficiency: feeder.motor_efficiency,
+                power_factor: feeder.power_factor,
+                make: feeder.motor_make,
+                part_code: feeder.motor_part_code,
+                remark: feeder.remark,
+                area: feeder.area,
+                motor_scope: feeder.motor_scope,
+                cable_size: cable_size ?? "",
+              };
+            }
+          ),
+      };
+      console.log(payload);
+      try {
+        const respose = await updateData(
+          getSaveEndPoint(key, tab),
+          false,
+          payload
+        );
+        console.log(respose);
+        message.success("Motor Specifications & List Saved");
+      } catch (error) {
+        message.error("Unable to Save Motor Specifications & List");
+      }
     }
   };
   const DownloadTabs = [
@@ -788,11 +914,86 @@ const Download: React.FC<Props> = ({
       const lpbsResponse = await getData(
         `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${projectDivision}"]]&fields=["*"]`
       );
+
       setLpbsSchemes(lpbsResponse);
       setLoadListData(loadListData);
       setCommonConfigData(commonConfigData);
       // console.log(loadListData, "loadlist");
       // console.log(commonConfigData, "commonConfigData");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+  const getMotorSpecsData = async () => {
+    // console.log(designBasisRevisionId);
+
+    try {
+      const getMainPkgUrl = await getData(
+        `${PROJECT_MAIN_PKG_LIST_API}?revision_id=${designBasisRevisionId}`
+      );
+      const cableScheduleData = await getData(
+        `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${cableScheduleRevisionId}`
+      );
+
+      const commonConfigData1 = await getData(
+        `${COMMON_CONFIGURATION_1}?fields=["dm_standard"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
+      );
+      const motorParameters = await getData(
+        `${MOTOR_PARAMETER_API}?fields=["*"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
+      );
+      const loadListData = await getData(
+        `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${loadListLatestRevisionId}`
+      );
+
+      const data = {
+        gas_group: getMainPkgUrl[0]?.gas_group,
+        temperature_class: getMainPkgUrl[0]?.temperature_class,
+        standard: getMainPkgUrl[0]?.standard,
+        zone: getMainPkgUrl[0]?.zone,
+        dm_standard: commonConfigData1[0]?.dm_standard,
+        safe_area_enclosure_ip_rating:
+          motorParameters[0]?.safe_area_enclosure_ip_rating,
+        hazardous_area_enclosure_ip_rating:
+          motorParameters[0]?.hazardous_area_enclosure_ip_rating,
+        safe_area_duty: motorParameters[0]?.safe_area_duty,
+        hazardous_area_duty: motorParameters[0]?.safe_area_duty,
+        safe_area_insulation_class:
+          motorParameters[0]?.safe_area_insulation_class,
+        hazardous_area_insulation_class:
+          motorParameters[0]?.hazardous_area_insulation_class,
+
+        safe_area_temperature_rise:
+          motorParameters[0]?.safe_area_temperature_rise,
+        hazardous_area_temperature_rise:
+          motorParameters[0]?.hazardous_area_temperature_rise,
+        safe_area_starts_hour_permissible:
+          motorParameters[0]?.safe_area_starts_hour_permissible,
+        hazardous_area_starts_hour_permissible:
+          motorParameters[0]?.hazardous_area_starts_hour_permissible,
+        safe_area_service_factor: motorParameters[0]?.safe_area_service_factor,
+        hazardous_area_service_factor:
+          motorParameters[0]?.hazardous_area_service_factor,
+        safe_area_cooling_type: motorParameters[0]?.safe_area_cooling_type,
+        hazardous_area_cooling_type:
+          motorParameters[0]?.hazardous_area_cooling_type,
+
+        safe_area_body_material: motorParameters[0]?.safe_area_body_material,
+        hazardous_area_body_material:
+          motorParameters[0]?.hazardous_area_body_material,
+        safe_area_terminal_box_material:
+          motorParameters[0]?.safe_area_terminal_box_material,
+        hazardous_area_terminal_box_material:
+          motorParameters[0]?.hazardous_area_terminal_box_material,
+        safe_area_paint_type_and_shade:
+          motorParameters[0]?.safe_area_paint_type_and_shade,
+        hazardous_area_paint_type_and_shade:
+          motorParameters[0]?.hazardous_area_paint_type_and_shade,
+      };
+      setCableScheduleData(cableScheduleData);
+      setMotorSpecsData({ data, loadListData: loadListData });
+      console.log(getMainPkgUrl);
     } catch (error) {
       console.error(error);
     } finally {
@@ -841,6 +1042,9 @@ const Download: React.FC<Props> = ({
       }));
       if (key === "6" || key === "5") {
         await getIsolatorData();
+      }
+      if (key === "4") {
+        await getMotorSpecsData();
       }
       // console.log(dataSource);
 

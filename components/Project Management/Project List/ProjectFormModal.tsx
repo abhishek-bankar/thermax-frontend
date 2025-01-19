@@ -19,7 +19,7 @@ import {
   THERMAX_USER_API,
 } from "@/configs/api-endpoints";
 import { useDropdownOptions } from "@/hooks/useDropdownOptions";
-import { createProject } from "@/actions/project";
+import { createThermaxProject } from "@/actions/project";
 
 const getProjectFormValidationSchema = (
   project_oc_numbers: string[],
@@ -118,7 +118,7 @@ export default function ProjectFormModal({
 
   const handleCreateProject = async (projectData: any) => {
     try {
-      await createProject(projectData, userInfo);
+      await createThermaxProject(projectData, userInfo);
       setOpen(false);
       message.success("Project created successfully");
     } catch (error: any) {

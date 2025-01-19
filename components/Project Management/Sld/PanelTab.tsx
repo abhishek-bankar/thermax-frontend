@@ -12,7 +12,7 @@ import {
   Tag,
   Tooltip,
 } from "antd";
-import React, { useMemo, Suspense, lazy, useState } from "react";
+import React, { useMemo, Suspense, lazy, useState, useEffect } from "react";
 import { getThermaxDateFormat } from "@/utils/helpers";
 import { SLD_REVISION_STATUS } from "@/configs/constants";
 import { updateData } from "@/actions/crud-actions";
@@ -20,6 +20,7 @@ import { SLD_REVISIONS_API } from "@/configs/api-endpoints";
 import { getAllSldRevisions } from "@/actions/electrical-load-list";
 import { useParams } from "next/navigation";
 import PanelGa from "./Panel GA/PanelGa";
+import PanelSpecification from "./Panel Specification/PanelSpecification";
 
 // Lazy load tab components
 const SwitchgearSelection = lazy(
@@ -51,19 +52,25 @@ const PanelTab: React.FC<Props> = ({
 }) => {
   const params = useParams();
   const project_id = params.project_id as string;
-  // const [sldRevisionsData, setSldRevisionsData] = useState(sldRevisions)
-
+  const [activeKey, setActiveKey] = useState<string>("1");
+  const [setIntervaId, setSetIntervaId] = useState<any>(null);
+  const [sldRevisionsData, setSldRevisionsData] = useState(sldRevisions);
+  const [isSLDInProcess, setIsSLDInProcess] = useState(false);
   const getSLDRevision = async () => {
     try {
       const response = await getAllSldRevisions(project_id);
-
-      // setSldRevisionsData(response.filter(
-      //   (item: any) => item.panel_name === panelData.panelName
-      // ))
+      const data = response.filter(
+        (item: any) => item.panel_name === panelData.panelName
+      );
+      
+      setSldRevisionsData(data);
     } catch (error) {}
   };
+  useEffect(() => {
+    getSLDRevision();
+  }, []);
+
   const handleDownload = async (record: any) => {
-    console.log(record);
     if (record.status === SLD_REVISION_STATUS.DEFAULT) {
       try {
         const respose = await updateData(
@@ -71,7 +78,6 @@ const PanelTab: React.FC<Props> = ({
           false,
           { status: SLD_REVISION_STATUS.DOWNLOAD_READY }
         );
-        // setLoading(false);
         console.log(respose);
         message.success("SLD is Being Prepared Please Wait For A While");
         const interval = setInterval(async () => {
@@ -87,6 +93,8 @@ const PanelTab: React.FC<Props> = ({
           //   document.body.removeChild(link);
           // }
         }, 30000); // 30 seconds interval
+        setIsSLDInProcess(true);
+        setSetIntervaId(interval);
       } catch (error) {
       } finally {
       }
@@ -109,7 +117,7 @@ const PanelTab: React.FC<Props> = ({
             <Button
               type="link"
               iconPosition="start"
-              onClick={() => {}}
+              onClick={() => setActiveKey("2")}
               icon={
                 <FolderOpenOutlined
                   style={{ color: "#fef65b", fontSize: "1.2rem" }}
@@ -159,6 +167,9 @@ const PanelTab: React.FC<Props> = ({
               <Button
                 type="link"
                 shape="circle"
+                disabled={sldRevisionsData.some(
+                  (item: any) => item.status === "IN_PROCESS"
+                )}
                 icon={
                   <CloudDownloadOutlined
                     style={{
@@ -178,7 +189,14 @@ const PanelTab: React.FC<Props> = ({
         dataIndex: "release",
         render: () => (
           <div className="text-center">
-            <Button type="primary" size="small" name="Release">
+            <Button
+              type="primary"
+              size="small"
+              name="Release"
+              disabled={sldRevisionsData.some(
+                (item: any) => item.status === "IN_PROCESS"
+              )}
+            >
               Release
             </Button>
           </div>
@@ -190,7 +208,7 @@ const PanelTab: React.FC<Props> = ({
 
   const dataSource = useMemo(
     () =>
-      sldRevisions?.map((item: SLDRevision, index: number) => ({
+      sldRevisionsData?.map((item: SLDRevision, index: number) => ({
         key: item.name,
         documentName: "SLD",
         status: item.status,
@@ -198,8 +216,25 @@ const PanelTab: React.FC<Props> = ({
         createdDate: item.creation,
         sld_path: item.sld_path,
       })),
-    [sldRevisions]
+    [sldRevisionsData]
   );
+  useEffect(() => {
+    const in_process = sldRevisionsData.some(
+      (item: any) => item.status === "IN_PROCESS"
+    );
+    if (in_process) {
+      const interval = setInterval(async () => {
+        getSLDRevision();
+      }, 30000);
+      setSetIntervaId(interval);
+    } else {
+      if (setIntervaId) {
+        clearInterval(setIntervaId);
+        setSetIntervaId(null);
+      }
+      // setSetIntervaId()
+    }
+  }, [sldRevisionsData]);
 
   const latestRevision = useMemo(
     () => sldRevisions?.find((item: SLDRevision) => !item.is_released) ?? {},
@@ -215,7 +250,12 @@ const PanelTab: React.FC<Props> = ({
   const SLDRevisionTab = () => (
     <>
       <div className="text-end">
-        <Button icon={<SyncOutlined color="#492971" />}>Refresh</Button>
+        <Button
+          icon={<SyncOutlined color="#492971" />}
+          onClick={() => getSLDRevision()}
+        >
+          Refresh
+        </Button>
       </div>
       <div className="mt-2">
         <Table columns={columns} dataSource={dataSource} size="small" />
@@ -239,6 +279,7 @@ const PanelTab: React.FC<Props> = ({
             data={panelData.data}
             otherData={panelData.otherData}
             revision_id={latestRevision.name}
+            setActiveTab={setActiveKey}
           />
         </Suspense>
       ),
@@ -253,6 +294,7 @@ const PanelTab: React.FC<Props> = ({
             panelData={panelData}
             projectPanelData={projectPanelData}
             revision_id={latestRevision.name}
+            setActiveTab={setActiveKey}
           />
         </Suspense>
       ),
@@ -262,7 +304,11 @@ const PanelTab: React.FC<Props> = ({
       key: "4",
       children: (
         <Suspense fallback={<LoadingFallback />}>
-          <BusbarSizing designBasisRevisionId={designBasisRevisionId} />
+          <BusbarSizing
+            revision_id={latestRevision.name}
+            designBasisRevisionId={designBasisRevisionId}
+            setActiveTab={setActiveKey}
+          />
         </Suspense>
       ),
     },
@@ -270,24 +316,40 @@ const PanelTab: React.FC<Props> = ({
       label: "PANEL GA",
       key: "5",
       children: (
-        <PanelGa
-          panelData={panelData}
-          projectPanelData={projectPanelData}
-          sld_revision_id={latestRevision.name}
-        />
+        <Suspense fallback={<LoadingFallback />}>
+          <PanelGa
+            panelData={panelData}
+            projectPanelData={projectPanelData}
+            sld_revision_id={latestRevision.name}
+          />
+        </Suspense>
       ),
     },
     {
       label: "PANEL SPECIFICATIONS",
       key: "6",
-      children: <h2>PANEL SPECIFICATIONS</h2>,
+      children: (
+        <Suspense fallback={<LoadingFallback />}>
+          <PanelSpecification
+            panelData={panelData}
+            projectPanelData={projectPanelData}
+            sld_revision_id={latestRevision.name}
+          />
+        </Suspense>
+      ),
     },
   ];
+  const onChange = (key: string) => {
+    setActiveKey(key);
+    localStorage.setItem("active-panels-tab", String(key));
+  };
 
   return (
     <div>
       <Tabs
         type="card"
+        activeKey={activeKey}
+        onChange={onChange}
         style={{ fontSize: "11px !important" }}
         items={tabItems}
         destroyInactiveTabPane

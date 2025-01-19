@@ -17,7 +17,7 @@ import PCCPanel from "./Dynamic Panels/PCCPanel";
 import { sortDatewise } from "@/utils/helpers";
 
 const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
-  const [activeKey, setActiveKey] = useState<string>("1"); // Default active tab
+  const [activeKey, setActiveKey] = useState<string>("1");
   const { setLoading: setModalLoading } = useLoading();
   useEffect(() => {
     setModalLoading(false);

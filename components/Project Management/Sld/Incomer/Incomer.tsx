@@ -11,6 +11,7 @@ interface Props {
   revision_id: string;
   panelData: any;
   projectPanelData: any;
+  setActiveTab: any;
 }
 
 interface IncomerData {
@@ -27,6 +28,7 @@ const Incomer: React.FC<Props> = ({
   projectPanelData,
   panelData,
   revision_id,
+  setActiveTab,
 }) => {
   const [isAddMainsIncomerOpen, setIsAddMainsIncomerOpen] =
     useState<boolean>(false);
@@ -165,6 +167,17 @@ const Incomer: React.FC<Props> = ({
         scroll={{ x: true }}
       />
 
+      <div className="flex w-full flex-row justify-end gap-2">
+        <Button
+          type="primary"
+          onClick={() => message.success("Incomer Data Saved")}
+        >
+          Save
+        </Button>
+        <Button type="primary" onClick={() => setActiveTab("4")}>
+          Next
+        </Button>
+      </div>
       {isAddMainsIncomerOpen && (
         <AddIncomer
           panelType={getPanelType().panel_main_type}

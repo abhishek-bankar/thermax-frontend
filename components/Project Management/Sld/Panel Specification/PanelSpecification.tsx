@@ -44,7 +44,7 @@ const useDataFetching = (project_id: string, panel: any) => {
       }
       console.log(panelData);
       console.log(panelGARevisions);
- 
+
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -74,7 +74,7 @@ interface Props {
   sld_revision_id: string;
 }
 
-const PanelGa: React.FC<Props> = ({
+const PanelSpecification: React.FC<Props> = ({
   panelData,
   projectPanelData,
   sld_revision_id,
@@ -97,12 +97,12 @@ const PanelGa: React.FC<Props> = ({
     isLoading,
   } = useDataFetching(project_id, panel);
   console.log(designBasisData);
-  
+
   const dataSource = useMemo(
     () =>
       panelGARevisions?.map((item: any, index: number) => ({
         key: item.name,
-        documentName: "Panel GA",
+        documentName: "Panel Specification",
         status: item.status,
         documentRevision: `R${index}`,
         createdDate: item.creation,
@@ -111,63 +111,63 @@ const PanelGa: React.FC<Props> = ({
     [panelGARevisions]
   );
   const handleDownload = async (record: any) => {
-    console.log(record);
-    if (record.status === SLD_REVISION_STATUS.DEFAULT) {
-      try {
-        const respose = await updateData(
-          `${GA_REVISIONS_API}/${record.key}`,
-          false,
-          { status: SLD_REVISION_STATUS.DOWNLOAD_READY }
-        );
-        // setLoading(false);
-        console.log(respose);
-        message.success("Panel GA is Being Prepared Please Wait For A While");
-        // const interval = setInterval(async () => {
-        //   getSLDRevision();
-        //   // const revisionData:any = await getSLDRevision();
-        //   // const updatedRecord = revisionData.find((r:any) => r.key === record.key); // Find the specific record by key
-        //   // if (updatedRecord && updatedRecord.status === SLD_REVISION_STATUS.SUCCESS) {
-        //   //   clearInterval(interval); // Stop the interval when the status is SUCCESS
-        //   //   const link = document.createElement("a");
-        //   //   link.href = updatedRecord.sld_path;
-        //   //   document.body.appendChild(link);
-        //   //   link.click();
-        //   //   document.body.removeChild(link);
-        //   // }
-        // }, 30000); // 30 seconds interval
-      } catch (error) {
-      } finally {
-      }
-    } else if (record.status === SLD_REVISION_STATUS.SUCCESS) {
-      const link = document.createElement("a");
-      link.href = record.sld_path;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    // console.log(record);
+    // if (record.status === SLD_REVISION_STATUS.DEFAULT) {
+    //   try {
+    //     const respose = await updateData(
+    //       `${GA_REVISIONS_API}/${record.key}`,
+    //       false,
+    //       { status: SLD_REVISION_STATUS.DOWNLOAD_READY }
+    //     );
+    //     // setLoading(false);
+    //     console.log(respose);
+    //     message.success("Panel GA is Being Prepared Please Wait For A While");
+    //     // const interval = setInterval(async () => {
+    //     //   getSLDRevision();
+    //     //   // const revisionData:any = await getSLDRevision();
+    //     //   // const updatedRecord = revisionData.find((r:any) => r.key === record.key); // Find the specific record by key
+    //     //   // if (updatedRecord && updatedRecord.status === SLD_REVISION_STATUS.SUCCESS) {
+    //     //   //   clearInterval(interval); // Stop the interval when the status is SUCCESS
+    //     //   //   const link = document.createElement("a");
+    //     //   //   link.href = updatedRecord.sld_path;
+    //     //   //   document.body.appendChild(link);
+    //     //   //   link.click();
+    //     //   //   document.body.removeChild(link);
+    //     //   // }
+    //     // }, 30000); // 30 seconds interval
+    //   } catch (error) {
+    //   } finally {
+    //   }
+    // } else if (record.status === SLD_REVISION_STATUS.SUCCESS) {
+    //   const link = document.createElement("a");
+    //   link.href = record.sld_path;
+    //   document.body.appendChild(link);
+    //   link.click();
+    //   document.body.removeChild(link);
+    // }
   };
   const handleSave = async (key: any) => {
     console.log(designBasisData);
     console.log(key);
-    
-    const payload = {
-      panel_ga_data: [{
-        panel_front_type: designBasisData?.ga_mcc_compartmental,
-        type_of_construction_for_board: designBasisData?.ga_mcc_construction_front_type,
-        panel_incoming_feeder_drawout_type: designBasisData?.incoming_drawout_type,
-        panel_outgoing_feeder_drawout_type: designBasisData?.outgoing_drawout_type,
-        switchgear_selection_revision_id: sld_revision_id,
-      }],
-    }; 
-    try {
-      console.log(payload);
-      console.log(`${GA_REVISIONS_API}/${key}`);
-      
-      const respose = await updateData(`${GA_REVISIONS_API}/${key}`, false, payload);
-      message.success("Panel GA Saved");
-    } catch (error) {
-      message.error("Unable to Save Panel GA");
-    }
+
+    // const payload = {
+    //   panel_ga_data: [{
+    //     panel_front_type: designBasisData?.ga_mcc_compartmental,
+    //     type_of_construction_for_board: designBasisData?.ga_mcc_construction_front_type,
+    //     panel_incoming_feeder_drawout_type: designBasisData?.incoming_drawout_type,
+    //     panel_outgoing_feeder_drawout_type: designBasisData?.outgoing_drawout_type,
+    //     switchgear_selection_revision_id: sld_revision_id,
+    //   }],
+    // };
+    // try {
+    //   console.log(payload);
+    //   console.log(`${GA_REVISIONS_API}/${key}`);
+
+    //   const respose = await updateData(`${GA_REVISIONS_API}/${key}`, false, payload);
+    //   message.success("Panel GA Saved");
+    // } catch (error) {
+    //   message.error("Unable to Save Panel GA");
+    // }
   };
   const columns: TableColumnsType = useMemo(
     () => [
@@ -226,12 +226,6 @@ const PanelGa: React.FC<Props> = ({
                   <Button
                     type="link"
                     shape="circle"
-                    // disabled={
-                    //   (tab === "lpbs-specs" &&
-                    //     !commonConfigData?.is_local_push_button_station_selected) ||
-                    //   (tab === "local-isolator" &&
-                    //     !commonConfigData?.is_field_motor_isolator_selected)
-                    // }
                     icon={
                       <SaveTwoTone
                         style={{
@@ -305,4 +299,4 @@ const PanelGa: React.FC<Props> = ({
   return <GARevisionTab />;
 };
 
-export default PanelGa;
+export default PanelSpecification;

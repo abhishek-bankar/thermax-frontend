@@ -478,12 +478,11 @@ const LoadList: React.FC<LoadListProps> = ({
         );
         const lpbs_scheme = lpbs_data?.find(
           (item: any) => item.control_scheme === newValue
-        ); 
+        );
         if (lpbs_scheme) {
           data[rowIndex][getColumnIndex("lpbs_type")] = lpbs_scheme?.lpbs_type;
-        }else if(newValue === "NA"){
+        } else if (newValue === "NA") {
           data[rowIndex][getColumnIndex("lpbs_type")] = "NA";
-
         }
       }
       if (colIndex === "12") {
@@ -2033,6 +2032,11 @@ const LoadList: React.FC<LoadListProps> = ({
 
   return (
     <>
+      <div className="text-end">
+        <h3 className="italic text-gray-500 text-sm">
+          {/* last modified: {lastModified} */}
+        </h3>
+      </div>
       <div className="mb-4 flex justify-between gap-4">
         <div className="flex gap-4">
           <Button

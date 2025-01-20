@@ -14,14 +14,18 @@ import {
   PROJECT_API,
   PROJECT_INFO_API,
 } from "@/configs/api-endpoints";
-import { useGetData } from "@/hooks/useCRUD";
+import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useMCCPCCPanelDropdowns from "./MCCPCCPanelDropdown";
 import { pccPanelValidationSchema } from "../schemas";
 import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
-import { moveNAtoEnd, parseToArray } from "@/utils/helpers";
+import {
+  convertToFrappeDatetime,
+  moveNAtoEnd,
+  parseToArray,
+} from "@/utils/helpers";
 import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 
 const getDefaultValues = (
@@ -141,8 +145,7 @@ const getDefaultValues = (
     ppc_base_frame_paint_shade:
       pccPanelData?.ppc_base_frame_paint_shade || "Black",
     ppc_minimum_coating_thickness:
-      pccPanelData?.ppc_minimum_coating_thickness ||
-      "60 to 70 microns",
+      pccPanelData?.ppc_minimum_coating_thickness || "60 to 70 microns",
     ppc_pretreatment_panel_standard:
       pccPanelData?.ppc_pretreatment_panel_standard ||
       "- Panel Shall Be Degreased And Derusted(7 Tank Pretreatment)\n- Panel Shall Be Powder Coated.\nOR\n- OEM standard for pretreatment.    ",
@@ -221,8 +224,11 @@ const PCCPanel = ({
 }) => {
   const params = useParams();
   const project_id = params.project_id;
-  const { data: pccPanelData, isLoading: isPccPanelLoading } = useGetData(
-    `${PCC_PANEL}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
+  const { data: pccPanelData, isLoading: isPccPanelLoading } = useNewGetData(
+    `${PCC_PANEL}?fields=["*"]&filters=[["panel_id", "=", "${panel_id}"]]`
+  );
+  const lastModified = convertToFrappeDatetime(
+    new Date(pccPanelData?.[0]?.modified)
   );
   const getProjectInfoUrl = `${PROJECT_INFO_API}/${project_id}`;
   const getProjectMetadataUrl = `${PROJECT_API}/${project_id}`;
@@ -481,13 +487,19 @@ const PCCPanel = ({
 
   return (
     <>
-      <Divider>
-        <span className="font-bold text-slate-700">Incomer Selection</span>
-      </Divider>
+      <div className="text-end">
+        <h3 className="italic text-gray-500 text-sm">
+          last modified: {lastModified}
+        </h3>
+      </div>
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-2 px-4"
       >
+        <Divider>
+          <span className="font-bold text-slate-700">Incomer Selection</span>
+        </Divider>
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <h4 className="flex-1 text-sm font-semibold text-slate-700">

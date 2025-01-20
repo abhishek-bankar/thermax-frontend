@@ -14,14 +14,18 @@ import {
   PROJECT_API,
   PROJECT_INFO_API,
 } from "@/configs/api-endpoints";
-import { useGetData } from "@/hooks/useCRUD";
+import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useMCCPCCPanelDropdowns from "./MCCPCCPanelDropdown";
 import { mccPanelValidationSchema } from "../schemas";
 import { HEATING, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
-import { moveNAtoEnd, parseToArray } from "@/utils/helpers";
+import {
+  convertToFrappeDatetime,
+  moveNAtoEnd,
+  parseToArray,
+} from "@/utils/helpers";
 import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 
 const getDefaultValues = (
@@ -211,28 +215,29 @@ const getDefaultValues = (
 };
 
 const MCCPanel = ({
-  revision_id,
   panel_id,
   setActiveKey,
 }: {
-  revision_id: string;
   panel_id: string;
   setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const params = useParams();
   const project_id = params.project_id;
 
-  const { data: mccPanelData, isLoading: isMccPanelLoading } = useGetData(
-    `${MCC_PANEL}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
+  const { data: mccPanelData, isLoading: isMccPanelLoading } = useNewGetData(
+    `${MCC_PANEL}?fields=["*"]&filters=[["panel_id", "=", "${panel_id}"]]`
+  );
+  const lastModified = convertToFrappeDatetime(
+    new Date(mccPanelData?.[0]?.modified)
   );
 
   const getProjectInfoUrl = `${PROJECT_INFO_API}/${project_id}`;
   const getProjectMetadataUrl = `${PROJECT_API}/${project_id}`;
 
   const { data: projectMetadata, isLoading: isProjectMetaDataLoading } =
-    useGetData(getProjectMetadataUrl);
+    useNewGetData(getProjectMetadataUrl);
   const { data: projectInfo, isLoading: isProjectInfoLoading } =
-    useGetData(getProjectInfoUrl);
+    useNewGetData(getProjectInfoUrl);
 
   const [loading, setLoading] = useState(false);
   const userInfo = useCurrentUser();
@@ -327,7 +332,6 @@ const MCCPanel = ({
   }, [currentTransformerCoating, setValue]);
 
   console.log(mccPanelData, "MCC DATA");
-
 
   useEffect(() => {
     console.log(mccPanelData, "MCC DATA");
@@ -502,6 +506,11 @@ const MCCPanel = ({
 
   return (
     <>
+      <div className="text-end">
+        <h3 className="italic text-gray-500 text-sm">
+          last modified: {lastModified}
+        </h3>
+      </div>
       <Divider>
         <span className="font-bold text-slate-700">Incomer Selection</span>
       </Divider>

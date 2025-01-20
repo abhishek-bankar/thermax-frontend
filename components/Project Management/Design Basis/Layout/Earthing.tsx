@@ -7,10 +7,11 @@ import { createData, getData, updateData } from "@/actions/crud-actions";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
 import { LAYOUT_EARTHING, PROJECT_API } from "@/configs/api-endpoints";
-import { useGetData } from "@/hooks/useCRUD";
+import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useEarthingDropdowns from "./EarthingDropdown";
 import { useParams, useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { convertToFrappeDatetime } from "@/utils/helpers";
 
 const cableTrayValidationSchema = zod.object({
   earthing_system: zod.string({
@@ -44,8 +45,12 @@ const Earthing = ({ revision_id }: { revision_id: string }) => {
   const router = useRouter();
   const params = useParams();
   const userInfo = useCurrentUser();
-  const { data: layoutEarthingData } = useGetData(
+  const { data: layoutEarthingData } = useNewGetData(
     `${LAYOUT_EARTHING}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
+  );
+
+  const lastModified = convertToFrappeDatetime(
+    new Date(layoutEarthingData?.[0]?.modified)
   );
 
   const { data: projectData } = useGetData(
@@ -107,12 +112,17 @@ const Earthing = ({ revision_id }: { revision_id: string }) => {
 
   return (
     <>
-      <Divider orientation="center" orientationMargin={0}>
-        <span className="font-bold text-slate-700">
-          Material Of Construction
-        </span>
-      </Divider>
+      <div className="text-end">
+        <h3 className="italic text-gray-500 text-sm">
+          last modified: {lastModified}
+        </h3>
+      </div>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <Divider orientation="center" orientationMargin={0}>
+          <span className="font-bold text-slate-700">
+            Material Of Construction
+          </span>
+        </Divider>
         <div className="flex gap-4">
           <div className="flex-1">
             <CustomSingleSelect

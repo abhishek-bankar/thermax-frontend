@@ -43,9 +43,12 @@ export const mergeLists = (
     if (matchingItem) {
       combinedList.push({ ...list1Item, ...matchingItem });
     }
-  }
+  } 
+  const sortedList = combinedList.sort((a: any, b: any) =>
+    a.full_name.localeCompare(b.full_name)
+  );
 
-  return combinedList;
+  return sortedList;
 };
 
 export const changeNameToKey = (projectList: any[]) => {
@@ -112,9 +115,9 @@ export const sortAlphaNumericArray = (data: any) => {
   return sortedData;
 };
 
-export const parseToArray = (value: any) => { 
-  if(!value){
-    return []
+export const parseToArray = (value: any) => {
+  if (!value) {
+    return [];
   }
 
   try {

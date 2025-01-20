@@ -126,6 +126,8 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
   motorCanopyRevisionId,
 }) => {
   const jRef = useRef<HTMLDivElement | null>(null);
+  const [motorCanopyDetailsFetched, setMotorCanopyDetailsFetched] =
+    useState<any>();
   const [spreadsheetInstance, setSpreadsheetInstance] =
     useState<JspreadsheetInstance | null>(null);
   const { setLoading } = useLoading();
@@ -167,7 +169,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
       columnResize: true,
       tableOverflow: true,
       lazyLoading: true,
-      loadingSpin: true, 
+      loadingSpin: true,
       tableWidth: "100%",
       tableHeight: "550px",
       freezeColumns: 6,
@@ -204,6 +206,11 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
 
     const payload = {
       motor_canopy_data: data?.map((row: any) => {
+        console.log(motorCanopyDetailsFetched);
+
+        const otherData = motorCanopyDetailsFetched?.find(
+          (item: any) => item.tag_number === row[0]
+        );
         return {
           tag_number: row[0],
           service_description: row[1],
@@ -220,6 +227,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
           part_code: row[12],
           motor_scope: row[13],
           remark: row[14],
+          description: otherData?.description,
         };
       }),
     };
@@ -277,6 +285,9 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
         }
         return row;
       });
+      if (motorData.length > 0) {
+        setMotorCanopyDetailsFetched(motorData);
+      }
       console.log("updated calc", motorData);
       console.log("updated calc", updatedLoadList);
 
@@ -289,6 +300,8 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
       setLoading(false);
     }
   };
+  console.log(motorCanopyDetailsFetched);
+  
   return (
     <>
       <div className="m-2 flex flex-col overflow-auto">
@@ -309,7 +322,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
         <Button
           type="primary"
           onClick={handleMotorCanopySave}
-          disabled={isLoading}
+          disabled={isLoading || !motorCanopyDetailsFetched}
         >
           Save
         </Button>

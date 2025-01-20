@@ -297,6 +297,11 @@ export const CREDENTIALS_EMAIL_API =
 
 export const HEATING_CONTROL_SCHEMES_URI =
   "/document/Heating Control System Index";
+
+export const ENVIRO_CONTROL_SCHEMES_URI =
+  "/document/Enviro Control System Index";
+
+export const IPG_CONTROL_SCHEMES_URI = "/document/IPG Control System Index";
 export const SPG_SERVICES_CONTROL_SCHEMES_URI =
   "/document/WWS SPG Control System Index";
 export const LPBS_SCHEMES_URI = "/document/LPBS Combination";
@@ -323,6 +328,8 @@ export const GET_LOAD_LIST_EXCEL_API = `/method/load_list_revisions.get_load_lis
 export const GET_CABLE_SCHEDULE_EXCEL_API = `/method/cable_schedule_revisions.get_cable_schedule_excel`;
 export const GET_VOLTAGE_DROP_EXCEL_API = `/method/cable_schedule_revisions.get_voltage_drop_excel`;
 export const GET_ISOLATOR_EXCEL_API = `/method/local_isolator_revisions.get_local_isolator_excel`;
+export const GET_LPBS_SPECS_EXCEL_API = `/method/lpbs_specification_revisions.get_lpbs_specification_excel`;
+export const GET_MOTOR_SPECS_EXCEL_API = `/method/motor_specification_revisions.get_motor_specification_excel`;
 export const GET_CB_COUNT = `/method/frappe.client.get_count?doctype=Circuit Breaker`;
 export const GET_SFU_COUNT = `/method/frappe.client.get_count?doctype=SFU`;
 
@@ -333,6 +340,7 @@ export const VFD_SWITCHGEAR_API = `/document/VFD`;
 export const SOFTSTARTER_SWITCHGEAR_API = `/document/Soft Starter`;
 export const SUPPLYFEEDER_SWITCHGEAR_API = `/document/Supply Feeder`;
 export const SLD_REVISIONS_API = `/document/SLD Revisions`;
+export const GA_REVISIONS_API = `/document/Panel GA Revisions`;
 
 export const CIRCUIT_BREAKER_API = `/document/Circuit Breaker`;
 export const SFU_API = `/document/SFU`;

@@ -55,7 +55,17 @@ const getPoles = (sg_data: any, projectPanelData: any) => {
     ? projectPanelData?.incomer_pole
     : projectPanelData?.incomer_above_pole;
 };
+export const getPanelDoctype = (name: string) => {
+  switch (name) {
+    case "MCC":
+      return MCC_PANEL;
+    case "PCC":
+      return PCC_PANEL;
 
+    default:
+      return MCC_PANEL;
+  }
+};
 const useDataFetching = (
   panelType: string,
   revision_id: string,
@@ -70,17 +80,6 @@ const useDataFetching = (
   const [totalCountOfItems, setTotalCountOfItems] = useState<number>(0);
 
   const [projectPanelData, setProjectPanelData] = useState<any>([]);
-  const getPanelDoctype = (name: string) => {
-    switch (name) {
-      case "MCC":
-        return MCC_PANEL;
-      case "PCC":
-        return PCC_PANEL;
-
-      default:
-        return "";
-    }
-  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -88,10 +87,11 @@ const useDataFetching = (
       const makeComponents = await getData(
         `${MAKE_OF_COMPONENT_API}?fields=["preferred_lv_switchgear"]&filters=[["revision_id", "=", "${revision_id}"]]`
       );
+
       const projectPanelData = await getData(
         `${getPanelDoctype(
           panelType
-        )}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
+        )}?fields=["*"]&filters=[["panel_id", "=", "${panel_id}"]]`
       );
       const sg_data = await getData(`${SLD_REVISIONS_API}/${sld_revision_id}`);
       // console.log(projectPanelData, "vishal");

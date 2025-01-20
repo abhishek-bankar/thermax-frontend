@@ -1,20 +1,25 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Form, InputNumber, Card, Button, Select, message, Spin } from "antd";
-import { getData } from "@/actions/crud-actions";
+import { getData, updateData } from "@/actions/crud-actions";
 import { useParams } from "next/navigation";
 import {
   COMMON_CONFIGURATION_1,
   COMMON_CONFIGURATION_2,
   COMMON_CONFIGURATION_3,
   PROJECT_INFO_API,
+  SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
 import { getBusbarSizingCalculations } from "@/actions/sld";
+import { useLoading } from "@/hooks/useLoading";
 
-const useDataFetching = (designBasisRevisionId: string) => {
+const useDataFetching = (
+  designBasisRevisionId: string,
+  revision_id: string
+) => {
   const [isLoading, setIsLoading] = useState(true);
   // const [sg_data, setSg_data] = useState<any>([]);
   const [commonConfig, setCommonConfig] = useState<any>([]);
-  // const [commonConfiguration, setCommonConfiguration] = useState<any[]>([])
+  const [busbarSizingData, setBusbarSizingData] = useState<any>([]);
   const [projectInfo, setProjectInfo] = useState<any>([]);
   // const [totalCountOfItems, setTotalCountOfItems] = useState<number>(0);
   const params = useParams();
@@ -38,6 +43,7 @@ const useDataFetching = (designBasisRevisionId: string) => {
       const commonConfigData3 = await getData(
         `${COMMON_CONFIGURATION_3}?fields=["*"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
       );
+      const sld_data = await getData(`${SLD_REVISIONS_API}/${revision_id}`);
 
       const commonConfig = {
         ...commonConfigData1?.[0],
@@ -45,8 +51,8 @@ const useDataFetching = (designBasisRevisionId: string) => {
         ...commonConfigData3?.[0],
       };
 
-      // console.log(commonConfig, "commonConfig");
-
+      console.log(sld_data, "commonConfig");
+      setBusbarSizingData(sld_data?.busbar_sizing_data[0]);
       setProjectInfo(projectInfo);
       setCommonConfig(commonConfig);
       setIsLoading(false);
@@ -64,6 +70,7 @@ const useDataFetching = (designBasisRevisionId: string) => {
 
   return {
     totalCountOfItems: 0,
+    busbarSizingData,
     projectInfo,
     projectPanelData: [],
     sg_data: [],
@@ -73,47 +80,138 @@ const useDataFetching = (designBasisRevisionId: string) => {
 };
 
 interface Props {
+  revision_id: string;
   designBasisRevisionId: string;
+  setActiveTab: any;
 }
-const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
+const BusbarSizing: React.FC<Props> = ({
+  designBasisRevisionId,
+  setActiveTab,
+  revision_id,
+}) => {
   const [form] = Form.useForm();
-  const { projectInfo, commonConfig, isLoading } = useDataFetching(
-    designBasisRevisionId
-  );
+  const { projectInfo, busbarSizingData, commonConfig, isLoading } =
+    useDataFetching(designBasisRevisionId, revision_id);
+  const { setLoading } = useLoading();
 
-  const onFinish = (values: any) => {
-    // console.log("Received values:", values);
+  const onSubmit = async (values: any) => {
+    console.log("Received values:", values);
+
+    const {
+      fault_current,
+      maximum_temperature_during_fault,
+      operating_temperature,
+      fault_duration,
+      ambient_temperature,
+      maximum_busbar_temperature_rise,
+      material,
+      material_constant,
+      enclosure_height,
+      enclosure_depth,
+      enclosure_horizontal_busbar_chamber_height,
+      enclosure_horizontal_cable_chamber_height,
+      enclosure_vertical_busbar_chamber_width,
+      enclosure_vertical_cable_chamber_width,
+    } = values;
+    const payload = {
+      busbar_sizing_data: [
+        {
+          fault_current,
+          fault_duration,
+
+          operating_temperature,
+          maximum_temperature_during_fault,
+          ambient_temperature,
+          maximum_busbar_temperature_rise,
+
+          material,
+          material_constant,
+          enclosure_height,
+          enclosure_depth,
+          enclosure_horizontal_busbar_chamber_height,
+          enclosure_horizontal_cable_chamber_height,
+          enclosure_vertical_busbar_chamber_width,
+          enclosure_vertical_cable_chamber_width,
+          busbar_size: "",
+        },
+      ],
+    };
+    try {
+      setLoading(true);
+
+      const respose = await updateData(
+        `${SLD_REVISIONS_API}/${revision_id}`,
+        false,
+        payload
+      );
+      setLoading(false);
+      console.log(respose, "response");
+
+      message.success("Busbar/Enclouser Sizing Saved");
+      // setActiveTab("1");
+    } catch (error) {
+      message.error("Unable to save Busbar/Enclouser Sizing");
+
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+    console.log(payload, "payload");
   };
   useEffect(() => {
+    if (busbarSizingData) {
+      form.setFieldsValue({
+        fault_current: busbarSizingData.fault_current,
+        fault_duration: busbarSizingData.fault_duration,
+
+        operating_temperature: busbarSizingData.operating_temperature,
+        maximum_temperature_during_fault:
+          busbarSizingData.maximum_temperature_during_fault,
+        ambient_temperature: busbarSizingData.ambient_temperature,
+        maximum_busbar_temperature_rise:
+          busbarSizingData.maximum_busbar_temperature_rise,
+
+        material: busbarSizingData.material,
+        material_constant: busbarSizingData.material_constant,
+        enclosure_height: busbarSizingData.enclosure_height,
+        enclosure_depth: busbarSizingData.enclosure_depth,
+        enclosure_horizontal_busbar_chamber_height:
+          busbarSizingData.enclosure_horizontal_busbar_chamber_height,
+        enclosure_horizontal_cable_chamber_height:
+          busbarSizingData.enclosure_horizontal_cable_chamber_height,
+        enclosure_vertical_busbar_chamber_width:
+          busbarSizingData.enclosure_vertical_busbar_chamber_width,
+        enclosure_vertical_cable_chamber_width:
+          busbarSizingData.enclosure_vertical_cable_chamber_width,
+        busbar_size: busbarSizingData.busbar_size,
+      });
+      return;
+    }
     if (projectInfo && commonConfig) {
       const material_constant = commonConfig
         ? commonConfig?.power_bus_current_density?.split(" ")[0]
         : 0;
       form.setFieldsValue({
-        // Fault Current Details
-        faultCurrent: projectInfo.fault_level,
-        faultDuration: projectInfo.sec,
+        fault_current: projectInfo.fault_level,
+        fault_duration: projectInfo.sec,
+        operating_temperature: projectInfo.electrical_design_temperature,
+        maximum_temperature_during_fault:
+          projectInfo.maximum_temperature_during_fault,
+        ambient_temperature: projectInfo.ambient_temperature_max,
 
-        // // Temperature Details
-        operatingTemp: projectInfo.electrical_design_temperature,
-        maxTempFault: projectInfo.maxTempFault,
-        ambientTemp: projectInfo.ambient_temperature_max,
-        // maxBusbarTemp: projectInfo.maxBusbarTemp,
-
-        // // Material Details
         material: commonConfig.power_bus_material,
-        materialConstant: material_constant, // current density power bus
+        material_constant: material_constant, // current density power bus
 
         // // Enclosure Details
-        // height: projectInfo.height,
-        // depth: projectInfo.depth,
-        // horizontalBusbarHeight: projectInfo.horizontalBusbarHeight,
-        // horizontalCableHeight: projectInfo.horizontalCableHeight,
-        // verticalBusbarWidth: projectInfo.verticalBusbarWidth,
-        // verticalCableWidth: projectInfo.verticalCableWidth,
+        // enclosure_height: projectInfo.height,
+        // enclosure_depth: projectInfo.depth,
+        // enclosure_horizontal_busbar_chamber_height: projectInfo.horizontalBusbarHeight,
+        // enclosure_horizontal_cable_chamber_height: projectInfo.horizontalCableHeight,
+        // enclosure_vertical_busbar_chamber_width: projectInfo.enclosure_vertical_busbar_chamber_width,
+        // enclosure_vertical_cable_chamber_width: projectInfo.enclosure_vertical_cable_chamber_width,
       });
-    }
-  }, [projectInfo, commonConfig, form]);
+    } 
+  }, [projectInfo, commonConfig, form, busbarSizingData]);
   const handleCalculateBusbarSizing = async () => {
     // console.log(form);
     let data;
@@ -142,7 +240,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
           <Form
             form={form}
             layout="vertical"
-            onFinish={onFinish}
+            onFinish={onSubmit}
             //   {...formItemLayout}
             className="space-y-4"
           >
@@ -151,7 +249,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <Form.Item
                   label="Fault Current (kA)"
-                  name="faultCurrent"
+                  name="fault_current"
                   rules={[
                     { required: true, message: "Please enter fault current!" },
                   ]}
@@ -160,7 +258,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                 </Form.Item>
                 <Form.Item
                   label="Fault Duration (Sec.)"
-                  name="faultDuration"
+                  name="fault_duration"
                   rules={[
                     { required: true, message: "Please enter fault duration!" },
                   ]}
@@ -175,7 +273,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <Form.Item
                   label="Operating Temperature (Deg C)"
-                  name="operatingTemp"
+                  name="operating_temperature"
                   rules={[
                     {
                       required: true,
@@ -187,7 +285,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                 </Form.Item>
                 <Form.Item
                   label="Max. Temperature during fault (Deg C)"
-                  name="maxTempFault"
+                  name="maximum_temperature_during_fault"
                   rules={[
                     {
                       required: true,
@@ -199,7 +297,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                 </Form.Item>
                 <Form.Item
                   label="Ambient Temperature (Deg C)"
-                  name="ambientTemp"
+                  name="ambient_temperature"
                   rules={[
                     {
                       required: true,
@@ -211,7 +309,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                 </Form.Item>
                 <Form.Item
                   label="Max. Busbar Temperature rise (Deg C)"
-                  name="maxBusbarTemp"
+                  name="maximum_busbar_temperature_rise"
                   rules={[
                     {
                       required: true,
@@ -245,7 +343,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                 </Form.Item>
                 <Form.Item
                   label="Material Constant"
-                  name="materialConstant"
+                  name="material_constant"
                   rules={[
                     {
                       required: true,
@@ -265,7 +363,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <Form.Item
                     label="Height (mm)"
-                    name="height"
+                    name="enclosure_height"
                     rules={[
                       { required: true, message: "Please enter height!" },
                     ]}
@@ -274,7 +372,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                   </Form.Item>
                   <Form.Item
                     label="Depth (mm)"
-                    name="depth"
+                    name="enclosure_depth"
                     rules={[{ required: true, message: "Please enter depth!" }]}
                   >
                     <InputNumber min={0} className="!w-full" />
@@ -285,7 +383,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <Form.Item
                     label="Horizontal Busbar Chamber Height (mm)"
-                    name="horizontalBusbarHeight"
+                    name="enclosure_horizontal_busbar_chamber_height"
                     rules={[
                       {
                         required: true,
@@ -298,7 +396,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                   </Form.Item>
                   <Form.Item
                     label="Horizontal Cable Chamber Height (mm)"
-                    name="horizontalCableHeight"
+                    name="enclosure_horizontal_cable_chamber_height"
                     rules={[
                       {
                         required: true,
@@ -311,7 +409,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                   </Form.Item>
                   <Form.Item
                     label="Vertical Busbar Chamber Width (mm)"
-                    name="verticalBusbarWidth"
+                    name="enclosure_vertical_busbar_chamber_width"
                     rules={[
                       {
                         required: true,
@@ -323,7 +421,7 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                   </Form.Item>
                   <Form.Item
                     label="Vertical Cable Chamber Width (mm)"
-                    name="verticalCableWidth"
+                    name="enclosure_vertical_cable_chamber_width"
                     rules={[
                       {
                         required: true,
@@ -349,319 +447,21 @@ const BusbarSizing: React.FC<Props> = ({ designBasisRevisionId }) => {
                 Download Busbar Sizing
               </Button>
               <Button type="primary" htmlType="submit">
-                Save And Next
+                Save
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                onClick={() => setActiveTab("1")}
+              >
+                Next
               </Button>
             </div>
           </Form>
         </div>
       )}
     </>
-
-    // <div className="mx-auto max-w-3xl">
-    //   <Form form={form} layout="horizontal" onFinish={onFinish} className="space-y-2">
-    //     {/* Fault Current Details */}
-    //     <Card title="Fault Current Details" className="p-0 shadow-sm">
-    //       <div className="grid grid-cols-1 md:grid-cols-2">
-    //         <Form.Item
-    //           label="Fault Current (kA)"
-    //           name="faultCurrent"
-    //           className="text-blue-500"
-    //           rules={[{ required: true, message: "Please enter fault current!" }]}
-    //         >
-    //           <InputNumber readOnly min={0} className="w-full" />
-    //         </Form.Item>
-    //         <Form.Item
-    //           label="Fault Duration (Sec.)"
-    //           name="faultDuration"
-    //           rules={[{ required: true, message: "Please input fault duration!" }]}
-    //         >
-    //           <InputNumber min={0} className="w-full" />
-    //         </Form.Item>
-    //       </div>
-    //     </Card>
-
-    //     {/* Temperature Details */}
-    //     <Card title="Temperature Details" className="shadow-sm">
-    //       <div className="grid grid-cols-1 md:grid-cols-2">
-    //         <Form.Item
-    //           label="Operating Temperature (Deg C)"
-    //           name="operatingTemp"
-    //           rules={[{ required: true, message: "Please input operating temperature!" }]}
-    //         >
-    //           <InputNumber min={0} className="w-full" />
-    //         </Form.Item>
-    //         <Form.Item
-    //           label="Max. Temperature during fault (Deg C)"
-    //           name="maxTempFault"
-    //           rules={[{ required: true, message: "Please input max temperature!" }]}
-    //         >
-    //           <InputNumber min={0} className="w-full" />
-    //         </Form.Item>
-    //         <Form.Item
-    //           label="Ambient Temperature (Deg C)"
-    //           name="ambientTemp"
-    //           rules={[{ required: true, message: "Please input ambient temperature!" }]}
-    //         >
-    //           <InputNumber min={0} className="w-full" />
-    //         </Form.Item>
-    //         <Form.Item
-    //           label="Max. Busbar Temperature rise (Deg C)"
-    //           name="maxBusbarTemp"
-    //           rules={[{ required: true, message: "Please input max busbar temperature!" }]}
-    //         >
-    //           <InputNumber min={0} className="w-full" />
-    //         </Form.Item>
-    //       </div>
-    //     </Card>
-
-    //     {/* Material Details */}
-    //     <Card title="Material Details" className="shadow-sm">
-    //       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-    //         <Form.Item
-    //           label="Material"
-    //           name="material"
-    //           rules={[{ required: true, message: "Please select material!" }]}
-    //         >
-    //           <Select placeholder="Select material">
-    //             <Select.Option value="copper">Copper</Select.Option>
-    //             <Select.Option value="aluminum">Aluminum</Select.Option>
-    //           </Select>
-    //         </Form.Item>
-    //         <Form.Item
-    //           label="Material Constant"
-    //           name="materialConstant"
-    //           rules={[{ required: true, message: "Please input material constant!" }]}
-    //         >
-    //           <InputNumber min={0} className="w-full" />
-    //         </Form.Item>
-    //       </div>
-    //     </Card>
-
-    //     {/* Enclosure Details */}
-    //     <Card title="Enclosure Details" className="shadow-sm">
-    //       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-    //         {/* Overall Dimensions */}
-    //         <div className="col-span-2">
-    //           {/* <h3 className="mb-4 text-lg font-medium">Overall Dimensions</h3> */}
-    //           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-    //             <Form.Item
-    //               label="Height (mm)"
-    //               name="height"
-    //               rules={[{ required: true, message: "Please input height!" }]}
-    //             >
-    //               <InputNumber min={0} className="w-full" />
-    //             </Form.Item>
-
-    //             <Form.Item label="Depth (mm)" name="depth" rules={[{ required: true, message: "Please input depth!" }]}>
-    //               <InputNumber min={0} className="w-full" />
-    //             </Form.Item>
-    //           </div>
-    //         </div>
-
-    //         {/* Chamber Dimensions */}
-    //         <div className="col-span-2">
-    //           {/* <h3 className="mb-4 text-lg font-medium">Chamber Dimensions</h3> */}
-    //           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-    //             <Form.Item
-    //               label="Horizontal Busbar Chamber Height (mm)"
-    //               name="horizontalBusbarHeight"
-    //               rules={[{ required: true, message: "Please input horizontal busbar chamber height!" }]}
-    //             >
-    //               <InputNumber min={0} className="w-full" />
-    //             </Form.Item>
-    //             <Form.Item
-    //               label="Horizontal Cable Chamber Height (mm)"
-    //               name="horizontalCableHeight"
-    //               rules={[{ required: true, message: "Please input horizontal cable chamber height!" }]}
-    //             >
-    //               <InputNumber min={0} className="w-full" />
-    //             </Form.Item>
-    //             <Form.Item
-    //               label="Vertical Busbar Chamber Width (mm)"
-    //               name="verticalBusbarWidth"
-    //               rules={[{ required: true, message: "Please input vertical busbar chamber width!" }]}
-    //             >
-    //               <InputNumber min={0} className="w-full" />
-    //             </Form.Item>
-    //             <Form.Item
-    //               label="Vertical Cable Chamber Width (mm)"
-    //               name="verticalCableWidth"
-    //               rules={[{ required: true, message: "Please input vertical cable chamber width!" }]}
-    //             >
-    //               <InputNumber min={0} className="w-full" />
-    //             </Form.Item>
-    //           </div>
-    //         </div>
-    //       </div>
-    //     </Card>
-    //     <div className="flex justify-end gap-2">
-    //       <Button type="primary" htmlType="button" className="w-auto">
-    //         Calculate Busbar Sizing
-    //       </Button>
-    //       <Button type="primary" htmlType="button" className="w-auto">
-    //         Download Busbar Sizing
-    //       </Button>
-    //       <Button type="primary" htmlType="submit" className="w-auto" onClick={() => {}}>
-    //         Save And Next
-    //       </Button>
-    //     </div>
-    //   </Form>
-    // </div>
   );
 };
 
 export default BusbarSizing;
-
-// <div className="max-w-6xl mx-auto p-4">
-// <Form
-//   form={form}
-//   layout="vertical"
-//   onFinish={onFinish}
-//   {...formItemLayout}
-//   className="space-y-4"
-// >
-//   {/* Fault Current Details */}
-//   <Card title="Fault Current Details" className="shadow-sm">
-//     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//       <Form.Item
-//         label="Fault Current (kA)"
-//         name="faultCurrent"
-//         rules={[{ required: true, message: "Please enter fault current!" }]}
-//       >
-//         <InputNumber min={0} className="!w-full" />
-//       </Form.Item>
-//       <Form.Item
-//         label="Fault Duration (Sec.)"
-//         name="faultDuration"
-//         rules={[{ required: true, message: "Please input fault duration!" }]}
-//       >
-//         <InputNumber min={0} className="!w-full" />
-//       </Form.Item>
-//     </div>
-//   </Card>
-
-//   {/* Temperature Details */}
-//   <Card title="Temperature Details" className="shadow-sm">
-//     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//       <Form.Item
-//         label="Operating Temperature (Deg C)"
-//         name="operatingTemp"
-//         rules={[{ required: true, message: "Please input operating temperature!" }]}
-//       >
-//         <InputNumber min={0} className="!w-full" />
-//       </Form.Item>
-//       <Form.Item
-//         label="Max. Temperature during fault (Deg C)"
-//         name="maxTempFault"
-//         rules={[{ required: true, message: "Please input max temperature!" }]}
-//       >
-//         <InputNumber min={0} className="!w-full" />
-//       </Form.Item>
-//       <Form.Item
-//         label="Ambient Temperature (Deg C)"
-//         name="ambientTemp"
-//         rules={[{ required: true, message: "Please input ambient temperature!" }]}
-//       >
-//         <InputNumber min={0} className="!w-full" />
-//       </Form.Item>
-//       <Form.Item
-//         label="Max. Busbar Temperature rise (Deg C)"
-//         name="maxBusbarTemp"
-//         rules={[{ required: true, message: "Please input max busbar temperature!" }]}
-//       >
-//         <InputNumber min={0} className="!w-full" />
-//       </Form.Item>
-//     </div>
-//   </Card>
-
-//   {/* Material Details */}
-//   <Card title="Material Details" className="shadow-sm">
-//     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//       <Form.Item
-//         label="Material"
-//         name="material"
-//         rules={[{ required: true, message: "Please select material!" }]}
-//       >
-//         <Select placeholder="Select material" className="!w-full">
-//           <Select.Option value="copper">Copper</Select.Option>
-//           <Select.Option value="aluminum">Aluminum</Select.Option>
-//         </Select>
-//       </Form.Item>
-//       <Form.Item
-//         label="Material Constant"
-//         name="materialConstant"
-//         rules={[{ required: true, message: "Please input material constant!" }]}
-//       >
-//         <InputNumber min={0} className="!w-full" />
-//       </Form.Item>
-//     </div>
-//   </Card>
-
-//   {/* Enclosure Details */}
-//   <Card title="Enclosure Details" className="shadow-sm">
-//     <div className="space-y-6">
-//       {/* Overall Dimensions */}
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//         <Form.Item
-//           label="Height (mm)"
-//           name="height"
-//           rules={[{ required: true, message: "Please input height!" }]}
-//         >
-//           <InputNumber min={0} className="!w-full" />
-//         </Form.Item>
-//         <Form.Item
-//           label="Depth (mm)"
-//           name="depth"
-//           rules={[{ required: true, message: "Please input depth!" }]}
-//         >
-//           <InputNumber min={0} className="!w-full" />
-//         </Form.Item>
-//       </div>
-
-//       {/* Chamber Dimensions */}
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//         <Form.Item
-//           label="Horizontal Busbar Chamber Height (mm)"
-//           name="horizontalBusbarHeight"
-//           rules={[{ required: true, message: "Please input horizontal busbar chamber height!" }]}
-//         >
-//           <InputNumber min={0} className="!w-full" />
-//         </Form.Item>
-//         <Form.Item
-//           label="Horizontal Cable Chamber Height (mm)"
-//           name="horizontalCableHeight"
-//           rules={[{ required: true, message: "Please input horizontal cable chamber height!" }]}
-//         >
-//           <InputNumber min={0} className="!w-full" />
-//         </Form.Item>
-//         <Form.Item
-//           label="Vertical Busbar Chamber Width (mm)"
-//           name="verticalBusbarWidth"
-//           rules={[{ required: true, message: "Please input vertical busbar chamber width!" }]}
-//         >
-//           <InputNumber min={0} className="!w-full" />
-//         </Form.Item>
-//         <Form.Item
-//           label="Vertical Cable Chamber Width (mm)"
-//           name="verticalCableWidth"
-//           rules={[{ required: true, message: "Please input vertical cable chamber width!" }]}
-//         >
-//           <InputNumber min={0} className="!w-full" />
-//         </Form.Item>
-//       </div>
-//     </div>
-//   </Card>
-
-//   <div className="flex justify-end gap-2">
-//     <Button type="primary" htmlType="button">
-//       Calculate Busbar Sizing
-//     </Button>
-//     <Button type="primary" htmlType="button">
-//       Download Busbar Sizing
-//     </Button>
-//     <Button type="primary" htmlType="submit">
-//       Save And Next
-//     </Button>
-//   </div>
-// </Form>
-// </div>

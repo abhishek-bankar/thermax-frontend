@@ -12,6 +12,7 @@ import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
 import {
   DYNAMIC_DOCUMENT_API,
+  GA_REVISIONS_API,
   getProjectListUrl,
   MCC_PANEL,
   MCC_PCC_PLC_PANEL_1,
@@ -186,6 +187,8 @@ export default function PanelFormModal({
         status: SLD_REVISION_STATUS.DEFAULT,
         description: "Issued for approval",
       };
+      
+      await createData(GA_REVISIONS_API, false, new_sld_revision);
       await createData(SLD_REVISIONS_API, false, new_sld_revision);
 
       if (panelType === MCC_PANEL_TYPE) {

@@ -1,15 +1,22 @@
 "use server";
 
-import { HEATING, LOAD_LIST_REVISION_STATUS } from "@/configs/constants";
-import { getData } from "./crud-actions";
+import {
+  DB_REVISION_STATUS,
+  HEATING,
+  LOAD_LIST_REVISION_STATUS,
+} from "@/configs/constants";
+import { createData, getData, updateData } from "./crud-actions";
 import {
   CABLE_SCHEDULE_REVISION_HISTORY_API,
   CABLE_SIZE_HEATING_API,
   CABLE_SIZING_DATA_API,
   ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
   HEATING_SWITCHGEAR_HEATER_API,
+  LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
+  LOCAL_ISOLATOR_REVISION_HISTORY_API,
   MOTOR_CANOPY_METADATA,
   MOTOR_CANOPY_REVISION_HISTORY_API,
+  MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
   SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
 
@@ -230,7 +237,7 @@ export const motorCanopyCalculation = async (loadListData: any) => {
         canopy_leg_length: nextHigherKwFrame.leg_length,
         canopy_cut_out: nextHigherKwFrame.cut_out,
         part_code: nextHigherKwFrame.canopy_model_number,
-        description: nextHigherKwFrame.description, 
+        description: nextHigherKwFrame.description,
       };
     }
 
@@ -521,4 +528,210 @@ export const getCableSizingCalculation = async (cableScheduleData: any) => {
   });
 
   return calculatedData;
+};
+
+export const copyRevision = async (payload: any) => { 
+  const old_revision_id = payload.revision_id;
+  const clone_note = payload.clone_notes;
+  const module_name = payload.module_name;
+  const copy_load_list = async () => {
+    try {
+      const existing_load_list_data = await getData(
+        `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${old_revision_id}`
+      );
+      const new_load_list_revision = {
+        status: LOAD_LIST_REVISION_STATUS.NotReleased,
+        project_id: existing_load_list_data.project_id,
+        electrical_load_list_data:
+          existing_load_list_data.electrical_load_list_data,
+        clone_note,
+      };
+      const response = await createData(
+        ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
+        false,
+        new_load_list_revision
+      ); 
+      if (response) {
+        await updateData(
+          `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        );
+      }
+    } catch (error) {}
+  };
+  const copy_cable_schedule = async () => {
+    try {
+      const existing_cable_schedule_data = await getData(
+        `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${old_revision_id}`
+      );
+      const new_cable_schedule_revision = {
+        status: LOAD_LIST_REVISION_STATUS.NotReleased,
+        project_id: existing_cable_schedule_data.project_id,
+        cable_schedule_data: existing_cable_schedule_data.cable_schedule_data,
+        clone_note,
+        excel_payload: existing_cable_schedule_data.excel_payload,
+      };
+      console.log(existing_cable_schedule_data);
+
+      const response = await createData(
+        CABLE_SCHEDULE_REVISION_HISTORY_API,
+        false,
+        new_cable_schedule_revision
+      ); 
+      if (response) {
+        await updateData(
+          `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        );
+      }
+    } catch (error) {}
+  };
+  const copy_motor_canopy = async () => {
+    try {
+      const existing_motor_canopy = await getData(
+        `${MOTOR_CANOPY_REVISION_HISTORY_API}/${old_revision_id}`
+      );
+      const new_motor_canopy_revision = {
+        status: LOAD_LIST_REVISION_STATUS.NotReleased,
+        project_id: existing_motor_canopy.project_id,
+        motor_canopy_data: existing_motor_canopy.motor_canopy_data,
+        clone_note,
+      }; 
+
+      const response = await createData(
+        MOTOR_CANOPY_REVISION_HISTORY_API,
+        false,
+        new_motor_canopy_revision
+      ); 
+      if (response) {
+        await updateData(
+          `${MOTOR_CANOPY_REVISION_HISTORY_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        ); 
+      }
+    } catch (error) {}
+  };
+  const copy_motor_specs = async () => {
+    try {
+      const existing_motor_specs = await getData(
+        `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}/${old_revision_id}`
+      );
+      const new_motor_specs_revision = {
+        status: LOAD_LIST_REVISION_STATUS.NotReleased,
+        project_id: existing_motor_specs.project_id,
+        clone_note,
+        is_safe_area_selected: existing_motor_specs.is_safe_area_selected,
+        is_hazardous_area_selected:
+          existing_motor_specs.is_hazardous_area_selected,
+        motor_specification_data: existing_motor_specs.motor_specification_data,
+        motor_details_data: existing_motor_specs.motor_details_data,
+      }; 
+
+      const response = await createData(
+        MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
+        false,
+        new_motor_specs_revision
+      ); 
+      if (response) {
+        await updateData(
+          `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        ); 
+      }
+    } catch (error) {}
+  };
+  const copy_lpbs_specs = async () => {
+    try {
+      const existing_lpbs_specs = await getData(
+        `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}/${old_revision_id}`
+      );
+      const new_lpbs_specs_revision = {
+        status: LOAD_LIST_REVISION_STATUS.NotReleased,
+        project_id: existing_lpbs_specs.project_id,
+        clone_note,
+        is_safe_lpbs_selected: existing_lpbs_specs.is_safe_lpbs_selected,
+        is_hazardous_lpbs_selected:
+          existing_lpbs_specs.is_hazardous_lpbs_selected,
+        lpbs_specification_data: existing_lpbs_specs.lpbs_specification_data,
+        lpbs_specifications_motor_details: existing_lpbs_specs.lpbs_specifications_motor_details,
+      }; 
+
+      const response = await createData(
+        LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
+        false,
+        new_lpbs_specs_revision
+      ); 
+      if (response) {
+        await updateData(
+          `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        ); 
+      }
+    } catch (error) {}
+  };
+  const copy_local_isolator = async () => {
+    try {
+      const existing_local_isolator = await getData(
+        `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${old_revision_id}`
+      );
+      const new_local_isolator_revision = {
+        status: LOAD_LIST_REVISION_STATUS.NotReleased,
+        project_id: existing_local_isolator.project_id,
+        clone_note,
+        is_safe_area_isolator_selected: existing_local_isolator.is_safe_area_isolator_selected,
+        is_hazardous_area_isolator_selected:
+          existing_local_isolator.is_hazardous_area_isolator_selected,
+          local_isolator_data: existing_local_isolator.local_isolator_data,
+        local_isolator_motor_details_data: existing_local_isolator.local_isolator_motor_details_data,
+      }; 
+
+      const response = await createData(
+        LOCAL_ISOLATOR_REVISION_HISTORY_API,
+        false,
+        new_local_isolator_revision
+      ); 
+      if (response) {
+        await updateData(
+          `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        ); 
+      }
+    } catch (error) {}
+  };
+  if (module_name === "load-list") {
+    copy_load_list();
+  }
+  if (module_name === "cable-schedule") {
+    copy_cable_schedule();
+  }
+  if (module_name === "motor-canopy") {
+    copy_motor_canopy();
+  }
+  if (module_name === "motor-specs") {
+    copy_motor_specs();
+  }
+  if (module_name === "lpbs-specs") {
+    copy_lpbs_specs();
+  }
+  if (module_name === "local-isolator") {
+    copy_local_isolator();
+  }
 };

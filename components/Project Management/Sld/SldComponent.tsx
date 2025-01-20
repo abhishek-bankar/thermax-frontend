@@ -21,7 +21,7 @@ const SldComponent: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <div>
+    <div> 
       <SLDTabs
         sldRevisions={sldRevisions}
         designBasisRevisionId={designBasisRevisionId}

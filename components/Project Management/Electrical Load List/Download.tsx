@@ -1,6 +1,7 @@
 "use client";
 import {
   CloudDownloadOutlined,
+  CopyTwoTone,
   FolderOpenOutlined,
   SaveTwoTone,
   SyncOutlined,
@@ -9,6 +10,7 @@ import { downloadFile, getData, updateData } from "@/actions/crud-actions";
 import {
   Button,
   message,
+  Popconfirm,
   Table,
   TableColumnsType,
   Tabs,
@@ -36,7 +38,10 @@ import {
   PROJECT_MAIN_PKG_LIST_API,
   STATIC_DOCUMENT_API,
 } from "@/configs/api-endpoints";
-import { DB_REVISION_STATUS, LOAD_LIST_REVISION_STATUS } from "@/configs/constants";
+import {
+  DB_REVISION_STATUS,
+  LOAD_LIST_REVISION_STATUS,
+} from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 import "./DownloadComponent.css";
 import { useLoading } from "@/hooks/useLoading";
@@ -46,6 +51,7 @@ import { mutate } from "swr";
 import { getThermaxDateFormat } from "@/utils/helpers";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getStandByKw } from "./Electrical Load List/LoadListComponent";
+import CopyRevision from "@/components/Modal/CopyRevision";
 
 interface Props {
   designBasisRevisionId: string;
@@ -64,7 +70,7 @@ const Download: React.FC<Props> = ({
 
   const [downloadIconSpin, setDownloadIconSpin] = useState(false);
   // const [submitIconSpin, setSubmitIconSpin] = useState(false);
-
+  const [versionToCopy, setVersionToCopy] = useState(null); 
   const params = useParams();
   const project_id = params.project_id as string;
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
@@ -91,6 +97,8 @@ const Download: React.FC<Props> = ({
   // } = useCurrentUser();
 
   useEffect(() => {
+    console.log(revisionHistory);
+
     if (revisionHistory?.length) {
       const dataSource = revisionHistory?.map((item: any, index: number) => ({
         key: item.name,
@@ -98,6 +106,7 @@ const Download: React.FC<Props> = ({
         status: item.status,
         documentRevision: `R${index}`,
         createdDate: item.creation,
+        is_copied: item.is_copied,
       }));
       setDataSource(dataSource);
     }
@@ -160,22 +169,37 @@ const Download: React.FC<Props> = ({
     }
   };
 
-  const handleRelease = async (row: any) => {
+  const handleRelease = async (record: any, tab: any) => {
+    console.log(record, tab);
+
+    // getSaveEndPoint("x",)
     setModalLoading(true);
     try {
-      console.log(row);
-      if(row.status === LOAD_LIST_REVISION_STATUS.NotReleased){
-        // const response = await updateData(getApiEndpoint(""),false,{})
+      // console.log(row);
+      if (record.status === LOAD_LIST_REVISION_STATUS.NotReleased) {
+        const response = await updateData(
+          getSaveEndPoint(record?.key, tab),
+          false,
+          { status: LOAD_LIST_REVISION_STATUS.Released }
+        );
+        console.log(response);
       }
-      // console.log(revision_id);
+      console.log(tabKey);
+
+      // updateDataSource()
       // await copyDesignBasisRevision(project_id, revision_id)
       // mutate(dbLoadlistHistoryUrl);
-      message.success("Load list revision is released and locked");
+      message.success("Revision is Released and Locked");
+      updateDataSource(tabKey);
     } catch (error) {
       console.error(error);
     } finally {
       setModalLoading(false);
     }
+  };
+  const handleClone = async (record: any) => {
+    setVersionToCopy(record);
+    // console.log(record);
   };
   // const { setLoading: setModalLoading } = useLoading()
   useEffect(() => {
@@ -278,12 +302,45 @@ const Download: React.FC<Props> = ({
         },
       },
       {
+        title: () => <div className="text-center">Create New Revision</div>,
+        dataIndex: "clone",
+        render: (_, record) => {
+          console.log(record);
+          if (record.is_copied === 1) {
+            return null;
+          }
+
+          return (
+            <div className="text-center">
+              <Tooltip title={"Create New Revision"}>
+                <Button
+                  type="link"
+                  shape="circle"
+                  icon={
+                    <CopyTwoTone
+                      style={{
+                        fontSize: "1rem",
+                      }}
+                    />
+                  }
+                  onClick={() => handleClone(record)}
+                  disabled={
+                    record.status !== DB_REVISION_STATUS.Released ||
+                    userDivision !== projectDivision
+                  }
+                />
+              </Tooltip>
+            </div>
+          );
+        },
+      },
+      {
         title: () => <div className="text-center">Release</div>,
         dataIndex: "release",
         render: (text, record) => {
           return (
             <div className="text-center">
-              <Button
+              {/* <Button
                 type="primary"
                 size="small"
                 name="Release"
@@ -295,10 +352,42 @@ const Download: React.FC<Props> = ({
                   (tab === "local-isolator" &&
                     !commonConfigData?.is_field_motor_isolator_selected)
                 }
-                onClick={() => handleRelease(record)}
+                onClick={() => handleRelease(record, tab)}
               >
                 Release
-              </Button>
+              </Button> */}
+
+              <Popconfirm
+                title="Are you sure to release this revision?"
+                onConfirm={async () => handleRelease(record, tab)}
+                okText="Yes"
+                cancelText="No"
+                placement="topRight"
+                disabled={
+                  record.status === DB_REVISION_STATUS.Released ||
+                  userDivision !== projectDivision ||
+                  (tab === "lpbs-specs" &&
+                    !commonConfigData?.is_local_push_button_station_selected) ||
+                  (tab === "local-isolator" &&
+                    !commonConfigData?.is_field_motor_isolator_selected)
+                }
+              >
+                <Button
+                  type="primary"
+                  size="small"
+                  name="Release"
+                  disabled={
+                    record.status === DB_REVISION_STATUS.Released ||
+                    userDivision !== projectDivision ||
+                    (tab === "lpbs-specs" &&
+                      !commonConfigData?.is_local_push_button_station_selected) ||
+                    (tab === "local-isolator" &&
+                      !commonConfigData?.is_field_motor_isolator_selected)
+                  }
+                >
+                  Release
+                </Button>
+              </Popconfirm>
             </div>
           );
         },
@@ -308,6 +397,13 @@ const Download: React.FC<Props> = ({
       title: () => <div className="text-center">Save</div>,
       dataIndex: "download",
       render(text: any, record: any) {
+        if (
+          record.is_copied === 1 ||
+          record.status === LOAD_LIST_REVISION_STATUS.Released
+        ) {
+          return null;
+        }
+
         return (
           <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
             <div>
@@ -351,6 +447,8 @@ const Download: React.FC<Props> = ({
   };
 
   const getSaveEndPoint = (id: any, tab: any) => {
+    console.log(tab);
+
     switch (tab) {
       case "local-isolator":
         return `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${id}`;
@@ -358,6 +456,12 @@ const Download: React.FC<Props> = ({
         return `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}/${id}`;
       case "motor-specs":
         return `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}/${id}`;
+      case "load-list":
+        return `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${id}`;
+      case "cable-schedule":
+        return `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${id}`;
+      case "motor-canopy":
+        return `${MOTOR_CANOPY_REVISION_HISTORY_API}/${id}`;
 
       default:
         return "";
@@ -729,7 +833,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("1")}
             >
               {" "}
               Refresh
@@ -754,7 +858,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("2")}
             >
               {" "}
               Refresh
@@ -779,7 +883,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("3")}
             >
               {" "}
               Refresh
@@ -804,7 +908,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("4")}
             >
               {" "}
               Refresh
@@ -829,7 +933,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("5")}
             >
               {" "}
               Refresh
@@ -854,7 +958,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("6")}
             >
               {" "}
               Refresh
@@ -1023,6 +1127,25 @@ const Download: React.FC<Props> = ({
         return "";
     }
   };
+  const updateDataSource = async (key: any) => {
+    console.log(key);
+
+    const data = await getData(getApiEndpoint(key));
+    // console.log(data);
+
+    const dataSource = data?.map((item: any, index: number) => ({
+      key: item.name,
+      documentName: getName(key),
+      status: item.status,
+      documentRevision: `R${index}`,
+      createdDate: item.creation,
+      is_copied: item.is_copied,
+    }));
+    console.log(dataSource, " fetched all revisions");
+
+    setDataSource(dataSource);
+  };
+
   const onChange = async (key: string) => {
     setModalLoading(true);
 
@@ -1035,16 +1158,7 @@ const Download: React.FC<Props> = ({
 
       // console.log(staticData,"staticData");
 
-      const data = await getData(getApiEndpoint(key));
-      // console.log(data);
-
-      const dataSource = data?.map((item: any, index: number) => ({
-        key: item.name,
-        documentName: getName(key),
-        status: item.status,
-        documentRevision: `R${index}`,
-        createdDate: item.creation,
-      }));
+      updateDataSource(key);
       if (key === "6" || key === "5") {
         await getIsolatorData();
       }
@@ -1053,7 +1167,6 @@ const Download: React.FC<Props> = ({
       }
       // console.log(dataSource);
 
-      setDataSource(dataSource);
       // console.log(data);
     } catch (error) {
       console.error(error);
@@ -1070,6 +1183,12 @@ const Download: React.FC<Props> = ({
         type="card"
         style={{ fontSize: "11px !important" }}
         items={DownloadTabs}
+      />
+      <CopyRevision
+        version={versionToCopy}
+        setVersionToCopy={setVersionToCopy} 
+        tab={tabKey}
+        updateTable={updateDataSource}
       />
     </div>
   );

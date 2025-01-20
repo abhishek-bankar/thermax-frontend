@@ -97,6 +97,7 @@ const PanelGa: React.FC<Props> = ({
     isLoading,
   } = useDataFetching(project_id, panel);
   console.log(designBasisData);
+  console.log(panelGARevisions);
   
   const dataSource = useMemo(
     () =>

@@ -36,7 +36,7 @@ import {
   PROJECT_MAIN_PKG_LIST_API,
   STATIC_DOCUMENT_API,
 } from "@/configs/api-endpoints";
-import { DB_REVISION_STATUS } from "@/configs/constants";
+import { DB_REVISION_STATUS, LOAD_LIST_REVISION_STATUS } from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 import "./DownloadComponent.css";
 import { useLoading } from "@/hooks/useLoading";
@@ -160,12 +160,16 @@ const Download: React.FC<Props> = ({
     }
   };
 
-  const handleRelease = async (revision_id: string) => {
+  const handleRelease = async (row: any) => {
     setModalLoading(true);
     try {
+      console.log(row);
+      if(row.status === LOAD_LIST_REVISION_STATUS.NotReleased){
+        // const response = await updateData(getApiEndpoint(""),false,{})
+      }
       // console.log(revision_id);
       // await copyDesignBasisRevision(project_id, revision_id)
-      mutate(dbLoadlistHistoryUrl);
+      // mutate(dbLoadlistHistoryUrl);
       message.success("Load list revision is released and locked");
     } catch (error) {
       console.error(error);
@@ -291,7 +295,7 @@ const Download: React.FC<Props> = ({
                   (tab === "local-isolator" &&
                     !commonConfigData?.is_field_motor_isolator_selected)
                 }
-                onClick={() => handleRelease(record.key)}
+                onClick={() => handleRelease(record)}
               >
                 Release
               </Button>
@@ -912,8 +916,9 @@ const Download: React.FC<Props> = ({
         `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${loadListLatestRevisionId}`
       );
       const lpbsResponse = await getData(
-        `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${projectDivision}"]]&fields=["*"]`
+        `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${projectDivision}"]]&fields=["*"]&limit=2500`
       );
+      console.log(lpbsResponse);
 
       setLpbsSchemes(lpbsResponse);
       setLoadListData(loadListData);

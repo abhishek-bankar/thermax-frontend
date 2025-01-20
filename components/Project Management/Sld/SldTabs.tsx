@@ -245,12 +245,14 @@ import { Button, message, Tabs } from "antd";
 import {
   CABLE_SCHEDULE_REVISION_HISTORY_API,
   ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
+  PROJECT_API,
   PROJECT_PANEL_API,
 } from "@/configs/api-endpoints";
 import { useLoading } from "@/hooks/useLoading";
 import { useCallback, useEffect, useState } from "react";
 import PanelTab from "./PanelTab";
 import { getData } from "@/actions/crud-actions";
+import { useParams } from "next/navigation";
 
 interface Props {
   designBasisRevisionId: string;
@@ -261,12 +263,14 @@ interface Props {
 const useDataFetching = (
   loadListLatestRevisionId: string,
   cableScheduleRevisionId: string,
-  designBasisRevisionId: string
+  designBasisRevisionId: string,
+  project_id: string,
 ) => {
   const { isLoading, setLoading: setIsLoading } = useLoading();
   const [loadListData, setLoadListData] = useState<any[]>([]);
   const [cableScheduleData, setCableScheduleData] = useState<any[]>([]);
   const [projectPanelData, setProjectPanelData] = useState<any[]>([]);
+  const [projectData, setProjectData] = useState<any>()
   const fetchData = useCallback(async () => {
     if (!loadListLatestRevisionId) return;
 
@@ -281,7 +285,11 @@ const useDataFetching = (
       const cableScheduleData = await getData(
         `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${cableScheduleRevisionId}`
       );
-     
+      const projectData = await getData(
+        `${PROJECT_API}/${project_id}`
+      ); 
+      setProjectData(projectData)
+
       setCableScheduleData(cableScheduleData.cable_schedule_data);
       setProjectPanelData(projectPanelData);
       setLoadListData(loadList?.electrical_load_list_data);
@@ -298,6 +306,7 @@ const useDataFetching = (
   }, [fetchData]);
 
   return {
+    projectData,
     projectPanelData,
     cableScheduleData,
     loadListData,
@@ -311,20 +320,22 @@ const SLDTabs: React.FC<Props> = ({
   cableScheduleRevisionId,
   loadListLatestRevisionId,
   sldRevisions,
-}) => { 
-
+}) => {
   const { setLoading: setModalLoading } = useLoading();
   const [sLDTabs, setSLDTabs] = useState<any[]>([]);
-
-  const { projectPanelData, cableScheduleData, loadListData } = useDataFetching(
+  const params  = useParams();
+  console.log(params);
+  const project_id = params?.project_id as string
+  
+  const { projectData,projectPanelData, cableScheduleData, loadListData } = useDataFetching(
     loadListLatestRevisionId,
     cableScheduleRevisionId,
-    designBasisRevisionId
+    designBasisRevisionId,
+    project_id
   );
 
   const [panelWiseData, setPanelWiseData] = useState<any[]>([]);
-  useEffect(() => { 
-
+  useEffect(() => {
     const updatedTabs = panelWiseData.map((tab: any, index: number) => {
       return {
         label: tab.panelName,
@@ -385,7 +396,7 @@ const SLDTabs: React.FC<Props> = ({
         return acc;
       }, []);
 
-      setPanelWiseData(panelWiseData); 
+      setPanelWiseData(panelWiseData);
     }
   }, [loadListData, projectPanelData]);
 
@@ -438,14 +449,17 @@ const SLDTabs: React.FC<Props> = ({
         return acc;
       }, []);
 
-      setPanelWiseData(panelWiseData); 
+      setPanelWiseData(panelWiseData);
     }
   };
- 
 
   return (
     <div className="">
-      <div className="mb-4 flex justify-end gap-4">
+      <div className="mb-4 flex justify-between gap-4">
+        <div className="flex font-semibold">
+          <h2>{projectData?.project_oc_number}</h2>
+          <h2> / {projectData?.project_name}</h2>
+        </div>
         <Button
           type="primary"
           onClick={getLoadListData}
@@ -453,9 +467,8 @@ const SLDTabs: React.FC<Props> = ({
         >
           Get Load List Details
         </Button>
-      
       </div>
-      <Tabs 
+      <Tabs
         type="card"
         style={{ fontSize: "11px !important" }}
         items={sLDTabs}

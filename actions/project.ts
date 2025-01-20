@@ -69,6 +69,20 @@ import {
   copyProjectMainPackage,
   copyProjectDynamicPanels,
 } from "./project/copy";
+import {
+  deleteCableScheduleRevisions,
+  deleteDesignBasisGeneralInfo,
+  deleteDesignBasisMakeofComponent,
+  deleteDesignBasisMotorParameters,
+  deleteLoadListRevisions,
+  deleteLocalIsolatorRevisions,
+  deleteLPBSSpecificationRevisions,
+  deleteMotorCanopyRevisions,
+  deleteMotorSpecificationRevisions,
+  deleteProjectInformation,
+  deleteProjectMainPackage,
+  deleteStaticDocumentList,
+} from "./project/delete";
 
 export const createThermaxProject = async (projectData: any, userInfo: any) => {
   try {
@@ -187,13 +201,26 @@ export const copyThermaxProject = async (
   }
 };
 
-export const deleteProject = async (project_id: string) => {
+export const deleteThermaxProject = async (project_id: string) => {
   try {
     // Delete Project Information
-    await deleteData(`${PROJECT_INFO_API}/${project_id}`, false);
-
+    await deleteProjectInformation(project_id);
     // Delete Static Document List
-    await deleteData(`${STATIC_DOCUMENT_API}/${project_id}`, false);
+    await deleteStaticDocumentList(project_id);
+
+    // Delete Load List Revisions
+    await deleteLoadListRevisions(project_id);
+    // Delete Cable Schedule Revisions
+    await deleteCableScheduleRevisions(project_id);
+    // Delete Motor Canopy Revisions
+    await deleteMotorCanopyRevisions(project_id);
+    // Delete Motor Specification Revisions
+    await deleteMotorSpecificationRevisions(project_id);
+    // Delete LPBS Specification Revisions
+    await deleteLPBSSpecificationRevisions(project_id);
+    // Delete Local Isolator Revisions
+    await deleteLocalIsolatorRevisions(project_id);
+
     // Delete Design Basis Revision History
     const designBasisRevisionHistory = await getData(
       `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["*"]`
@@ -201,78 +228,13 @@ export const deleteProject = async (project_id: string) => {
     for (const revision of designBasisRevisionHistory || []) {
       const revisionID = revision.name;
       // Delete Design Basis General Information
-      const designBasisGeneralInfo = await getData(
-        `${DESIGN_BASIS_GENERAL_INFO_API}?filters=[["revision_id", "=", "${revisionID}"]]&fields=["*"]`
-      );
-
-      for (const dbGeneralInfo of designBasisGeneralInfo || []) {
-        const dbGeneralInfoID = dbGeneralInfo.name;
-        await deleteData(
-          `${DESIGN_BASIS_GENERAL_INFO_API}/${dbGeneralInfoID}`,
-          false
-        );
-      }
-
+      await deleteDesignBasisGeneralInfo(revisionID);
       // Delete Project Main Package
-      const projectMainPackage = await getData(
-        `${PROJECT_MAIN_PKG_API}?filters=[["revision_id", "=", "${revisionID}"]]&fields=["*"]`
-      );
-      for (const projectMainPkg of projectMainPackage || []) {
-        const projectMainPkgID = projectMainPkg.name;
-        await deleteData(`${PROJECT_MAIN_PKG_API}/${projectMainPkgID}`, false);
-      }
-
+      await deleteProjectMainPackage(revisionID);
       // Delete Motor Parameters
-      const motorParameters = await getData(
-        `${MOTOR_PARAMETER_API}?filters=[["revision_id", "=", "${revisionID}"]]&fields=["*"]`
-      );
-      for (const motorParameter of motorParameters || []) {
-        const motorParameterID = motorParameter.name;
-        await deleteData(`${MOTOR_PARAMETER_API}/${motorParameterID}`, false);
-      }
-
+      await deleteDesignBasisMotorParameters(revisionID);
       // Delete Make of Components
-      const makeOfComponents = await getData(
-        `${MAKE_OF_COMPONENT_API}?filters=[["revision_id", "=", "${revisionID}"]]&fields=["*"]`
-      );
-      for (const makeOfComponent of makeOfComponents || []) {
-        const makeOfComponentID = makeOfComponent.name;
-        await deleteData(
-          `${MAKE_OF_COMPONENT_API}/${makeOfComponentID}`,
-          false
-        );
-      }
-
-      const commonConfigurations1 = await getData(
-        `${COMMON_CONFIGURATION_1}?filters=[["revision_id", "=", "${revisionID}"]]&fields=["*"]`
-      );
-      const commonConfigurations2 = await getData(
-        `${COMMON_CONFIGURATION_2}?filters=[["revision_id", "=", "${revisionID}"]]&fields=["*"]`
-      );
-      const commonConfigurations3 = await getData(
-        `${COMMON_CONFIGURATION_3}?filters=[["revision_id", "=", "${revisionID}"]]&fields=["*"]`
-      );
-      for (const commonConfiguration of commonConfigurations1 || []) {
-        const commonConfigurationID = commonConfiguration.name;
-        await deleteData(
-          `${COMMON_CONFIGURATION_1}/${commonConfigurationID}`,
-          false
-        );
-      }
-      for (const commonConfiguration of commonConfigurations2 || []) {
-        const commonConfigurationID = commonConfiguration.name;
-        await deleteData(
-          `${COMMON_CONFIGURATION_2}/${commonConfigurationID}`,
-          false
-        );
-      }
-      for (const commonConfiguration of commonConfigurations3 || []) {
-        const commonConfigurationID = commonConfiguration.name;
-        await deleteData(
-          `${COMMON_CONFIGURATION_3}/${commonConfigurationID}`,
-          false
-        );
-      }
+      await deleteDesignBasisMakeofComponent(revisionID);
 
       // Delete all MCC Panel Data
       const mccPanelData = await getData(
@@ -376,78 +338,6 @@ export const deleteProject = async (project_id: string) => {
 
       await deleteData(
         `${DESIGN_BASIS_REVISION_HISTORY_API}/${revisionID}`,
-        false
-      );
-    }
-
-    const electricalLoadListRevisionHistory = await getData(
-      `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["*"]`
-    );
-    for (const revision of electricalLoadListRevisionHistory || []) {
-      const revisionID = revision.name;
-
-      await deleteData(
-        `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${revisionID}`,
-        false
-      );
-    }
-
-    const cableScheduleRevisionHistory = await getData(
-      `${CABLE_SCHEDULE_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["*"]`
-    );
-    for (const revision of cableScheduleRevisionHistory || []) {
-      const revisionID = revision.name;
-
-      await deleteData(
-        `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${revisionID}`,
-        false
-      );
-    }
-
-    const motorCanopyRevisionHistory = await getData(
-      `${MOTOR_CANOPY_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["*"]`
-    );
-    for (const revision of motorCanopyRevisionHistory || []) {
-      const revisionID = revision.name;
-
-      await deleteData(
-        `${MOTOR_CANOPY_REVISION_HISTORY_API}/${revisionID}`,
-        false
-      );
-    }
-
-    const motorSpecificationsRevisionHistory = await getData(
-      `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["*"]`
-    );
-    for (const revision of motorSpecificationsRevisionHistory || []) {
-      const revisionID = revision.name;
-
-      await deleteData(
-        `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}/${revisionID}`,
-        false
-      );
-    }
-
-    const lbpsSpecificationsRevisionHistory = await getData(
-      `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["*"]`
-    );
-    for (const revision of lbpsSpecificationsRevisionHistory || []) {
-      const revisionID = revision.name;
-
-      await deleteData(
-        `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}/${revisionID}`,
-        false
-      );
-    }
-
-    const localIsolatorRevisionHistory = await getData(
-      `${LOCAL_ISOLATOR_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["*"]`
-    );
-    for (const revision of localIsolatorRevisionHistory || []) {
-      const revisionID = revision.name;
-
-      await deleteData(
-        `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${revisionID}`,
         false
       );
     }

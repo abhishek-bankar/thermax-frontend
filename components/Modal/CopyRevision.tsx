@@ -59,6 +59,8 @@ const CopyRevision: React.FC<CopyRevisionProps> = ({
         return "lpbs-specs";
       case "6":
         return "local-isolator";
+      case "panel_ga":
+        return "panel_ga";
       default:
         return "";
     }
@@ -73,6 +75,8 @@ const CopyRevision: React.FC<CopyRevisionProps> = ({
     setLoading(true);
     try {
       const { clone_notes } = data;
+      console.log(version);
+      
       const revision_id = version?.key;
       copyRevision({
         revision_id,

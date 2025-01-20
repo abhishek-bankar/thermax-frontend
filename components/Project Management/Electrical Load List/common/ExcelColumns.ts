@@ -1024,10 +1024,8 @@ export const switchGearSelectionColumns = (division: string) => {
     {
       type: "dropdown",
       source: [
-        "Type II Coordination-Fuse",
-        "Type II Coordination-Fuse-One Size Higher",
-        "Type II Coordination-Fuseless",
-        "Type II Coordination-Fuseless-One Size Higher",
+        "Type II Coordination-Fuse", 
+        "Type II Coordination-Fuseless", 
       ],
       name: "switchGearType",
       title: "SWITCH GEAR TYPE",

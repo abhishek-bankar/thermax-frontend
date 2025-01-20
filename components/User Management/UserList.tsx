@@ -34,7 +34,8 @@ export const UserList = ({ userInfo }: any) => {
 
   const thermaxUserUrl = `${THERMAX_USER_API}?fields=["*"]&filters=[["division", "=",  "${userInfo?.division}"]]&limit=1000`;
   const { data: thermaxUserList } = useGetData(thermaxUserUrl);
-  const { data: userList } = useGetData(`${USER_API}?fields=["*"]&limit=1000`);
+  const userListUrl = `${USER_API}?fields=["*"]&limit=1000`;
+  const { data: userList } = useGetData(userListUrl);
   const mergedList = mergeLists(thermaxUserList, userList, "name", "name");
 
   const { setLoading: setModalLoading } = useLoading();
@@ -42,6 +43,11 @@ export const UserList = ({ userInfo }: any) => {
     setModalLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const refreshData = () => { 
+    mutate(thermaxUserUrl);
+    mutate(userListUrl);
+  };
 
   const handleEdit = (selectedRow: any) => {
     setEditEventTrigger(!editEventTrigger);
@@ -58,7 +64,14 @@ export const UserList = ({ userInfo }: any) => {
       message.error("Error deleting user");
       console.error("Error deleting user", error);
     } finally {
-      mutate(thermaxUserUrl);
+      refreshData();
+    }
+  };
+
+  const handleModalClose = (success: boolean) => {
+    setOpen(false);
+    if (success) {
+      refreshData();
     }
   };
 
@@ -67,7 +80,7 @@ export const UserList = ({ userInfo }: any) => {
       title: "Full Name",
       dataIndex: "full_name",
       key: "full_name",
-      align: "center",
+      align: "left",
       render: (text, record) => (
         <span>
           {record?.first_name} {record?.last_name}
@@ -78,21 +91,20 @@ export const UserList = ({ userInfo }: any) => {
       title: "Initials",
       dataIndex: "name_initial",
       key: "name_initial",
-      align: "center",
+      align: "left",
     },
-    { title: "Email", dataIndex: "email", key: "email", align: "center" },
+    { title: "Email", dataIndex: "email", key: "email", align: "left" },
     {
       title: "Created Date",
       dataIndex: "creation",
       key: "creation",
-      align: "center",
-
+      align: "left",
       render: (text) => new Date(text).toDateString(),
     },
     {
       title: "Action",
       dataIndex: "action",
-      align: "center",
+      align: "left",
       render: (text, record: any) => {
         return (
           <div className="flex justify-center gap-2">
@@ -141,6 +153,7 @@ export const UserList = ({ userInfo }: any) => {
     setEditMode(false);
     setUserRow(null);
   };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-2">
@@ -153,7 +166,7 @@ export const UserList = ({ userInfo }: any) => {
                 type="link"
                 shape="circle"
                 icon={<SyncOutlined />}
-                onClick={() => mutate(thermaxUserUrl)}
+                onClick={refreshData}
               />
             </div>
           </Tooltip>
@@ -179,12 +192,11 @@ export const UserList = ({ userInfo }: any) => {
 
       <UserFormModal
         open={open}
-        setOpen={setOpen}
+        setOpen={handleModalClose}
         editMode={editMode}
         values={userRow}
         editEventTrigger={editEventTrigger}
         userInfo={userInfo}
-        onMutate={() => mutate(thermaxUserUrl)}
       />
     </div>
   );

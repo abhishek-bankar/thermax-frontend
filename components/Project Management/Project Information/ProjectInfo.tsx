@@ -26,6 +26,7 @@ import PanelDataList from "./Panel/PanelDataList";
 import useProjectInfoDropdowns from "./ProjectInfoDropdowns";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Video } from "@/components/FormInputs/Video";
+import { convertToFrappeDatetime, getThermaxDateFormat } from "@/utils/helpers";
 
 const ProjectInfoSchema = zod.object({
   project_name: zod.string({
@@ -206,6 +207,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
 
   const { data: projectMetadata } = useGetData(getProjectMetadataUrl);
   const { data: projectInfo } = useGetData(getProjectInfoUrl);
+  const lastModified = convertToFrappeDatetime(new Date(projectInfo?.modified));
 
   const projectDivision = projectMetadata?.division;
 
@@ -304,9 +306,16 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
 
   return (
     <div className="flex flex-col gap-4 px-4">
-      <div className="flex font-semibold">
-        <h2>{projectData?.project_oc_number}</h2>
-        <h2> / {projectData?.project_name}</h2>
+      <div className="flex items-center justify-between gap-2 font-semibold">
+        <div className="flex">
+          <h2>{projectData?.project_oc_number}</h2>
+          <h2> / {projectData?.project_name}</h2>
+        </div>
+        <div>
+          <h3 className="italic text-gray-500 text-sm">
+            last modified: {lastModified}
+          </h3>
+        </div>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="flex gap-4">

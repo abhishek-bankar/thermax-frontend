@@ -20,20 +20,21 @@ import {
   PROJECT_MAIN_PKG_LIST_API,
   SUB_PKG_API,
 } from "@/configs/api-endpoints";
-import { useGetData } from "@/hooks/useCRUD";
+import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import { useDropdownOptions } from "@/hooks/useDropdownOptions";
 import { useLoading } from "@/hooks/useLoading";
 import GIPkgSelectionTabs from "./GIPkgSelection";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { mutate } from "swr";
 import { SyncOutlined } from "@ant-design/icons";
+import { convertToFrappeDatetime } from "@/utils/helpers";
 
 const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
   const userInfo = useCurrentUser();
   const params = useParams();
   const router = useRouter();
   const project_id = params.project_id;
-  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const { data: projectData } = useNewGetData(`${PROJECT_API}/${project_id}`);
   const userDivision = userInfo?.division;
   const projectDivision = projectData?.division;
 
@@ -57,10 +58,14 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
 
   const getMainPkgUrl = `${PROJECT_MAIN_PKG_LIST_API}?revision_id=${revision_id}`;
 
-  const { data: generalInfoDefaultData }: any = useGetData(getGeneralInfoUrl);
+  const { data: generalInfoDefaultData }: any =
+    useNewGetData(getGeneralInfoUrl);
+  const lastModified = convertToFrappeDatetime(
+    new Date(generalInfoDefaultData?.[0]?.modified)
+  );
 
-  const { data: mainPkgData } = useGetData(getMainPkgUrl);
-  const { data: dbPkgList } = useGetData(
+  const { data: mainPkgData } = useNewGetData(getMainPkgUrl);
+  const { data: dbPkgList } = useNewGetData(
     `${MAIN_PKG_API}?fields=["*"]&filters=[["division_name", "=", "${userInfo?.division}"]]`
   );
 
@@ -305,6 +310,11 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
             >
               Refresh
             </Button>
+          </div>
+          <div>
+            <h3 className="italic text-gray-500 text-sm">
+              last modified: {lastModified}
+            </h3>
           </div>
         </div>
       </div>

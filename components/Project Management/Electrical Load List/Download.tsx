@@ -438,7 +438,7 @@ const Download: React.FC<Props> = ({
       tab === "motor-specs" ||
       tab === "lpbs-specs"
     ) {
-      const position = columns.length - 2;
+      const position = columns.length - 3;
 
       // Insert the element at the calculated position
       columns.splice(position, 0, saveElement);

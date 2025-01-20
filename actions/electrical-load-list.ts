@@ -11,6 +11,7 @@ import {
   CABLE_SIZE_HEATING_API,
   CABLE_SIZING_DATA_API,
   ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
+  GA_REVISIONS_API,
   HEATING_SWITCHGEAR_HEATER_API,
   LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
   LOCAL_ISOLATOR_REVISION_HISTORY_API,
@@ -716,6 +717,34 @@ export const copyRevision = async (payload: any) => {
       }
     } catch (error) {}
   };
+  const copy_panel_ga = async () => {
+    try {
+      const existing_panel_ga = await getData(
+        `${GA_REVISIONS_API}/${old_revision_id}`
+      );
+      const new_panel_ga_revision = { 
+        project_id: existing_panel_ga.project_id,
+        panel_id: existing_panel_ga.panel_id,
+        clone_note,
+        panel_ga_data: existing_panel_ga.panel_ga_data
+      }; 
+
+      const response = await createData(
+        GA_REVISIONS_API,
+        false,
+        new_panel_ga_revision
+      ); 
+      if (response) {
+        await updateData(
+          `${GA_REVISIONS_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        ); 
+      }
+    } catch (error) {}
+  };
   if (module_name === "load-list") {
     copy_load_list();
   }
@@ -733,5 +762,8 @@ export const copyRevision = async (payload: any) => {
   }
   if (module_name === "local-isolator") {
     copy_local_isolator();
+  }
+  if (module_name === "panel_ga") {
+    copy_panel_ga();
   }
 };

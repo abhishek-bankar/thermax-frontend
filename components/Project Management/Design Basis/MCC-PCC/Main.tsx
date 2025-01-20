@@ -58,11 +58,7 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
         label: panel?.panel_name,
         key: String(index + 3),
         children: (
-          <MCCPanel
-            revision_id={revision_id}
-            panel_id={panel?.name}
-            setActiveKey={setActiveKey}
-          />
+          <MCCPanel panel_id={panel?.name} setActiveKey={setActiveKey} />
         ),
       });
     } else if (panel.panel_main_type === PCC_PANEL_TYPE) {
@@ -82,11 +78,7 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
         label: panel?.panel_name,
         key: String(index + 3),
         children: (
-          <MCCcumPCCPanel
-            revision_id={revision_id}
-            panel_id={panel?.name}
-            setActiveKey={setActiveKey}
-          />
+          <MCCcumPCCPanel panel_id={panel?.name} setActiveKey={setActiveKey} />
         ),
       });
     }
@@ -105,7 +97,7 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
       <Tabs
         activeKey={activeKey} // Set the active tab
         onChange={onChange}
-        type="card" 
+        type="card"
         items={TabMCC.map((tab) => ({
           label: tab.label,
           key: tab.key,

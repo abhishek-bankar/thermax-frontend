@@ -23,6 +23,7 @@ import { configItemValidationSchema } from "../schemas";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { WWS_SPG } from "@/configs/constants";
 import {
+  convertToFrappeDatetime,
   moveNAtoEnd,
   parseToArray,
   sortAlphaNumericArray,
@@ -58,16 +59,14 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     ammeter_configuration:
       commonConfigData?.ammeter_configuration || "All Phase With CT",
     mcc_switchgear_type:
-      commonConfigData?.mcc_switchgear_type ||
-      "Type II Coordination-Fuseless",
+      commonConfigData?.mcc_switchgear_type || "Type II Coordination-Fuseless",
     switchgear_combination:
       commonConfigData?.switchgear_combination || "Without MCB",
 
     is_control_transformer_applicable:
       commonConfigData?.is_control_transformer_applicable?.toString() || "1",
     control_transformer_primary_voltage:
-      commonConfigData?.control_transformer_primary_voltage ||
-      "415 VAC",
+      commonConfigData?.control_transformer_primary_voltage || "415 VAC",
     control_transformer_secondary_voltage_copy:
       commonConfigData?.control_transformer_secondary_voltage_copy ||
       "230 VAC, 1-Phase, 2 wire",
@@ -317,11 +316,14 @@ const CommonConfiguration = ({
     const config1 = commonConfiguration1?.[0] || {}; // Extract the first object or use an empty object
     const config2 = commonConfiguration2?.[0] || {};
     const config3 = commonConfiguration3?.[0] || {};
- 
+
     // Merge the objects
     return { ...config1, ...config2, ...config3 };
   }, [commonConfiguration1, commonConfiguration2, commonConfiguration3]);
 
+  const lastModified = convertToFrappeDatetime(
+    new Date(commonConfigurationData?.modified)
+  );
 
   const [loading, setLoading] = useState(false);
 
@@ -431,7 +433,7 @@ const CommonConfiguration = ({
     setValue("control_bus_main_busbar_selection", dm_standard);
     setValue("earth_bus_main_busbar_selection", dm_standard);
   }, [dm_standard, setValue]);
-  
+
   useEffect(() => {
     if (["SS 316", "SS 304", "CRCA"].includes(safe_field_motor_material)) {
       setValue("safe_field_motor_thickness", "3 mm");
@@ -465,7 +467,7 @@ const CommonConfiguration = ({
 
     const configuration =
       transformerConfigMap[
-      currentTransformerNumber as keyof typeof transformerConfigMap
+        currentTransformerNumber as keyof typeof transformerConfigMap
       ] || "NA";
 
     setValue("current_transformer_configuration", configuration);
@@ -585,7 +587,7 @@ const CommonConfiguration = ({
 
     const mappedKeyValue =
       keyValueMapping[
-      control_bus_material_controlled as keyof typeof keyValueMapping
+        control_bus_material_controlled as keyof typeof keyValueMapping
       ] || "1.0 A/Sq. mm";
 
     setValue("control_bus_current_density", mappedKeyValue);
@@ -599,7 +601,7 @@ const CommonConfiguration = ({
     };
     const mappedKeyValue =
       keyValueMapping[
-      power_bus_material_controlled as keyof typeof keyValueMapping
+        power_bus_material_controlled as keyof typeof keyValueMapping
       ] || "1.0 A/Sq. mm";
 
     setValue("power_bus_current_density", mappedKeyValue);
@@ -613,7 +615,7 @@ const CommonConfiguration = ({
     };
     const mappedKeyValue =
       keyValueMapping[
-      earth_bus_material_controlled as keyof typeof keyValueMapping
+        earth_bus_material_controlled as keyof typeof keyValueMapping
       ] || "1.0 A/Sq. mm";
 
     setValue("earth_bus_current_density", mappedKeyValue);
@@ -672,6 +674,11 @@ const CommonConfiguration = ({
 
   return (
     <>
+      <div className="text-end">
+        <h3 className="italic text-gray-500 text-sm">
+          last modified: {lastModified}
+        </h3>
+      </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-2 px-4"
@@ -1080,8 +1087,7 @@ const CommonConfiguration = ({
                 name="switchgear_combination"
                 label="Switchgear Combination"
                 disabled={
-                  watch("mcc_switchgear_type") ===
-                  "Type II Coordination-Fuse"
+                  watch("mcc_switchgear_type") === "Type II Coordination-Fuse"
                 }
                 options={dropdown["Switchgear Combination"] || []}
                 size="small"
@@ -1768,8 +1774,8 @@ const CommonConfiguration = ({
                   watch("safe_field_motor_material")
                 )
                   ? dropdown["Field Motor Thickness"]?.filter(
-                    (item: any) => item.name !== "NA"
-                  )
+                      (item: any) => item.name !== "NA"
+                    )
                   : na_dropdown
               }
               size="small"
@@ -1908,8 +1914,8 @@ const CommonConfiguration = ({
                   watch("hazardous_field_motor_material")
                 )
                   ? dropdown["Field Motor Thickness"]?.filter(
-                    (item: any) => item.name !== "NA"
-                  )
+                      (item: any) => item.name !== "NA"
+                    )
                   : na_dropdown
               }
               size="small"
@@ -2166,8 +2172,8 @@ const CommonConfiguration = ({
                   watch("safe_lpbs_material")
                 )
                   ? dropdown["Field Motor Thickness"]?.filter(
-                    (item: any) => item.name !== "NA"
-                  )
+                      (item: any) => item.name !== "NA"
+                    )
                   : na_dropdown
               }
               disabled={
@@ -2309,8 +2315,8 @@ const CommonConfiguration = ({
                   watch("hazardous_lpbs_material")
                 )
                   ? dropdown["Field Motor Thickness"]?.filter(
-                    (item: any) => item.name !== "NA"
-                  )
+                      (item: any) => item.name !== "NA"
+                    )
                   : na_dropdown
               }
               disabled={

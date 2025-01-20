@@ -22,6 +22,7 @@ import { plcPanelValidationSchema } from "../schemas";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { HEATING } from "@/configs/constants";
 import {
+  convertToFrappeDatetime,
   moveNAtoEnd,
   sortAlphaNumericArray,
   sortDropdownOptions,
@@ -81,7 +82,8 @@ const getDefaultValues = (plcData: any) => {
     is_electronic_hooter_selected: plcData?.is_electronic_hooter_selected,
     electronic_hooter_acknowledge:
       plcData?.electronic_hooter_acknowledge || "NA",
-    panel_power_supply_on_color: plcData?.panel_power_supply_on_color || "Green",
+    panel_power_supply_on_color:
+      plcData?.panel_power_supply_on_color || "Green",
     panel_power_supply_off_color:
       plcData?.panel_power_supply_off_color || "Red",
     indicating_lamp_color_for_nonups_power_supply:
@@ -286,22 +288,20 @@ Note - MFM, VFD, ACB Incomer - Address List & Parameter shall be configure by PL
 };
 
 const MCCcumPCCPLCPanel = ({
-  revision_id,
   panel_id,
   setActiveKey,
 }: {
-  revision_id: string;
   panel_id: string;
   setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const { data: plcPanelData1 } = useNewGetData(
-    `${MCC_PCC_PLC_PANEL_1}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
+    `${MCC_PCC_PLC_PANEL_1}?fields=["*"]&filters=[["panel_id", "=", "${panel_id}"]]`
   );
   const { data: plcPanelData2 } = useNewGetData(
-    `${MCC_PCC_PLC_PANEL_2}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
+    `${MCC_PCC_PLC_PANEL_2}?fields=["*"]&filters=[["panel_id", "=", "${panel_id}"]]`
   );
   const { data: plcPanelData3 } = useNewGetData(
-    `${MCC_PCC_PLC_PANEL_3}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panel_id}"]]`
+    `${MCC_PCC_PLC_PANEL_3}?fields=["*"]&filters=[["panel_id", "=", "${panel_id}"]]`
   );
   const params = useParams();
   const project_id = params.project_id;
@@ -316,6 +316,10 @@ const MCCcumPCCPLCPanel = ({
       ...(plcPanelData3?.[0] || {}),
     }),
     [plcPanelData1, plcPanelData2, plcPanelData3]
+  );
+
+  const lastModified = convertToFrappeDatetime(
+    new Date(plcPanelData?.modified)
   );
 
   const [loading, setLoading] = useState(false);
@@ -450,6 +454,12 @@ const MCCcumPCCPLCPanel = ({
 
   return (
     <>
+      <div className="text-end">
+        <h3 className="italic text-gray-500 text-sm">
+          last modified: {lastModified}
+        </h3>
+      </div>
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-2 px-4"

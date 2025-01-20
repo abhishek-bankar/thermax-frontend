@@ -16,11 +16,11 @@ import {
   PROJECT_INFO_API,
 } from "@/configs/api-endpoints";
 
-import { useGetData } from "@/hooks/useCRUD";
+import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import { useLoading } from "@/hooks/useLoading";
 import useMotorParametersDropdowns from "./MotorParametersDropdown";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
-import { sortDropdownOptions } from "@/utils/helpers";
+import { convertToFrappeDatetime, sortDropdownOptions } from "@/utils/helpers";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const fieldSchema = zod.object({
@@ -303,8 +303,12 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
     setModalLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { data: motorParameters } = useGetData(
+  const { data: motorParameters } = useNewGetData(
     `${MOTOR_PARAMETER_API}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
+  );
+
+  const lastModified = convertToFrappeDatetime(
+    new Date(motorParameters?.[0]?.modified)
   );
 
   useEffect(() => {
@@ -382,6 +386,11 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
 
   return (
     <div className="flex flex-col gap-2 px-4">
+      <div className="text-end">
+        <h3 className="italic text-gray-500 text-sm">
+          last modified: {lastModified}
+        </h3>
+      </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="flex justify-center bg-black text-white">
           <div className="flex-1 border border-white p-1 text-center">

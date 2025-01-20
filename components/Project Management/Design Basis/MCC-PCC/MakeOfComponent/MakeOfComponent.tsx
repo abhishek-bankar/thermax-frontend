@@ -8,13 +8,17 @@ import * as zod from "zod";
 import { getData, updateData } from "@/actions/crud-actions";
 import { MAKE_OF_COMPONENT_API, PROJECT_API } from "@/configs/api-endpoints";
 import { HEATING } from "@/configs/constants";
-import { useGetData } from "@/hooks/useCRUD";
+import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLoading } from "@/hooks/useLoading";
 import useMakeOfComponentDropdowns from "./MakeDropdowns";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
-import { moveNAtoEnd, parseToArray } from "@/utils/helpers";
+import {
+  convertToFrappeDatetime,
+  moveNAtoEnd,
+  parseToArray,
+} from "@/utils/helpers";
 import { useParams } from "next/navigation";
 
 // Define Zod schema for validation
@@ -123,12 +127,16 @@ const MakeOfComponent = ({
   const userInfo = useCurrentUser();
   const project_id = params?.project_id;
 
-  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const { data: projectData } = useNewGetData(`${PROJECT_API}/${project_id}`);
   const userDivision = userInfo?.division;
   const projectDivision = projectData?.division;
 
-  const { data: makeOfComponent } = useGetData(
+  const { data: makeOfComponent } = useNewGetData(
     `${MAKE_OF_COMPONENT_API}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
+  );
+
+  const lastModified = convertToFrappeDatetime(
+    new Date(makeOfComponent?.[0]?.modified)
   );
 
   const dropdown: any = useMakeOfComponentDropdowns();
@@ -234,52 +242,161 @@ const MakeOfComponent = ({
     }
   };
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-2 px-4"
-    >
+    <>
       <Divider className="flex items-center justify-center">
         <h2 className="font-bold text-slate-700">Make of Components</h2>
       </Divider>
-      <div className="flex flex-col justify-between gap-4">
-        <div className="flex flex-1 items-center gap-4">
-          <div className="w-4/5">
-            <CustomMultiSelect
-              control={control}
-              name="motor"
-              label="Motor"
-              options={moveNAtoEnd(motors_make_options) || []}
-              size="small"
-              disabled={userInfo?.division === HEATING}
-            />
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-2 px-4"
+      >
+        <div className="text-end">
+          <h3 className="italic text-gray-500 text-sm">
+            last modified: {lastModified}
+          </h3>
+        </div>
+        <div className="flex flex-col justify-between gap-4">
+          <div className="flex flex-1 items-center gap-4">
+            <div className="w-4/5">
+              <CustomMultiSelect
+                control={control}
+                name="motor"
+                label="Motor"
+                options={moveNAtoEnd(motors_make_options) || []}
+                size="small"
+                disabled={userInfo?.division === HEATING}
+              />
+            </div>
+            <div className="w-1/5">
+              <CustomTextInput
+                control={control}
+                name="preferred_motor"
+                label="Preferred Motor"
+                size="small"
+                readOnly
+                disabled={userInfo?.division === HEATING}
+              />
+            </div>
           </div>
-          <div className="w-1/5">
-            <CustomTextInput
-              control={control}
-              name="preferred_motor"
-              label="Preferred Motor"
-              size="small"
-              readOnly
-              disabled={userInfo?.division === HEATING}
-            />
+          <div className="flex flex-1 items-center gap-4">
+            <div className="w-4/5">
+              <CustomMultiSelect
+                control={control}
+                name="cable"
+                label="Cable"
+                options={moveNAtoEnd(cable_make_options) || []}
+                size="small"
+              />
+            </div>
+            <div className="w-1/5">
+              <CustomTextInput
+                control={control}
+                name="preferred_cable"
+                readOnly
+                label="Preferred Cable"
+                size="small"
+              />
+            </div>
+          </div>
+          <div className="flex flex-1 items-center gap-4">
+            <div className="w-4/5">
+              <CustomMultiSelect
+                control={control}
+                name="lv_switchgear"
+                label="LV Switchgear"
+                options={lv_switchgear_options || []}
+                size="small"
+              />
+            </div>
+            <div className="w-1/5">
+              <CustomTextInput
+                control={control}
+                name="preferred_lv_switchgear"
+                label="Preferred LV Switchgear"
+                readOnly
+                size="small"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col justify-between gap-4">
+          <div className="flex flex-1 items-center gap-4">
+            <div className="w-4/5">
+              <CustomMultiSelect
+                control={control}
+                name="panel_enclosure"
+                label="Panel Enclosure"
+                options={moveNAtoEnd(panel_enclosure_options) || []}
+                size="small"
+              />
+            </div>
+            <div className="w-1/5">
+              <CustomTextInput
+                control={control}
+                name="preferred_panel_enclosure"
+                label="Preferred Panel Enclosure"
+                readOnly
+                size="small"
+              />
+            </div>
+          </div>
+          <div className="flex flex-1 items-center gap-4">
+            <div className="w-4/5">
+              <CustomMultiSelect
+                control={control}
+                name="variable_frequency_speed_drive_vfd_vsd"
+                label="Variable Frequency/Speed Drive (VFD/VSD)"
+                options={moveNAtoEnd(vfd_vsd_options) || []}
+                size="small"
+              />
+            </div>
+            <div className="w-1/5">
+              <CustomTextInput
+                control={control}
+                name="preferred_vfdvsd"
+                label="Preferred VFD/VSD"
+                readOnly
+                size="small"
+              />
+            </div>
+          </div>
+          <div className="flex flex-1 items-center gap-4">
+            <div className="w-4/5">
+              <CustomMultiSelect
+                control={control}
+                name="soft_starter"
+                label="Soft Starter"
+                options={moveNAtoEnd(soft_starter_options) || []}
+                size="small"
+              />
+            </div>
+            <div className="w-1/5">
+              <CustomTextInput
+                control={control}
+                name="preferred_soft_starter"
+                label="Preferred Soft Starter"
+                readOnly
+                size="small"
+              />
+            </div>
           </div>
         </div>
         <div className="flex flex-1 items-center gap-4">
           <div className="w-4/5">
             <CustomMultiSelect
               control={control}
-              name="cable"
-              label="Cable"
-              options={moveNAtoEnd(cable_make_options) || []}
+              name="plc"
+              label="PLC"
+              options={moveNAtoEnd(plc_make_options) || []}
               size="small"
             />
           </div>
           <div className="w-1/5">
             <CustomTextInput
               control={control}
-              name="preferred_cable"
+              name="preferred_plc"
               readOnly
-              label="Preferred Cable"
+              label="Preferred PLC"
               size="small"
             />
           </div>
@@ -288,137 +405,35 @@ const MakeOfComponent = ({
           <div className="w-4/5">
             <CustomMultiSelect
               control={control}
-              name="lv_switchgear"
-              label="LV Switchgear"
-              options={lv_switchgear_options || []}
+              name="gland_make"
+              label="Gland"
+              options={gland_make_options || []}
               size="small"
             />
           </div>
           <div className="w-1/5">
             <CustomTextInput
               control={control}
-              name="preferred_lv_switchgear"
-              label="Preferred LV Switchgear"
+              name="preferred_gland_make"
               readOnly
+              label="Preferred Gland"
               size="small"
             />
           </div>
         </div>
-      </div>
-      <div className="flex flex-col justify-between gap-4">
-        <div className="flex flex-1 items-center gap-4">
-          <div className="w-4/5">
-            <CustomMultiSelect
-              control={control}
-              name="panel_enclosure"
-              label="Panel Enclosure"
-              options={moveNAtoEnd(panel_enclosure_options) || []}
-              size="small"
-            />
-          </div>
-          <div className="w-1/5">
-            <CustomTextInput
-              control={control}
-              name="preferred_panel_enclosure"
-              label="Preferred Panel Enclosure"
-              readOnly
-              size="small"
-            />
-          </div>
-        </div>
-        <div className="flex flex-1 items-center gap-4">
-          <div className="w-4/5">
-            <CustomMultiSelect
-              control={control}
-              name="variable_frequency_speed_drive_vfd_vsd"
-              label="Variable Frequency/Speed Drive (VFD/VSD)"
-              options={moveNAtoEnd(vfd_vsd_options) || []}
-              size="small"
-            />
-          </div>
-          <div className="w-1/5">
-            <CustomTextInput
-              control={control}
-              name="preferred_vfdvsd"
-              label="Preferred VFD/VSD"
-              readOnly
-              size="small"
-            />
-          </div>
-        </div>
-        <div className="flex flex-1 items-center gap-4">
-          <div className="w-4/5">
-            <CustomMultiSelect
-              control={control}
-              name="soft_starter"
-              label="Soft Starter"
-              options={moveNAtoEnd(soft_starter_options) || []}
-              size="small"
-            />
-          </div>
-          <div className="w-1/5">
-            <CustomTextInput
-              control={control}
-              name="preferred_soft_starter"
-              label="Preferred Soft Starter"
-              readOnly
-              size="small"
-            />
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-1 items-center gap-4">
-        <div className="w-4/5">
-          <CustomMultiSelect
-            control={control}
-            name="plc"
-            label="PLC"
-            options={moveNAtoEnd(plc_make_options) || []}
-            size="small"
-          />
-        </div>
-        <div className="w-1/5">
-          <CustomTextInput
-            control={control}
-            name="preferred_plc"
-            readOnly
-            label="Preferred PLC"
-            size="small"
-          />
-        </div>
-      </div>
-      <div className="flex flex-1 items-center gap-4">
-        <div className="w-4/5">
-          <CustomMultiSelect
-            control={control}
-            name="gland_make"
-            label="Gland"
-            options={gland_make_options || []}
-            size="small"
-          />
-        </div>
-        <div className="w-1/5">
-          <CustomTextInput
-            control={control}
-            name="preferred_gland_make"
-            readOnly
-            label="Preferred Gland"
-            size="small"
-          />
-        </div>
-      </div>
 
-      <div className="flex justify-end">
-        <Button
-          type="primary"
-          htmlType="submit"
-          loading={loading}
-          disabled={userDivision !== projectDivision}
-        >
-          Save and Next
-        </Button>
-      </div>
-    </form>
+        <div className="flex justify-end">
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            disabled={userDivision !== projectDivision}
+          >
+            Save and Next
+          </Button>
+        </div>
+      </form>
+    </>
   );
 };
 

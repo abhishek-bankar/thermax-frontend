@@ -25,7 +25,6 @@ export const convertToFrappeDatetime = (datetime: Date): string => {
   const expires = `${expiresDate} ${expiresTime}`;
   return expires;
 };
-
 export const mergeLists = (
   list1: any[],
   list2: any[],
@@ -43,13 +42,19 @@ export const mergeLists = (
     if (matchingItem) {
       combinedList.push({ ...list1Item, ...matchingItem });
     }
-  } 
-  const sortedList = combinedList.sort((a: any, b: any) =>
-    a.full_name.localeCompare(b.full_name)
-  );
+  }
+ 
+  const shouldSort = combinedList.some((item) => item.hasOwnProperty("full_name"));
+ 
+  if (shouldSort) {
+    combinedList.sort((a: any, b: any) =>
+      a.full_name.localeCompare(b.full_name)
+    );
+  }
 
-  return sortedList;
+  return combinedList;
 };
+
 
 export const changeNameToKey = (projectList: any[]) => {
   if (!projectList) return [];

@@ -27,6 +27,7 @@ import {
   GET_ISOLATOR_EXCEL_API,
   GET_LOAD_LIST_EXCEL_API,
   GET_LPBS_SPECS_EXCEL_API,
+  GET_MOTOR_CANOPY_EXCEL_API,
   GET_MOTOR_SPECS_EXCEL_API,
   LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
   LOCAL_ISOLATOR_REVISION_HISTORY_API,
@@ -70,7 +71,7 @@ const Download: React.FC<Props> = ({
 
   const [downloadIconSpin, setDownloadIconSpin] = useState(false);
   // const [submitIconSpin, setSubmitIconSpin] = useState(false);
-  const [versionToCopy, setVersionToCopy] = useState(null); 
+  const [versionToCopy, setVersionToCopy] = useState(null);
   const params = useParams();
   const project_id = params.project_id as string;
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
@@ -117,12 +118,11 @@ const Download: React.FC<Props> = ({
 
     switch (tabKey) {
       case "1":
-        return GET_LOAD_LIST_EXCEL_API;
-
+        return GET_LOAD_LIST_EXCEL_API; 
       case "2":
         return GET_CABLE_SCHEDULE_EXCEL_API;
       case "3":
-        return "";
+        return GET_MOTOR_CANOPY_EXCEL_API;
       case "4":
         return GET_MOTOR_SPECS_EXCEL_API;
       case "5":
@@ -470,9 +470,11 @@ const Download: React.FC<Props> = ({
 
   const handleSave = async (key: any, tab: any) => {
     if (tab === "local-isolator") {
-      // console.log(commonConfigData);
-      // console.log(loadListData);
       const payload = {
+        is_safe_area_isolator_selected:
+          commonConfigData?.is_safe_area_isolator_selected,
+        is_hazardous_area_isolator_selected:
+          commonConfigData?.is_hazardous_area_isolator_selected,
         local_isolator_data: [
           {
             fmi_type: commonConfigData?.safe_field_motor_type,
@@ -680,37 +682,15 @@ const Download: React.FC<Props> = ({
     if (tab === "motor-specs") {
       console.log(motorSpecsData);
       console.log(loadListData);
-      console.log(cableScheduleData);
+      // is_hazardous_area_present
+      // is_safe_area_present
+      console.log(motorSpecsData?.loadListData?.electrical_load_list_data);
       const payload = {
         motor_specification_data: [
           {
-            area_classification: "",
-            // standard: motorSpecsData.standard,
-            // zone: motorSpecsData.zone,
-            // gas_group: motorSpecsData.gas_group,
-            // temperature_class: motorSpecsData.temperature_class,
-            // dm_standard: motorSpecsData.dm_standard,
-            // safe_area_enclosure_ip_rating: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_enclosure_ip_rating: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_duty: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_duty: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_insulation_class: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_insulation_class: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_temperature_rise: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_temperature_rise: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_start_hour_permissible: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_start_hour_permissible: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_service_factor: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_service_factor: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_cooling_type: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_cooling_type: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_body_material: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_body_material: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_terminal_box_material: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_terminal_box_material: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_paint_type_and_shade: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_paint_type_and_shade: motorSpecsData.safe_area_enclosure_ip_rating,
-
+            is_hazardous_area_selected:
+              motorSpecsData?.data?.is_hazardous_area_present,
+            is_safe_area_selected: motorSpecsData?.data?.is_safe_area_present,
             gas_group: motorSpecsData?.data?.gas_group,
             temperature_class: motorSpecsData?.data?.temperature_class,
             standard: motorSpecsData?.data?.standard,
@@ -759,8 +739,9 @@ const Download: React.FC<Props> = ({
           },
         ],
         motor_details_data:
-          motorSpecsData?.loadListData?.electrical_load_list_data?.map(
-            (feeder: any) => {
+          motorSpecsData?.loadListData?.electrical_load_list_data
+            ?.filter((el: any) => el.motor_scope === "THERMAX")
+            ?.map((feeder: any) => {
               const cableScheduleRow =
                 cableScheduleData?.cable_schedule_data?.find(
                   (el: any) => el.tag_number === feeder.tag_number
@@ -805,10 +786,9 @@ const Download: React.FC<Props> = ({
                 remark: feeder.remark,
                 area: feeder.area,
                 motor_scope: feeder.motor_scope,
-                cable_size: cable_size ?? "",
+                cable_size: cable_size,
               };
-            }
-          ),
+            }),
       };
       console.log(payload);
       try {
@@ -1055,6 +1035,7 @@ const Download: React.FC<Props> = ({
       const loadListData = await getData(
         `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${loadListLatestRevisionId}`
       );
+      console.log(motorParameters[0]);
 
       const data = {
         gas_group: getMainPkgUrl[0]?.gas_group,
@@ -1099,10 +1080,12 @@ const Download: React.FC<Props> = ({
           motorParameters[0]?.safe_area_paint_type_and_shade,
         hazardous_area_paint_type_and_shade:
           motorParameters[0]?.hazardous_area_paint_type_and_shade,
+        is_hazardous_area_present:
+          motorParameters[0]?.is_hazardous_area_present,
+        is_safe_area_present: motorParameters[0]?.is_safe_area_present,
       };
       setCableScheduleData(cableScheduleData);
       setMotorSpecsData({ data, loadListData: loadListData });
-      console.log(getMainPkgUrl);
     } catch (error) {
       console.error(error);
     } finally {
@@ -1186,7 +1169,7 @@ const Download: React.FC<Props> = ({
       />
       <CopyRevision
         version={versionToCopy}
-        setVersionToCopy={setVersionToCopy} 
+        setVersionToCopy={setVersionToCopy}
         tab={tabKey}
         updateTable={updateDataSource}
       />

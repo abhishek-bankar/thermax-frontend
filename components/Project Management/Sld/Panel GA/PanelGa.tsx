@@ -22,32 +22,56 @@ const useDataFetching = (project_id: string, panel: any) => {
   const [isLoading, setIsLoading] = useState(true);
   const [panelGARevisions, setpanelGARevisions] = useState<any>();
   const [panelData, setPanelData] = useState<any>();
-  const [swSelectionData, setSwSelectionData] = useState<any[]>([]);
-  const [commonConfiguration, setCommonConfiguration] = useState<any[]>([]);
-  // const panel_id = "";
-
-  const [makeComponents, setMakeComponents] = useState<any[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
       const panelGARevisions = await getData(
-        `${GA_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"],["project_id", "=", "${project_id}"]]`
+        `${GA_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
       );
+      console.log(panel?.name, "vishal");
+      console.log(panelGARevisions, "vishal");
+
       if (panelGARevisions) {
         const sortedData = panelGARevisions.sort((a: any, b: any) => {
           const dateA = new Date(a.creation);
           const dateB = new Date(b.creation);
-          return dateA.getTime() - dateB.getTime();  
+          return dateA.getTime() - dateB.getTime();
         });
         setpanelGARevisions(sortedData);
       }
+      const getFields = (name: string) => {
+        switch (name) {
+          case "MCC":
+            return [
+              "ga_mcc_compartmental",
+              "ga_mcc_construction_front_type",
+              "incoming_drawout_type",
+              "outgoing_drawout_type",
+            ];
+          case "PCC":
+            return [
+              "ga_pcc_compartmental",
+              "ga_pcc_construction_front_type",
+              "incoming_drawout_type",
+              "outgoing_drawout_type",
+            ];
+          default:
+            return [
+              "ga_mcc_compartmental",
+              "ga_mcc_construction_front_type",
+              "incoming_drawout_type",
+              "outgoing_drawout_type",
+            ];
+        }
+      };
+      const fields = getFields(panel?.panel_main_type);
+      console.log(fields);
+      
       const panelData = await getData(
         `${getPanelDoctype(
           panel?.panel_main_type
-        )}?fields=["ga_mcc_compartmental","ga_mcc_construction_front_type","incoming_drawout_type","outgoing_drawout_type"]&filters=[["panel_id", "=", "${
-          panel?.name
-        }"]]`
+        )}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
       );
       if (panelData) {
         setPanelData(panelData[0]);
@@ -71,9 +95,6 @@ const useDataFetching = (project_id: string, panel: any) => {
   return {
     designBasisData: panelData,
     panelGARevisions,
-    commonConfiguration,
-    makeComponents,
-    swSelectionData,
     isLoading,
     refetch: fetchData,
   };
@@ -98,15 +119,10 @@ const PanelGa: React.FC<Props> = ({
     (el: any) => el.panel_name === panelData.panelName
   );
 
-  const {
-    panelGARevisions,
-    commonConfiguration,
-    makeComponents,
-    designBasisData,
-    swSelectionData,
-    isLoading,
-    refetch,
-  } = useDataFetching(project_id, panel);
+  const { panelGARevisions, designBasisData, refetch } = useDataFetching(
+    project_id,
+    panel
+  );
   console.log(designBasisData);
   console.log(panelGARevisions);
   const { setLoading } = useLoading();
@@ -121,6 +137,8 @@ const PanelGa: React.FC<Props> = ({
   console.log(projectData, "project data");
 
   const projectDivision = projectData?.division;
+  console.log(panelGARevisions, "Panel GA revisions");
+
   const dataSource = useMemo(
     () =>
       panelGARevisions?.map((item: any, index: number) => ({

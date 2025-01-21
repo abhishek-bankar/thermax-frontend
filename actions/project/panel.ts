@@ -1,3 +1,4 @@
+"use server";
 import {
   MCC_PANEL_TYPE,
   MCCcumPCC_PANEL_TYPE,
@@ -20,6 +21,12 @@ import {
   deletePCCPanels,
   deleteProjectPanelData,
 } from "./delete";
+import { deleteData } from "../crud-actions";
+import {
+  DYNAMIC_DOCUMENT_API,
+  MCC_PANEL,
+  PCC_PANEL,
+} from "@/configs/api-endpoints";
 
 export const createDynamicPanel = async (panelData: any) => {
   try {
@@ -27,8 +34,6 @@ export const createDynamicPanel = async (panelData: any) => {
     // Create Project Panel Data with DB Revision ID
     const panelRes = await createProjectPanelData(panelData);
     const { name: panel_id, panel_name } = panelRes;
-    // Create Dynamic Document List with Project Panel ID
-    await createDynamicPanel({ panel_id });
     // Create MCC Panel with Project Panel ID
     if (panelType === MCC_PANEL_TYPE) {
       await createMCCPanel({ panel_id });
@@ -72,6 +77,16 @@ export const deleteDynamicPanel = async (revisionID: string) => {
     await deleteMccCumPCCPLCPanels(revisionID);
     // Delete Project Panel Data
     await deleteProjectPanelData(revisionID);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteIndividualPanel = async (panel_id: string) => {
+  try {
+    await deleteData(`${DYNAMIC_DOCUMENT_API}/${panel_id}`, false);
+    await deleteData(`${MCC_PANEL}/${panel_id}`, false);
+    await deleteData(`${PCC_PANEL}/${panel_id}`, false);
   } catch (error) {
     throw error;
   }

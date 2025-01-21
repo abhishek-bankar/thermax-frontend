@@ -1,9 +1,10 @@
 import { getData, updateData } from "@/actions/crud-actions";
-import { GA_REVISIONS_API } from "@/configs/api-endpoints";
+import { GA_REVISIONS_API, PROJECT_API } from "@/configs/api-endpoints";
 import { SLD_REVISION_STATUS } from "@/configs/constants";
 import { getThermaxDateFormat } from "@/utils/helpers";
 import {
   CloudDownloadOutlined,
+  CopyTwoTone,
   FolderOpenOutlined,
   SaveTwoTone,
   SyncOutlined,
@@ -12,39 +13,72 @@ import { Button, message, Table, TableColumnsType, Tag, Tooltip } from "antd";
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { getPanelDoctype } from "../Incomer/Add Incomer/AddIncomer";
+import { useLoading } from "@/hooks/useLoading";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useGetData } from "@/hooks/useCRUD";
+import CopyRevision from "@/components/Modal/CopyRevision";
 
 const useDataFetching = (project_id: string, panel: any) => {
   const [isLoading, setIsLoading] = useState(true);
   const [panelGARevisions, setpanelGARevisions] = useState<any>();
   const [panelData, setPanelData] = useState<any>();
-  const [swSelectionData, setSwSelectionData] = useState<any[]>([]);
-  const [commonConfiguration, setCommonConfiguration] = useState<any[]>([]);
-  // const panel_id = "";
-
-  const [makeComponents, setMakeComponents] = useState<any[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
       const panelGARevisions = await getData(
-        `${GA_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"],["project_id", "=", "${project_id}"]]`
+        `${GA_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
       );
+      console.log(panel?.name, "vishal");
+      console.log(panelGARevisions, "vishal");
+
       if (panelGARevisions) {
-        setpanelGARevisions(panelGARevisions);
+        const sortedData = panelGARevisions.sort((a: any, b: any) => {
+          const dateA = new Date(a.creation);
+          const dateB = new Date(b.creation);
+          return dateA.getTime() - dateB.getTime();
+        });
+        setpanelGARevisions(sortedData);
       }
+      const getFields = (name: string) => {
+        switch (name) {
+          case "MCC":
+            return [
+              "ga_mcc_compartmental",
+              "ga_mcc_construction_front_type",
+              "incoming_drawout_type",
+              "outgoing_drawout_type",
+            ];
+          case "PCC":
+            return [
+              "ga_pcc_compartmental",
+              "ga_pcc_construction_front_type",
+              "incoming_drawout_type",
+              "outgoing_drawout_type",
+            ];
+          default:
+            return [
+              "ga_mcc_compartmental",
+              "ga_mcc_construction_front_type",
+              "incoming_drawout_type",
+              "outgoing_drawout_type",
+            ];
+        }
+      };
+      const fields = getFields(panel?.panel_main_type);
+      console.log(fields);
+      
       const panelData = await getData(
         `${getPanelDoctype(
           panel?.panel_main_type
-        )}?fields=["ga_mcc_compartmental","ga_mcc_construction_front_type","incoming_drawout_type","outgoing_drawout_type"]&filters=[["panel_id", "=", "${
-          panel?.name
-        }"]]`
+        )}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
       );
       if (panelData) {
         setPanelData(panelData[0]);
       }
       console.log(panelData);
       console.log(panelGARevisions);
- 
+
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -61,9 +95,6 @@ const useDataFetching = (project_id: string, panel: any) => {
   return {
     designBasisData: panelData,
     panelGARevisions,
-    commonConfiguration,
-    makeComponents,
-    swSelectionData,
     isLoading,
     refetch: fetchData,
   };
@@ -88,16 +119,26 @@ const PanelGa: React.FC<Props> = ({
     (el: any) => el.panel_name === panelData.panelName
   );
 
-  const {
-    panelGARevisions,
-    commonConfiguration,
-    makeComponents,
-    designBasisData,
-    swSelectionData,
-    isLoading,
-  } = useDataFetching(project_id, panel);
+  const { panelGARevisions, designBasisData, refetch } = useDataFetching(
+    project_id,
+    panel
+  );
   console.log(designBasisData);
-  
+  console.log(panelGARevisions);
+  const { setLoading } = useLoading();
+  const userInfo: {
+    division: string;
+  } = useCurrentUser();
+
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const [versionToCopy, setVersionToCopy] = useState(null);
+
+  const userDivision = userInfo?.division;
+  console.log(projectData, "project data");
+
+  const projectDivision = projectData?.division;
+  console.log(panelGARevisions, "Panel GA revisions");
+
   const dataSource = useMemo(
     () =>
       panelGARevisions?.map((item: any, index: number) => ({
@@ -107,9 +148,13 @@ const PanelGa: React.FC<Props> = ({
         documentRevision: `R${index}`,
         createdDate: item.creation,
         path: item.path,
+        is_released: item.is_released,
+        panel_id: panel.name,
       })),
     [panelGARevisions]
   );
+  console.log(dataSource);
+
   const handleDownload = async (record: any) => {
     console.log(record);
     if (record.status === SLD_REVISION_STATUS.DEFAULT) {
@@ -140,7 +185,7 @@ const PanelGa: React.FC<Props> = ({
       }
     } else if (record.status === SLD_REVISION_STATUS.SUCCESS) {
       const link = document.createElement("a");
-      link.href = record.sld_path;
+      link.href = record.path;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -149,25 +194,58 @@ const PanelGa: React.FC<Props> = ({
   const handleSave = async (key: any) => {
     console.log(designBasisData);
     console.log(key);
-    
+
     const payload = {
-      panel_ga_data: [{
-        panel_front_type: designBasisData?.ga_mcc_compartmental,
-        type_of_construction_for_board: designBasisData?.ga_mcc_construction_front_type,
-        panel_incoming_feeder_drawout_type: designBasisData?.incoming_drawout_type,
-        panel_outgoing_feeder_drawout_type: designBasisData?.outgoing_drawout_type,
-        switchgear_selection_revision_id: sld_revision_id,
-      }],
-    }; 
+      panel_ga_data: [
+        {
+          panel_front_type: designBasisData?.ga_mcc_compartmental,
+          type_of_construction_for_board:
+            designBasisData?.ga_mcc_construction_front_type,
+          panel_incoming_feeder_drawout_type:
+            designBasisData?.incoming_drawout_type,
+          panel_outgoing_feeder_drawout_type:
+            designBasisData?.outgoing_drawout_type,
+          switchgear_selection_revision_id: sld_revision_id,
+        },
+      ],
+    };
     try {
       console.log(payload);
       console.log(`${GA_REVISIONS_API}/${key}`);
-      
-      const respose = await updateData(`${GA_REVISIONS_API}/${key}`, false, payload);
+
+      const respose = await updateData(
+        `${GA_REVISIONS_API}/${key}`,
+        false,
+        payload
+      );
       message.success("Panel GA Saved");
     } catch (error) {
       message.error("Unable to Save Panel GA");
     }
+  };
+  const handleRelease = async (record: any) => {
+    console.log(record);
+    try {
+      // console.log(row);
+      if (record.is_released === 0) {
+        const respose = await updateData(
+          `${GA_REVISIONS_API}/${record?.key}`,
+          false,
+          {
+            is_released: 1,
+          }
+        );
+      }
+      message.success("Revision is Released and Locked");
+      refetch();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // setModalLoading(false);
+    }
+  };
+  const handleClone = async (record: any) => {
+    setVersionToCopy(record);
   };
   const columns: TableColumnsType = useMemo(
     () => [
@@ -226,12 +304,7 @@ const PanelGa: React.FC<Props> = ({
                   <Button
                     type="link"
                     shape="circle"
-                    // disabled={
-                    //   (tab === "lpbs-specs" &&
-                    //     !commonConfigData?.is_local_push_button_station_selected) ||
-                    //   (tab === "local-isolator" &&
-                    //     !commonConfigData?.is_field_motor_isolator_selected)
-                    // }
+                    disabled={record.is_released === 1}
                     icon={
                       <SaveTwoTone
                         style={{
@@ -278,11 +351,51 @@ const PanelGa: React.FC<Props> = ({
         ),
       },
       {
+        title: () => <div className="text-center">Create New Revision</div>,
+        dataIndex: "clone",
+        render: (_, record) => {
+          console.log(record);
+          if (record.is_copied === 1) {
+            return null;
+          }
+
+          return (
+            <div className="text-center">
+              <Tooltip title={"Create New Revision"}>
+                <Button
+                  type="link"
+                  shape="circle"
+                  icon={
+                    <CopyTwoTone
+                      style={{
+                        fontSize: "1rem",
+                      }}
+                    />
+                  }
+                  onClick={() => handleClone(record)}
+                  disabled={
+                    record.is_released !== 1 || userDivision !== projectDivision
+                  }
+                />
+              </Tooltip>
+            </div>
+          );
+        },
+      },
+      {
         title: () => <div className="text-center">Release</div>,
         dataIndex: "release",
-        render: () => (
+        render: (text: any, record: any) => (
           <div className="text-center">
-            <Button type="primary" size="small" name="Release">
+            <Button
+              type="primary"
+              size="small"
+              name="Release"
+              disabled={
+                record.is_released === 1 || userDivision !== projectDivision
+              }
+              onClick={() => handleRelease(record)}
+            >
               Release
             </Button>
           </div>
@@ -295,11 +408,19 @@ const PanelGa: React.FC<Props> = ({
   const GARevisionTab = () => (
     <>
       <div className="text-end">
-        <Button icon={<SyncOutlined color="#492971" />}>Refresh</Button>
+        <Button onClick={refetch} icon={<SyncOutlined color="#492971" />}>
+          Refresh
+        </Button>
       </div>
       <div className="mt-2">
         <Table columns={columns} dataSource={dataSource} size="small" />
       </div>
+      <CopyRevision
+        version={versionToCopy}
+        setVersionToCopy={setVersionToCopy}
+        tab={"panel_ga"}
+        updateTable={() => refetch()}
+      />
     </>
   );
   return <GARevisionTab />;

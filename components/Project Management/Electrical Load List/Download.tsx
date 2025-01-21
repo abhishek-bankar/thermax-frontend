@@ -1,6 +1,7 @@
 "use client";
 import {
   CloudDownloadOutlined,
+  CopyTwoTone,
   FolderOpenOutlined,
   SaveTwoTone,
   SyncOutlined,
@@ -9,6 +10,7 @@ import { downloadFile, getData, updateData } from "@/actions/crud-actions";
 import {
   Button,
   message,
+  Popconfirm,
   Table,
   TableColumnsType,
   Tabs,
@@ -25,6 +27,7 @@ import {
   GET_ISOLATOR_EXCEL_API,
   GET_LOAD_LIST_EXCEL_API,
   GET_LPBS_SPECS_EXCEL_API,
+  GET_MOTOR_CANOPY_EXCEL_API,
   GET_MOTOR_SPECS_EXCEL_API,
   LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
   LOCAL_ISOLATOR_REVISION_HISTORY_API,
@@ -36,7 +39,10 @@ import {
   PROJECT_MAIN_PKG_LIST_API,
   STATIC_DOCUMENT_API,
 } from "@/configs/api-endpoints";
-import { DB_REVISION_STATUS, LOAD_LIST_REVISION_STATUS } from "@/configs/constants";
+import {
+  DB_REVISION_STATUS,
+  LOAD_LIST_REVISION_STATUS,
+} from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 import "./DownloadComponent.css";
 import { useLoading } from "@/hooks/useLoading";
@@ -46,6 +52,7 @@ import { mutate } from "swr";
 import { getThermaxDateFormat } from "@/utils/helpers";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { getStandByKw } from "./Electrical Load List/LoadListComponent";
+import CopyRevision from "@/components/Modal/CopyRevision";
 
 interface Props {
   designBasisRevisionId: string;
@@ -64,7 +71,7 @@ const Download: React.FC<Props> = ({
 
   const [downloadIconSpin, setDownloadIconSpin] = useState(false);
   // const [submitIconSpin, setSubmitIconSpin] = useState(false);
-
+  const [versionToCopy, setVersionToCopy] = useState(null);
   const params = useParams();
   const project_id = params.project_id as string;
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
@@ -91,6 +98,8 @@ const Download: React.FC<Props> = ({
   // } = useCurrentUser();
 
   useEffect(() => {
+    console.log(revisionHistory);
+
     if (revisionHistory?.length) {
       const dataSource = revisionHistory?.map((item: any, index: number) => ({
         key: item.name,
@@ -98,6 +107,7 @@ const Download: React.FC<Props> = ({
         status: item.status,
         documentRevision: `R${index}`,
         createdDate: item.creation,
+        is_copied: item.is_copied,
       }));
       setDataSource(dataSource);
     }
@@ -108,12 +118,11 @@ const Download: React.FC<Props> = ({
 
     switch (tabKey) {
       case "1":
-        return GET_LOAD_LIST_EXCEL_API;
-
+        return GET_LOAD_LIST_EXCEL_API; 
       case "2":
         return GET_CABLE_SCHEDULE_EXCEL_API;
       case "3":
-        return "";
+        return GET_MOTOR_CANOPY_EXCEL_API;
       case "4":
         return GET_MOTOR_SPECS_EXCEL_API;
       case "5":
@@ -160,22 +169,37 @@ const Download: React.FC<Props> = ({
     }
   };
 
-  const handleRelease = async (row: any) => {
+  const handleRelease = async (record: any, tab: any) => {
+    console.log(record, tab);
+
+    // getSaveEndPoint("x",)
     setModalLoading(true);
     try {
-      console.log(row);
-      if(row.status === LOAD_LIST_REVISION_STATUS.NotReleased){
-        // const response = await updateData(getApiEndpoint(""),false,{})
+      // console.log(row);
+      if (record.status === LOAD_LIST_REVISION_STATUS.NotReleased) {
+        const response = await updateData(
+          getSaveEndPoint(record?.key, tab),
+          false,
+          { status: LOAD_LIST_REVISION_STATUS.Released }
+        );
+        console.log(response);
       }
-      // console.log(revision_id);
+      console.log(tabKey);
+
+      // updateDataSource()
       // await copyDesignBasisRevision(project_id, revision_id)
       // mutate(dbLoadlistHistoryUrl);
-      message.success("Load list revision is released and locked");
+      message.success("Revision is Released and Locked");
+      updateDataSource(tabKey);
     } catch (error) {
       console.error(error);
     } finally {
       setModalLoading(false);
     }
+  };
+  const handleClone = async (record: any) => {
+    setVersionToCopy(record);
+    // console.log(record);
   };
   // const { setLoading: setModalLoading } = useLoading()
   useEffect(() => {
@@ -278,12 +302,45 @@ const Download: React.FC<Props> = ({
         },
       },
       {
+        title: () => <div className="text-center">Create New Revision</div>,
+        dataIndex: "clone",
+        render: (_, record) => {
+          console.log(record);
+          if (record.is_copied === 1) {
+            return null;
+          }
+
+          return (
+            <div className="text-center">
+              <Tooltip title={"Create New Revision"}>
+                <Button
+                  type="link"
+                  shape="circle"
+                  icon={
+                    <CopyTwoTone
+                      style={{
+                        fontSize: "1rem",
+                      }}
+                    />
+                  }
+                  onClick={() => handleClone(record)}
+                  disabled={
+                    record.status !== DB_REVISION_STATUS.Released ||
+                    userDivision !== projectDivision
+                  }
+                />
+              </Tooltip>
+            </div>
+          );
+        },
+      },
+      {
         title: () => <div className="text-center">Release</div>,
         dataIndex: "release",
         render: (text, record) => {
           return (
             <div className="text-center">
-              <Button
+              {/* <Button
                 type="primary"
                 size="small"
                 name="Release"
@@ -295,10 +352,42 @@ const Download: React.FC<Props> = ({
                   (tab === "local-isolator" &&
                     !commonConfigData?.is_field_motor_isolator_selected)
                 }
-                onClick={() => handleRelease(record)}
+                onClick={() => handleRelease(record, tab)}
               >
                 Release
-              </Button>
+              </Button> */}
+
+              <Popconfirm
+                title="Are you sure to release this revision?"
+                onConfirm={async () => handleRelease(record, tab)}
+                okText="Yes"
+                cancelText="No"
+                placement="topRight"
+                disabled={
+                  record.status === DB_REVISION_STATUS.Released ||
+                  userDivision !== projectDivision ||
+                  (tab === "lpbs-specs" &&
+                    !commonConfigData?.is_local_push_button_station_selected) ||
+                  (tab === "local-isolator" &&
+                    !commonConfigData?.is_field_motor_isolator_selected)
+                }
+              >
+                <Button
+                  type="primary"
+                  size="small"
+                  name="Release"
+                  disabled={
+                    record.status === DB_REVISION_STATUS.Released ||
+                    userDivision !== projectDivision ||
+                    (tab === "lpbs-specs" &&
+                      !commonConfigData?.is_local_push_button_station_selected) ||
+                    (tab === "local-isolator" &&
+                      !commonConfigData?.is_field_motor_isolator_selected)
+                  }
+                >
+                  Release
+                </Button>
+              </Popconfirm>
             </div>
           );
         },
@@ -308,6 +397,13 @@ const Download: React.FC<Props> = ({
       title: () => <div className="text-center">Save</div>,
       dataIndex: "download",
       render(text: any, record: any) {
+        if (
+          record.is_copied === 1 ||
+          record.status === LOAD_LIST_REVISION_STATUS.Released
+        ) {
+          return null;
+        }
+
         return (
           <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
             <div>
@@ -342,7 +438,7 @@ const Download: React.FC<Props> = ({
       tab === "motor-specs" ||
       tab === "lpbs-specs"
     ) {
-      const position = columns.length - 2;
+      const position = columns.length - 3;
 
       // Insert the element at the calculated position
       columns.splice(position, 0, saveElement);
@@ -351,6 +447,8 @@ const Download: React.FC<Props> = ({
   };
 
   const getSaveEndPoint = (id: any, tab: any) => {
+    console.log(tab);
+
     switch (tab) {
       case "local-isolator":
         return `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${id}`;
@@ -358,6 +456,12 @@ const Download: React.FC<Props> = ({
         return `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}/${id}`;
       case "motor-specs":
         return `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}/${id}`;
+      case "load-list":
+        return `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${id}`;
+      case "cable-schedule":
+        return `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${id}`;
+      case "motor-canopy":
+        return `${MOTOR_CANOPY_REVISION_HISTORY_API}/${id}`;
 
       default:
         return "";
@@ -366,9 +470,11 @@ const Download: React.FC<Props> = ({
 
   const handleSave = async (key: any, tab: any) => {
     if (tab === "local-isolator") {
-      // console.log(commonConfigData);
-      // console.log(loadListData);
       const payload = {
+        is_safe_area_isolator_selected:
+          commonConfigData?.is_safe_area_isolator_selected,
+        is_hazardous_area_isolator_selected:
+          commonConfigData?.is_hazardous_area_isolator_selected,
         local_isolator_data: [
           {
             fmi_type: commonConfigData?.safe_field_motor_type,
@@ -576,37 +682,15 @@ const Download: React.FC<Props> = ({
     if (tab === "motor-specs") {
       console.log(motorSpecsData);
       console.log(loadListData);
-      console.log(cableScheduleData);
+      // is_hazardous_area_present
+      // is_safe_area_present
+      console.log(motorSpecsData?.loadListData?.electrical_load_list_data);
       const payload = {
         motor_specification_data: [
           {
-            area_classification: "",
-            // standard: motorSpecsData.standard,
-            // zone: motorSpecsData.zone,
-            // gas_group: motorSpecsData.gas_group,
-            // temperature_class: motorSpecsData.temperature_class,
-            // dm_standard: motorSpecsData.dm_standard,
-            // safe_area_enclosure_ip_rating: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_enclosure_ip_rating: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_duty: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_duty: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_insulation_class: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_insulation_class: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_temperature_rise: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_temperature_rise: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_start_hour_permissible: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_start_hour_permissible: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_service_factor: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_service_factor: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_cooling_type: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_cooling_type: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_body_material: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_body_material: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_terminal_box_material: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_terminal_box_material: motorSpecsData.safe_area_enclosure_ip_rating,
-            // safe_area_paint_type_and_shade: motorSpecsData.safe_area_enclosure_ip_rating,
-            // hazardous_area_paint_type_and_shade: motorSpecsData.safe_area_enclosure_ip_rating,
-
+            is_hazardous_area_selected:
+              motorSpecsData?.data?.is_hazardous_area_present,
+            is_safe_area_selected: motorSpecsData?.data?.is_safe_area_present,
             gas_group: motorSpecsData?.data?.gas_group,
             temperature_class: motorSpecsData?.data?.temperature_class,
             standard: motorSpecsData?.data?.standard,
@@ -655,8 +739,9 @@ const Download: React.FC<Props> = ({
           },
         ],
         motor_details_data:
-          motorSpecsData?.loadListData?.electrical_load_list_data?.map(
-            (feeder: any) => {
+          motorSpecsData?.loadListData?.electrical_load_list_data
+            ?.filter((el: any) => el.motor_scope === "THERMAX")
+            ?.map((feeder: any) => {
               const cableScheduleRow =
                 cableScheduleData?.cable_schedule_data?.find(
                   (el: any) => el.tag_number === feeder.tag_number
@@ -701,10 +786,9 @@ const Download: React.FC<Props> = ({
                 remark: feeder.remark,
                 area: feeder.area,
                 motor_scope: feeder.motor_scope,
-                cable_size: cable_size ?? "",
+                cable_size: cable_size,
               };
-            }
-          ),
+            }),
       };
       console.log(payload);
       try {
@@ -729,7 +813,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("1")}
             >
               {" "}
               Refresh
@@ -754,7 +838,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("2")}
             >
               {" "}
               Refresh
@@ -779,7 +863,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("3")}
             >
               {" "}
               Refresh
@@ -804,7 +888,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("4")}
             >
               {" "}
               Refresh
@@ -829,7 +913,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("5")}
             >
               {" "}
               Refresh
@@ -854,7 +938,7 @@ const Download: React.FC<Props> = ({
           <div className="text-end">
             <Button
               icon={<SyncOutlined color="#492971" />}
-              onClick={() => mutate(dbLoadlistHistoryUrl)}
+              onClick={() => updateDataSource("6")}
             >
               {" "}
               Refresh
@@ -951,6 +1035,7 @@ const Download: React.FC<Props> = ({
       const loadListData = await getData(
         `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${loadListLatestRevisionId}`
       );
+      console.log(motorParameters[0]);
 
       const data = {
         gas_group: getMainPkgUrl[0]?.gas_group,
@@ -995,10 +1080,12 @@ const Download: React.FC<Props> = ({
           motorParameters[0]?.safe_area_paint_type_and_shade,
         hazardous_area_paint_type_and_shade:
           motorParameters[0]?.hazardous_area_paint_type_and_shade,
+        is_hazardous_area_present:
+          motorParameters[0]?.is_hazardous_area_present,
+        is_safe_area_present: motorParameters[0]?.is_safe_area_present,
       };
       setCableScheduleData(cableScheduleData);
       setMotorSpecsData({ data, loadListData: loadListData });
-      console.log(getMainPkgUrl);
     } catch (error) {
       console.error(error);
     } finally {
@@ -1023,6 +1110,25 @@ const Download: React.FC<Props> = ({
         return "";
     }
   };
+  const updateDataSource = async (key: any) => {
+    console.log(key);
+
+    const data = await getData(getApiEndpoint(key));
+    // console.log(data);
+
+    const dataSource = data?.map((item: any, index: number) => ({
+      key: item.name,
+      documentName: getName(key),
+      status: item.status,
+      documentRevision: `R${index}`,
+      createdDate: item.creation,
+      is_copied: item.is_copied,
+    }));
+    console.log(dataSource, " fetched all revisions");
+
+    setDataSource(dataSource);
+  };
+
   const onChange = async (key: string) => {
     setModalLoading(true);
 
@@ -1035,16 +1141,7 @@ const Download: React.FC<Props> = ({
 
       // console.log(staticData,"staticData");
 
-      const data = await getData(getApiEndpoint(key));
-      // console.log(data);
-
-      const dataSource = data?.map((item: any, index: number) => ({
-        key: item.name,
-        documentName: getName(key),
-        status: item.status,
-        documentRevision: `R${index}`,
-        createdDate: item.creation,
-      }));
+      updateDataSource(key);
       if (key === "6" || key === "5") {
         await getIsolatorData();
       }
@@ -1053,7 +1150,6 @@ const Download: React.FC<Props> = ({
       }
       // console.log(dataSource);
 
-      setDataSource(dataSource);
       // console.log(data);
     } catch (error) {
       console.error(error);
@@ -1070,6 +1166,12 @@ const Download: React.FC<Props> = ({
         type="card"
         style={{ fontSize: "11px !important" }}
         items={DownloadTabs}
+      />
+      <CopyRevision
+        version={versionToCopy}
+        setVersionToCopy={setVersionToCopy}
+        tab={tabKey}
+        updateTable={updateDataSource}
       />
     </div>
   );

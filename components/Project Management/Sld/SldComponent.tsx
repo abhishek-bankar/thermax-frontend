@@ -21,13 +21,13 @@ const SldComponent: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <div>
-      <SLDTabs
+    <div> 
+      {/* <SLDTabs
         sldRevisions={sldRevisions}
         designBasisRevisionId={designBasisRevisionId}
         loadListLatestRevisionId={loadListLatestRevisionId}
         cableScheduleRevisionId={cableScheduleRevisionId}
-      />
+      /> */}
     </div>
   );
 };

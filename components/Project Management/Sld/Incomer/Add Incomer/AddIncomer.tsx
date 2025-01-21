@@ -581,7 +581,7 @@ const getPoles = (sg_data: any, projectPanelData: any, projectInfo: any) => {
     : projectPanelData?.incomer_above_pole;
 };
 
-const getPanelDoctype = (name: string) => {
+export const getPanelDoctype = (name: string) => {
   switch (name) {
     case "MCC":
       return MCC_PANEL;

@@ -23,6 +23,7 @@ import { getStandByKw } from "@/components/Project Management/Electrical Load Li
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { ENVIRO, HEATING, SLD_REVISION_STATUS } from "@/configs/constants";
 import { getSwSelectionDetails } from "@/actions/sld";
+import { convertToFrappeDatetime } from "@/utils/helpers";
 
 interface Props {
   designBasisRevisionId: string;
@@ -30,6 +31,7 @@ interface Props {
   otherData: any[];
   revision_id: string;
   setActiveTab: any;
+  setLastModified: any;
 }
 
 const getArrayOfSwitchgearSelectionData = (
@@ -204,6 +206,7 @@ const SwitchgearSelection: React.FC<Props> = ({
   data,
   setActiveTab,
   otherData,
+  setLastModified,
   revision_id,
 }) => {
   // console.log(data, "switchgear");
@@ -465,16 +468,19 @@ const SwitchgearSelection: React.FC<Props> = ({
     try {
       setLoading(true);
 
-      const respose = await updateData(
+      const response = await updateData(
         `${SLD_REVISIONS_API}/${revision_id}`,
         false,
         payload
       );
-      setLoading(false);
-
+      setLoading(false);  
+      if (response) {
+        const lastModified = convertToFrappeDatetime(
+          new Date(response?.modified)
+        );
+        setLastModified(lastModified);
+      }
       message.success("Switchgear Selection Saved !");
-     
-
     } catch (error) {
       message.error("Unable to save Switchgear Selection list");
 
@@ -589,7 +595,11 @@ const SwitchgearSelection: React.FC<Props> = ({
         >
           Save
         </Button>
-        <Button type="primary" onClick={() =>  setActiveTab("3")} disabled={isLoading}>
+        <Button
+          type="primary"
+          onClick={() => setActiveTab("3")}
+          disabled={isLoading}
+        >
           Next
         </Button>
       </div>

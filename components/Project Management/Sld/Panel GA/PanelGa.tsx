@@ -1,7 +1,7 @@
 import { getData, updateData } from "@/actions/crud-actions";
 import { GA_REVISIONS_API, PROJECT_API } from "@/configs/api-endpoints";
 import { SLD_REVISION_STATUS } from "@/configs/constants";
-import { getThermaxDateFormat } from "@/utils/helpers";
+import { convertToFrappeDatetime, getThermaxDateFormat } from "@/utils/helpers";
 import {
   CloudDownloadOutlined,
   CopyTwoTone,
@@ -67,7 +67,7 @@ const useDataFetching = (project_id: string, panel: any) => {
       };
       const fields = getFields(panel?.panel_main_type);
       console.log(fields);
-      
+
       const panelData = await getData(
         `${getPanelDoctype(
           panel?.panel_main_type
@@ -102,12 +102,14 @@ const useDataFetching = (project_id: string, panel: any) => {
 interface Props {
   panelData: any;
   projectPanelData: any;
+  setLastModified: any;
   sld_revision_id: string;
 }
 
 const PanelGa: React.FC<Props> = ({
   panelData,
   projectPanelData,
+  setLastModified,
   sld_revision_id,
 }) => {
   const params = useParams();
@@ -149,11 +151,29 @@ const PanelGa: React.FC<Props> = ({
         createdDate: item.creation,
         path: item.path,
         is_released: item.is_released,
+        is_copied: item.is_copied,
         panel_id: panel.name,
       })),
     [panelGARevisions]
   );
-  console.log(dataSource);
+  useEffect(() => {
+    console.log(panelGARevisions, "GA Revision");
+    if (panelGARevisions?.length) {
+      console.log(panelGARevisions[panelGARevisions.length - 1], "GA Revision");
+      const lastModified = convertToFrappeDatetime(
+        new Date(panelGARevisions[panelGARevisions.length - 1]?.modified)
+      );
+      setLastModified(lastModified);
+    }
+  }, [panelGARevisions]);
+useEffect(() => {
+  if(!versionToCopy){
+    setTimeout(() => { 
+      refetch()
+    }, 2000);
+  }
+}, [versionToCopy])
+
 
   const handleDownload = async (record: any) => {
     console.log(record);
@@ -213,11 +233,17 @@ const PanelGa: React.FC<Props> = ({
       console.log(payload);
       console.log(`${GA_REVISIONS_API}/${key}`);
 
-      const respose = await updateData(
+      const response = await updateData(
         `${GA_REVISIONS_API}/${key}`,
         false,
         payload
       );
+      if (response) {
+        const lastModified = convertToFrappeDatetime(
+          new Date(response?.modified)
+        );
+        setLastModified(lastModified);
+      }
       message.success("Panel GA Saved");
     } catch (error) {
       message.error("Unable to Save Panel GA");

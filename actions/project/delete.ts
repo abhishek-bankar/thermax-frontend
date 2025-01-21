@@ -252,12 +252,17 @@ export const deleteCommonConfiguration = async (revision_id: string) => {
 export const deleteMCCPanels = async (revision_id: string) => {
   try {
     // Delete all MCC Panel Data
-    const mccPanelData = await getData(
+    const projectPanelData = await getData(
       `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
-    for (const mccPanel of mccPanelData || []) {
-      const mccPanelID = mccPanel.name;
-      await deleteData(`${MCC_PANEL}/${mccPanelID}`, false);
+    for (const projectPanel of projectPanelData || []) {
+      const panel_id = projectPanel.name;
+      const mccPanel = await getData(
+        `${MCC_PANEL}?filters=[["panel_id", "=", "${panel_id}"]]`
+      );
+      if (Array.isArray(mccPanel) && mccPanel.length > 0) {
+        await deleteData(`${MCC_PANEL}/${mccPanel?.[0]?.name}`, false);
+      }
     }
   } catch (error: any) {
     throw error;
@@ -266,12 +271,17 @@ export const deleteMCCPanels = async (revision_id: string) => {
 
 export const deletePCCPanels = async (revision_id: string) => {
   try {
-    const pccPanelData = await getData(
+    const projectPanelData = await getData(
       `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
-    for (const pccPanel of pccPanelData || []) {
-      const pccPanelID = pccPanel.name;
-      await deleteData(`${PCC_PANEL}/${pccPanelID}`, false);
+    for (const projectPanel of projectPanelData || []) {
+      const panel_id = projectPanel.name;
+      const pccPanel = await getData(
+        `${PCC_PANEL}?filters=[["panel_id", "=", "${panel_id}"]]`
+      );
+      if (Array.isArray(pccPanel) && pccPanel.length > 0) {
+        await deleteData(`${PCC_PANEL}/${pccPanel?.[0]?.name}`, false);
+      }
     }
   } catch (error: any) {
     throw error;
@@ -280,27 +290,39 @@ export const deletePCCPanels = async (revision_id: string) => {
 
 export const deleteMccCumPCCPLCPanels = async (revision_id: string) => {
   try {
-    const mccPccPlcPanel1Data = await getData(
-      `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
-    );
-    const mccPccPlcPanel2Data = await getData(
-      `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
-    );
-    const mccPccPlcPanel3Data = await getData(
+    const projectPanelData = await getData(
       `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
 
-    for (const mccPccPlcPanel1 of mccPccPlcPanel1Data || []) {
-      const mccPccPlcPanel1ID = mccPccPlcPanel1.name;
-      await deleteData(`${MCC_PCC_PLC_PANEL_1}/${mccPccPlcPanel1ID}`, false);
-    }
-    for (const mccPccPlcPanel2 of mccPccPlcPanel2Data) {
-      const mccPccPlcPanel2ID = mccPccPlcPanel2.name;
-      await deleteData(`${MCC_PCC_PLC_PANEL_2}/${mccPccPlcPanel2ID}`, false);
-    }
-    for (const mccPccPlcPanel3 of mccPccPlcPanel3Data || []) {
-      const mccPccPlcPanel3ID = mccPccPlcPanel3.name;
-      await deleteData(`${MCC_PCC_PLC_PANEL_3}/${mccPccPlcPanel3ID}`, false);
+    for (const projectPanel of projectPanelData || []) {
+      const panel_id = projectPanel.name;
+      const mccPccPlcPanel1 = await getData(
+        `${MCC_PCC_PLC_PANEL_1}?filters=[["panel_id", "=", "${panel_id}"]]`
+      );
+      if (Array.isArray(mccPccPlcPanel1) && mccPccPlcPanel1.length > 0) {
+        await deleteData(
+          `${MCC_PCC_PLC_PANEL_1}/${mccPccPlcPanel1?.[0]?.name}`,
+          false
+        );
+      }
+      const mccPccPlcPanel2 = await getData(
+        `${MCC_PCC_PLC_PANEL_2}?filters=[["panel_id", "=", "${panel_id}"]]`
+      );
+      if (Array.isArray(mccPccPlcPanel2) && mccPccPlcPanel2.length > 0) {
+        await deleteData(
+          `${MCC_PCC_PLC_PANEL_2}/${mccPccPlcPanel2?.[0]?.name}`,
+          false
+        );
+      }
+      const mccPccPlcPanel3 = await getData(
+        `${MCC_PCC_PLC_PANEL_3}?filters=[["panel_id", "=", "${panel_id}"]]`
+      );
+      if (Array.isArray(mccPccPlcPanel3) && mccPccPlcPanel3.length > 0) {
+        await deleteData(
+          `${MCC_PCC_PLC_PANEL_3}/${mccPccPlcPanel3?.[0]?.name}`,
+          false
+        );
+      }
     }
   } catch (error: any) {
     throw error;

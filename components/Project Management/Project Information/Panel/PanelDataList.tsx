@@ -22,10 +22,7 @@ import { useGetData } from "@/hooks/useCRUD";
 import { changeNameToKey, sortDatewise } from "@/utils/helpers";
 import PanelFormModal from "./PanelFormModal";
 import { ColumnsType } from "antd/es/table";
-import {
-  deleteDynamicPanel,
-  deleteIndividualPanel,
-} from "@/actions/project/panel";
+import { deleteDynamicPanel } from "@/actions/project/panel";
 
 interface DataType {
   key: string;
@@ -144,7 +141,7 @@ export default function PanelDataList({
 
   const handleDeletePanel = async (panelId: string) => {
     try {
-      await deleteIndividualPanel(panelId);
+      await deleteDynamicPanel(panelId);
     } catch (error) {
       handleError(error);
     } finally {

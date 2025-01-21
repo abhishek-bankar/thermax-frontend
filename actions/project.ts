@@ -76,6 +76,7 @@ import {
   deleteDesignBasisGeneralInfo,
   deleteDesignBasisMakeofComponent,
   deleteDesignBasisMotorParameters,
+  deleteDesignBasisRevisionHistory,
   deleteDynamicDocumentList,
   deleteLayoutEarthing,
   deleteLoadListRevisions,
@@ -271,6 +272,8 @@ export const deleteThermaxProject = async (project_id: string) => {
       await deletePanelGARevisions(revisionID);
       // Delete Project Panel Data
       await deleteProjectPanelData(revisionID);
+      // Delete Design Basis Revision History
+      await deleteDesignBasisRevisionHistory(revisionID);
     }
     await deleteProject(project_id);
   } catch (error) {

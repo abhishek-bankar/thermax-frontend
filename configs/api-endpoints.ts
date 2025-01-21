@@ -326,6 +326,7 @@ export const HEATING_SWITCHGEAR_HEATER_API = `/document/Heating Switchgear Combi
 export const GET_DESIGN_BASIS_EXCEL_API = `/method/db_revision.get_design_basis_excel`;
 export const GET_LOAD_LIST_EXCEL_API = `/method/load_list_revisions.get_load_list_excel`;
 export const GET_CABLE_SCHEDULE_EXCEL_API = `/method/cable_schedule_revisions.get_cable_schedule_excel`;
+export const GET_MOTOR_CANOPY_EXCEL_API = `/method/motor_canopy_revisions.get_motor_canopy_excel`;
 export const GET_VOLTAGE_DROP_EXCEL_API = `/method/cable_schedule_revisions.get_voltage_drop_excel`;
 export const GET_ISOLATOR_EXCEL_API = `/method/local_isolator_revisions.get_local_isolator_excel`;
 export const GET_LPBS_SPECS_EXCEL_API = `/method/lpbs_specification_revisions.get_lpbs_specification_excel`;

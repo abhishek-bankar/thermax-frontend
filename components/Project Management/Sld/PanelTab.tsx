@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from "antd";
 import React, { useMemo, Suspense, lazy, useState, useEffect } from "react";
-import { getThermaxDateFormat } from "@/utils/helpers";
+import { getThermaxDateFormat, sortDatewise } from "@/utils/helpers";
 import { SLD_REVISION_STATUS } from "@/configs/constants";
 import { updateData } from "@/actions/crud-actions";
 import { SLD_REVISIONS_API } from "@/configs/api-endpoints";
@@ -30,8 +30,7 @@ const Incomer = lazy(() => import("./Incomer/Incomer"));
 const BusbarSizing = lazy(() => import("./Busbar Sizing/BusbarSizing"));
 
 interface Props {
-  panelData: any;
-  sldRevisions: any[];
+  panelData: any; 
   projectPanelData: any;
   designBasisRevisionId: string;
 }
@@ -45,25 +44,25 @@ interface SLDRevision {
 }
 
 const PanelTab: React.FC<Props> = ({
-  panelData,
-  sldRevisions = [],
+  panelData, 
   projectPanelData,
   designBasisRevisionId,
 }) => {
+  console.log(panelData);
+  
   const params = useParams();
-  const project_id = params.project_id as string;
   const [activeKey, setActiveKey] = useState<string>("1");
   const [setIntervaId, setSetIntervaId] = useState<any>(null);
-  const [sldRevisionsData, setSldRevisionsData] = useState(sldRevisions);
+  const [sldRevisionsData, setSldRevisionsData] = useState([]);
   const [isSLDInProcess, setIsSLDInProcess] = useState(false);
   const getSLDRevision = async () => {
     try {
-      const response = await getAllSldRevisions(project_id);
-      const data = response.filter(
-        (item: any) => item.panel_name === panelData.panelName
-      );
+      const response = await getAllSldRevisions(panelData?.panelId);
+      // const data = response.filter(
+      //   (item: any) => item.panel_name === panelData.panelName
+      // );
       
-      setSldRevisionsData(data);
+      setSldRevisionsData(response);
     } catch (error) {}
   };
   useEffect(() => {
@@ -219,7 +218,7 @@ const PanelTab: React.FC<Props> = ({
     [sldRevisionsData]
   );
   useEffect(() => {
-    const in_process = sldRevisionsData.some(
+    const in_process = sldRevisionsData?.some(
       (item: any) => item.status === "IN_PROCESS"
     );
     if (in_process) {
@@ -237,9 +236,10 @@ const PanelTab: React.FC<Props> = ({
   }, [sldRevisionsData]);
 
   const latestRevision = useMemo(
-    () => sldRevisions?.find((item: SLDRevision) => !item.is_released) ?? {},
-    [sldRevisions]
+    () => sortDatewise(sldRevisionsData)[0] ?? {},
+    [sldRevisionsData]
   );
+console.log(latestRevision,"latest rev");
 
   const LoadingFallback = () => (
     <div className="flex justify-center items-center h-32">

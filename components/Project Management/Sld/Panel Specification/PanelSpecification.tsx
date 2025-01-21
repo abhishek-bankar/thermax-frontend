@@ -27,7 +27,7 @@ const useDataFetching = (project_id: string, panel: any) => {
     try {
       setIsLoading(true);
       const panelGARevisions = await getData(
-        `${GA_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"],["project_id", "=", "${project_id}"]]`
+        `${GA_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
       );
       if (panelGARevisions) {
         setpanelGARevisions(panelGARevisions);

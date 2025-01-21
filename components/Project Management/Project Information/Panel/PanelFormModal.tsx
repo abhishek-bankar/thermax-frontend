@@ -284,7 +284,6 @@ export default function PanelFormModal({
             </div>
           )}
         </div>
-        <AlertNotification message={infoMessage} status={status} />
         <div className="text-end">
           <Button type="primary" loading={loading} htmlType="submit">
             Save

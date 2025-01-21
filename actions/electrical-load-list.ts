@@ -264,6 +264,12 @@ const findCableHeatingUpto100M = (
   numberOfCores: number,
   copper_conductor: number
 ) => {
+  if (starterType === "VFD BYPASS-S/D") {
+    starterType = "STAR-DELTA";
+  }
+  if (starterType === "VFD Bypass DOL") {
+    starterType = "DOL STARTER";
+  }
   const cables = cableAsPerHeatingChart.filter(
     (data: any) =>
       data.voltage === supplyVoltage &&
@@ -531,7 +537,7 @@ export const getCableSizingCalculation = async (cableScheduleData: any) => {
   return calculatedData;
 };
 
-export const copyRevision = async (payload: any) => { 
+export const copyRevision = async (payload: any) => {
   const old_revision_id = payload.revision_id;
   const clone_note = payload.clone_notes;
   const module_name = payload.module_name;
@@ -551,7 +557,7 @@ export const copyRevision = async (payload: any) => {
         ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
         false,
         new_load_list_revision
-      ); 
+      );
       if (response) {
         await updateData(
           `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${old_revision_id}`,
@@ -581,7 +587,7 @@ export const copyRevision = async (payload: any) => {
         CABLE_SCHEDULE_REVISION_HISTORY_API,
         false,
         new_cable_schedule_revision
-      ); 
+      );
       if (response) {
         await updateData(
           `${CABLE_SCHEDULE_REVISION_HISTORY_API}/${old_revision_id}`,
@@ -603,13 +609,13 @@ export const copyRevision = async (payload: any) => {
         project_id: existing_motor_canopy.project_id,
         motor_canopy_data: existing_motor_canopy.motor_canopy_data,
         clone_note,
-      }; 
+      };
 
       const response = await createData(
         MOTOR_CANOPY_REVISION_HISTORY_API,
         false,
         new_motor_canopy_revision
-      ); 
+      );
       if (response) {
         await updateData(
           `${MOTOR_CANOPY_REVISION_HISTORY_API}/${old_revision_id}`,
@@ -617,7 +623,7 @@ export const copyRevision = async (payload: any) => {
           {
             is_copied: 1,
           }
-        ); 
+        );
       }
     } catch (error) {}
   };
@@ -635,13 +641,13 @@ export const copyRevision = async (payload: any) => {
           existing_motor_specs.is_hazardous_area_selected,
         motor_specification_data: existing_motor_specs.motor_specification_data,
         motor_details_data: existing_motor_specs.motor_details_data,
-      }; 
+      };
 
       const response = await createData(
         MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
         false,
         new_motor_specs_revision
-      ); 
+      );
       if (response) {
         await updateData(
           `${MOTOR_SPECIFICATIONS_REVISION_HISTORY_API}/${old_revision_id}`,
@@ -649,7 +655,7 @@ export const copyRevision = async (payload: any) => {
           {
             is_copied: 1,
           }
-        ); 
+        );
       }
     } catch (error) {}
   };
@@ -666,14 +672,15 @@ export const copyRevision = async (payload: any) => {
         is_hazardous_lpbs_selected:
           existing_lpbs_specs.is_hazardous_lpbs_selected,
         lpbs_specification_data: existing_lpbs_specs.lpbs_specification_data,
-        lpbs_specifications_motor_details: existing_lpbs_specs.lpbs_specifications_motor_details,
-      }; 
+        lpbs_specifications_motor_details:
+          existing_lpbs_specs.lpbs_specifications_motor_details,
+      };
 
       const response = await createData(
         LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
         false,
         new_lpbs_specs_revision
-      ); 
+      );
       if (response) {
         await updateData(
           `${LBPS_SPECIFICATIONS_REVISION_HISTORY_API}/${old_revision_id}`,
@@ -681,7 +688,7 @@ export const copyRevision = async (payload: any) => {
           {
             is_copied: 1,
           }
-        ); 
+        );
       }
     } catch (error) {}
   };
@@ -694,18 +701,20 @@ export const copyRevision = async (payload: any) => {
         status: LOAD_LIST_REVISION_STATUS.NotReleased,
         project_id: existing_local_isolator.project_id,
         clone_note,
-        is_safe_area_isolator_selected: existing_local_isolator.is_safe_area_isolator_selected,
+        is_safe_area_isolator_selected:
+          existing_local_isolator.is_safe_area_isolator_selected,
         is_hazardous_area_isolator_selected:
           existing_local_isolator.is_hazardous_area_isolator_selected,
-          local_isolator_data: existing_local_isolator.local_isolator_data,
-        local_isolator_motor_details_data: existing_local_isolator.local_isolator_motor_details_data,
-      }; 
+        local_isolator_data: existing_local_isolator.local_isolator_data,
+        local_isolator_motor_details_data:
+          existing_local_isolator.local_isolator_motor_details_data,
+      };
 
       const response = await createData(
         LOCAL_ISOLATOR_REVISION_HISTORY_API,
         false,
         new_local_isolator_revision
-      ); 
+      );
       if (response) {
         await updateData(
           `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${old_revision_id}`,
@@ -713,7 +722,7 @@ export const copyRevision = async (payload: any) => {
           {
             is_copied: 1,
           }
-        ); 
+        );
       }
     } catch (error) {}
   };
@@ -722,26 +731,22 @@ export const copyRevision = async (payload: any) => {
       const existing_panel_ga = await getData(
         `${GA_REVISIONS_API}/${old_revision_id}`
       );
-      const new_panel_ga_revision = { 
+      const new_panel_ga_revision = {
         project_id: existing_panel_ga.project_id,
         panel_id: existing_panel_ga.panel_id,
         clone_note,
-        panel_ga_data: existing_panel_ga.panel_ga_data
-      }; 
+        panel_ga_data: existing_panel_ga.panel_ga_data,
+      };
 
       const response = await createData(
         GA_REVISIONS_API,
         false,
         new_panel_ga_revision
-      ); 
+      );
       if (response) {
-        await updateData(
-          `${GA_REVISIONS_API}/${old_revision_id}`,
-          false,
-          {
-            is_copied: 1,
-          }
-        ); 
+        await updateData(`${GA_REVISIONS_API}/${old_revision_id}`, false, {
+          is_copied: 1,
+        });
       }
     } catch (error) {}
   };

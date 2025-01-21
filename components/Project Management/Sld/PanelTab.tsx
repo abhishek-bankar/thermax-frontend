@@ -13,7 +13,11 @@ import {
   Tooltip,
 } from "antd";
 import React, { useMemo, Suspense, lazy, useState, useEffect } from "react";
-import { getThermaxDateFormat, sortDatewise } from "@/utils/helpers";
+import {
+  convertToFrappeDatetime,
+  getThermaxDateFormat,
+  sortDatewise,
+} from "@/utils/helpers";
 import { SLD_REVISION_STATUS } from "@/configs/constants";
 import { updateData } from "@/actions/crud-actions";
 import { SLD_REVISIONS_API } from "@/configs/api-endpoints";
@@ -30,8 +34,9 @@ const Incomer = lazy(() => import("./Incomer/Incomer"));
 const BusbarSizing = lazy(() => import("./Busbar Sizing/BusbarSizing"));
 
 interface Props {
-  panelData: any; 
+  panelData: any;
   projectPanelData: any;
+  setLastModified: (val: string) => void;
   designBasisRevisionId: string;
 }
 
@@ -44,24 +49,29 @@ interface SLDRevision {
 }
 
 const PanelTab: React.FC<Props> = ({
-  panelData, 
+  panelData,
   projectPanelData,
+  setLastModified,
   designBasisRevisionId,
 }) => {
   console.log(panelData);
-  
+
   const params = useParams();
   const [activeKey, setActiveKey] = useState<string>("1");
   const [setIntervaId, setSetIntervaId] = useState<any>(null);
-  const [sldRevisionsData, setSldRevisionsData] = useState([]);
+  const [sldRevisionsData, setSldRevisionsData] = useState<any>([]);
   const [isSLDInProcess, setIsSLDInProcess] = useState(false);
   const getSLDRevision = async () => {
     try {
       const response = await getAllSldRevisions(panelData?.panelId);
-      // const data = response.filter(
-      //   (item: any) => item.panel_name === panelData.panelName
-      // );
-      
+     
+      if (response.length) {
+        const lastModified = convertToFrappeDatetime(
+          new Date(response[0]?.modified)
+        );
+        setLastModified(lastModified);
+      }
+
       setSldRevisionsData(response);
     } catch (error) {}
   };
@@ -239,7 +249,7 @@ const PanelTab: React.FC<Props> = ({
     () => sortDatewise(sldRevisionsData)[0] ?? {},
     [sldRevisionsData]
   );
-console.log(latestRevision,"latest rev");
+  console.log(latestRevision, "latest rev");
 
   const LoadingFallback = () => (
     <div className="flex justify-center items-center h-32">
@@ -280,6 +290,7 @@ console.log(latestRevision,"latest rev");
             otherData={panelData.otherData}
             revision_id={latestRevision.name}
             setActiveTab={setActiveKey}
+            setLastModified={setLastModified}
           />
         </Suspense>
       ),
@@ -295,6 +306,7 @@ console.log(latestRevision,"latest rev");
             projectPanelData={projectPanelData}
             revision_id={latestRevision.name}
             setActiveTab={setActiveKey}
+            setLastModified={setLastModified}
           />
         </Suspense>
       ),
@@ -308,6 +320,7 @@ console.log(latestRevision,"latest rev");
             revision_id={latestRevision.name}
             designBasisRevisionId={designBasisRevisionId}
             setActiveTab={setActiveKey}
+            setLastModified={setLastModified}
           />
         </Suspense>
       ),
@@ -321,6 +334,7 @@ console.log(latestRevision,"latest rev");
             panelData={panelData}
             projectPanelData={projectPanelData}
             sld_revision_id={latestRevision.name}
+            setLastModified={setLastModified}
           />
         </Suspense>
       ),

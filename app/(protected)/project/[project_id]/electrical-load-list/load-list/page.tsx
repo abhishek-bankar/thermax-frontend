@@ -15,12 +15,12 @@ export default async function Loadlist({
   );
 
   if (loadListRevisionData && loadListRevisionData.length > 0) {
-    return (
+    return ( 
       <LoadList
         designBasisRevisionId={designbasisData[0]?.name}
         loadListLatestRevisionId={loadListRevisionData[0]?.name}
         revision={loadListRevisionData?.length - 1}
-      />
+        /> 
     );
   } else {
     return null;

@@ -191,7 +191,8 @@ const LoadList: React.FC<LoadListProps> = ({
   designBasisRevisionId,
   loadListLatestRevisionId,
   revision,
-}) => {
+}) => { 
+  
   const jRef = useRef<HTMLDivElement | null>(null);
   const spreadsheetRef = useRef<JspreadsheetInstance | null>(null);
   const [isCurrentFetched, setIsCurrentFetched] = useState(false);

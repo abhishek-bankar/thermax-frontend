@@ -17,6 +17,7 @@ import {
 } from "@/configs/api-endpoints";
 import { getData, updateData } from "@/actions/crud-actions";
 import { useParams } from "next/navigation";
+import { convertToFrappeDatetime } from "@/utils/helpers";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -26,6 +27,7 @@ interface Props {
   sld_revision_id: string;
   designBasisRevisionId: string;
   panelData: any;
+  setLastModified: any;
   incomers: any;
 }
 const getRatingForIncomer = (sg_data: any, projectInfo: any) => {
@@ -212,6 +214,7 @@ const AddIncomer: React.FC<Props> = ({
   revision_id,
   panel_id,
   sld_revision_id,
+  setLastModified,
   incomers,
 }) => {
   const params = useParams();
@@ -419,11 +422,17 @@ const AddIncomer: React.FC<Props> = ({
             },
           ],
         };
-        const respose = await updateData(
+        const response = await updateData(
           `${SLD_REVISIONS_API}/${sld_revision_id}`,
           false,
           payload
         );
+        if (response) {
+          const lastModified = convertToFrappeDatetime(
+            new Date(response?.modified)
+          );
+          setLastModified(lastModified);
+        }
         message.success("Incomer added!");
         onClose();
       }

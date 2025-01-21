@@ -33,9 +33,16 @@ export default function DesignBasisLayout({
   return (
     <div className="flex h-full flex-col gap-4 px-4">
       <div className="sticky top-0 z-10 w-full bg-white">
-        <div className="flex font-semibold">
-          <h2>{projectData?.project_oc_number}</h2>
-          <h2> / {projectData?.project_name}</h2>
+        {projectData && (
+          <div className="flex font-semibold">
+            <h2>{projectData?.project_oc_number}</h2>
+            <h2> / {projectData?.project_name}</h2>
+          </div>
+        )}
+        <div>
+          {/* <h3 className="italic text-gray-500 text-sm">
+            last modified: {lastModified}
+          </h3> */}
         </div>
         <nav className="flex gap-2">
           <div

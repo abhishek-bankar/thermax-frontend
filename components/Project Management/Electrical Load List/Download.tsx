@@ -1112,6 +1112,7 @@ const Download: React.FC<Props> = ({
   };
   const updateDataSource = async (key: any) => {
     console.log(key);
+    console.log(getApiEndpoint(key));
 
     const data = await getData(getApiEndpoint(key));
     // console.log(data);

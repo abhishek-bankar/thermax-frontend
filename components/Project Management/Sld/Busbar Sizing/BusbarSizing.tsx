@@ -11,6 +11,7 @@ import {
 } from "@/configs/api-endpoints";
 import { getBusbarSizingCalculations } from "@/actions/sld";
 import { useLoading } from "@/hooks/useLoading";
+import { convertToFrappeDatetime } from "@/utils/helpers";
 
 const useDataFetching = (
   designBasisRevisionId: string,
@@ -83,11 +84,13 @@ interface Props {
   revision_id: string;
   designBasisRevisionId: string;
   setActiveTab: any;
+  setLastModified: any;
 }
 const BusbarSizing: React.FC<Props> = ({
   designBasisRevisionId,
   setActiveTab,
   revision_id,
+  setLastModified,
 }) => {
   const [form] = Form.useForm();
   const { projectInfo, busbarSizingData, commonConfig, isLoading } =
@@ -139,16 +142,20 @@ const BusbarSizing: React.FC<Props> = ({
     try {
       setLoading(true);
 
-      const respose = await updateData(
+      const response = await updateData(
         `${SLD_REVISIONS_API}/${revision_id}`,
         false,
         payload
       );
       setLoading(false);
-      console.log(respose, "response");
-
+      if (response) {
+        const lastModified = convertToFrappeDatetime(
+          new Date(response?.modified)
+        );
+        setLastModified(lastModified);
+      }
+      // setLastModified
       message.success("Busbar/Enclouser Sizing Saved");
-      // setActiveTab("1");
     } catch (error) {
       message.error("Unable to save Busbar/Enclouser Sizing");
 
@@ -210,7 +217,7 @@ const BusbarSizing: React.FC<Props> = ({
         // enclosure_vertical_busbar_chamber_width: projectInfo.enclosure_vertical_busbar_chamber_width,
         // enclosure_vertical_cable_chamber_width: projectInfo.enclosure_vertical_cable_chamber_width,
       });
-    } 
+    }
   }, [projectInfo, commonConfig, form, busbarSizingData]);
   const handleCalculateBusbarSizing = async () => {
     // console.log(form);

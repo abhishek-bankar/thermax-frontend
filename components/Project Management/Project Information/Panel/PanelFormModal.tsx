@@ -183,11 +183,10 @@ export default function PanelFormModal({
       const new_sld_revision = {
         panel_id: panelRes.name,
         panel_name: panelRes.panel_name,
-        project_id,
         status: SLD_REVISION_STATUS.DEFAULT,
         description: "Issued for approval",
       };
-      
+
       await createData(GA_REVISIONS_API, false, new_sld_revision);
       await createData(SLD_REVISIONS_API, false, new_sld_revision);
 

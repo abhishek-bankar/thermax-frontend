@@ -21,6 +21,10 @@ import {
 } from "@/configs/api-endpoints";
 import { DB_REVISION_STATUS } from "@/configs/constants";
 import { createData, getData } from "./crud-actions";
+import {
+  copyCommonConfiguration,
+  copyProjectDynamicPanels,
+} from "./project/copy";
 
 export const copyDesignBasisRevision = async (
   project_id: string,
@@ -76,7 +80,7 @@ export const copyDesignBasisRevision = async (
       revision_id: new_revision_id,
     });
 
-    await copyCommonConfigData(revision_id, new_revision_id);
+    await copyCommonConfiguration(revision_id, new_revision_id);
 
     const projectPanelData = await getData(
       `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
@@ -129,7 +133,7 @@ export const copyDesignBasisRevision = async (
         });
       }
 
-      await copyMccCumPccPLCPanelData(revision_id, new_revision_id);
+      await copyProjectDynamicPanels(revision_id, new_revision_id);
     }
 
     const cableTrayLayoutData = await getData(

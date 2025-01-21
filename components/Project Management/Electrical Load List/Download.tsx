@@ -118,7 +118,7 @@ const Download: React.FC<Props> = ({
 
     switch (tabKey) {
       case "1":
-        return GET_LOAD_LIST_EXCEL_API; 
+        return GET_LOAD_LIST_EXCEL_API;
       case "2":
         return GET_CABLE_SCHEDULE_EXCEL_API;
       case "3":
@@ -135,28 +135,24 @@ const Download: React.FC<Props> = ({
   };
 
   const handleDownload = async (revision_id: string) => {
-    setDownloadIconSpin(true);
-    console.log(revision_id);
+    setDownloadIconSpin(true); 
 
     try {
       const base64Data: any = await downloadFile(getDownLoadEndpoint(), true, {
         revision_id,
       });
-
-      // Create a Blob from the Base64 string
+ 
       const binaryData = Buffer.from(base64Data, "base64");
       const blob = new Blob([binaryData], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      // Create a download link and trigger the download
+      }); 
+      
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
+ 
+      const filename = `${getExcelName(tabKey, revision_id)}.xlsx`;
 
-      // Use Content-Disposition header to get the filename
-      const filename = `${getName(tabKey)}.xlsx`;
-
-      link.download = filename.replace(/"/g, ""); // Remove quotes if present
+      link.download = filename.replace(/"/g, "");  
 
       link.click();
     } catch (error) {
@@ -1092,7 +1088,8 @@ const Download: React.FC<Props> = ({
       setModalLoading(false);
     }
   };
-  const getName = (key: any) => {
+  const getName = (key: any,) => { 
+
     switch (key) {
       case "1":
         return documentList[0]?.electrical_load_list;
@@ -1106,6 +1103,30 @@ const Download: React.FC<Props> = ({
         return documentList[0]?.lpbs_specifications_and_list;
       case "6":
         return documentList[0]?.local_isolator_specifications_and_list;
+      default:
+        return "";
+    }
+  };
+  const getExcelName = (key: any, revision_id?: string) => { 
+    let revisionNo = 0;
+    dataSource?.forEach((item: any, index: number) => {
+      if (item.key === revision_id) {
+        revisionNo = index 
+      }
+    }); 
+    switch (key) {
+      case "1":
+        return documentList[0]?.electrical_load_list + "_R" + revisionNo + "_Electrical Load List";
+      case "2":
+        return documentList[0]?.electrical_cable_schedule + "_R" + revisionNo + "_Electrical Cable Schedule";
+      case "3":
+        return documentList[0]?.motor_canopy_list_and_specification + "_R" + revisionNo +  "_Motor Canopy List and Specifications";
+      case "4":
+        return documentList[0]?.motor_specification + "_R" + revisionNo + "_Motor Specification";
+      case "5":
+        return documentList[0]?.lpbs_specifications_and_list + "_R" + revisionNo + "_LPBS Specifications and List";
+      case "6":
+        return documentList[0]?.local_isolator_specifications_and_list + "_R" + revisionNo + "_Local Isolator Specifications and List";
       default:
         return "";
     }

@@ -20,6 +20,7 @@ import { useLoading } from "@/hooks/useLoading";
 import { useParams, useRouter } from "next/navigation";
 import { getStandByKw } from "../Electrical Load List/LoadListComponent";
 import { motorCanopyCalculation } from "@/actions/electrical-load-list";
+import { convertToFrappeDatetime } from "@/utils/helpers";
 
 interface MotorCanopyProps {
   loadListLatestRevisionId: string;
@@ -83,7 +84,7 @@ const useDataFetching = (
 ) => {
   const [isLoading, setIsLoading] = useState(true);
   const [motorCanopyData, setMotorCanopyData] = useState<any[]>([]);
-  // const [motorCanopySavedData, setMotorCanopySavedData] = useState<any[]>([]);
+  const [motorCanopySavedData, setMotorCanopySavedData] = useState<any>([]);
   // const {setLoading} = useLoading();
   const [loadListData, setLoadListData] = useState<any[]>([]);
   const fetchData = useCallback(async () => {
@@ -101,8 +102,7 @@ const useDataFetching = (
         loadList,
         motorCanopySavedData
       );
-      //   console.log(savedCableSchedule, "savedCableSchedule")
-
+      setMotorCanopySavedData(motorCanopySavedData);
       setLoadListData(loadList?.electrical_load_list_data);
       setMotorCanopyData(formattedData);
     } catch (error) {
@@ -118,7 +118,13 @@ const useDataFetching = (
     fetchData();
   }, [fetchData]);
 
-  return { motorCanopyData, loadListData, isLoading, refetch: fetchData };
+  return {
+    motorCanopyData,
+    motorCanopySavedData,
+    loadListData,
+    isLoading,
+    refetch: fetchData,
+  };
 };
 
 const MotorCanopy: React.FC<MotorCanopyProps> = ({
@@ -136,10 +142,8 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
 
   const project_id = params.project_id as string;
 
-  const { motorCanopyData, isLoading } = useDataFetching(
-    loadListLatestRevisionId,
-    motorCanopyRevisionId
-  );
+  const { motorCanopyData, motorCanopySavedData, isLoading, refetch } =
+    useDataFetching(loadListLatestRevisionId, motorCanopyRevisionId);
 
   const typedMotorCanopyColumns = useMemo(
     () =>
@@ -149,15 +153,6 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
       })),
     []
   );
-
-  // const typedMulticoreCableConfigColumns = useMemo(
-  //   () =>
-  //     multicoreCableConfigColumns.map((column) => ({
-  //       ...column,
-  //       type: column.type as ValidColumnType,
-  //     })),
-  //   []
-  // );
 
   const cableScheduleOptions = useMemo(
     () => ({
@@ -241,6 +236,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
       );
       setLoading(false);
       message.success("Motor Canopy Saved");
+      refetch();
 
       console.log(respose, "Motor Canopy response");
     } catch (error) {
@@ -300,8 +296,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
       setLoading(false);
     }
   };
-  console.log(motorCanopyDetailsFetched);
-  
+
   return (
     <>
       <div className="m-2 flex flex-col overflow-auto">
@@ -310,7 +305,17 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
             <Spin size="large" />
           </div>
         ) : (
-          <div ref={jRef} />
+          <>
+            {motorCanopySavedData?.modified && (
+              <h3 className="italic text-gray-500 text-sm text-end pr-2">
+                last modified:{" "}
+                {convertToFrappeDatetime(
+                  new Date(motorCanopySavedData?.modified)
+                )}
+              </h3>
+            )}
+            <div ref={jRef} />
+          </>
         )}
       </div>
 

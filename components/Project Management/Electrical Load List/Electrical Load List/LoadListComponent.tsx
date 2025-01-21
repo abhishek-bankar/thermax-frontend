@@ -53,6 +53,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { ENVIRO, HEATING, WWS_IPG, WWS_SPG } from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 import TableFilter from "../common/TabelFilter";
+import { convertToFrappeDatetime } from "@/utils/helpers";
 
 export const getStandByKw = (item2: any, item3: any) => {
   if (item2 == 0) {
@@ -191,13 +192,14 @@ const LoadList: React.FC<LoadListProps> = ({
   designBasisRevisionId,
   loadListLatestRevisionId,
   revision,
-}) => { 
-  
+}) => {
   const jRef = useRef<HTMLDivElement | null>(null);
   const spreadsheetRef = useRef<JspreadsheetInstance | null>(null);
   const [isCurrentFetched, setIsCurrentFetched] = useState(false);
   const params = useParams();
   const router = useRouter();
+  const [lastModified, setLastModified] = useState("");
+
   const userInfo: {
     division: string;
   } = useCurrentUser();
@@ -220,6 +222,7 @@ const LoadList: React.FC<LoadListProps> = ({
     projectInfo,
     mainSupplyLV,
     subPackages,
+    refetch
   } = useDataFetching(
     designBasisRevisionId,
     loadListLatestRevisionId,
@@ -1050,6 +1053,7 @@ const LoadList: React.FC<LoadListProps> = ({
           ];
         }
       });
+      console.log(loadListData, "vishal");
     }
   }, [loadListData]);
 
@@ -1445,7 +1449,7 @@ const LoadList: React.FC<LoadListProps> = ({
         payload
       );
       console.log(respose);
-
+      refetch(); 
       message.success("Electrical Load List Saved");
     } catch (error) {
       message.error("Unable to save electrical load list");
@@ -1717,9 +1721,9 @@ const LoadList: React.FC<LoadListProps> = ({
         if (!item[35]) {
           item[35] = motorParameters[0]?.safe_area_efficiency_level; // efficieany
         }
-        if (!item[36]) {
-          item[36] = "No"; // local isolator
-        }
+        // if (!item[36]) {
+        item[36] = "No"; // local isolator
+        // }
 
         // }
         if (
@@ -2034,9 +2038,12 @@ const LoadList: React.FC<LoadListProps> = ({
   return (
     <>
       <div className="text-end">
-        <h3 className="italic text-gray-500 text-sm">
-          {/* last modified: {lastModified} */}
-        </h3>
+        {loadListData && (
+          <h3 className="italic text-gray-500 text-sm pr-2 pb-2">
+            last modified:{" "}
+            {convertToFrappeDatetime(new Date(loadListData?.modified))}
+          </h3>
+        )}
       </div>
       <div className="mb-4 flex justify-between gap-4">
         <div className="flex gap-4">

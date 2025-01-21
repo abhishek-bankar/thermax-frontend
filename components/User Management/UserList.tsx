@@ -26,7 +26,8 @@ interface DataType {
   modified: string;
 }
 
-export const UserList = ({ userInfo }: any) => {
+export default function UserList({ userInfo }: any) {
+  // export const UserList = ({ userInfo }: any) => {
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [userRow, setUserRow] = useState<any>(null);
@@ -44,7 +45,7 @@ export const UserList = ({ userInfo }: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const refreshData = () => { 
+  const refreshData = () => {
     mutate(thermaxUserUrl);
     mutate(userListUrl);
   };
@@ -200,4 +201,4 @@ export const UserList = ({ userInfo }: any) => {
       />
     </div>
   );
-};
+}

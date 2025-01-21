@@ -22,12 +22,12 @@ const SldComponent: React.FC<Props> = ({
   }, []);
   return (
     <div> 
-      <SLDTabs
+      {/* <SLDTabs
         sldRevisions={sldRevisions}
         designBasisRevisionId={designBasisRevisionId}
         loadListLatestRevisionId={loadListLatestRevisionId}
         cableScheduleRevisionId={cableScheduleRevisionId}
-      />
+      /> */}
     </div>
   );
 };

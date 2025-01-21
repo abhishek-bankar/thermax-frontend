@@ -11,10 +11,12 @@ import {
   MAKE_OF_COMPONENT_API,
   MCC_PANEL,
   PCC_PANEL,
+  PROJECT_INFO_API,
   SFU_API,
   SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
 import { getData, updateData } from "@/actions/crud-actions";
+import { useParams } from "next/navigation";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -26,31 +28,41 @@ interface Props {
   panelData: any;
   incomers: any;
 }
-const getRatingForIncomer = (sg_data: any) => {
+const getRatingForIncomer = (sg_data: any, projectInfo: any) => {
   if (!sg_data) return 0;
   let totalWorkingKW = 0;
   let highestStandbyKW = 0;
+  console.log(projectInfo);
 
+  const supply_voltage = Number(projectInfo[0]?.main_supply_lv.split(" ")[0]);
   sg_data?.switchgear_selection_data?.forEach((item: any) => {
     totalWorkingKW += item.working_kw || 0;
     if (item.standby_kw > highestStandbyKW) {
       highestStandbyKW = item.standby_kw;
     }
   });
-  const result = totalWorkingKW + totalWorkingKW * 0.2 + highestStandbyKW / 2;
-  return result.toFixed(2);
+  // console.log(totalWorkingKW);
+  // console.log(totalWorkingKW + highestStandbyKW / 2);
+  const total_sum_kw = (totalWorkingKW + highestStandbyKW / 2) * 1000;
+  // const result = totalWorkingKW + totalWorkingKW * 0.2 + highestStandbyKW / 2;
+  // (KW/(1.732*Supply Voltage *0.8)) *1.2
+  const incomer_current = (total_sum_kw / (1.732 * supply_voltage * 0.8)) * 1.2;
+  console.log(total_sum_kw);
+  console.log(incomer_current);
+
+  return incomer_current.toFixed(2);
 };
-const getDevice = (sg_data: any, projectPanelData: any) => {
+const getDevice = (sg_data: any, projectPanelData: any, projectInfo: any) => {
   // console.log(getRatingForIncomer(sg_data) <= Number(projectPanelData?.incomer_ampere));
 
-  return Number(getRatingForIncomer(sg_data)) <=
+  return Number(getRatingForIncomer(sg_data, projectInfo)) <=
     Number(projectPanelData?.incomer_ampere)
     ? projectPanelData?.incomer_type
     : projectPanelData?.incomer_above_type;
 };
 
-const getPoles = (sg_data: any, projectPanelData: any) => {
-  return Number(getRatingForIncomer(sg_data)) <=
+const getPoles = (sg_data: any, projectPanelData: any, projectInfo: any) => {
+  return Number(getRatingForIncomer(sg_data, projectInfo)) <=
     Number(projectPanelData?.incomer_ampere)
     ? projectPanelData?.incomer_pole
     : projectPanelData?.incomer_above_pole;
@@ -70,7 +82,8 @@ const useDataFetching = (
   panelType: string,
   revision_id: string,
   panel_id: string,
-  sld_revision_id: string
+  sld_revision_id: string,
+  project_id: string
 ) => {
   const [isLoading, setIsLoading] = useState(true);
   const [sg_data, setSg_data] = useState<any>([]);
@@ -80,6 +93,7 @@ const useDataFetching = (
   const [totalCountOfItems, setTotalCountOfItems] = useState<number>(0);
 
   const [projectPanelData, setProjectPanelData] = useState<any>([]);
+  const [projectInfo, setProjectInfo] = useState<any>();
 
   const fetchData = useCallback(async () => {
     try {
@@ -87,7 +101,12 @@ const useDataFetching = (
       const makeComponents = await getData(
         `${MAKE_OF_COMPONENT_API}?fields=["preferred_lv_switchgear"]&filters=[["revision_id", "=", "${revision_id}"]]`
       );
-
+      const project_info = await getData(
+        `${PROJECT_INFO_API}?fields=["main_supply_lv"]&filters=[["project_id", "=", "${project_id}"]]`
+      );
+      if (project_info) {
+        setProjectInfo(project_info);
+      }
       const projectPanelData = await getData(
         `${getPanelDoctype(
           panelType
@@ -99,9 +118,10 @@ const useDataFetching = (
 
       const preferredSwitchgear =
         makeComponents[0]?.preferred_lv_switchgear.toUpperCase();
-      const pole = getPoles(sg_data, projectPanelData[0]) + "-POLE";
-      const device = getDevice(sg_data, projectPanelData[0]);
-      const current_rating = getRatingForIncomer(sg_data);
+      const pole =
+        getPoles(sg_data, projectPanelData[0], project_info) + "-POLE";
+      const device = getDevice(sg_data, projectPanelData[0], project_info);
+      const current_rating = getRatingForIncomer(sg_data, project_info);
       // console.log(current_rating, "current_rating");
 
       let filters;
@@ -110,7 +130,11 @@ const useDataFetching = (
       if (device === "SFU") {
         filters = [
           ["make", "=", preferredSwitchgear],
-          ["pole", "like", `%${getPoles(sg_data, projectPanelData[0])}%`],
+          [
+            "pole",
+            "like",
+            `%${getPoles(sg_data, projectPanelData[0], project_info)}%`,
+          ],
           ["ampere", ">=", current_rating],
         ];
       } else {
@@ -172,6 +196,7 @@ const useDataFetching = (
   }, [fetchData]);
 
   return {
+    projectInfo,
     totalCountOfItems,
     incomerResponse,
     projectPanelData,
@@ -189,14 +214,24 @@ const AddIncomer: React.FC<Props> = ({
   sld_revision_id,
   incomers,
 }) => {
+  const params = useParams();
+
+  const project_id = params.project_id as string;
   const {
+    projectInfo,
     totalCountOfItems,
     incomerResponse,
     projectPanelData,
     sg_data,
     makeComponents,
     isLoading: dataLoading,
-  } = useDataFetching(panelType, revision_id, panel_id, sld_revision_id);
+  } = useDataFetching(
+    panelType,
+    revision_id,
+    panel_id,
+    sld_revision_id,
+    project_id
+  );
 
   const [searchModel, setSearchModel] = useState("");
   const [searchRating, setSearchRating] = useState("");
@@ -256,15 +291,19 @@ const AddIncomer: React.FC<Props> = ({
         setLoading(true);
         const preferredSwitchgear =
           makeComponents?.preferred_lv_switchgear.toUpperCase();
-        const pole = getPoles(sg_data, projectPanelData) + "-POLE";
-        const device = getDevice(sg_data, projectPanelData);
+        const pole = getPoles(sg_data, projectPanelData, projectInfo) + "-POLE";
+        const device = getDevice(sg_data, projectPanelData, projectInfo);
         let filters;
 
-        const current_rating = getRatingForIncomer(sg_data);
+        const current_rating = getRatingForIncomer(sg_data, projectInfo);
         if (device === "SFU") {
           filters = [
             ["make", "=", preferredSwitchgear],
-            ["pole", "like", `%${getPoles(sg_data, projectPanelData[0])}%`],
+            [
+              "pole",
+              "like",
+              `%${getPoles(sg_data, projectPanelData[0], projectInfo)}%`,
+            ],
             ["ampere", ">=", current_rating],
           ];
         } else {
@@ -447,7 +486,7 @@ const AddIncomer: React.FC<Props> = ({
             <p className="font-semibold text-blue-500">
               Recommended Rating for Incomer (Ampere)
             </p>
-            <p>{sg_data && getRatingForIncomer(sg_data)}</p>
+            <p>{sg_data && getRatingForIncomer(sg_data, projectInfo)}</p>
             <Button
               type="primary"
               disabled={!selectedBreaker}
@@ -458,7 +497,7 @@ const AddIncomer: React.FC<Props> = ({
             <p className="font-semibold text-blue-500">Make</p>
             <p>{makeComponents?.preferred_lv_switchgear}</p>
             <p className="font-semibold text-blue-500">Device</p>
-            <p>{getDevice(sg_data, projectPanelData)}</p>
+            <p>{getDevice(sg_data, projectPanelData, projectInfo)}</p>
           </div>
           <Divider />
 

@@ -109,10 +109,10 @@ export const getLatestCableScheduleRevision = async (projectId: string) => {
 
   return dbRevisionData;
 };
-export const getAllSldRevisions = async (projectId: string) => {
+export const getAllSldRevisions = async (panel_id: string) => {
   // ["status", "in", ["${LOAD_LIST_REVISION_STATUS.NotReleased}"]]
   const dbRevisionData = await getData(
-    `${SLD_REVISIONS_API}?filters=[["project_id", "=", "${projectId}"]]&fields=["*"]&order_by=creation desc`
+    `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["*"]&order_by=creation desc`
   );
 
   return dbRevisionData;

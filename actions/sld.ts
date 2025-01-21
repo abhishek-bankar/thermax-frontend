@@ -6,7 +6,6 @@ import {
   VFD_SWITCHGEAR_API,
 } from "@/configs/api-endpoints";
 import { downloadFrappeCloudFile, getData } from "./crud-actions";
-const XLSX = require("xlsx");
 
 import { HEATING } from "@/configs/constants";
 // import * as XLSX from 'xlsx';

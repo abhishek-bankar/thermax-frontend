@@ -36,6 +36,7 @@ import { useParams } from "next/navigation";
 import S3BucketUpload from "@/components/FormInputs/S3BucketUpload";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import CustomRadioSelect from "@/components/FormInputs/CustomRadioSelect";
+import { createDynamicPanel } from "@/actions/project/panel";
 
 interface UserInfo {
   division: keyof typeof S3FolderMapping;
@@ -107,8 +108,6 @@ export default function PanelFormModal({
   projectMetadata,
 }: any) {
   // console.log("projectMetadata", projectMetadata);
-  const [infoMessage, setInfoMessage] = useState("");
-  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const { dropdownOptions: panelTypeOptions } = useDropdownOptions(
     `${PANEL_TYPE_API}?fields=["*"]`,
@@ -149,8 +148,6 @@ export default function PanelFormModal({
   const handleCancel = () => {
     setOpen(false);
     panelReset(getDefaultValues(false, values));
-    setInfoMessage("");
-    setStatus("");
   };
 
   // Watch panel_sub_type changes
@@ -168,42 +165,8 @@ export default function PanelFormModal({
   }, [panelSubType, panelTypeOptions, setValue]);
 
   const handleCreatePanel = async (panelData: any) => {
-    const panelType = panelData?.panel_main_type;
     try {
-      const panelRes = await createData(PROJECT_PANEL_API, false, panelData);
-      await createData(DYNAMIC_DOCUMENT_API, false, {
-        panel_id: panelRes.name,
-      });
-
-      const panelCreateData = {
-        panel_id: panelRes.name,
-        revision_id: revisionId,
-      };
-
-      const new_sld_revision = {
-        panel_id: panelRes.name,
-        panel_name: panelRes.panel_name,
-        status: SLD_REVISION_STATUS.DEFAULT,
-        description: "Issued for approval",
-      };
-
-      await createData(GA_REVISIONS_API, false, new_sld_revision);
-      await createData(SLD_REVISIONS_API, false, new_sld_revision);
-
-      if (panelType === MCC_PANEL_TYPE) {
-        await createData(MCC_PANEL, false, panelCreateData);
-      }
-      if (panelType === PCC_PANEL_TYPE) {
-        await createData(PCC_PANEL, false, panelCreateData);
-      }
-      if (panelType === MCCcumPCC_PANEL_TYPE) {
-        await createData(MCC_PANEL, false, panelCreateData);
-        await createData(MCC_PCC_PLC_PANEL_1, false, panelCreateData);
-        await createData(MCC_PCC_PLC_PANEL_2, false, panelCreateData);
-        await createData(MCC_PCC_PLC_PANEL_3, false, panelCreateData);
-      }
-      setStatus("success");
-      setInfoMessage("New panel created successfully");
+      await createDynamicPanel(panelData);
     } catch (error: any) {
       throw error;
     } finally {
@@ -224,14 +187,13 @@ export default function PanelFormModal({
 
   // Helper function for handling errors
   const handleError = (error: any) => {
-    setStatus("error");
     try {
       const errorObj = JSON.parse(error?.message) as any;
-      setInfoMessage(errorObj?.message);
+      message.error(errorObj?.message);
     } catch (parseError) {
       console.error(parseError);
       // If parsing fails, use the raw error message
-      setInfoMessage(error?.message || "An unknown error occurred");
+      message.error(error?.message || "An unknown error occurred");
     }
   };
 
@@ -322,7 +284,6 @@ export default function PanelFormModal({
             </div>
           )}
         </div>
-        <AlertNotification message={infoMessage} status={status} />
         <div className="text-end">
           <Button type="primary" loading={loading} htmlType="submit">
             Save

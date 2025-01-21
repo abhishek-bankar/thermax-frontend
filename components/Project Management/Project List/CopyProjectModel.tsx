@@ -1,7 +1,7 @@
 "use client";
 
 import { createData, updateData } from "@/actions/crud-actions";
-import { copyProject, createProject } from "@/actions/project";
+import { copyThermaxProject, createThermaxProject } from "@/actions/project";
 import CustomAutoComplete from "@/components/FormInputs/AutocompleteWithCreate";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
@@ -135,7 +135,7 @@ const CopyProjectModel = ({
     data = { ...data, division: userInfo?.division };
     try {
       const oldProjectId = projectRowData?.name;
-      await copyProject(oldProjectId, data, userInfo);
+      await copyThermaxProject(oldProjectId, data, userInfo);
       setOpen(false);
       message.success("Project created successfully");
     } catch (error: any) {

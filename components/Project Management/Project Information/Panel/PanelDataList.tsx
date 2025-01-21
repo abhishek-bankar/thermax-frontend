@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Popconfirm, Table, Tooltip } from "antd";
+import { Button, message, Popconfirm, Table, Tooltip } from "antd";
 import { useState } from "react";
 import { mutate } from "swr";
 import { deleteData, getData } from "@/actions/crud-actions";
@@ -22,6 +22,7 @@ import { useGetData } from "@/hooks/useCRUD";
 import { changeNameToKey, sortDatewise } from "@/utils/helpers";
 import PanelFormModal from "./PanelFormModal";
 import { ColumnsType } from "antd/es/table";
+import { deleteDynamicPanel } from "@/actions/project/panel";
 
 interface DataType {
   key: string;
@@ -126,83 +127,27 @@ export default function PanelDataList({
     setProjectRow(record);
   };
 
-  const handleDeletePanel = async (selectedRowID: string) => {
-    await deleteData(`${DYNAMIC_DOCUMENT_API}/${selectedRowID}`, false);
-    const panelData = await getData(`${PROJECT_PANEL_API}/${selectedRowID}`);
-    const panelType = panelData?.panel_main_type;
-    const panelId = panelData?.name;
-    if (panelType === MCC_PANEL_TYPE) {
-      const mccPanelData = await getData(
-        `${MCC_PANEL}?filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panelId}"]]`
-      );
-      for (const mccPanel of mccPanelData || []) {
-        const mccPanelID = mccPanel.name;
-        await deleteData(`${MCC_PANEL}/${mccPanelID}`, false);
-      }
+  // Helper function for handling errors
+  const handleError = (error: any) => {
+    try {
+      const errorObj = JSON.parse(error?.message) as any;
+      message.error(errorObj?.message);
+    } catch (parseError) {
+      console.error(parseError);
+      // If parsing fails, use the raw error message
+      message.error(error?.message || "An unknown error occurred");
     }
-    if (panelType === PCC_PANEL_TYPE) {
-      const pccPanelData = await getData(
-        `${PCC_PANEL}?filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panelId}"]]`
-      );
-      for (const pccPanel of pccPanelData || []) {
-        const pccPanelID = pccPanel.name;
-        await deleteData(`${PCC_PANEL}/${pccPanelID}`, false);
-      }
+  };
+
+  const handleDeletePanel = async (revisionId: string) => {
+    try {
+      await deleteDynamicPanel(revisionId);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      // Revalidate the cache
+      mutate(getProjectPanelDataUrl);
     }
-
-    if (panelType === MCCcumPCC_PANEL_TYPE) {
-      // Delete all MCC Cum PCC MCC Panel Data
-      const mccCumPccMccPanelData = await getData(
-        `${MCC_PANEL}?filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panelId}"]]&fields=["*"]`
-      );
-      for (const mccCumPccMccPanel of mccCumPccMccPanelData || []) {
-        const mccCumPccMccPanelID = mccCumPccMccPanel.name;
-        await deleteData(`${MCC_PANEL}/${mccCumPccMccPanelID}`, false);
-      }
-
-      // Delete all MCC_PCC_PLC_PANEL_1 Data
-      const mccPccPlcPanel1Data = await getData(
-        `${MCC_PCC_PLC_PANEL_1}?filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panelId}"]]&fields=["*"]`
-      );
-
-      for (const mccPccPlcPanel1 of mccPccPlcPanel1Data || []) {
-        const mccPccPlcPanel1ID = mccPccPlcPanel1.name;
-        await deleteData(`${MCC_PCC_PLC_PANEL_1}/${mccPccPlcPanel1ID}`, false);
-      }
-
-      // Delete all MCC_PCC_PLC_PANEL_2 Data
-      const mccPccPlcPanel2Data = await getData(
-        `${MCC_PCC_PLC_PANEL_2}?filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panelId}"]]&fields=["*"]`
-      );
-
-      for (const mccPccPlcPanel2 of mccPccPlcPanel2Data) {
-        const mccPccPlcPanel2ID = mccPccPlcPanel2.name;
-        await deleteData(`${MCC_PCC_PLC_PANEL_2}/${mccPccPlcPanel2ID}`, false);
-      }
-
-      // Delete all MCC_PCC_PLC_PANEL_3 Data
-      const mccPccPlcPanel3Data = await getData(
-        `${MCC_PCC_PLC_PANEL_3}?filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${panelId}"]]&fields=["*"]`
-      );
-
-      for (const mccPccPlcPanel3 of mccPccPlcPanel3Data) {
-        const mccPccPlcPanel3ID = mccPccPlcPanel3.name;
-        await deleteData(`${MCC_PCC_PLC_PANEL_3}/${mccPccPlcPanel3ID}`, false);
-      }
-
-      // Delete all SLD revision
-      const sldRevisionData = await getData(
-        `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${panelId}"]]&fields=["*"]`
-      );
-
-      for (const sldRevision of sldRevisionData) {
-        const sldRevisionID = sldRevision.name;
-        await deleteData(`${SLD_REVISIONS_API}/${sldRevisionID}`, false);
-      }
-    }
-    await deleteData(`${PROJECT_PANEL_API}/${selectedRowID}`, false);
-    // Revalidate the cache
-    mutate(getProjectPanelDataUrl);
   };
 
   return (

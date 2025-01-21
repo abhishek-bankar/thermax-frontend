@@ -342,6 +342,6 @@ export const SOFTSTARTER_SWITCHGEAR_API = `/document/Soft Starter`;
 export const SUPPLYFEEDER_SWITCHGEAR_API = `/document/Supply Feeder`;
 export const SLD_REVISIONS_API = `/document/SLD Revisions`;
 export const GA_REVISIONS_API = `/document/Panel GA Revisions`;
-
+export const PANEL_SPEC_REVISIONS_API = `/document/Panel Specifications Revisions`;
 export const CIRCUIT_BREAKER_API = `/document/Circuit Breaker`;
 export const SFU_API = `/document/SFU`;

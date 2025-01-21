@@ -23,6 +23,7 @@ import {
   MCC_PANEL,
   PCC_PANEL,
   PROJECT_PANEL_API,
+  SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
 import { DB_REVISION_STATUS } from "@/configs/constants";
 import { createData, getData } from "../crud-actions";
@@ -48,6 +49,9 @@ import {
   createMccCumPccPLCPanelData,
   createDynamicDocumentList,
   createProjectPanelData,
+  createSLDRevisions,
+  createPanelGARevisions,
+  createPanelSpecificationsRevisions,
 } from "./create";
 
 export const copyProjectInformation = async (
@@ -453,6 +457,57 @@ export const copyMccCumPccPLCPanelData = async (
   await createMccCumPccPLCPanelData(mccPccPlcPanelData);
 };
 
+export const copySLDRevisions = async (
+  oldPanelId: string,
+  newPanelId: string
+) => {
+  try {
+    const oldSLDRevisionsRes = await getData(
+      `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${oldPanelId}"]]&fields=["*"]`
+    );
+    const oldSLDRevisionsData = oldSLDRevisionsRes[0];
+    await createSLDRevisions({ ...oldSLDRevisionsData, panel_id: newPanelId });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const copyPanelGARevisions = async (
+  oldPanelId: string,
+  newPanelId: string
+) => {
+  try {
+    const revisionsRes = await getData(
+      `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${oldPanelId}"]]&fields=["*"]`
+    );
+    const revisionsData = revisionsRes[0];
+    await createPanelGARevisions({
+      ...revisionsData,
+      panel_id: newPanelId,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const copyPanelSpecificationsRevisions = async (
+  oldPanelId: string,
+  newPanelId: string
+) => {
+  try {
+    const revisionsRes = await getData(
+      `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${oldPanelId}"]]&fields=["*"]`
+    );
+    const revisionsData = revisionsRes[0];
+    await createPanelSpecificationsRevisions({
+      ...revisionsData,
+      panel_id: newPanelId,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const copyProjectDynamicPanels = async (
   oldDBRevisionID: string,
   newDBRevisionID: string
@@ -478,6 +533,12 @@ export const copyProjectDynamicPanels = async (
       await copyPCCPanel(oldPanelId, newPanelId);
       // Copy MCC cum PCC PLC Panel Data
       await copyMccCumPccPLCPanelData(oldPanelId, newPanelId);
+      // Copy SLD Revisions
+      await copySLDRevisions(oldPanelId, newPanelId);
+      // Copy Panel GA Revisions
+      await copyPanelGARevisions(oldPanelId, newPanelId);
+      // Copy Panel Specifications Revisions
+      await copyPanelSpecificationsRevisions(oldPanelId, newPanelId);
     }
   } catch (error: any) {
     throw error;

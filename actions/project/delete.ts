@@ -1,18 +1,31 @@
 import {
   CABLE_SCHEDULE_REVISION_HISTORY_API,
+  CABLE_TRAY_LAYOUT,
   COMMON_CONFIGURATION_1,
   COMMON_CONFIGURATION_2,
   COMMON_CONFIGURATION_3,
   DESIGN_BASIS_GENERAL_INFO_API,
+  DYNAMIC_DOCUMENT_API,
   ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
+  GA_REVISIONS_API,
+  LAYOUT_EARTHING,
   LBPS_SPECIFICATIONS_REVISION_HISTORY_API,
   LOCAL_ISOLATOR_REVISION_HISTORY_API,
   MAKE_OF_COMPONENT_API,
+  MCC_PANEL,
+  MCC_PCC_PLC_PANEL_1,
+  MCC_PCC_PLC_PANEL_2,
+  MCC_PCC_PLC_PANEL_3,
   MOTOR_CANOPY_REVISION_HISTORY_API,
   MOTOR_PARAMETER_API,
   MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
+  PANEL_SPEC_REVISIONS_API,
+  PCC_PANEL,
+  PROJECT_API,
   PROJECT_INFO_API,
   PROJECT_MAIN_PKG_API,
+  PROJECT_PANEL_API,
+  SLD_REVISIONS_API,
   STATIC_DOCUMENT_API,
 } from "@/configs/api-endpoints";
 import { deleteData, getData } from "../crud-actions";
@@ -141,7 +154,7 @@ export const deleteLocalIsolatorRevisions = async (project_id: string) => {
 export const deleteDesignBasisGeneralInfo = async (revision_id: string) => {
   try {
     const designBasisGeneralInfo = await getData(
-      `${DESIGN_BASIS_GENERAL_INFO_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${DESIGN_BASIS_GENERAL_INFO_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
 
     for (const dbGeneralInfo of designBasisGeneralInfo || []) {
@@ -159,7 +172,7 @@ export const deleteDesignBasisGeneralInfo = async (revision_id: string) => {
 export const deleteProjectMainPackage = async (revision_id: string) => {
   try {
     const projectMainPackage = await getData(
-      `${PROJECT_MAIN_PKG_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${PROJECT_MAIN_PKG_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
     for (const projectMainPkg of projectMainPackage || []) {
       const projectMainPkgID = projectMainPkg.name;
@@ -173,7 +186,7 @@ export const deleteProjectMainPackage = async (revision_id: string) => {
 export const deleteDesignBasisMotorParameters = async (revision_id: string) => {
   try {
     const motorParameters = await getData(
-      `${MOTOR_PARAMETER_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${MOTOR_PARAMETER_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
     for (const motorParameter of motorParameters || []) {
       const motorParameterID = motorParameter.name;
@@ -187,7 +200,7 @@ export const deleteDesignBasisMotorParameters = async (revision_id: string) => {
 export const deleteDesignBasisMakeofComponent = async (revision_id: string) => {
   try {
     const makeOfComponents = await getData(
-      `${MAKE_OF_COMPONENT_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${MAKE_OF_COMPONENT_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
     for (const makeOfComponent of makeOfComponents || []) {
       const makeOfComponentID = makeOfComponent.name;
@@ -201,13 +214,13 @@ export const deleteDesignBasisMakeofComponent = async (revision_id: string) => {
 export const deleteCommonConfiguration = async (revision_id: string) => {
   try {
     const commonConfigurations1 = await getData(
-      `${COMMON_CONFIGURATION_1}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${COMMON_CONFIGURATION_1}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
     const commonConfigurations2 = await getData(
-      `${COMMON_CONFIGURATION_2}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${COMMON_CONFIGURATION_2}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
     const commonConfigurations3 = await getData(
-      `${COMMON_CONFIGURATION_3}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${COMMON_CONFIGURATION_3}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
     );
     for (const commonConfiguration of commonConfigurations1 || []) {
       const commonConfigurationID = commonConfiguration.name;
@@ -231,6 +244,190 @@ export const deleteCommonConfiguration = async (revision_id: string) => {
       );
     }
   } catch (error: any) {
+    throw error;
+  }
+};
+
+export const deleteMCCPanels = async (revision_id: string) => {
+  try {
+    // Delete all MCC Panel Data
+    const mccPanelData = await getData(
+      `${MCC_PANEL}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
+    );
+    for (const mccPanel of mccPanelData || []) {
+      const mccPanelID = mccPanel.name;
+      await deleteData(`${MCC_PANEL}/${mccPanelID}`, false);
+    }
+  } catch (error: any) {
+    throw error;
+  }
+};
+
+export const deletePCCPanels = async (revision_id: string) => {
+  try {
+    const pccPanelData = await getData(
+      `${PCC_PANEL}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
+    );
+    for (const pccPanel of pccPanelData || []) {
+      const pccPanelID = pccPanel.name;
+      await deleteData(`${PCC_PANEL}/${pccPanelID}`, false);
+    }
+  } catch (error: any) {
+    throw error;
+  }
+};
+
+export const deleteMccCumPCCPLCPanels = async (revision_id: string) => {
+  try {
+    const mccPccPlcPanel1Data = await getData(
+      `${MCC_PCC_PLC_PANEL_1}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
+    );
+    const mccPccPlcPanel2Data = await getData(
+      `${MCC_PCC_PLC_PANEL_2}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
+    );
+    const mccPccPlcPanel3Data = await getData(
+      `${MCC_PCC_PLC_PANEL_3}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
+    );
+
+    for (const mccPccPlcPanel1 of mccPccPlcPanel1Data || []) {
+      const mccPccPlcPanel1ID = mccPccPlcPanel1.name;
+      await deleteData(`${MCC_PCC_PLC_PANEL_1}/${mccPccPlcPanel1ID}`, false);
+    }
+    for (const mccPccPlcPanel2 of mccPccPlcPanel2Data) {
+      const mccPccPlcPanel2ID = mccPccPlcPanel2.name;
+      await deleteData(`${MCC_PCC_PLC_PANEL_2}/${mccPccPlcPanel2ID}`, false);
+    }
+    for (const mccPccPlcPanel3 of mccPccPlcPanel3Data || []) {
+      const mccPccPlcPanel3ID = mccPccPlcPanel3.name;
+      await deleteData(`${MCC_PCC_PLC_PANEL_3}/${mccPccPlcPanel3ID}`, false);
+    }
+  } catch (error: any) {
+    throw error;
+  }
+};
+
+export const deleteCableTrayLayout = async (revision_id: string) => {
+  try {
+    const cableTrayLayoutData = await getData(
+      `${CABLE_TRAY_LAYOUT}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
+    );
+    for (const cableTrayLayout of cableTrayLayoutData || []) {
+      const cableTrayLayoutID = cableTrayLayout.name;
+      await deleteData(`${CABLE_TRAY_LAYOUT}/${cableTrayLayoutID}`, false);
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteLayoutEarthing = async (revision_id: string) => {
+  try {
+    const earthingLayoutData = await getData(
+      `${LAYOUT_EARTHING}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
+    );
+    for (const earthingLayout of earthingLayoutData || []) {
+      const earthingLayoutID = earthingLayout.name;
+      await deleteData(`${LAYOUT_EARTHING}/${earthingLayoutID}`, false);
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteSLDRevisions = async (revision_id: string) => {
+  try {
+    const projectPanelData = await getData(
+      `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+    );
+    for (const projectPanel of projectPanelData || []) {
+      const panel_id = projectPanel.name;
+      const sldRevisionHistory = await getData(
+        `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
+      );
+      for (const sldRevision of sldRevisionHistory || []) {
+        const sldRevisionID = sldRevision.name;
+        await deleteData(`${SLD_REVISIONS_API}/${sldRevisionID}`, false);
+      }
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deletePanelSpecificationsRevisions = async (
+  revision_id: string
+) => {
+  try {
+    const projectPanelData = await getData(
+      `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+    );
+    for (const projectPanel of projectPanelData || []) {
+      const panel_id = projectPanel.name;
+      const revisionHistory = await getData(
+        `${PANEL_SPEC_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
+      );
+      for (const revision of revisionHistory || []) {
+        const revisionID = revision.name;
+        await deleteData(`${PANEL_SPEC_REVISIONS_API}/${revisionID}`, false);
+      }
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deletePanelGARevisions = async (revision_id: string) => {
+  try {
+    const projectPanelData = await getData(
+      `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+    );
+    for (const projectPanel of projectPanelData || []) {
+      const panel_id = projectPanel.name;
+      const revisionHistory = await getData(
+        `${GA_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
+      );
+      for (const revision of revisionHistory || []) {
+        const revisionID = revision.name;
+        await deleteData(`${GA_REVISIONS_API}/${revisionID}`, false);
+      }
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteDynamicDocumentList = async (revision_id: string) => {
+  try {
+    const projectPanelData = await getData(
+      `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+    );
+    for (const projectPanel of projectPanelData || []) {
+      const panel_id = projectPanel.name;
+      await deleteData(`${DYNAMIC_DOCUMENT_API}/${panel_id}`, false);
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteProjectPanelData = async (revision_id: string) => {
+  try {
+    const projectPanelData = await getData(
+      `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["name"]`
+    );
+    for (const projectPanel of projectPanelData || []) {
+      const panel_id = projectPanel.name;
+      await deleteData(`${PROJECT_PANEL_API}/${panel_id}`, false);
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteProject = async (project_id: string) => {
+  try {
+    await deleteData(`${PROJECT_API}/${project_id}`, false);
+  } catch (error) {
     throw error;
   }
 };

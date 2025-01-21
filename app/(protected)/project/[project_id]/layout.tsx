@@ -94,11 +94,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 (isProjectInfoSaved === 0 || !isDesignBasisReleased) &&
                   "opacity-50 cursor-not-allowed bg-gray-500"
               )}
-              onClick={() => {
-                if (isProjectInfoSaved === 1 && isDesignBasisReleased) {
-                  handleTabChange(sld_path);
-                }
-              }}
+              // onClick={() => {
+              //   if (isProjectInfoSaved === 1 && isDesignBasisReleased) {
+              //     handleTabChange(sld_path);
+              //   }
+              // }}
+              onClick={() => handleTabChange(sld_path)}
               aria-disabled={isProjectInfoSaved}
             >
               SLD

@@ -20,7 +20,7 @@ import { useLoading } from "@/hooks/useLoading";
 import ProjectFormModal from "./ProjectFormModal";
 import { UploadProjectFilesModal } from "./UploadProjectFilesModal";
 import { getThermaxDateFormat } from "@/utils/helpers";
-import { deleteProject } from "@/actions/project";
+import { deleteThermaxProject } from "@/actions/project";
 import {
   ENVIRO,
   HEATING,
@@ -306,7 +306,7 @@ export default function ProjectList({ userInfo, isComplete }: any) {
 
   const handleDeleteProject = async (selectedRowID: string) => {
     try {
-      await deleteProject(selectedRowID);
+      await deleteThermaxProject(selectedRowID);
       message.success("Project Deleted Successfully");
     } catch (error) {
       message.error(`Error deleting project: ${error}`);

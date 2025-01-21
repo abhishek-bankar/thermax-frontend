@@ -20,6 +20,7 @@ import {
   MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
   SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
+import { sortDatewise } from "@/utils/helpers";
 
 export const getCurrentCalculation = async (loadListData: any) => {
   const division = loadListData.divisionName;
@@ -96,10 +97,9 @@ export const getCurrentCalculation = async (loadListData: any) => {
 
 export const getLatestLoadlistRevision = async (projectId: string) => {
   const dbRevisionData = await getData(
-    `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectId}"], ["status", "in", ["${LOAD_LIST_REVISION_STATUS.NotReleased}"]]]&fields=["*"]&order_by=creation desc`
-  );
-
-  return dbRevisionData;
+    `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectId}"]]&fields=["*"]&order_by=creation desc`
+  ); 
+  return sortDatewise(dbRevisionData);
 };
 
 export const getLatestCableScheduleRevision = async (projectId: string) => {
@@ -107,7 +107,7 @@ export const getLatestCableScheduleRevision = async (projectId: string) => {
     `${CABLE_SCHEDULE_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectId}"], ["status", "in", ["${LOAD_LIST_REVISION_STATUS.NotReleased}"]]]&fields=["*"]&order_by=creation desc`
   );
 
-  return dbRevisionData;
+  return sortDatewise(dbRevisionData);
 };
 export const getAllSldRevisions = async (panel_id: string) => {
   // ["status", "in", ["${LOAD_LIST_REVISION_STATUS.NotReleased}"]]
@@ -115,14 +115,14 @@ export const getAllSldRevisions = async (panel_id: string) => {
     `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["*"]&order_by=creation desc`
   );
 
-  return dbRevisionData;
+  return sortDatewise(dbRevisionData);
 };
 export const getLatestMotorCanopyRevision = async (projectId: string) => {
   const dbRevisionData = await getData(
     `${MOTOR_CANOPY_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectId}"], ["status", "in", ["${LOAD_LIST_REVISION_STATUS.NotReleased}"]]]&fields=["*"]&order_by=creation desc`
   );
 
-  return dbRevisionData;
+  return sortDatewise(dbRevisionData);
 };
 export const getFrameSizeCalculation = async (loadListData: any) => {
   const division = loadListData.divisionName;

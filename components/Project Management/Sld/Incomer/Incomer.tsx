@@ -12,6 +12,7 @@ interface Props {
   panelData: any;
   projectPanelData: any;
   setActiveTab: any;
+  setLastModified: any;
 }
 
 interface IncomerData {
@@ -29,6 +30,7 @@ const Incomer: React.FC<Props> = ({
   panelData,
   revision_id,
   setActiveTab,
+  setLastModified,
 }) => {
   const [isAddMainsIncomerOpen, setIsAddMainsIncomerOpen] =
     useState<boolean>(false);
@@ -189,6 +191,7 @@ const Incomer: React.FC<Props> = ({
           sld_revision_id={revision_id}
           designBasisRevisionId={designBasisRevisionId}
           incomers={incomers}
+          setLastModified={setLastModified}
         />
       )}
     </div>

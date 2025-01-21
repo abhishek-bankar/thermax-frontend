@@ -88,7 +88,7 @@ const SLDTabs: React.FC<Props> = ({
     designBasisRevisionId,
     project_id
   );
-
+  const [lastModified, setLastModified] = useState("");
   const [panelWiseData, setPanelWiseData] = useState<any[]>([]);
   useEffect(() => {
     const updatedTabs = panelWiseData.map((tab: any, index: number) => {
@@ -101,6 +101,7 @@ const SLDTabs: React.FC<Props> = ({
               panelData={tab}
               designBasisRevisionId={designBasisRevisionId}
               projectPanelData={projectPanelData}
+              setLastModified={setLastModified}
             />
           </>
         ),
@@ -216,13 +217,20 @@ const SLDTabs: React.FC<Props> = ({
           <h2>{projectData?.project_oc_number}</h2>
           <h2> / {projectData?.project_name}</h2>
         </div>
-        <Button
-          type="primary"
-          onClick={getLoadListData}
-          className="hover:bg-blue-600"
-        >
-          Get Load List Details
-        </Button>
+        <div className="flex items-center gap-4">
+          {lastModified !== "" && (
+            <h3 className="italic text-gray-500 text-sm">
+              last modified: {lastModified}
+            </h3>
+          )}
+          <Button
+            type="primary"
+            onClick={getLoadListData}
+            className="hover:bg-blue-600"
+          >
+            Get Load List Details
+          </Button>
+        </div>
       </div>
       <Tabs
         type="card"

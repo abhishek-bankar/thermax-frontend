@@ -6,6 +6,7 @@ import {
   SLD_REVISION_STATUS,
 } from "@/configs/constants";
 import {
+  createDynamicDocumentList,
   createMccCumPccPLCPanelData,
   createMCCPanel,
   createPanelGARevisions,
@@ -21,11 +22,18 @@ import {
   deletePCCPanels,
   deleteProjectPanelData,
 } from "./delete";
-import { deleteData } from "../crud-actions";
+import { deleteData, getData } from "../crud-actions";
 import {
   DYNAMIC_DOCUMENT_API,
+  GA_REVISIONS_API,
   MCC_PANEL,
+  MCC_PCC_PLC_PANEL_1,
+  MCC_PCC_PLC_PANEL_2,
+  MCC_PCC_PLC_PANEL_3,
+  PANEL_SPEC_REVISIONS_API,
   PCC_PANEL,
+  PROJECT_PANEL_API,
+  SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
 
 export const createDynamicPanel = async (panelData: any) => {
@@ -34,6 +42,7 @@ export const createDynamicPanel = async (panelData: any) => {
     // Create Project Panel Data with DB Revision ID
     const panelRes = await createProjectPanelData(panelData);
     const { name: panel_id, panel_name } = panelRes;
+    await createDynamicDocumentList({ panel_id });
     // Create MCC Panel with Project Panel ID
     if (panelType === MCC_PANEL_TYPE) {
       await createMCCPanel({ panel_id });
@@ -65,28 +74,78 @@ export const createDynamicPanel = async (panelData: any) => {
   }
 };
 
-export const deleteDynamicPanel = async (revisionID: string) => {
+export const deleteDynamicPanel = async (panel_id: string) => {
   try {
     // Delete Dynamic Document List
-    await deleteDynamicDocumentList(revisionID);
-    // Delete MCC Panel Data
-    await deleteMCCPanels(revisionID);
-    // Delete PCC Panel Data
-    await deletePCCPanels(revisionID);
-    // Delete all MCC_PCC_PLC_PANEL Data
-    await deleteMccCumPCCPLCPanels(revisionID);
-    // Delete Project Panel Data
-    await deleteProjectPanelData(revisionID);
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const deleteIndividualPanel = async (panel_id: string) => {
-  try {
     await deleteData(`${DYNAMIC_DOCUMENT_API}/${panel_id}`, false);
-    await deleteData(`${MCC_PANEL}/${panel_id}`, false);
-    await deleteData(`${PCC_PANEL}/${panel_id}`, false);
+    // Delete MCC Panel Data
+    const mccPanel = await getData(
+      `${MCC_PANEL}?filters=[["panel_id", "=", "${panel_id}"]]`
+    );
+    if (Array.isArray(mccPanel) && mccPanel.length > 0) {
+      await deleteData(`${MCC_PANEL}/${mccPanel?.[0]?.name}`, false);
+    }
+    // Delete PCC Panel Data
+    const pccPanel = await getData(
+      `${PCC_PANEL}?filters=[["panel_id", "=", "${panel_id}"]]`
+    );
+    if (Array.isArray(pccPanel) && pccPanel.length > 0) {
+      await deleteData(`${PCC_PANEL}/${pccPanel?.[0]?.name}`, false);
+    }
+    // Delete all MCC_PCC_PLC_PANEL Data
+    const mccPccPlcPanel1 = await getData(
+      `${MCC_PCC_PLC_PANEL_1}?filters=[["panel_id", "=", "${panel_id}"]]`
+    );
+    if (Array.isArray(mccPccPlcPanel1) && mccPccPlcPanel1.length > 0) {
+      await deleteData(
+        `${MCC_PCC_PLC_PANEL_1}/${mccPccPlcPanel1?.[0]?.name}`,
+        false
+      );
+    }
+    const mccPccPlcPanel2 = await getData(
+      `${MCC_PCC_PLC_PANEL_2}?filters=[["panel_id", "=", "${panel_id}"]]`
+    );
+    if (Array.isArray(mccPccPlcPanel2) && mccPccPlcPanel2.length > 0) {
+      await deleteData(
+        `${MCC_PCC_PLC_PANEL_2}/${mccPccPlcPanel2?.[0]?.name}`,
+        false
+      );
+    }
+    const mccPccPlcPanel3 = await getData(
+      `${MCC_PCC_PLC_PANEL_3}?filters=[["panel_id", "=", "${panel_id}"]]`
+    );
+    if (Array.isArray(mccPccPlcPanel3) && mccPccPlcPanel3.length > 0) {
+      await deleteData(
+        `${MCC_PCC_PLC_PANEL_3}/${mccPccPlcPanel3?.[0]?.name}`,
+        false
+      );
+    }
+    // Delete SLD Revisions
+    const sldRevisionHistory = await getData(
+      `${SLD_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
+    );
+    for (const sldRevision of sldRevisionHistory || []) {
+      const sldRevisionID = sldRevision.name;
+      await deleteData(`${SLD_REVISIONS_API}/${sldRevisionID}`, false);
+    }
+    // Delete Panel GA Revisions
+    const panelGARevisionHistory = await getData(
+      `${GA_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
+    );
+    for (const revision of panelGARevisionHistory || []) {
+      const revisionID = revision.name;
+      await deleteData(`${GA_REVISIONS_API}/${revisionID}`, false);
+    }
+    // Delete Panel Specifications Revisions
+    const revisionHistory = await getData(
+      `${PANEL_SPEC_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
+    );
+    for (const revision of revisionHistory || []) {
+      const revisionID = revision.name;
+      await deleteData(`${PANEL_SPEC_REVISIONS_API}/${revisionID}`, false);
+    }
+    // Delete Project Panel Data
+    await deleteData(`${PROJECT_PANEL_API}/${panel_id}`, false);
   } catch (error) {
     throw error;
   }

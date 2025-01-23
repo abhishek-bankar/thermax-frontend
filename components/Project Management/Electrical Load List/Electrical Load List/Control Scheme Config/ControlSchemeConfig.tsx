@@ -128,6 +128,8 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
 
           setControlSchemesSelected(selectedRows);
         }
+        console.log("set selected schemes");
+        
       }, [isOpen, selectedControlSchemes, controlSchemes, schemeIndex]);
       const getSortedControlSchemes = (data: any) => {
         if (division === ENVIRO) {
@@ -290,6 +292,8 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
               }
               return scheme;
             });
+            console.log("set all schemes");
+
             setControlSchemes(temp);
             setIsDataFetched(true);
             setLoading(false);
@@ -405,6 +409,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           division === HEATING ? row[2] : row[1];
         const checkedSchemeIds = new Set(checkedRows.map(getSchemeId));
         const uncheckedSchemeIds = new Set(uncheckedRows.map(getSchemeId));
+        console.log("set after add schemes");
 
         setControlSchemesSelected((prevSelected) => {
           const updatedSelected = prevSelected.filter((row) => {

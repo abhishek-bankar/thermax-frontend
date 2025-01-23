@@ -93,9 +93,11 @@ const Download: React.FC<Props> = ({
   const [cableScheduleData, setCableScheduleData] = useState<any>([]);
   const [lpbsSchemes, setLpbsSchemes] = useState<any>([]);
   const [tabKey, setTabKey] = useState("1");
-  // const userInfo: {
-  //   division: string;
-  // } = useCurrentUser();
+  const is_motor_specs_enabled =
+    motorSpecsData?.loadListData?.electrical_load_list_data?.some(
+      (el: any) => el.motor_scope === "THERMAX"
+    );
+  console.log(is_motor_specs_enabled);
 
   useEffect(() => {
     console.log(revisionHistory);
@@ -135,24 +137,24 @@ const Download: React.FC<Props> = ({
   };
 
   const handleDownload = async (revision_id: string) => {
-    setDownloadIconSpin(true); 
+    setDownloadIconSpin(true);
 
     try {
       const base64Data: any = await downloadFile(getDownLoadEndpoint(), true, {
         revision_id,
       });
- 
+
       const binaryData = Buffer.from(base64Data, "base64");
       const blob = new Blob([binaryData], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      }); 
-      
+      });
+
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
- 
+
       const filename = `${getExcelName(tabKey, revision_id)}.xlsx`;
 
-      link.download = filename.replace(/"/g, "");  
+      link.download = filename.replace(/"/g, "");
 
       link.click();
     } catch (error) {
@@ -278,7 +280,10 @@ const Download: React.FC<Props> = ({
                       (tab === "lpbs-specs" &&
                         !commonConfigData?.is_local_push_button_station_selected) ||
                       (tab === "local-isolator" &&
-                        !commonConfigData?.is_field_motor_isolator_selected)
+                        !commonConfigData?.is_field_motor_isolator_selected) ||
+                      (tab === "lpbs-specs" && !record?.is_saved) ||
+                      (tab === "local-isolator" && !record?.is_saved) ||
+                      (tab === "motor-specs" && !record?.is_saved)
                     }
                     icon={
                       <CloudDownloadOutlined
@@ -336,23 +341,6 @@ const Download: React.FC<Props> = ({
         render: (text, record) => {
           return (
             <div className="text-center">
-              {/* <Button
-                type="primary"
-                size="small"
-                name="Release"
-                disabled={
-                  record.status === DB_REVISION_STATUS.Released ||
-                  userDivision !== projectDivision ||
-                  (tab === "lpbs-specs" &&
-                    !commonConfigData?.is_local_push_button_station_selected) ||
-                  (tab === "local-isolator" &&
-                    !commonConfigData?.is_field_motor_isolator_selected)
-                }
-                onClick={() => handleRelease(record, tab)}
-              >
-                Release
-              </Button> */}
-
               <Popconfirm
                 title="Are you sure to release this revision?"
                 onConfirm={async () => handleRelease(record, tab)}
@@ -411,7 +399,8 @@ const Download: React.FC<Props> = ({
                     (tab === "lpbs-specs" &&
                       !commonConfigData?.is_local_push_button_station_selected) ||
                     (tab === "local-isolator" &&
-                      !commonConfigData?.is_field_motor_isolator_selected)
+                      !commonConfigData?.is_field_motor_isolator_selected) ||
+                    (tab === "motor-specs" && !is_motor_specs_enabled)
                   }
                   icon={
                     <SaveTwoTone
@@ -467,6 +456,7 @@ const Download: React.FC<Props> = ({
   const handleSave = async (key: any, tab: any) => {
     if (tab === "local-isolator") {
       const payload = {
+        is_saved: 1,
         is_safe_area_isolator_selected:
           commonConfigData?.is_safe_area_isolator_selected,
         is_hazardous_area_isolator_selected:
@@ -531,13 +521,12 @@ const Download: React.FC<Props> = ({
           payload
         );
         message.success("Local Isolator Specifications Saved");
+        updateDataSource(tabKey);
       } catch (error) {
         message.error("Unable to Save Local Isolator Specifications");
       }
     }
     if (tab === "lpbs-specs") {
-      console.log(commonConfigData);
-      console.log(loadListData);
       let start_push_button = "";
       // let forward_start_push_button = "";
       // let reverse_start_push_button = "";
@@ -549,17 +538,14 @@ const Download: React.FC<Props> = ({
       let on_indication_lamp_push_button = "";
       let off_indication_lamp_push_button = "";
 
-      console.log(lpbsSchemes);
       loadListData?.electrical_load_list_data?.forEach(
         (item: any, index: number) => {
           if (item.lpbs_type !== "NA") {
-            console.log(item.lpbs_type);
             const lpbsScheme = lpbsSchemes?.find(
               (el: any) => el.lpbs_type === item.lpbs_type
             );
 
             if (lpbsScheme) {
-              console.log(item.lpbs_type + ">>>>>>>>>", lpbsScheme);
               if (lpbsScheme.start_push_button !== "NA") {
                 start_push_button = "Yes";
               }
@@ -587,6 +573,8 @@ const Download: React.FC<Props> = ({
         }
       );
       const payload = {
+        is_saved: 1,
+
         is_safe_lpbs_selected: commonConfigData?.is_safe_lpbs_selected,
         is_hazardous_lpbs_selected:
           commonConfigData?.is_hazardous_lpbs_selected,
@@ -671,17 +659,15 @@ const Download: React.FC<Props> = ({
         );
         console.log(respose);
         message.success("LPBS Specifications & List Saved");
+        updateDataSource(tabKey);
       } catch (error) {
         message.error("Unable to Save LPBS Specifications & List");
       }
     }
     if (tab === "motor-specs") {
-      console.log(motorSpecsData);
-      console.log(loadListData);
-      // is_hazardous_area_present
-      // is_safe_area_present
-      console.log(motorSpecsData?.loadListData?.electrical_load_list_data);
       const payload = {
+        is_saved: 1,
+
         motor_specification_data: [
           {
             is_hazardous_area_selected:
@@ -795,6 +781,7 @@ const Download: React.FC<Props> = ({
         );
         console.log(respose);
         message.success("Motor Specifications & List Saved");
+        updateDataSource(tabKey);
       } catch (error) {
         message.error("Unable to Save Motor Specifications & List");
       }
@@ -1088,8 +1075,7 @@ const Download: React.FC<Props> = ({
       setModalLoading(false);
     }
   };
-  const getName = (key: any,) => { 
-
+  const getName = (key: any) => {
     switch (key) {
       case "1":
         return documentList[0]?.electrical_load_list;
@@ -1107,26 +1093,56 @@ const Download: React.FC<Props> = ({
         return "";
     }
   };
-  const getExcelName = (key: any, revision_id?: string) => { 
+  const getExcelName = (key: any, revision_id?: string) => {
     let revisionNo = 0;
     dataSource?.forEach((item: any, index: number) => {
       if (item.key === revision_id) {
-        revisionNo = index 
+        revisionNo = index;
       }
-    }); 
+    });
     switch (key) {
       case "1":
-        return documentList[0]?.electrical_load_list + "_R" + revisionNo + "_Electrical Load List";
+        return (
+          documentList[0]?.electrical_load_list +
+          "_R" +
+          revisionNo +
+          "_Electrical Load List"
+        );
       case "2":
-        return documentList[0]?.electrical_cable_schedule + "_R" + revisionNo + "_Electrical Cable Schedule";
+        return (
+          documentList[0]?.electrical_cable_schedule +
+          "_R" +
+          revisionNo +
+          "_Electrical Cable Schedule"
+        );
       case "3":
-        return documentList[0]?.motor_canopy_list_and_specification + "_R" + revisionNo +  "_Motor Canopy List and Specifications";
+        return (
+          documentList[0]?.motor_canopy_list_and_specification +
+          "_R" +
+          revisionNo +
+          "_Motor Canopy List and Specifications"
+        );
       case "4":
-        return documentList[0]?.motor_specification + "_R" + revisionNo + "_Motor Specification";
+        return (
+          documentList[0]?.motor_specification +
+          "_R" +
+          revisionNo +
+          "_Motor Specification"
+        );
       case "5":
-        return documentList[0]?.lpbs_specifications_and_list + "_R" + revisionNo + "_LPBS Specifications and List";
+        return (
+          documentList[0]?.lpbs_specifications_and_list +
+          "_R" +
+          revisionNo +
+          "_LPBS Specifications and List"
+        );
       case "6":
-        return documentList[0]?.local_isolator_specifications_and_list + "_R" + revisionNo + "_Local Isolator Specifications and List";
+        return (
+          documentList[0]?.local_isolator_specifications_and_list +
+          "_R" +
+          revisionNo +
+          "_Local Isolator Specifications and List"
+        );
       default:
         return "";
     }
@@ -1144,8 +1160,10 @@ const Download: React.FC<Props> = ({
       status: item.status,
       documentRevision: `R${index}`,
       createdDate: item.creation,
-      is_copied: item.is_copied,
+      is_copied: item?.is_copied,
+      is_saved: item?.is_saved,
     }));
+    console.log(data, " fetched all revisions");
     console.log(dataSource, " fetched all revisions");
 
     setDataSource(dataSource);
@@ -1154,15 +1172,7 @@ const Download: React.FC<Props> = ({
   const onChange = async (key: string) => {
     setModalLoading(true);
 
-    // console.log(key);
-    // console.log(documentList);
-    // console.log(getApiEndpoint(key));
-
     try {
-      // const documentList = await getData()
-
-      // console.log(staticData,"staticData");
-
       updateDataSource(key);
       if (key === "6" || key === "5") {
         await getIsolatorData();
@@ -1170,9 +1180,6 @@ const Download: React.FC<Props> = ({
       if (key === "4") {
         await getMotorSpecsData();
       }
-      // console.log(dataSource);
-
-      // console.log(data);
     } catch (error) {
       console.error(error);
     } finally {

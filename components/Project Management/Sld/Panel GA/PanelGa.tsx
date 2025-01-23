@@ -11,7 +11,7 @@ import {
 } from "@ant-design/icons";
 import { Button, message, Table, TableColumnsType, Tag, Tooltip } from "antd";
 import { useParams } from "next/navigation";
-import React, { useCallback, useEffect, useMemo, useState } from "react"; 
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLoading } from "@/hooks/useLoading";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useGetData } from "@/hooks/useCRUD";
@@ -65,6 +65,30 @@ const useDataFetching = (project_id: string, panel: any) => {
             ];
         }
       };
+      const panelDataByType = (panel: string, panelData: any) => {
+        if (panel === "MCC") {
+          return {
+            panel_front_type: panelData?.ga_mcc_compartmental,
+            type_of_construction_for_board:
+              panelData?.ga_mcc_construction_front_type,
+            panel_incoming_feeder_drawout_type:
+              panelData?.incoming_drawout_type,
+            panel_outgoing_feeder_drawout_type:
+              panelData?.outgoing_drawout_type,
+          };
+        }
+        if (panel === "PCC") {
+          return {
+            panel_front_type: panelData?.ga_pcc_compartmental,
+            type_of_construction_for_board:
+              panelData?.ga_pcc_construction_front_type,
+            panel_incoming_feeder_drawout_type:
+              panelData?.incoming_drawout_type,
+            panel_outgoing_feeder_drawout_type:
+              panelData?.outgoing_drawout_type,
+          };
+        }
+      };
       const fields = getFields(panel?.panel_main_type);
       console.log(fields);
 
@@ -74,7 +98,9 @@ const useDataFetching = (project_id: string, panel: any) => {
         )}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
       );
       if (panelData) {
-        setPanelData(panelData[0]);
+        console.log(panelDataByType(panel?.panel_main_type, panelData[0]),"vishal 2");
+        
+        setPanelData(panelDataByType(panel?.panel_main_type, panelData[0]));
       }
       console.log(panelData);
       console.log(panelGARevisions);
@@ -166,14 +192,13 @@ const PanelGa: React.FC<Props> = ({
       setLastModified(lastModified);
     }
   }, [panelGARevisions]);
-useEffect(() => {
-  if(!versionToCopy){
-    setTimeout(() => { 
-      refetch()
-    }, 2000);
-  }
-}, [versionToCopy])
-
+  useEffect(() => {
+    if (!versionToCopy) {
+      setTimeout(() => {
+        refetch();
+      }, 2000);
+    }
+  }, [versionToCopy]);
 
   const handleDownload = async (record: any) => {
     console.log(record);
@@ -211,20 +236,19 @@ useEffect(() => {
       document.body.removeChild(link);
     }
   };
+  console.log(designBasisData, "Design basis data ");
+
   const handleSave = async (key: any) => {
-    console.log(designBasisData);
     console.log(key);
+    console.log(sld_revision_id);
+    console.log(designBasisData, "Design basis data save");
+
+    // console.log(designBasisData);
 
     const payload = {
       panel_ga_data: [
         {
-          panel_front_type: designBasisData?.ga_mcc_compartmental,
-          type_of_construction_for_board:
-            designBasisData?.ga_mcc_construction_front_type,
-          panel_incoming_feeder_drawout_type:
-            designBasisData?.incoming_drawout_type,
-          panel_outgoing_feeder_drawout_type:
-            designBasisData?.outgoing_drawout_type,
+          ...designBasisData,
           switchgear_selection_revision_id: sld_revision_id,
         },
       ],
@@ -233,18 +257,18 @@ useEffect(() => {
       console.log(payload);
       console.log(`${GA_REVISIONS_API}/${key}`);
 
-      const response = await updateData(
-        `${GA_REVISIONS_API}/${key}`,
-        false,
-        payload
-      );
-      if (response) {
-        const lastModified = convertToFrappeDatetime(
-          new Date(response?.modified)
-        );
-        setLastModified(lastModified);
-      }
-      message.success("Panel GA Saved");
+      // const response = await updateData(
+      //   `${GA_REVISIONS_API}/${key}`,
+      //   false,
+      //   payload
+      // );
+      // if (response) {
+      //   const lastModified = convertToFrappeDatetime(
+      //     new Date(response?.modified)
+      //   );
+      //   setLastModified(lastModified);
+      // }
+      // message.success("Panel GA Saved");
     } catch (error) {
       message.error("Unable to Save Panel GA");
     }

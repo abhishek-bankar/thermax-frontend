@@ -41,7 +41,7 @@ const ValidatePanelLoad = lazy(
 );
 import { getStarterList, LoadListcolumns } from "../common/ExcelColumns";
 import "./LoadListComponent.css";
-import { Button, message, Spin } from "antd";
+import { Button, message, Modal, Popconfirm, Spin } from "antd";
 import { useProjectPanelData } from "@/hooks/useProjectPanelData";
 import { useParams, useRouter } from "next/navigation";
 import { useLoading } from "@/hooks/useLoading";
@@ -198,7 +198,6 @@ const LoadList: React.FC<LoadListProps> = ({
   const [isCurrentFetched, setIsCurrentFetched] = useState(false);
   const params = useParams();
   const router = useRouter();
-  const [lastModified, setLastModified] = useState("");
 
   const userInfo: {
     division: string;
@@ -222,7 +221,7 @@ const LoadList: React.FC<LoadListProps> = ({
     projectInfo,
     mainSupplyLV,
     subPackages,
-    refetch
+    refetch,
   } = useDataFetching(
     designBasisRevisionId,
     loadListLatestRevisionId,
@@ -232,6 +231,7 @@ const LoadList: React.FC<LoadListProps> = ({
     () => projectPanelData?.map((item: any) => item.panel_name) || [],
     [projectPanelData]
   );
+
   const [panelsSumData, setPanelsSumData] = useState<PanelSumData[]>([]);
   const [isControlSchemeModalOpen, setIsControlSchemeModalOpen] =
     useState(false);
@@ -402,14 +402,42 @@ const LoadList: React.FC<LoadListProps> = ({
       return columnMap[key] ?? -1;
     },
     [projectDivision]
-  );
+  ); 
 
   const handleFilter = useCallback(
     (values: any) => {
-      console.log(values);
-      console.log(projectData);
-
-      let filtered = spreadsheetRef?.current?.getData();
+      let filtered: any;
+      const isEmpty = Object.keys(values).length === 0;
+      if (isEmpty) {
+        const getdata = async () => {
+          try {
+            setLoading(true);
+            const res = await getData(
+              `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${loadListLatestRevisionId}`
+            );
+            const filteredData = spreadsheetRef?.current?.getData();
+            const originalData = getArrayOfLoadListData(res, revision);
+            const final = originalData.map((element: any) => {
+              const found = filteredData?.find(
+                (el: any) => el[0] === element[0]
+              );
+              if (found) {
+                return found;
+              } else {
+                return element;
+              }
+            });
+            spreadsheetRef?.current?.setData(final);
+          } catch (error) {
+            console.error(error);
+          } finally {
+            setLoading(false);
+          }
+        };
+        getdata();
+      } else {
+        filtered = spreadsheetRef?.current?.getData();
+      }
       if (filtered) {
         Object.entries(values).forEach(([key, value]) => {
           if (value) {
@@ -419,7 +447,7 @@ const LoadList: React.FC<LoadListProps> = ({
               return;
             }
 
-            filtered = filtered?.filter((item) => {
+            filtered = filtered?.filter((item: any) => {
               const itemValue = item[columnIndex];
               if (itemValue === undefined) {
                 console.warn(
@@ -442,26 +470,6 @@ const LoadList: React.FC<LoadListProps> = ({
       }
       if (spreadsheetRef?.current) {
         spreadsheetRef?.current?.setData(filtered);
-      }
-      const isEmpty = Object.keys(values).length === 0;
-      if (isEmpty) {
-        const getdata = async () => {
-          try {
-            setLoading(true);
-            const res = await getData(
-              `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}/${loadListLatestRevisionId}`
-            );
-
-            spreadsheetRef?.current?.setData(
-              getArrayOfLoadListData(res, revision)
-            );
-          } catch (error) {
-            console.error(error);
-          } finally {
-            setLoading(false);
-          }
-        };
-        getdata();
       }
     },
     [spreadsheetRef, getColumnIndex] // Add any other dependencies used in this function
@@ -1053,7 +1061,6 @@ const LoadList: React.FC<LoadListProps> = ({
           ];
         }
       });
-      console.log(loadListData, "vishal");
     }
   }, [loadListData]);
 
@@ -1061,10 +1068,13 @@ const LoadList: React.FC<LoadListProps> = ({
     if (subPackages?.length) {
       typedLoadListColumns.forEach((column) => {
         if (column.name === "pkg") {
+          console.log(subPackages, "vishal");
+
           column.source = [
             ...subPackages
               ?.map((pkg: any) => pkg.sub_packages)
               .flat()
+              .filter((item: any) => item.is_sub_package_selected === 1)
               .map((item: any) => item.sub_package_name),
             "NA",
           ];
@@ -1449,7 +1459,7 @@ const LoadList: React.FC<LoadListProps> = ({
         payload
       );
       console.log(respose);
-      refetch(); 
+      refetch();
       message.success("Electrical Load List Saved");
     } catch (error) {
       message.error("Unable to save electrical load list");
@@ -1740,129 +1750,139 @@ const LoadList: React.FC<LoadListProps> = ({
           }
         }
       });
-      const sheet_data = newArray.map((item: any) => {
-        if (projectDivision === HEATING) {
-          return [
-            item[getColumnIndex("tag_number")],
-            item[getColumnIndex("service_description")],
-            item[getColumnIndex("working_kw")],
-            item[getColumnIndex("standby_kw")],
-            item[5],
-            item[6],
-            item[7],
-            "",
-            item[9],
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            item[29],
-            item[30],
-            item[31],
-            item[32],
-            "",
-            item[34], //24th power factor
-            item[35], //motor efficiency
-            item[36],
-            item[37],
-          ];
-        } else if (projectDivision === ENVIRO) {
-          return [
-            item[getColumnIndex("tag_number")],
-            item[getColumnIndex("service_description")],
-            item[getColumnIndex("working_kw")],
-            item[getColumnIndex("standby_kw")],
-            item[4], // kva
-            item[5], // starter type
-            item[6], // supply voltage
-            item[7], // phase
-            item[9], // eocr
-            "", //lpbs type
-            "", // control scheme
-            "", // panel
-            "", // bus segrigation
-            "", // motor rpm
-            "", // type of mounting
-            "", // frame size
-            "", // gd2
-            "", // driven equipment
-            "", //bkw
-            "", //type of coupling
-            "", // pkg
-            "", // area
-            "", // standard
-            "", // zone
-            "", // gas group
-            "", // temp class
-            "", // remark
-            "", // rev
-            item[29],
-            item[30],
-            item[31],
-            item[32],
-            "", // type of bearing
-            item[34], //24th power factor
-            item[35], //motor efficiency
-            item[36], //local isolator
-            item[37], // panel ameter
-            item[38], // prefered motor make
-            "", // motor scope
-            "", // motor location
-            "", // motor part code
-            "", // motor rated current
-          ];
-        } else {
-          return [
-            item[getColumnIndex("tag_number")],
-            item[getColumnIndex("service_description")],
-            item[getColumnIndex("working_kw")],
-            item[getColumnIndex("standby_kw")],
-            item[5], // starter type
-            item[6], // supply voltage
-            item[7], // phase
-            item[9], // eocr
-            "", //lpbs type
-            "", // control scheme
-            "", // panel
-            "", // bus segrigation
-            "", // motor rpm
-            "", // type of mounting
-            "", // frame size
-            "", // gd2
-            "", // driven equipment
-            "", //bkw
-            "", //type of coupling
-            "", // pkg
-            "", // area
-            "", // standard
-            "", // zone
-            "", // gas group
-            "", // temp class
-            "", // remark
-            "", // rev
-            item[29],
-            item[30],
-            item[31],
-            item[32],
-            "", // type of bearing
-            item[34], //24th power factor
-            item[35], //motor efficiency
-            item[36], //local isolator
-            item[37], // panel ameter
-            item[38], // prefered motor make
-            "", // motor scope
-            "", // motor location
-            "", // motor part code
-            "", // motor rated current
-          ];
-        }
-      });
+
+      const sheet_data = newArray
+        .map((item: any) => {
+          if (projectDivision === HEATING) {
+            return [
+              item[getColumnIndex("tag_number")],
+              item[getColumnIndex("service_description")],
+              item[getColumnIndex("working_kw")],
+              item[getColumnIndex("standby_kw")],
+              item[5],
+              item[6],
+              item[7],
+              "", //starting time
+              item[9], //eocr
+              "", //lpbs type
+              "", //control scheme
+              "", //panel
+              "", //pkg
+              "", //area
+              "", //standard
+              "", //zone
+              "", //gas group
+              "", //temp class
+              "", //remark
+              revision, //rev
+              item[29], //space heater
+              item[30], //bearing rtd
+              item[31], //winding rtd
+              item[32], //thermistor
+              item[34], //24th power factor
+              item[35], //motor efficiency
+              item[36], //local isolator
+              item[37], //panel ammeter
+            ];
+          } else if (projectDivision === ENVIRO) {
+            return [
+              item[getColumnIndex("tag_number")],
+              item[getColumnIndex("service_description")],
+              item[getColumnIndex("working_kw")],
+              item[getColumnIndex("standby_kw")],
+              item[4], // kva
+              item[5], // starter type
+              item[6], // supply voltage
+              item[7], // phase
+              item[9], // eocr
+              "", //lpbs type
+              "", // control scheme
+              "", // panel
+              "", // bus segrigation
+              "", // motor rpm
+              "", // type of mounting
+              "", // frame size
+              "", // gd2
+              "", // driven equipment
+              "", //bkw
+              "", //type of coupling
+              "", // pkg
+              "", // area
+              "", // standard
+              "", // zone
+              "", // gas group
+              "", // temp class
+              "", // remark
+              "", // rev
+              item[29],
+              item[30],
+              item[31],
+              item[32],
+              "", // type of bearing
+              item[34], //24th power factor
+              item[35], //motor efficiency
+              item[36], //local isolator
+              item[37], // panel ameter
+              item[38], // prefered motor make
+              "", // motor scope
+              "", // motor location
+              "", // motor part code
+              "", // motor rated current
+            ];
+          } else {
+            return [
+              item[getColumnIndex("tag_number")],
+              item[getColumnIndex("service_description")],
+              item[getColumnIndex("working_kw")],
+              item[getColumnIndex("standby_kw")],
+              item[5], // starter type
+              item[6], // supply voltage
+              item[7], // phase
+              item[9], // eocr
+              "", //lpbs type
+              "", // control scheme
+              "", // panel
+              "", // bus segrigation
+              "", // motor rpm
+              "", // type of mounting
+              "", // frame size
+              "", // gd2
+              "", // driven equipment
+              "", //bkw
+              "", //type of coupling
+              "", // pkg
+              "", // area
+              "", // standard
+              "", // zone
+              "", // gas group
+              "", // temp class
+              "", // remark
+              "", // rev
+              item[29],
+              item[30],
+              item[31],
+              item[32],
+              "", // type of bearing
+              item[34], //24th power factor
+              item[35], //motor efficiency
+              item[36], //local isolator
+              item[37], // panel ameter
+              item[38], // prefered motor make
+              "", // motor scope
+              "", // motor location
+              "", // motor part code
+              "", // motor rated current
+            ];
+          }
+        })
+        .filter((item: any) => {
+          if (item[0]) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+
       spreadsheetRef?.current?.setData(sheet_data);
     };
 
@@ -2034,6 +2054,18 @@ const LoadList: React.FC<LoadListProps> = ({
       <Spin size="large" />
     </div>
   );
+  const handleClearSheet = () => {
+    Modal.confirm({
+      title: "Are you sure you want to clear the sheet?",
+      content: "This action cannot be undone.",
+      okText: "Yes, Clear it",
+      cancelText: "Cancel",
+      onOk: () => {
+        spreadsheetRef?.current?.setData([]);
+      },
+      onCancel: () => {},
+    });
+  };
 
   return (
     <>
@@ -2051,7 +2083,7 @@ const LoadList: React.FC<LoadListProps> = ({
             type="primary"
             onClick={handleTemplateDownload}
             disabled={userDivision !== projectDivision}
-            size="small"
+            // size="small"
           >
             Load List Template
           </Button>
@@ -2059,9 +2091,16 @@ const LoadList: React.FC<LoadListProps> = ({
             type="primary"
             onClick={downloadCurrentData}
             disabled={userDivision !== projectDivision}
-            size="small"
+            // size="small"
           >
             Download Current Data
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleClearSheet}
+            disabled={userDivision !== projectDivision}
+          >
+            Clear Sheet
           </Button>
         </div>
         <div className="flex gap-4">
@@ -2070,7 +2109,7 @@ const LoadList: React.FC<LoadListProps> = ({
             onClick={updateLinkedData}
             className="hover:bg-blue-600"
             disabled={userDivision !== projectDivision}
-            size="small"
+            // size="small"
           >
             Refetch
           </Button>
@@ -2079,17 +2118,17 @@ const LoadList: React.FC<LoadListProps> = ({
             onClick={() => setIsControlSchemeModalOpen(true)}
             className="hover:bg-blue-600"
             disabled={userDivision !== projectDivision}
-            size="small"
+            // size="small"
           >
             Control Scheme Configurator
           </Button>
-          {(userDivision !== HEATING || projectDivision !== HEATING) && (
+          {projectDivision !== HEATING && (
             <Button
               type="primary"
               onClick={() => setIsLPBSModalOpen(true)}
               className="hover:bg-blue-600"
               disabled={userDivision !== projectDivision}
-              size="small"
+              // size="small"
             >
               LPBS Configurator
             </Button>
@@ -2141,7 +2180,7 @@ const LoadList: React.FC<LoadListProps> = ({
         <Button
           type="primary"
           disabled={userDivision !== projectDivision}
-          size="small"
+          // size="small"
         >
           Upload Load List
           <input
@@ -2160,11 +2199,12 @@ const LoadList: React.FC<LoadListProps> = ({
             onChange={handleUploadLoadlist}
           />
         </Button>
+
         <Button
           type="primary"
           onClick={handleCurrentCalculation}
           disabled={userDivision !== projectDivision || isCurrentFetched}
-          size="small"
+          // size="small"
         >
           Get Current
         </Button>
@@ -2172,7 +2212,7 @@ const LoadList: React.FC<LoadListProps> = ({
           type="primary"
           onClick={handleValidatePanelLoad}
           disabled={userDivision !== projectDivision}
-          size="small"
+          // size="small"
         >
           Validate Panel Load
         </Button>
@@ -2181,13 +2221,13 @@ const LoadList: React.FC<LoadListProps> = ({
           type="primary"
           onClick={handleLoadListSave}
           disabled={userDivision !== projectDivision}
-          size="small"
+          // size="small"
         >
           Save
         </Button>
         <Button
           type="primary"
-          size="small"
+          // size="small"
           onClick={() => {
             setLoading(true);
             router.push(

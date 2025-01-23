@@ -48,13 +48,12 @@ interface SLDRevision {
   creation: string;
 }
 
-const PanelTab: React.FC<Props> = ({
+const   PanelTab: React.FC<Props> = ({
   panelData,
   projectPanelData,
   setLastModified,
   designBasisRevisionId,
-}) => {
-  console.log(panelData);
+}) => { 
 
   const params = useParams();
   const [activeKey, setActiveKey] = useState<string>("1");

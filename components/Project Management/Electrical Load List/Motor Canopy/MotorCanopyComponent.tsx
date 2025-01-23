@@ -210,7 +210,7 @@ const MotorCanopy: React.FC<MotorCanopyProps> = ({
           tag_number: row[0],
           service_description: row[1],
           quantity: Number(row[2]),
-          motor_rated_current: Number(row[3]),
+          kw_rating: Number(row[3]),
           rpm: Number(row[4]),
           motor_mounting_type: row[5],
           motor_frame_size: row[6],

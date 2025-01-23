@@ -97,6 +97,11 @@ const Download: React.FC<Props> = ({
     motorSpecsData?.loadListData?.electrical_load_list_data?.some(
       (el: any) => el.motor_scope === "THERMAX"
     );
+    const is_lpbs_specs_enabled =
+    loadListData?.electrical_load_list_data?.some(
+      (el: any) => el.lpbs_type && el.lpbs_type !== "NA"
+    ) ?? false;
+  
   console.log(is_motor_specs_enabled);
 
   useEffect(() => {
@@ -400,7 +405,8 @@ const Download: React.FC<Props> = ({
                       !commonConfigData?.is_local_push_button_station_selected) ||
                     (tab === "local-isolator" &&
                       !commonConfigData?.is_field_motor_isolator_selected) ||
-                    (tab === "motor-specs" && !is_motor_specs_enabled)
+                    (tab === "motor-specs" && !is_motor_specs_enabled)  ||
+                    (tab === "lpbs-specs" && !is_lpbs_specs_enabled)
                   }
                   icon={
                     <SaveTwoTone
@@ -572,6 +578,7 @@ const Download: React.FC<Props> = ({
           }
         }
       );
+
       const payload = {
         is_saved: 1,
 
@@ -645,10 +652,11 @@ const Download: React.FC<Props> = ({
               area: item.area,
               standard: item.standard,
               zone: item.zone,
-              temprature_class: item.temperature_class,
+              temperature_class: item.temperature_class,
               gas_group: item.gas_group,
             })),
       };
+      console.log(loadListData?.electrical_load_list_data);
       console.log(payload);
 
       try {

@@ -1,6 +1,8 @@
-import { getData, updateData } from "@/actions/crud-actions";
+import { downloadFile, getData, updateData } from "@/actions/crud-actions";
 import CopyRevision from "@/components/Modal/CopyRevision";
 import {
+  DYNAMIC_DOCUMENT_API,
+  GET_PANEL_SPECS_EXCEL_API,
   PANEL_SPECS_REVISIONS_API,
   PROJECT_API,
   SLD_REVISIONS_API,
@@ -57,6 +59,8 @@ const useDataFetching = (
       );
 
       // Safely extract busbar sizing data
+      console.log(sldDataResponse, "busbar data");
+
       const busbarData = sldDataResponse?.busbar_sizing_data?.[0];
       setSldData(busbarData || null);
     } catch (error) {
@@ -116,7 +120,8 @@ const PanelSpecification: React.FC<Props> = ({
 
   const { panelSpecificationRevisions, sldData, refetch, isLoading } =
     useDataFetching(project_id, panel, sld_revision_id);
-  console.log(sldData);
+  // console.log(sldData);
+  console.log(sldData, "busbar data");
 
   const dataSource = useMemo(
     () =>
@@ -133,42 +138,64 @@ const PanelSpecification: React.FC<Props> = ({
       })),
     [panelSpecificationRevisions]
   );
-  const handleDownload = async (record: any) => {
-    // console.log(record);
-    // if (record.status === SLD_REVISION_STATUS.DEFAULT) {
-    //   try {
-    //     const respose = await updateData(
-    //       `${GA_REVISIONS_API}/${record.key}`,
-    //       false,
-    //       { status: SLD_REVISION_STATUS.DOWNLOAD_READY }
-    //     );
-    //     // setLoading(false);
-    //     console.log(respose);
-    //     message.success("Panel GA is Being Prepared Please Wait For A While");
-    //     // const interval = setInterval(async () => {
-    //     //   getSLDRevision();
-    //     //   // const revisionData:any = await getSLDRevision();
-    //     //   // const updatedRecord = revisionData.find((r:any) => r.key === record.key); // Find the specific record by key
-    //     //   // if (updatedRecord && updatedRecord.status === SLD_REVISION_STATUS.SUCCESS) {
-    //     //   //   clearInterval(interval); // Stop the interval when the status is SUCCESS
-    //     //   //   const link = document.createElement("a");
-    //     //   //   link.href = updatedRecord.sld_path;
-    //     //   //   document.body.appendChild(link);
-    //     //   //   link.click();
-    //     //   //   document.body.removeChild(link);
-    //     //   // }
-    //     // }, 30000); // 30 seconds interval
-    //   } catch (error) {
-    //   } finally {
-    //   }
-    // } else if (record.status === SLD_REVISION_STATUS.SUCCESS) {
-    //   const link = document.createElement("a");
-    //   link.href = record.sld_path;
-    //   document.body.appendChild(link);
-    //   link.click();
-    //   document.body.removeChild(link);
-    // }
+
+  const getExcelName = async (revision_id?: string) => {
+    let revisionNo = 0;
+    dataSource?.forEach((item: any, index: number) => {
+      if (item.key === revision_id) {
+        revisionNo = index;
+      }
+    });
+
+    const documents_number = await getData(
+      `${DYNAMIC_DOCUMENT_API}?fields=["panel_specification"]&filters=[["panel_id", "=", "${panel?.name}"]]`
+    );
+    // console.log(documents_data);
+
+    const filename =
+      documents_number[0]?.panel_specification +
+      "_R" +
+      revisionNo +
+      "_" +
+      panelData?.panelName +
+      " Panel Specifications";
+    return filename;
   };
+  const handleDownload = async (revision_id: string) => {
+    //  setDownloadIconSpin(true);
+    // getExcelName(revision_id);
+    try {
+      const base64Data: any = await downloadFile(
+        GET_PANEL_SPECS_EXCEL_API,
+        true,
+        {
+          revision_id,
+        }
+      );
+
+      const binaryData = Buffer.from(base64Data, "base64");
+      const blob = new Blob([binaryData], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+
+       const filename = `${getExcelName(revision_id)}.xlsx`;
+
+       link.download = filename.replace(/"/g, "");
+
+      link.click();
+    } catch (error) {
+      console.error(error);
+      message.error("Unable to download file");
+
+      // setDownloadIconSpin(false);
+    } finally {
+      // setDownloadIconSpin(false);
+    }
+  };
+
   useEffect(() => {
     if (panelSpecificationRevisions?.length) {
       console.log(
@@ -331,7 +358,7 @@ const PanelSpecification: React.FC<Props> = ({
                       fontSize: "1.3rem",
                       color: "green",
                     }}
-                    onClick={() => handleDownload(record)}
+                    onClick={() => handleDownload(record.key)}
                   />
                 }
               />
@@ -418,8 +445,7 @@ const PanelSpecification: React.FC<Props> = ({
   );
   const updateTableTimeout = async () => {
     setTimeout(() => {
-
-      refetch()
+      refetch();
     }, 1500);
   };
   const PanelSpecificationTab = () => (

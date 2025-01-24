@@ -24,6 +24,7 @@ import {
   PCC_PANEL,
   PROJECT_PANEL_API,
   SLD_REVISIONS_API,
+  CABLE_TRAY_REVISION_HISTORY_API,
 } from "@/configs/api-endpoints";
 import { DB_REVISION_STATUS } from "@/configs/constants";
 import { createData, getData } from "../crud-actions";
@@ -52,6 +53,7 @@ import {
   createSLDRevisions,
   createPanelGARevisions,
   createPanelSpecificationsRevisions,
+  createCableTrayRevisions,
 } from "./create";
 
 export const copyProjectInformation = async (
@@ -210,6 +212,27 @@ export const copyLocalIsolatorRevisions = async (
       `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${oldRevisionId}`
     );
     await createLocalIsolatorRevisions({
+      ...newData,
+      project_id: newProjectId,
+    });
+  } catch (error: any) {
+    throw error;
+  }
+};
+export const copyCableTrayRevisions = async (
+  oldProjectId: string,
+  newProjectId: string
+) => {
+  try {
+    const oldDataRes = await getData(
+      `${CABLE_TRAY_REVISION_HISTORY_API}?filters=[["project_id", "=", "${oldProjectId}"]]&fields=["name"]&order_by=creation desc`
+    );
+    const oldData = oldDataRes[0];
+    const oldRevisionId = oldData.name;
+    const newData = await getData(
+      `${CABLE_TRAY_REVISION_HISTORY_API}/${oldRevisionId}`
+    );
+    await createCableTrayRevisions({
       ...newData,
       project_id: newProjectId,
     });

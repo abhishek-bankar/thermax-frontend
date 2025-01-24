@@ -49,6 +49,7 @@ import {
   createDesignBasisMakeofComponent,
   createCableTrayLayout,
   createLayoutEarthing,
+  createCableTrayRevisions,
 } from "./project/create";
 import {
   copyProjectInformation,
@@ -68,10 +69,12 @@ import {
   copyCommonConfiguration,
   copyProjectMainPackage,
   copyProjectDynamicPanels,
+  copyCableTrayRevisions,
 } from "./project/copy";
 import {
   deleteCableScheduleRevisions,
   deleteCableTrayLayout,
+  deleteCableTrayRevisions,
   deleteCommonConfiguration,
   deleteDesignBasisGeneralInfo,
   deleteDesignBasisMakeofComponent,
@@ -108,6 +111,8 @@ export const createThermaxProject = async (projectData: any, userInfo: any) => {
     await createStaticDocumentList({ project_id });
     // Create Load List Revisions
     await createLoadListRevisions({ project_id });
+    // Create Cable Tray Revisions 
+    await createCableTrayRevisions({ project_id });
     // Create Cable Schedule Revisions
     await createCableScheduleRevisions({ project_id });
     // Create Motor Canopy Revisions
@@ -176,6 +181,8 @@ export const copyThermaxProject = async (
     await copyLPBSSpecificationRevisions(oldProjectId, newProjectId);
     // Create copy of local isolator revisions
     await copyLocalIsolatorRevisions(oldProjectId, newProjectId);
+    // Create cable tray revisions
+    await copyCableTrayRevisions(oldProjectId, newProjectId);
 
     // Create copy of design basis revision history
     const { name: newDBRevisionID, oldDBRevisionID } =
@@ -235,6 +242,8 @@ export const deleteThermaxProject = async (project_id: string) => {
     await deleteLPBSSpecificationRevisions(project_id);
     // Delete Local Isolator Revisions
     await deleteLocalIsolatorRevisions(project_id);
+    // Delete Cable Tray Revisions
+    await deleteCableTrayRevisions(project_id);
 
     // Delete Design Basis Revision History
     const designBasisRevisionHistory = await getData(

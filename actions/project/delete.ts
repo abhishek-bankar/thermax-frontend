@@ -1,6 +1,7 @@
 import {
   CABLE_SCHEDULE_REVISION_HISTORY_API,
   CABLE_TRAY_LAYOUT,
+  CABLE_TRAY_REVISION_HISTORY_API,
   COMMON_CONFIGURATION_1,
   COMMON_CONFIGURATION_2,
   COMMON_CONFIGURATION_3,
@@ -144,6 +145,22 @@ export const deleteLocalIsolatorRevisions = async (project_id: string) => {
       const revisionID = revision.name;
       await deleteData(
         `${LOCAL_ISOLATOR_REVISION_HISTORY_API}/${revisionID}`,
+        false
+      );
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+export const deleteCableTrayRevisions = async (project_id: string) => {
+  try {
+    const cableTrayRevisionHistory = await getData(
+      `${CABLE_TRAY_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"]]&fields=["name"]`
+    );
+    for (const revision of cableTrayRevisionHistory || []) {
+      const revisionID = revision.name;
+      await deleteData(
+        `${CABLE_TRAY_REVISION_HISTORY_API}/${revisionID}`,
         false
       );
     }

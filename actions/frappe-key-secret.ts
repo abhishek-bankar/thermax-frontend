@@ -18,7 +18,7 @@ export const getFrappeAdminToken = async () => {
 };
 
 export const getFrappeBaseUrl = () => {
-  return process.env.FRAPPE_BASE_URL;
+  return process.env.FRAPPE_BASE_API_ENDPOINT;
 };
 
 export const getAuthSecretToken = () => {

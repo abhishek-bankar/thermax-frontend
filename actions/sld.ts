@@ -351,7 +351,7 @@ export const getSwSelectionDetails = async (payload: any) => {
 //     B1: 200,
 //   };
 //   const result = await downloadFrappeCloudFile(
-//     `${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/Final_Motor_Details_Template.xlsx`
+//     `${process.env.FRAPPE_BASE_URL}/files/Final_Motor_Details_Template.xlsx`
 //   );
 
 //   // Convert downloaded data to array buffer
@@ -373,7 +373,7 @@ interface FormulaResults {
 // export const getBusbarSizingCalculations = async (payload: any) => {
 //   try {
 //     // Download the template
-//     const url = `${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/Final_Motor_Details_Template.xlsx`;
+//     const url = `${process.env.FRAPPE_BASE_URL}/files/Final_Motor_Details_Template.xlsx`;
 //     const url2 = `https://enaibot.frappe.cloud/files/Busbar%20Calculations.xlsm`;
 
 //     const result = await downloadFrappeCloudFile(url2);

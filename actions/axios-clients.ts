@@ -1,12 +1,12 @@
-"use server"
-import axios from "axios"
-import { getFrappeToken } from "./frappe-key-secret"
+"use server";
+import axios from "axios";
+import { getFrappeToken } from "./frappe-key-secret";
 
 // Create and configure your API client
 export const getApiClient = async () => {
-  const token = await getFrappeToken()
+  const token = await getFrappeToken();
   const apiClient = axios.create({
-    baseURL: process.env.FRAPPE_BASE_URL,
+    baseURL: process.env.FRAPPE_BASE_API_ENDPOINT,
     maxBodyLength: Infinity,
     headers: {
       "Content-Type": "application/json",
@@ -14,27 +14,27 @@ export const getApiClient = async () => {
       Authorization: token,
       // Authorization: `token ${process.env.FRAPPE_ADMIN_AUTH_KEY}:${process.env.FRAPPE_ADMIN_AUTH_SECRET}`,
     },
-  })
+  });
 
-  return apiClient
-}
+  return apiClient;
+};
 
 export const adminApiClient = axios.create({
-  baseURL: process.env.FRAPPE_BASE_URL,
+  baseURL: process.env.FRAPPE_BASE_API_ENDPOINT,
   maxBodyLength: Infinity,
   headers: {
     "Content-Type": "application/json",
     Authorization: `token ${process.env.FRAPPE_ADMIN_AUTH_KEY}:${process.env.FRAPPE_ADMIN_AUTH_SECRET}`,
   },
-})
+});
 
 export const getFileUploadClient = async () => {
   const apiClient = axios.create({
-    baseURL: process.env.FRAPPE_BASE_URL,
+    baseURL: process.env.FRAPPE_BASE_API_ENDPOINT,
     maxBodyLength: Infinity,
     headers: {
       Authorization: `token ${process.env.FRAPPE_ADMIN_AUTH_KEY}:${process.env.FRAPPE_ADMIN_AUTH_SECRET}`,
     },
-  })
-  return apiClient
-}
+  });
+  return apiClient;
+};

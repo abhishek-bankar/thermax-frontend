@@ -1,7 +1,7 @@
 "use server";
 import bcrypt from "bcryptjs";
 import { v4 as uuid } from "uuid";
-import { NEXT_PUBLIC_FRAPPE_DOMAIN_NAME } from "@/configs/constants";
+import { NEXT_PUBLIC_FRONTEND_URL } from "@/configs/constants";
 import { convertToFrappeDatetime } from "@/utils/helpers";
 import { adminApiClient } from "./axios-clients";
 import { NEXT_AUTH_USER_API } from "@/configs/api-endpoints";
@@ -32,7 +32,7 @@ export const verifyEmailandGenerateToken = async (email: string) => {
       "/method/nextintegration.next_integration.doctype.nextauthuser.api.trigger_next_reset_password",
       {
         email: email,
-        reset_link: `${NEXT_PUBLIC_FRAPPE_DOMAIN_NAME}/auth/new-password?token=${token}`,
+        reset_link: `${NEXT_PUBLIC_FRONTEND_URL}/auth/new-password?token=${token}`,
         sent_by: "Admin Team",
       }
     );

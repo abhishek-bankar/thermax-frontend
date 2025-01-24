@@ -16,7 +16,7 @@ import {
   PROJECT_INFO_API,
 } from "@/configs/api-endpoints";
 
-import { useGetData, useNewGetData } from "@/hooks/useCRUD";
+import { useNewGetData } from "@/hooks/useCRUD";
 import { useLoading } from "@/hooks/useLoading";
 import useMotorParametersDropdowns from "./MotorParametersDropdown";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
@@ -238,9 +238,9 @@ const getDefaultValues = (
     hazardous_area_space_heater:
       defaultData?.hazardous_area_space_heater || "110",
     hazardous_area_certification:
-      defaultData?.hazardous_area_certification || mainPkgData?.standard
-        ? mainPkgData?.standard
-        : "IS",
+      defaultData?.hazardous_area_certification ??
+      mainPkgData?.standard ??
+      "IS",
     safe_area_bearing_rtd: defaultData?.safe_area_bearing_rtd || "110",
     hazardous_area_bearing_rtd:
       defaultData?.hazardous_area_bearing_rtd || "110",
@@ -293,8 +293,8 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
   const { setLoading: setModalLoading } = useLoading();
 
   const getProjectInfoUrl = `${PROJECT_INFO_API}/${project_id}`;
-  const { data: projectInfoData } = useGetData(getProjectInfoUrl);
-  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const { data: projectInfoData } = useNewGetData(getProjectInfoUrl);
+  const { data: projectData } = useNewGetData(`${PROJECT_API}/${project_id}`);
 
   const userDivision = userInfo?.division;
   const projectDivision = projectData?.division;
@@ -306,6 +306,7 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
   const { data: motorParameters } = useNewGetData(
     `${MOTOR_PARAMETER_API}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
   );
+  console.log("motorParameters", motorParameters);
 
   const lastModified = convertToFrappeDatetime(
     new Date(motorParameters?.[0]?.modified)
@@ -322,7 +323,7 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
 
   const getMainPkgUrl = `${PROJECT_MAIN_PKG_LIST_API}?revision_id=${revision_id}`;
 
-  const { data: mainPkgData } = useGetData(getMainPkgUrl);
+  const { data: mainPkgData } = useNewGetData(getMainPkgUrl);
   const [mainPkg, setMainPkg] = useState();
 
   const { control, handleSubmit, reset, setValue } = useForm({
@@ -336,7 +337,7 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
   });
   useEffect(() => {
     if (mainPkgData) {
-      setMainPkg(mainPkgData[0]);
+      setMainPkg(mainPkgData?.[0]);
     }
   }, [mainPkgData]);
 

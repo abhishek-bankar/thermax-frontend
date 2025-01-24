@@ -16,11 +16,15 @@ import { cableTrayValidationSchema } from "./schemas";
 import CustomTextNumber from "@/components/FormInputs/CustomInputNumber";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams } from "next/navigation";
-import { convertToFrappeDatetime } from "@/utils/helpers";
+import {
+  convertToFrappeDatetime,
+  sortAlphaNumericArray,
+} from "@/utils/helpers";
 
 const getDefaultValues = (cableTrayData: any) => {
   return {
-    cable_tray_cover: cableTrayData?.cable_tray_cover || "1",
+    is_cable_tray_cover_selected:
+      cableTrayData?.is_cable_tray_cover_selected?.toString() || "1",
     cable_tray_moc: cableTrayData?.cable_tray_moc || "SS 304",
     cable_tray_moc_input: cableTrayData?.cable_tray_moc_input || "",
     number_of_cores: cableTrayData?.number_of_cores || "3C",
@@ -196,11 +200,16 @@ const CableTray = ({
   const type_of_gland_options = dropdown["Type Of Gland"];
   const future_space_on_trays_options = dropdown["Future Space on Trays"];
   const cable_placement_options = dropdown["Cable Placement"];
-  // const cable_tray_orientation_options = dropdown["Cable Tray Orientation"];
   const cable_tray_moc_options = dropdown["Cable Tray MOC"];
-  const cable_tray_width_options = dropdown["Cable Tray Width"];
-  const cable_tray_height_options = dropdown["Cable Tray Height"];
-  const cable_tray_thickness_options = dropdown["Cable Tray Thickness"];
+  const cable_tray_width_options = sortAlphaNumericArray(
+    dropdown["Cable Tray Width"] || []
+  );
+  const cable_tray_height_options = sortAlphaNumericArray(
+    dropdown["Cable Tray Height"] || []
+  );
+  const cable_tray_thickness_options = sortAlphaNumericArray(
+    dropdown["Cable Tray Thickness"] || []
+  );
   const conduit_moc_options = dropdown["Conduit MOC"];
   const conduit_size_options = dropdown["Conduit Size"];
 
@@ -480,6 +489,7 @@ const CableTray = ({
                 name="touching_factor_air"
                 label=""
                 size="small"
+                min={0}
               />
             </div>
             <div>
@@ -488,6 +498,7 @@ const CableTray = ({
                 name="touching_factor_burid"
                 label=""
                 size="small"
+                min={0}
               />
             </div>
           </div>
@@ -501,6 +512,7 @@ const CableTray = ({
                 name="ambient_temp_factor_air"
                 label=""
                 size="small"
+                min={0}
               />
             </div>
             <div>
@@ -509,6 +521,7 @@ const CableTray = ({
                 name="ambient_temp_factor_burid"
                 label=""
                 size="small"
+                min={0}
               />
             </div>
           </div>
@@ -577,7 +590,7 @@ const CableTray = ({
             <div className="flex-1">
               <CustomRadioSelect
                 control={control}
-                name="cable_tray_cover"
+                name="is_cable_tray_cover_selected"
                 label="Cable Tray Cover"
                 options={[
                   { label: "Yes", value: "1" },
@@ -647,14 +660,14 @@ const CableTray = ({
             </div>
           </div>
           <div className="flex-1 flex-col gap-2">
-            <h4 className="text-sm font-bold">Cable Tray MOC</h4>
-            <div className="flex gap-4">
-              <div className="w-1/2 mt-[4px]">
+            <div className="flex items-center gap-4">
+              <div className="w-1/2">
                 <CustomSingleSelect
                   control={control}
                   name="cable_tray_moc"
-                  label=""
+                  label="Cable Tray MOC"
                   options={cable_tray_moc_options || []}
+                  size="small"
                 />
               </div>
               {Boolean(
@@ -664,7 +677,8 @@ const CableTray = ({
                   <CustomTextInput
                     control={control}
                     name="cable_tray_moc_input"
-                    label=""
+                    label="Coating Thickness"
+                    size="small"
                   />
                 </div>
               )}
@@ -697,7 +711,7 @@ const CableTray = ({
             <div className="flex items-center gap-4">
               <div className="grid grid-cols-2">
                 <h4 className="col-span-2 text-sm font-semibold text-slate-700">
-                  Perforated Type (upto below)
+                  Perforated Type (upto and below)
                 </h4>
                 <div className="flex-1">
                   <CustomRadioSelect
@@ -717,7 +731,7 @@ const CableTray = ({
                 control={control}
                 name="pct_perforated_type_width"
                 label="Width"
-                options={cable_tray_width_options || []}
+                options={sortAlphaNumericArray(cable_tray_width_options) || []}
                 size="small"
                 disabled={watch("is_pct_perforated_type_selected") === "0"}
               />
@@ -924,7 +938,7 @@ const CableTray = ({
             <div className="flex items-center gap-4">
               <div className="grid grid-cols-2">
                 <h4 className="col-span-2 text-sm font-semibold text-slate-700">
-                  Perforated Type (upto below)
+                  Perforated Type (upto and below)
                 </h4>
                 <div className="flex-1">
                   <CustomRadioSelect
@@ -1151,7 +1165,7 @@ const CableTray = ({
             <div className="flex items-center gap-4">
               <div className="grid grid-cols-2">
                 <h4 className="col-span-2 text-sm font-semibold text-slate-700">
-                  Perforated Type (upto below)
+                  Perforated Type (upto and below)
                 </h4>
                 <div className="flex-1">
                   <CustomRadioSelect
@@ -1243,7 +1257,7 @@ const CableTray = ({
                 label="Max. Width"
                 options={cable_tray_width_options || []}
                 size="small"
-                disabled={watch("is_pct_perforated_type_selected") === "0"}
+                disabled={watch("is_sct_ladder_type_selected") === "0"}
               />
             </div>
             <div className="flex-1">
@@ -1253,7 +1267,7 @@ const CableTray = ({
                 label="Height"
                 options={cable_tray_height_options || []}
                 size="small"
-                disabled={watch("is_pct_perforated_type_selected") === "0"}
+                disabled={watch("is_sct_ladder_type_selected") === "0"}
               />
             </div>
             <div className="flex-1">

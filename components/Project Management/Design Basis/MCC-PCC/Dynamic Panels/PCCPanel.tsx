@@ -17,7 +17,7 @@ import {
 import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useMCCPCCPanelDropdowns from "./MCCPCCPanelDropdown";
 import { pccPanelValidationSchema } from "../schemas";
-import { HEATING, WWS_SPG } from "@/configs/constants";
+import { HEATING, WWS_SERVICES, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
@@ -34,14 +34,14 @@ const getDefaultValues = (
   pccPanelData: any
 ) => {
   return {
-    incomer_ampere: pccPanelData?.incomer_ampere || "1000",
+    incomer_ampere: pccPanelData?.incomer_ampere || "630",
     special_note: pccPanelData?.special_note || "Not Applicable",
     led_type_other_input: pccPanelData?.led_type_other_input || "NA",
     incomer_pole: pccPanelData?.incomer_pole || "3",
-    incomer_type: pccPanelData?.incomer_type || "SFU",
-    incomer_above_ampere: pccPanelData?.incomer_above_ampere || "1001",
+    incomer_type: pccPanelData?.incomer_type || "MCCB",
+    incomer_above_ampere: pccPanelData?.incomer_above_ampere || "631",
     incomer_above_pole: pccPanelData?.incomer_above_pole || "4",
-    incomer_above_type: pccPanelData?.incomer_above_type || "SFU",
+    incomer_above_type: pccPanelData?.incomer_above_type || "EDO ACB",
     is_under_or_over_voltage_selected:
       Boolean(pccPanelData?.is_under_or_over_voltage_selected) || false,
     is_lsig_selected: Boolean(pccPanelData?.is_lsig_selected) || false,
@@ -95,7 +95,7 @@ const getDefaultValues = (
     door_thickness: pccPanelData?.door_thickness || "1.6 mm",
     ga_moc_thickness_covers: pccPanelData?.ga_moc_thickness_covers || "1.6 mm",
     ga_pcc_compartmental:
-      pccPanelData?.ga_pcc_compartmental || "Form-I A (Non Compartmental)",
+      pccPanelData?.ga_pcc_compartmental || "Form-III A (Compartmentalized)",
     ga_pcc_construction_front_type:
       pccPanelData?.ga_pcc_construction_front_type || "Single Front",
 
@@ -114,7 +114,7 @@ const getDefaultValues = (
     ga_panel_mounting_height: pccPanelData?.ga_panel_mounting_height || "100",
 
     is_marshalling_section_selected:
-      pccPanelData?.is_marshalling_section_selected || "0",
+      pccPanelData?.is_marshalling_section_selected?.toString() || "0",
     marshalling_section_text_area:
       pccPanelData?.marshalling_section_text_area ||
       "a) Min width 400 mm & Above\nb) Separate Marshaling for each shiping section with Partition\nc) Signal from MCC to PLC DI/DO/AI/AO with Separate TB.\nd) DI, DO TB to be mounted on separate column\ne) Signal from MCC to Field with Separate TB.",
@@ -1488,7 +1488,8 @@ const PCCPanel = ({
             </div>
           </>
         )}
-        {userInfo?.division === WWS_SPG && (
+        {(userInfo?.division === WWS_SPG ||
+          userInfo?.division === WWS_SERVICES) && (
           <>
             <Divider>
               <span className="font-bold text-slate-700">

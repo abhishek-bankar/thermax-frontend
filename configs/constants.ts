@@ -1,5 +1,4 @@
-export const NEXT_PUBLIC_FRAPPE_DOMAIN_NAME =
-  process.env.NEXT_PUBLIC_FRAPPE_DOMAIN_NAME;
+export const NEXT_PUBLIC_FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL;
 
 export const SIGN_IN = "/auth/sign-in";
 export const SIGN_UP = "/auth/sign-up";

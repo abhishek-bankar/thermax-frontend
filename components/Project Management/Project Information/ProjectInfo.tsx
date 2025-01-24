@@ -837,7 +837,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
         footer={null}
       >
         <Video
-          src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/Project Information Video.mp4`}
+          src={`${process.env.FRAPPE_BASE_URL}/files/Project Information Video.mp4`}
           shouldStop={!openVideoModel}
         />
       </Modal>

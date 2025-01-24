@@ -1975,7 +1975,7 @@ const LoadList: React.FC<LoadListProps> = ({
   };
   const handleTemplateDownload = async () => {
     const base64Data: any = await downloadFrappeCloudFile(
-      `${process.env.NEXT_PUBLIC_FRAPPE_URL}/files/Final_Motor_Details_Template.xlsx`
+      `${process.env.FRAPPE_BASE_URL}/files/Final_Motor_Details_Template.xlsx`
     );
     // Create a Blob from the Base64 string
     const binaryData = Buffer.from(base64Data, "base64");

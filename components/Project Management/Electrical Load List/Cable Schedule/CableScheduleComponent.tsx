@@ -33,7 +33,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   ENVIRO,
   HEATING,
-  SERVICES,
+  WWS_SERVICES,
   WWS_IPG,
   WWS_SPG,
 } from "@/configs/constants";
@@ -157,7 +157,7 @@ const useDataFetching = (
         return `${HEATING_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
       case WWS_SPG:
         return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
-      case SERVICES:
+      case WWS_SERVICES:
         return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
       case ENVIRO:
         return `${HEATING_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
@@ -175,7 +175,7 @@ const useDataFetching = (
       setIsLoading(true);
 
       const division =
-        userInfo?.division === WWS_SPG || userInfo?.division === SERVICES
+        userInfo?.division === WWS_SPG || userInfo?.division === WWS_SERVICES
           ? WWS_SPG
           : userInfo?.division;
       const lpbsResponse = await getData(
@@ -200,7 +200,10 @@ const useDataFetching = (
       getData(getApiEndpoint(userInfo?.division)).then((res) => {
         console.log(res);
         let sortedSchemes;
-        if (userInfo.division === SERVICES || userInfo.division === WWS_SPG) {
+        if (
+          userInfo.division === WWS_SERVICES ||
+          userInfo.division === WWS_SPG
+        ) {
           sortedSchemes = WWS_SPG_DATA;
         } else if (userInfo.division === ENVIRO) {
           sortedSchemes = [

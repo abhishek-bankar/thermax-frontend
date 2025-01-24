@@ -32,7 +32,7 @@ import {
 import {
   ENVIRO,
   HEATING,
-  SERVICES,
+  WWS_SERVICES,
   WWS_IPG,
   WWS_SPG,
 } from "@/configs/constants";
@@ -80,7 +80,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           case HEATING:
             return controlSchemeColumnsForHeating;
           case WWS_SPG:
-          case SERVICES:
+          case WWS_SERVICES:
             return columnsForWwsSPG;
           case WWS_IPG:
             return getIPGColumns(selectedFilter);
@@ -105,7 +105,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           case HEATING:
             return `${HEATING_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
           case WWS_SPG:
-          case SERVICES:
+          case WWS_SERVICES:
             return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
           case ENVIRO:
             return `${ENVIRO_CONTROL_SCHEMES_URI}?limit=3000&fields=["*"]`;
@@ -129,7 +129,6 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           setControlSchemesSelected(selectedRows);
         }
         console.log("set selected schemes");
-        
       }, [isOpen, selectedControlSchemes, controlSchemes, schemeIndex]);
       const getSortedControlSchemes = (data: any) => {
         if (division === ENVIRO) {
@@ -200,7 +199,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           // console.log(sortedData);
           return schemes;
         }
-        if (division === WWS_SPG || division === SERVICES) {
+        if (division === WWS_SPG || division === WWS_SERVICES) {
           const schemes = data?.map((scheme: any) => [
             false,
             scheme.scheme,
@@ -233,14 +232,13 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             const res = await getData(getApiEndpoint(division));
             let sortedSchemes;
             console.log(res, "control schemes data");
-            if (division === SERVICES || division === WWS_SPG) {
+            if (division === WWS_SERVICES || division === WWS_SPG) {
               sortedSchemes = getSortedControlSchemes(res);
             } else if (division === ENVIRO) {
               sortedSchemes = getSortedControlSchemes(res);
             } else if (division === WWS_IPG) {
               sortedSchemes = getIPGSchemesData();
             } else if (division === HEATING) {
-        
               sortedSchemes = res
                 .map((item: any) => [
                   false,
@@ -451,7 +449,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           selector_switch: 6,
           indication: 8,
           rating: 15,
-          type: division === WWS_SPG || division === SERVICES ? 5 : 100,
+          type: division === WWS_SPG || division === WWS_SERVICES ? 5 : 100,
           starter_type: division === ENVIRO ? 2 : division === WWS_IPG ? 4 : 2,
         };
         return columnMap[key] ?? -1;
@@ -546,7 +544,6 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           );
         }
         if (division === WWS_IPG) {
-         
           config.push({
             key: "starter_type",
             label: "Starter Type",

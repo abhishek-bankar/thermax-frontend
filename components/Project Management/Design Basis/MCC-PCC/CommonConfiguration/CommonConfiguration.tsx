@@ -21,7 +21,7 @@ import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useCommonConfigDropdowns from "./CommonConfigDropdowns";
 import { configItemValidationSchema } from "../schemas";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { WWS_SPG } from "@/configs/constants";
+import { WWS_SERVICES, WWS_SPG } from "@/configs/constants";
 import {
   convertToFrappeDatetime,
   moveNAtoEnd,
@@ -53,8 +53,8 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     is_hazardous_lpbs_selected:
       commonConfigData?.is_hazardous_lpbs_selected?.toString() || "1",
 
-    dol_starter: commonConfigData?.dol_starter || "0.37",
-    star_delta_starter: commonConfigData?.star_delta_starter || "0.55",
+    dol_starter: commonConfigData?.dol_starter || "7.5",
+    star_delta_starter: commonConfigData?.star_delta_starter || "11",
     ammeter: commonConfigData?.ammeter || "0.37",
     ammeter_configuration:
       commonConfigData?.ammeter_configuration || "All Phase With CT",
@@ -172,55 +172,74 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     stopped_closed: commonConfigData?.stopped_closed || "Red",
     trip: commonConfigData?.trip || "Amber",
     safe_field_motor_type: commonConfigData?.type || "Weather Proof Enclosure",
-    safe_field_motor_enclosure: commonConfigData?.enclosure || "IP 65",
-    safe_field_motor_material: commonConfigData?.material || "SS 316",
-    safe_field_motor_thickness: commonConfigData?.thickness || "1.6 mm",
+    safe_field_motor_enclosure:
+      commonConfigData?.safe_field_motor_enclosure || "IP 65",
+    safe_field_motor_material:
+      commonConfigData?.safe_field_motor_material || "SS 316",
+    safe_field_motor_thickness:
+      commonConfigData?.safe_field_motor_thickness || "1.6 mm",
     safe_field_motor_qty:
-      commonConfigData?.qty || "As Mentioned in Electrical Load List",
+      commonConfigData?.safe_field_motor_qty ||
+      "As Mentioned in Electrical Load List",
     safe_field_motor_isolator_color_shade:
-      commonConfigData?.field_motor_isolator_color_shade || "RAL 7035",
-    safe_field_motor_cable_entry: commonConfigData?.cable_entry || "Bottom",
-    safe_field_motor_canopy: commonConfigData?.canopy_on_top || "All",
-    safe_field_motor_canopy_type: commonConfigData?.type || "On Top",
+      commonConfigData?.safe_field_motor_isolator_color_shade || "RAL 7035",
+    safe_field_motor_cable_entry:
+      commonConfigData?.safe_field_motor_cable_entry || "Bottom",
+    safe_field_motor_canopy: commonConfigData?.safe_field_motor_canopy || "All",
+    safe_field_motor_canopy_type:
+      commonConfigData?.safe_field_motor_canopy_type || "On Top",
     hazardous_field_motor_type:
-      commonConfigData?.type || mainPkgData?.standard
-        ? mainPkgData?.standard
-        : "IS",
-    hazardous_field_motor_enclosure: commonConfigData?.enclosure || "IP 65",
-    hazardous_field_motor_material: commonConfigData?.material || "SS 316",
-    hazardous_field_motor_thickness: commonConfigData?.thickness || "1.6 mm",
+      commonConfigData?.hazardous_field_motor_type ??
+      mainPkgData?.standard ??
+      "IS",
+    hazardous_field_motor_enclosure:
+      commonConfigData?.hazardous_field_motor_enclosure || "IP 65",
+    hazardous_field_motor_material:
+      commonConfigData?.hazardous_field_motor_material || "SS 316",
+    hazardous_field_motor_thickness:
+      commonConfigData?.hazardous_field_motor_thickness || "1.6 mm",
     hazardous_field_motor_qty:
-      commonConfigData?.qty || "As Mentioned in Electrical Load List",
+      commonConfigData?.hazardous_field_motor_qty ||
+      "As Mentioned in Electrical Load List",
     hazardous_field_motor_isolator_color_shade:
-      commonConfigData?.field_motor_isolator_color_shade || "RAL 7035",
+      commonConfigData?.hazardous_field_motor_isolator_color_shade ||
+      "RAL 7035",
     hazardous_field_motor_cable_entry:
-      commonConfigData?.cable_entry || "Bottom",
-    hazardous_field_motor_canopy: commonConfigData?.canopy_on_top || "All",
-    hazardous_field_motor_canopy_type: commonConfigData?.type || "On Top",
+      commonConfigData?.hazardous_field_motor_cable_entry || "Bottom",
+    hazardous_field_motor_canopy:
+      commonConfigData?.hazardous_field_motor_canopy || "All",
+    hazardous_field_motor_canopy_type:
+      commonConfigData?.hazardous_field_motor_canopy_type || "On Top",
 
-    safe_lpbs_type: commonConfigData?.lpbs_type || "Weather Proof Enclosure",
-    safe_lpbs_enclosure: commonConfigData?.lpbs_enclosure || "IP 65",
-    safe_lpbs_material: commonConfigData?.lpbs_material || "CRCA",
-    safe_lpbs_thickness: commonConfigData?.thickness || "1.6 mm",
+    safe_lpbs_type:
+      commonConfigData?.safe_lpbs_type || "Weather Proof Enclosure",
+    safe_lpbs_enclosure: commonConfigData?.safe_lpbs_enclosure || "IP 65",
+    safe_lpbs_material: commonConfigData?.safe_lpbs_material || "CRCA",
+    safe_lpbs_thickness: commonConfigData?.safe_lpbs_thickness || "1.6 mm",
     safe_lpbs_qty:
-      commonConfigData?.lpbs_qty || "As Mentioned in Electrical Load List",
-    safe_lpbs_color_shade: commonConfigData?.lpbs_color_shade || "RAL 7035",
-    safe_lpbs_canopy: commonConfigData?.lpbs_canopy_on_top || "All",
-    safe_lpbs_canopy_type: commonConfigData?.type || "On Top",
+      commonConfigData?.safe_lpbs_qty || "As Mentioned in Electrical Load List",
+    safe_lpbs_color_shade:
+      commonConfigData?.safe_lpbs_color_shade || "RAL 7035",
+    safe_lpbs_canopy: commonConfigData?.safe_lpbs_canopy || "All",
+    safe_lpbs_canopy_type: commonConfigData?.safe_lpbs_canopy_type || "On Top",
 
     hazardous_lpbs_type:
-      commonConfigData?.lpbs_type || mainPkgData?.standard
-        ? mainPkgData?.standard
-        : "IS",
-    hazardous_lpbs_enclosure: commonConfigData?.lpbs_enclosure || "IP 65",
-    hazardous_lpbs_material: commonConfigData?.lpbs_material || "CRCA",
-    hazardous_lpbs_thickness: commonConfigData?.thickness || "1.6 mm",
+      commonConfigData?.hazardous_lpbs_type ?? mainPkgData?.standard ?? "IS",
+
+    hazardous_lpbs_enclosure:
+      commonConfigData?.hazardous_lpbs_enclosure || "IP 65",
+    hazardous_lpbs_material:
+      commonConfigData?.hazardous_lpbs_material || "CRCA",
+    hazardous_lpbs_thickness:
+      commonConfigData?.hazardous_lpbs_thickness || "1.6 mm",
     hazardous_lpbs_qty:
-      commonConfigData?.lpbs_qty || "As Mentioned in Electrical Load List",
+      commonConfigData?.hazardous_lpbs_qty ||
+      "As Mentioned in Electrical Load List",
     hazardous_lpbs_color_shade:
-      commonConfigData?.lpbs_color_shade || "RAL 7035",
-    hazardous_lpbs_canopy: commonConfigData?.lpbs_canopy_on_top || "All",
-    hazardous_lpbs_canopy_type: commonConfigData?.type || "On Top",
+      commonConfigData?.hazardous_lpbs_color_shade || "RAL 7035",
+    hazardous_lpbs_canopy: commonConfigData?.hazardous_lpbs_canopy || "All",
+    hazardous_lpbs_canopy_type:
+      commonConfigData?.hazardous_lpbs_canopy_type || "On Top",
 
     lpbs_push_button_start_color:
       commonConfigData?.lpbs_push_button_start_color || "Green",
@@ -1080,7 +1099,8 @@ const CommonConfiguration = ({
             />
           </div>
 
-          {userInfo?.division === WWS_SPG && (
+          {(userInfo?.division === WWS_SPG ||
+            userInfo?.division === WWS_SERVICES) && (
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}

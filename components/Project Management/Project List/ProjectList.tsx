@@ -24,7 +24,7 @@ import { deleteThermaxProject } from "@/actions/project";
 import {
   ENVIRO,
   HEATING,
-  SERVICES,
+  WWS_SERVICES,
   TagColors,
   WWS_IPG,
   WWS_SPG,
@@ -120,9 +120,11 @@ export default function ProjectList({ userInfo, isComplete }: any) {
           </div>
         );
       },
-      filters: [HEATING, ENVIRO, WWS_IPG, WWS_SPG, SERVICES].map((division) => {
-        return { text: division, value: division };
-      }),
+      filters: [HEATING, ENVIRO, WWS_IPG, WWS_SPG, WWS_SERVICES].map(
+        (division) => {
+          return { text: division, value: division };
+        }
+      ),
       onFilter: (value, record: any) => record?.division.indexOf(value) === 0,
       defaultFilteredValue: [userDivision],
     },

@@ -97,11 +97,11 @@ const Download: React.FC<Props> = ({
     motorSpecsData?.loadListData?.electrical_load_list_data?.some(
       (el: any) => el.motor_scope === "THERMAX"
     );
-    const is_lpbs_specs_enabled =
+  const is_lpbs_specs_enabled =
     loadListData?.electrical_load_list_data?.some(
       (el: any) => el.lpbs_type && el.lpbs_type !== "NA"
     ) ?? false;
-  
+
   console.log(is_motor_specs_enabled);
 
   useEffect(() => {
@@ -405,7 +405,7 @@ const Download: React.FC<Props> = ({
                       !commonConfigData?.is_local_push_button_station_selected) ||
                     (tab === "local-isolator" &&
                       !commonConfigData?.is_field_motor_isolator_selected) ||
-                    (tab === "motor-specs" && !is_motor_specs_enabled)  ||
+                    (tab === "motor-specs" && !is_motor_specs_enabled) ||
                     (tab === "lpbs-specs" && !is_lpbs_specs_enabled)
                   }
                   icon={
@@ -472,7 +472,7 @@ const Download: React.FC<Props> = ({
             fmi_type: commonConfigData?.safe_field_motor_type,
             fmi_ip_protection: commonConfigData?.safe_field_motor_enclosure,
             fmi_enclouser_moc: commonConfigData?.safe_field_motor_material,
-            fmi_enclouser_thickness:
+            fmi_enclosure_thickness:
               commonConfigData?.safe_field_motor_thickness,
             fmi_qty: commonConfigData?.safe_field_motor_qty,
             ifm_isolator_color_shade:
@@ -487,7 +487,7 @@ const Download: React.FC<Props> = ({
             fmi_ip_protection:
               commonConfigData?.hazardous_field_motor_enclosure,
             fmi_enclouser_moc: commonConfigData?.hazardous_field_motor_material,
-            fmi_enclouser_thickness:
+            fmi_enclosure_thickness:
               commonConfigData?.hazardous_field_motor_thickness,
             fmi_qty: commonConfigData?.hazardous_field_motor_qty,
             ifm_isolator_color_shade:

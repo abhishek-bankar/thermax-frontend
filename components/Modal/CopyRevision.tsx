@@ -1,18 +1,18 @@
-
 import { CopyOutlined } from "@ant-design/icons";
-import { zodResolver } from "@hookform/resolvers/zod"; 
-import { Button, message, Modal } from "antd"; 
-import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea"; 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, message, Modal } from "antd";
+import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm, Control } from "react-hook-form"; 
+import { SubmitHandler, useForm, Control } from "react-hook-form";
 import * as zod from "zod";
 import { copyRevision } from "@/actions/electrical-load-list";
+import { useParams } from "next/navigation";
 
 interface CopyRevisionProps {
   updateTable: (tab: string) => Promise<void>;
   version: any;
   tab: string;
-  setVersionToCopy: (el: any) => void;  
+  setVersionToCopy: (el: any) => void;
 }
 
 const schema = zod.object({
@@ -27,18 +27,18 @@ const defaultValues: FormData = {
 
 const CopyRevision: React.FC<CopyRevisionProps> = ({
   version,
-  setVersionToCopy, 
+  setVersionToCopy,
   updateTable,
-  tab, 
+  tab,
 }) => {
   const [loading, setLoading] = useState(false);
-
   const { control, handleSubmit, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues,
     mode: "onSubmit",
   });
-
+  const params = useParams();
+  const project_id = params?.project_id as string;
   useEffect(() => {
     if (!version) {
       reset(defaultValues);
@@ -61,12 +61,14 @@ const CopyRevision: React.FC<CopyRevisionProps> = ({
         return "local-isolator";
       case "panel_ga":
         return "panel_ga";
+      case "panel_specifications":
+        return "panel_specifications";
       default:
         return "";
     }
   };
 
-  const handleCancel = () => { 
+  const handleCancel = () => {
     reset(defaultValues);
     setVersionToCopy(null);
   };
@@ -75,17 +77,21 @@ const CopyRevision: React.FC<CopyRevisionProps> = ({
     setLoading(true);
     try {
       const { clone_notes } = data;
+      console.log(project_id);
       console.log(version);
-      
+
       const revision_id = version?.key;
-      copyRevision({
-        revision_id,
-        clone_notes,
-        module_name: get_tab_name(tab),
-      }).then(() => updateTable(tab));
+      copyRevision(
+        {
+          revision_id,
+          clone_notes,
+          module_name: get_tab_name(tab),
+        },
+        project_id
+      ).then(() => updateTable(tab));
 
       message.success("Revision Copied Successfully");
-      handleCancel();  
+      handleCancel();
     } catch (error) {
       message.error("Failed to clone revision data");
       console.error(error);

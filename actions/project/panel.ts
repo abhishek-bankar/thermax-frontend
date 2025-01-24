@@ -29,8 +29,8 @@ import {
   MCC_PANEL,
   MCC_PCC_PLC_PANEL_1,
   MCC_PCC_PLC_PANEL_2,
-  MCC_PCC_PLC_PANEL_3,
-  PANEL_SPEC_REVISIONS_API,
+  MCC_PCC_PLC_PANEL_3, 
+  PANEL_SPECS_REVISIONS_API, 
   PCC_PANEL,
   PROJECT_PANEL_API,
   SLD_REVISIONS_API,
@@ -138,11 +138,11 @@ export const deleteDynamicPanel = async (panel_id: string) => {
     }
     // Delete Panel Specifications Revisions
     const revisionHistory = await getData(
-      `${PANEL_SPEC_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
+      `${PANEL_SPECS_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
     );
     for (const revision of revisionHistory || []) {
       const revisionID = revision.name;
-      await deleteData(`${PANEL_SPEC_REVISIONS_API}/${revisionID}`, false);
+      await deleteData(`${PANEL_SPECS_REVISIONS_API}/${revisionID}`, false);
     }
     // Delete Project Panel Data
     await deleteData(`${PROJECT_PANEL_API}/${panel_id}`, false);

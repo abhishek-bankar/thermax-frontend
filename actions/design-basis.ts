@@ -10,14 +10,4 @@ export const getLatestDesignBasisRevision = async (projectId: string) => {
   );
 
   return dbRevisionData;
-};
-
-export const getLatestDesignBasisRevisionForLoadList = async (
-  projectId: string
-) => {
-  const dbRevisionData = await getData(
-    `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectId}"]]&fields=["*"]&order_by=creation desc`
-  );
-
-  return dbRevisionData;
-};
+}; 

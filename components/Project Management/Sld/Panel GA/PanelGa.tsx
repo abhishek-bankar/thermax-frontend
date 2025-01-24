@@ -257,18 +257,18 @@ const PanelGa: React.FC<Props> = ({
       console.log(payload);
       console.log(`${GA_REVISIONS_API}/${key}`);
 
-      // const response = await updateData(
-      //   `${GA_REVISIONS_API}/${key}`,
-      //   false,
-      //   payload
-      // );
-      // if (response) {
-      //   const lastModified = convertToFrappeDatetime(
-      //     new Date(response?.modified)
-      //   );
-      //   setLastModified(lastModified);
-      // }
-      // message.success("Panel GA Saved");
+      const response = await updateData(
+        `${GA_REVISIONS_API}/${key}`,
+        false,
+        payload
+      );
+      if (response) {
+        const lastModified = convertToFrappeDatetime(
+          new Date(response?.modified)
+        );
+        setLastModified(lastModified);
+      }
+      message.success("Panel GA Saved");
     } catch (error) {
       message.error("Unable to Save Panel GA");
     }

@@ -19,8 +19,8 @@ import {
   MCC_PCC_PLC_PANEL_3,
   MOTOR_CANOPY_REVISION_HISTORY_API,
   MOTOR_PARAMETER_API,
-  MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
-  PANEL_SPEC_REVISIONS_API,
+  MOTOR_SPECIFICATIONS_REVISION_HISTORY_API, 
+  PANEL_SPECS_REVISIONS_API, 
   PCC_PANEL,
   PROJECT_API,
   PROJECT_INFO_API,
@@ -387,11 +387,11 @@ export const deletePanelSpecificationsRevisions = async (
     for (const projectPanel of projectPanelData || []) {
       const panel_id = projectPanel.name;
       const revisionHistory = await getData(
-        `${PANEL_SPEC_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
+        `${PANEL_SPECS_REVISIONS_API}?filters=[["panel_id", "=", "${panel_id}"]]&fields=["name"]`
       );
       for (const revision of revisionHistory || []) {
         const revisionID = revision.name;
-        await deleteData(`${PANEL_SPEC_REVISIONS_API}/${revisionID}`, false);
+        await deleteData(`${PANEL_SPECS_REVISIONS_API}/${revisionID}`, false);
       }
     }
   } catch (error) {

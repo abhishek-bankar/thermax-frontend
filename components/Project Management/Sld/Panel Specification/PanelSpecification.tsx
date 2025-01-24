@@ -1,69 +1,83 @@
 import { getData, updateData } from "@/actions/crud-actions";
-import { GA_REVISIONS_API } from "@/configs/api-endpoints";
+import CopyRevision from "@/components/Modal/CopyRevision";
+import {
+  PANEL_SPECS_REVISIONS_API,
+  PROJECT_API,
+  SLD_REVISIONS_API,
+} from "@/configs/api-endpoints";
 import { SLD_REVISION_STATUS } from "@/configs/constants";
-import { getThermaxDateFormat } from "@/utils/helpers";
+import { useGetData } from "@/hooks/useCRUD";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import {
+  convertToFrappeDatetime,
+  getThermaxDateFormat,
+  sortDatewise,
+} from "@/utils/helpers";
 import {
   CloudDownloadOutlined,
+  CopyTwoTone,
   FolderOpenOutlined,
   SaveTwoTone,
   SyncOutlined,
 } from "@ant-design/icons";
-import { Button, message, Table, TableColumnsType, Tag, Tooltip } from "antd";
+import {
+  Button,
+  message,
+  Popconfirm,
+  Table,
+  TableColumnsType,
+  Tag,
+  Tooltip,
+} from "antd";
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { getPanelDoctype } from "../Incomer/Add Incomer/AddIncomer";
 
-const useDataFetching = (project_id: string, panel: any) => {
+const useDataFetching = (
+  project_id: string,
+  panel: any,
+  sld_revision_id: any
+) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [panelGARevisions, setpanelGARevisions] = useState<any>();
-  const [panelData, setPanelData] = useState<any>();
-  const [swSelectionData, setSwSelectionData] = useState<any[]>([]);
-  const [commonConfiguration, setCommonConfiguration] = useState<any[]>([]);
-  // const panel_id = "";
-
-  const [makeComponents, setMakeComponents] = useState<any[]>([]);
+  const [panelSpecificationRevisions, setPanelSpecificationRevisions] =
+    useState<any[]>([]);
+  const [sldData, setSldData] = useState<any>(null);
 
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const panelGARevisions = await getData(
-        `${GA_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
+      const panelSpecificationRevisionsResponse = await getData(
+        `${PANEL_SPECS_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
       );
-      if (panelGARevisions) {
-        setpanelGARevisions(panelGARevisions);
-      }
-      const panelData = await getData(
-        `${getPanelDoctype(
-          panel?.panel_main_type
-        )}?fields=["ga_mcc_compartmental","ga_mcc_construction_front_type","incoming_drawout_type","outgoing_drawout_type"]&filters=[["panel_id", "=", "${
-          panel?.name
-        }"]]`
+      const sldDataResponse = await getData(
+        `${SLD_REVISIONS_API}/${sld_revision_id}`
       );
-      if (panelData) {
-        setPanelData(panelData[0]);
-      }
-      console.log(panelData);
-      console.log(panelGARevisions);
 
-      setIsLoading(false);
+      setPanelSpecificationRevisions(
+        sortDatewise(panelSpecificationRevisionsResponse) || []
+      );
+
+      // Safely extract busbar sizing data
+      const busbarData = sldDataResponse?.busbar_sizing_data?.[0];
+      setSldData(busbarData || null);
     } catch (error) {
       console.error("Error fetching data:", error);
       message.error("Failed to load data");
+      setPanelSpecificationRevisions([]);
+      setSldData(null);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [panel?.name, sld_revision_id]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (panel?.name && sld_revision_id) {
+      fetchData();
+    }
+  }, [fetchData, panel?.name, sld_revision_id]);
 
   return {
-    designBasisData: panelData,
-    panelGARevisions,
-    commonConfiguration,
-    makeComponents,
-    swSelectionData,
+    panelSpecificationRevisions,
+    sldData,
     isLoading,
     refetch: fetchData,
   };
@@ -71,44 +85,53 @@ const useDataFetching = (project_id: string, panel: any) => {
 interface Props {
   panelData: any;
   projectPanelData: any;
+  designBasisRevisionId: any;
+  setLastModified: any;
   sld_revision_id: string;
 }
 
 const PanelSpecification: React.FC<Props> = ({
   panelData,
   projectPanelData,
+  designBasisRevisionId,
   sld_revision_id,
+  setLastModified,
 }) => {
   const params = useParams();
+  const userInfo: {
+    division: string;
+  } = useCurrentUser();
+
   const project_id = params.project_id as string;
-  console.log(panelData);
-  console.log(projectPanelData);
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const [versionToCopy, setVersionToCopy] = useState(null);
+
+  const userDivision = userInfo?.division;
+
+  const projectDivision = projectData?.division;
 
   const panel = projectPanelData?.find(
     (el: any) => el.panel_name === panelData.panelName
   );
 
-  const {
-    panelGARevisions,
-    commonConfiguration,
-    makeComponents,
-    designBasisData,
-    swSelectionData,
-    isLoading,
-  } = useDataFetching(project_id, panel);
-  console.log(designBasisData);
+  const { panelSpecificationRevisions, sldData, refetch, isLoading } =
+    useDataFetching(project_id, panel, sld_revision_id);
+  console.log(sldData);
 
   const dataSource = useMemo(
     () =>
-      panelGARevisions?.map((item: any, index: number) => ({
+      panelSpecificationRevisions?.map((item: any, index: number) => ({
         key: item.name,
         documentName: "Panel Specification",
         status: item.status,
         documentRevision: `R${index}`,
         createdDate: item.creation,
         path: item.path,
+        is_copied: item.is_copied,
+        is_saved: item.is_saved,
+        is_released: item.is_released,
       })),
-    [panelGARevisions]
+    [panelSpecificationRevisions]
   );
   const handleDownload = async (record: any) => {
     // console.log(record);
@@ -146,28 +169,71 @@ const PanelSpecification: React.FC<Props> = ({
     //   document.body.removeChild(link);
     // }
   };
-  const handleSave = async (key: any) => {
-    console.log(designBasisData);
-    console.log(key);
+  useEffect(() => {
+    if (panelSpecificationRevisions?.length) {
+      console.log(
+        panelSpecificationRevisions[panelSpecificationRevisions.length - 1],
+        "revishd"
+      );
+      const latest =
+        panelSpecificationRevisions[panelSpecificationRevisions.length - 1];
+      const lastModified = convertToFrappeDatetime(new Date(latest?.modified));
 
-    // const payload = {
-    //   panel_ga_data: [{
-    //     panel_front_type: designBasisData?.ga_mcc_compartmental,
-    //     type_of_construction_for_board: designBasisData?.ga_mcc_construction_front_type,
-    //     panel_incoming_feeder_drawout_type: designBasisData?.incoming_drawout_type,
-    //     panel_outgoing_feeder_drawout_type: designBasisData?.outgoing_drawout_type,
-    //     switchgear_selection_revision_id: sld_revision_id,
-    //   }],
-    // };
-    // try {
-    //   console.log(payload);
-    //   console.log(`${GA_REVISIONS_API}/${key}`);
+      setLastModified(lastModified);
+    }
+  }, [panelSpecificationRevisions, setLastModified]);
 
-    //   const respose = await updateData(`${GA_REVISIONS_API}/${key}`, false, payload);
-    //   message.success("Panel GA Saved");
-    // } catch (error) {
-    //   message.error("Unable to Save Panel GA");
-    // }
+  const handleSave = async (key: string, sldData: any) => {
+    console.log(sldData);
+    if (!sldData || !designBasisRevisionId) {
+      message.error("Missing required data for saving");
+      return;
+    }
+
+    const payload = {
+      is_saved: 1,
+      design_basis_revision_id: designBasisRevisionId,
+      sld_height_of_panel: sldData.enclosure_height || null,
+    };
+
+    try {
+      const response = await updateData(
+        `${PANEL_SPECS_REVISIONS_API}/${key}`,
+        false,
+        payload
+      );
+
+      if (response) {
+        refetch();
+        message.success("Panel Specification Saved");
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      message.error("Unable to Save Panel Specification");
+    }
+  };
+  const handleClone = async (record: any) => {
+    setVersionToCopy(record);
+  };
+  const handleRelease = async (record: any) => {
+    console.log(record);
+    try {
+      if (record.is_released === 0) {
+        const respose = await updateData(
+          `${PANEL_SPECS_REVISIONS_API}/${record?.key}`,
+          false,
+          {
+            is_released: 1,
+          }
+        );
+      }
+      message.success("Revision is Released and Locked");
+      refetch();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // setModalLoading(false);
+    }
   };
   const columns: TableColumnsType = useMemo(
     () => [
@@ -226,6 +292,7 @@ const PanelSpecification: React.FC<Props> = ({
                   <Button
                     type="link"
                     shape="circle"
+                    disabled={record.is_released === 1}
                     icon={
                       <SaveTwoTone
                         style={{
@@ -234,7 +301,7 @@ const PanelSpecification: React.FC<Props> = ({
                         }}
                       />
                     }
-                    onClick={() => handleSave(record?.key)}
+                    onClick={() => handleSave(record?.key, sldData)}
                   />
                 </Tooltip>
               </div>
@@ -257,6 +324,7 @@ const PanelSpecification: React.FC<Props> = ({
               <Button
                 type="link"
                 shape="circle"
+                disabled={!record.is_saved}
                 icon={
                   <CloudDownloadOutlined
                     style={{
@@ -272,31 +340,107 @@ const PanelSpecification: React.FC<Props> = ({
         ),
       },
       {
+        title: () => <div className="text-center">Create New Revision</div>,
+        dataIndex: "clone",
+        render: (_, record) => {
+          console.log(record);
+          if (record.is_copied === 1) {
+            return null;
+          }
+
+          return (
+            <div className="text-center">
+              <Tooltip title={"Create New Revision"}>
+                <Button
+                  type="link"
+                  shape="circle"
+                  icon={
+                    <CopyTwoTone
+                      style={{
+                        fontSize: "1rem",
+                      }}
+                    />
+                  }
+                  onClick={() => handleClone(record)}
+                  disabled={
+                    record.is_released !== 1 || userDivision !== projectDivision
+                  }
+                />
+              </Tooltip>
+            </div>
+          );
+        },
+      },
+      {
         title: () => <div className="text-center">Release</div>,
         dataIndex: "release",
-        render: () => (
+        render: (text: any, record: any) => (
+          // <div className="text-center">
+          //   <Button
+          //     type="primary"
+          //     size="small"
+          //     name="Release"
+          //     disabled={
+          //       record.is_released === 1 || userDivision !== projectDivision
+          //     }
+          //     onClick={() => handleRelease(record)}
+          //   >
+          //     Release
+          //   </Button>
+          // </div>
           <div className="text-center">
-            <Button type="primary" size="small" name="Release">
-              Release
-            </Button>
+            <Popconfirm
+              title="Are you sure to release this revision?"
+              onConfirm={async () => handleRelease(record)}
+              okText="Yes"
+              cancelText="No"
+              placement="topRight"
+              disabled={
+                record.is_released === 1 || userDivision !== projectDivision
+              }
+            >
+              <Button
+                type="primary"
+                size="small"
+                name="Release"
+                disabled={
+                  record.is_released === 1 || userDivision !== projectDivision
+                }
+              >
+                Release
+              </Button>
+            </Popconfirm>
           </div>
         ),
       },
     ],
     []
   );
+  const updateTableTimeout = async () => {
+    setTimeout(() => {
 
-  const GARevisionTab = () => (
+      refetch()
+    }, 1500);
+  };
+  const PanelSpecificationTab = () => (
     <>
       <div className="text-end">
-        <Button icon={<SyncOutlined color="#492971" />}>Refresh</Button>
+        <Button icon={<SyncOutlined color="#492971" />} onClick={refetch}>
+          Refresh
+        </Button>
       </div>
       <div className="mt-2">
         <Table columns={columns} dataSource={dataSource} size="small" />
       </div>
+      <CopyRevision
+        version={versionToCopy}
+        setVersionToCopy={setVersionToCopy}
+        tab={"panel_specifications"}
+        updateTable={async () => await updateTableTimeout()}
+      />
     </>
   );
-  return <GARevisionTab />;
+  return <PanelSpecificationTab />;
 };
 
 export default PanelSpecification;

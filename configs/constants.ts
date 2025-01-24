@@ -17,14 +17,14 @@ export const USER_MANAGEMENT_PAGE = "/user-management";
 export const BTG = "BTG";
 export const ENVIRO = "Enviro";
 export const HEATING = "Heating";
-export const SERVICES = "WWS Services";
+export const WWS_SERVICES = "WWS Services";
 export const WWS_IPG = "WWS IPG";
 export const WWS_SPG = "WWS SPG";
 
 export const S3FolderMapping = {
   [ENVIRO]: "ENVIRO",
   [HEATING]: "HEATING",
-  [SERVICES]: "WWS-SERVICES",
+  [WWS_SERVICES]: "WWS-SERVICES",
   [WWS_IPG]: "WWS-IPG",
   [WWS_SPG]: "WWS-SPG",
 };

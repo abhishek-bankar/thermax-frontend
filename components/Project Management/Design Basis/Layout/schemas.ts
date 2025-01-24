@@ -1,4 +1,4 @@
-import * as zod from "zod"
+import * as zod from "zod";
 
 export const cableTrayValidationSchema = zod.object({
   number_of_cores: zod.string({
@@ -7,15 +7,15 @@ export const cableTrayValidationSchema = zod.object({
   }),
   cable_tray_moc: zod.string({
     required_error: "Cable Tray MOC is required",
-    message:"Cable Tray MOC is required"
+    message: "Cable Tray MOC is required",
   }),
   cable_tray_moc_input: zod.string({
-    required_error:"MOC input is required",
-    message:"MOC input is required",
+    required_error: "MOC input is required",
+    message: "MOC input is required",
   }),
-  cable_tray_cover: zod.string({
-    required_error:"Tray Cable Tray Cover is required",
-    message:"Cable Tray Cover is required",
+  is_cable_tray_cover_selected: zod.string({
+    required_error: "Tray Cable Tray Cover is required",
+    message: "Cable Tray Cover is required",
   }),
   copper_conductor: zod.string({
     required_error: "Copper Conductor is required",
@@ -345,4 +345,4 @@ export const cableTrayValidationSchema = zod.object({
     required_error: "Derating Factor is required",
     message: "Derating factor is required",
   }),
-})
+});

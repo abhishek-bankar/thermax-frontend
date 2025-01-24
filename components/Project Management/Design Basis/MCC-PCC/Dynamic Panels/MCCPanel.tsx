@@ -17,7 +17,7 @@ import {
 import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useMCCPCCPanelDropdowns from "./MCCPCCPanelDropdown";
 import { mccPanelValidationSchema } from "../schemas";
-import { HEATING, WWS_SPG } from "@/configs/constants";
+import { HEATING, WWS_SERVICES, WWS_SPG } from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
@@ -34,14 +34,14 @@ const getDefaultValues = (
   mccPanelData: any
 ) => {
   return {
-    incomer_ampere: mccPanelData?.incomer_ampere || "1000",
+    incomer_ampere: mccPanelData?.incomer_ampere || "630",
     led_type_other_input: mccPanelData?.led_type_other_input || "NA",
     door_thickness: mccPanelData?.door_thickness || "1.6 mm",
     incomer_pole: mccPanelData?.incomer_pole || "3",
-    incomer_type: mccPanelData?.incomer_type || "SFU",
-    incomer_above_ampere: mccPanelData?.incomer_above_ampere || "1001",
+    incomer_type: mccPanelData?.incomer_type || "MCCB",
+    incomer_above_ampere: mccPanelData?.incomer_above_ampere || "631",
     incomer_above_pole: mccPanelData?.incomer_above_pole || "4",
-    incomer_above_type: mccPanelData?.incomer_above_type || "SFU",
+    incomer_above_type: mccPanelData?.incomer_above_type || "EDO ACB",
     is_under_or_over_voltage_selected:
       Boolean(mccPanelData?.is_under_or_over_voltage_selected) || false,
     is_lsig_selected: Boolean(mccPanelData?.is_lsig_selected) || false,
@@ -50,8 +50,6 @@ const getDefaultValues = (
       Boolean(mccPanelData?.is_neural_link_with_disconnect_facility_selected) ||
       false,
 
-    // is_led_type_lamp_selected:
-    //   mccPanelData?.is_led_type_lamp_selected?.toString() || "1",
     is_indication_on_selected:
       Boolean(mccPanelData?.is_indication_on_selected) || false,
     led_type_on_input: mccPanelData?.led_type_on_input || "Green",
@@ -91,7 +89,7 @@ const getDefaultValues = (
     ga_moc_thickness_door: mccPanelData?.ga_moc_thickness_door || "1.6 mm",
     ga_moc_thickness_covers: mccPanelData?.ga_moc_thickness_covers || "1.6 mm",
     ga_mcc_compartmental:
-      mccPanelData?.ga_mcc_compartmental || "Form-I A (Non Compartmental)",
+      mccPanelData?.ga_mcc_compartmental || "Form-III A (Compartmentalized)",
     ga_mcc_construction_front_type:
       mccPanelData?.ga_mcc_construction_front_type || "Single Front",
 
@@ -110,7 +108,7 @@ const getDefaultValues = (
     ga_panel_mounting_height: mccPanelData?.ga_panel_mounting_height || "100",
 
     is_marshalling_section_selected:
-      mccPanelData?.is_marshalling_section_selected || "1",
+      mccPanelData?.is_marshalling_section_selected?.toString() || "1",
     marshalling_section_text_area:
       mccPanelData?.marshalling_section_text_area ||
       "a) Min width 400 mm & Above\nb) Separate Marshaling for each shiping section with Partition\nc) Signal from MCC to PLC DI/DO/AI/AO with Separate TB.\nd) DI, DO TB to be mounted on separate column\ne) Signal from MCC to Field with Separate TB.",
@@ -1525,7 +1523,8 @@ const MCCPanel = ({
             </div>
           </>
         )}
-        {userInfo?.division === WWS_SPG && (
+        {(userInfo?.division === WWS_SPG ||
+          userInfo?.division === WWS_SERVICES) && (
           <>
             <Divider>
               <span className="font-bold text-slate-700">

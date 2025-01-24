@@ -57,9 +57,8 @@ const getDefaultValues = (
   last_name: editMode && values ? values.last_name : "",
   email: editMode && values ? values.email : "",
   name_initial: editMode && values ? values.name_initial : "",
-  digital_signature: editMode && values?.digital_signature 
-    ? [values.digital_signature]
-    : [],
+  digital_signature:
+    editMode && values?.digital_signature ? [values.digital_signature] : [],
 });
 
 const UserFormModal: React.FC<UserFormModalProps> = ({
@@ -82,7 +81,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
   useEffect(() => {
     console.log(values);
-    
+
     reset(getDefaultValues(editMode, values));
   }, [editMode, reset, values, editEventTrigger]);
 
@@ -126,10 +125,10 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
         return;
       }
 
-      setOpen(true); 
+      setOpen(true);
       message.success("User Created Successfully");
     } catch (error) {
-      setOpen(false);  
+      setOpen(false);
       throw error;
     }
   };
@@ -233,10 +232,10 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
               accept="image/*"
             />
           </div>
-          {values?.digital_signature  && (
+          {values?.digital_signature && (
             <div>
               <Image
-                src={`${process.env.NEXT_PUBLIC_FRAPPE_URL}${values.digital_signature}`}
+                src={`${process.env.FRAPPE_BASE_URL}${values.digital_signature}`}
                 width={100}
                 height={100}
                 alt="Digital Signature"

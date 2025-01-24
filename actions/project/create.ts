@@ -28,7 +28,7 @@ import {
   MCC_PCC_PLC_PANEL_3,
   SLD_REVISIONS_API,
   GA_REVISIONS_API,
-  PANEL_SPEC_REVISIONS_API,
+  PANEL_SPECS_REVISIONS_API, 
 } from "@/configs/api-endpoints";
 import { createData } from "../crud-actions";
 
@@ -293,7 +293,7 @@ export const createPanelGARevisions = async (data: any) => {
 
 export const createPanelSpecificationsRevisions = async (data: any) => {
   try {
-    const res = await createData(PANEL_SPEC_REVISIONS_API, false, data);
+    const res = await createData(PANEL_SPECS_REVISIONS_API, false, data);
     return res;
   } catch (error: any) {
     throw error;

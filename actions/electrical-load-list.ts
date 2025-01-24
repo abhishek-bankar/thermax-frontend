@@ -18,9 +18,11 @@ import {
   MOTOR_CANOPY_METADATA,
   MOTOR_CANOPY_REVISION_HISTORY_API,
   MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
+  PANEL_SPECS_REVISIONS_API,
   SLD_REVISIONS_API,
 } from "@/configs/api-endpoints";
 import { sortDatewise } from "@/utils/helpers";
+import { getLatestDesignBasisRevision } from "./design-basis";
 
 export const getCurrentCalculation = async (loadListData: any) => {
   const division = loadListData.divisionName;
@@ -98,7 +100,7 @@ export const getCurrentCalculation = async (loadListData: any) => {
 export const getLatestLoadlistRevision = async (projectId: string) => {
   const dbRevisionData = await getData(
     `${ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectId}"]]&fields=["*"]&order_by=creation desc`
-  ); 
+  );
   return sortDatewise(dbRevisionData);
 };
 
@@ -537,7 +539,7 @@ export const getCableSizingCalculation = async (cableScheduleData: any) => {
   return calculatedData;
 };
 
-export const copyRevision = async (payload: any) => {
+export const copyRevision = async (payload: any, project_id: string) => {
   const old_revision_id = payload.revision_id;
   const clone_note = payload.clone_notes;
   const module_name = payload.module_name;
@@ -732,8 +734,8 @@ export const copyRevision = async (payload: any) => {
         `${GA_REVISIONS_API}/${old_revision_id}`
       );
       const new_panel_ga_revision = {
-        project_id: existing_panel_ga.project_id,
         panel_id: existing_panel_ga.panel_id,
+        panel_name: existing_panel_ga.panel_name,
         clone_note,
         panel_ga_data: existing_panel_ga.panel_ga_data,
       };
@@ -745,6 +747,33 @@ export const copyRevision = async (payload: any) => {
       );
       if (response) {
         await updateData(`${GA_REVISIONS_API}/${old_revision_id}`, false, {
+          is_copied: 1,
+        });
+      }
+    } catch (error) {}
+  };
+  const copy_panel_specifications = async () => {
+    try {
+      const existing_panel_specification = await getData(
+        `${PANEL_SPECS_REVISIONS_API}/${old_revision_id}`
+      );
+      const latest_design_basis = await getLatestDesignBasisRevision(
+        project_id
+      );
+      const new_panel_specification_revision = {
+        panel_id: existing_panel_specification.panel_id,
+        panel_name: existing_panel_specification.panel_name,
+        clone_note,
+        design_basis_revision_id: latest_design_basis[0]?.name,
+      }; 
+
+      const response = await createData(
+        PANEL_SPECS_REVISIONS_API,
+        false,
+        new_panel_specification_revision
+      );
+      if (response) {
+        await updateData(`${PANEL_SPECS_REVISIONS_API}/${old_revision_id}`, false, {
           is_copied: 1,
         });
       }
@@ -770,5 +799,8 @@ export const copyRevision = async (payload: any) => {
   }
   if (module_name === "panel_ga") {
     copy_panel_ga();
+  }
+  if (module_name === "panel_specifications") {
+    copy_panel_specifications();
   }
 };

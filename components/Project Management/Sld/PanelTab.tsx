@@ -346,7 +346,9 @@ const   PanelTab: React.FC<Props> = ({
           <PanelSpecification
             panelData={panelData}
             projectPanelData={projectPanelData}
+            designBasisRevisionId={designBasisRevisionId}
             sld_revision_id={latestRevision.name}
+            setLastModified={setLastModified}
           />
         </Suspense>
       ),

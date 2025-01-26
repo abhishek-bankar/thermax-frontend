@@ -20,7 +20,7 @@ import {
   COMMON_CONFIGURATION_3,
 } from "@/configs/api-endpoints";
 import { DB_REVISION_STATUS } from "@/configs/constants";
-import { createData, getData } from "./crud-actions";
+import { createData, getData, updateData } from "./crud-actions";
 import {
   copyCommonConfiguration,
   copyProjectDynamicPanels,
@@ -28,7 +28,8 @@ import {
 
 export const copyDesignBasisRevision = async (
   project_id: string,
-  revision_id: string,
+  projectApproverEmail: string,
+  oldRevisionId: string,
   clone_notes: string
 ) => {
   try {
@@ -37,20 +38,21 @@ export const copyDesignBasisRevision = async (
       false,
       {
         project_id: project_id,
-        status: DB_REVISION_STATUS.Copied,
+        approver_email: projectApproverEmail,
+        status: DB_REVISION_STATUS.Unsubmitted,
         clone_notes,
       }
     );
-    const new_revision_id = createRevisionData.name;
+    const { name: newRevisionId } = createRevisionData;
     const generalInfoData = await getData(
-      `${DESIGN_BASIS_GENERAL_INFO_API}/?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${DESIGN_BASIS_GENERAL_INFO_API}/?filters=[["revision_id", "=", "${oldRevisionId}"]]&fields=["*"]`
     );
     await createData(`${DESIGN_BASIS_GENERAL_INFO_API}`, false, {
       ...generalInfoData[0],
-      revision_id: new_revision_id,
+      revision_id: newRevisionId,
     });
     const projectMainPkgData = await getData(
-      `${PROJECT_MAIN_PKG_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${PROJECT_MAIN_PKG_API}?filters=[["revision_id", "=", "${oldRevisionId}"]]&fields=["name"]`
     );
 
     for (const projectMainPkg of projectMainPkgData || []) {
@@ -58,101 +60,56 @@ export const copyDesignBasisRevision = async (
       const mainPkgData = await getData(`${PROJECT_MAIN_PKG_API}/${mainPkgId}`);
       await createData(`${PROJECT_MAIN_PKG_API}`, false, {
         ...mainPkgData,
-        revision_id: new_revision_id,
+        revision_id: newRevisionId,
       });
     }
 
     const motorParameterData = await getData(
-      `${MOTOR_PARAMETER_API}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
+      `${MOTOR_PARAMETER_API}?fields=["*"]&filters=[["revision_id", "=", "${oldRevisionId}"]]`
     );
 
     await createData(`${MOTOR_PARAMETER_API}`, false, {
       ...motorParameterData[0],
-      revision_id: new_revision_id,
+      revision_id: newRevisionId,
     });
 
     const makeOfComponentData = await getData(
-      `${MAKE_OF_COMPONENT_API}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
+      `${MAKE_OF_COMPONENT_API}?fields=["*"]&filters=[["revision_id", "=", "${oldRevisionId}"]]`
     );
 
     await createData(MAKE_OF_COMPONENT_API, false, {
       ...makeOfComponentData[0],
-      revision_id: new_revision_id,
+      revision_id: newRevisionId,
     });
 
-    await copyCommonConfiguration(revision_id, new_revision_id);
-
-    const projectPanelData = await getData(
-      `${PROJECT_PANEL_API}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
-    );
-
-    for (const projectPanel of projectPanelData || []) {
-      const old_panel_id = projectPanel.name;
-      const createPanelData = await createData(PROJECT_PANEL_API, false, {
-        ...projectPanel,
-        revision_id: new_revision_id,
-      });
-      const new_panel_id = createPanelData.name;
-      await createData(DYNAMIC_DOCUMENT_API, false, {
-        panel_id: new_panel_id,
-      });
-
-      const mccPanelData = await getData(
-        `${MCC_PANEL}?filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${old_panel_id}"]]&fields=["*"]`
-      );
-
-      for (const mccPanel of mccPanelData || []) {
-        await createData(MCC_PANEL, false, {
-          ...mccPanel,
-          revision_id: new_revision_id,
-          panel_id: new_panel_id,
-        });
-      }
-
-      const pccPanelData = await getData(
-        `${PCC_PANEL}?filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${old_panel_id}"]]&fields=["*"]`
-      );
-
-      for (const pccPanel of pccPanelData || []) {
-        await createData(PCC_PANEL, false, {
-          ...pccPanel,
-          revision_id: new_revision_id,
-          panel_id: new_panel_id,
-        });
-      }
-
-      const mccCumPccMccPanelData = await getData(
-        `${MCC_PANEL}?filters=[["revision_id", "=", "${revision_id}"], ["panel_id", "=", "${old_panel_id}"]]&fields=["*"]`
-      );
-
-      for (const mccCumPccMccPanel of mccCumPccMccPanelData || []) {
-        await createData(MCC_PANEL, false, {
-          ...mccCumPccMccPanel,
-          revision_id: new_revision_id,
-          panel_id: new_panel_id,
-        });
-      }
-
-      await copyProjectDynamicPanels(revision_id, new_revision_id);
-    }
+    await copyCommonConfiguration(oldRevisionId, newRevisionId);
+    await copyProjectDynamicPanels(oldRevisionId, newRevisionId);
 
     const cableTrayLayoutData = await getData(
-      `${CABLE_TRAY_LAYOUT}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${CABLE_TRAY_LAYOUT}?filters=[["revision_id", "=", "${oldRevisionId}"]]&fields=["*"]`
     );
 
     await createData(CABLE_TRAY_LAYOUT, false, {
       ...cableTrayLayoutData[0],
-      revision_id: new_revision_id,
+      revision_id: newRevisionId,
     });
 
     const earthingLayoutData = await getData(
-      `${LAYOUT_EARTHING}?filters=[["revision_id", "=", "${revision_id}"]]&fields=["*"]`
+      `${LAYOUT_EARTHING}?filters=[["revision_id", "=", "${oldRevisionId}"]]&fields=["*"]`
     );
 
     await createData(LAYOUT_EARTHING, false, {
       ...earthingLayoutData[0],
-      revision_id: new_revision_id,
+      revision_id: newRevisionId,
     });
+
+    await updateData(
+      `${DESIGN_BASIS_REVISION_HISTORY_API}/${oldRevisionId}`,
+      false,
+      {
+        status: DB_REVISION_STATUS.Copied,
+      }
+    );
   } catch (error) {
     throw error;
   }

@@ -3,7 +3,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { useLoading } from "@/hooks/useLoading";
 import clsx from "clsx";
-import { useGetData } from "@/hooks/useCRUD";
+import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import {
   DESIGN_BASIS_REVISION_HISTORY_API,
   PROJECT_INFO_API,
@@ -27,10 +27,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setModalLoading(true);
     router.push(path);
   };
-  const { data: projectData } = useGetData(
+  const { data: projectData } = useNewGetData(
     `${PROJECT_INFO_API}/${params?.project_id}`
   );
-  const { data: designBasisRevisionData } = useGetData(
+  const { data: designBasisRevisionData } = useNewGetData(
     `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${params?.project_id}"], ["status", "=", "${DB_REVISION_STATUS.Released}"]]`
   );
   const isProjectInfoSaved = projectData?.is_saved;

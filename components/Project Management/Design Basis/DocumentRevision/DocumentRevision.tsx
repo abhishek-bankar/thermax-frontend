@@ -52,7 +52,6 @@ export default function DocumentRevision() {
   const { data: revisionHistory } = useGetData(dbRevisionHistoryUrl);
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
   const projectOwnerEmail = projectData?.owner;
-
   const projectDivision = projectData?.division;
   const userDivision = userInfo?.division;
 
@@ -510,10 +509,9 @@ export default function DocumentRevision() {
       <CopyRevisionModel
         open={copyModelOpen}
         setOpen={setCopyModelOpen}
-        userInfo={userInfo}
         projectData={projectData}
         dbRevisionHistoryUrl={dbRevisionHistoryUrl}
-        revision_id={copyRevisionId}
+        oldRevisionId={copyRevisionId}
         setCopyRevisionId={setCopyRevisionId}
       />
     </>

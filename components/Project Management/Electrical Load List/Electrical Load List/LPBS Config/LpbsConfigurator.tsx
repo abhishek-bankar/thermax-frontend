@@ -17,7 +17,7 @@ import { LPBS_SCHEMES_URI } from "@/configs/api-endpoints";
 // import { HEATING, TagColors } from "configs/constants"
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLoading } from "@/hooks/useLoading";
-import { SERVICES, WWS_SPG } from "@/configs/constants";
+import { WWS_SERVICES, WWS_SPG } from "@/configs/constants";
 
 interface LpbsConfiguratorProps {
   isOpen: boolean;
@@ -72,7 +72,7 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
         columnResize: true,
         tableOverflow: true,
         lazyLoading: true,
-        loadingSpin: true, 
+        loadingSpin: true,
         tableWidth: "100%",
         tableHeight: isReadOnly ? "250px" : "500px",
         freezeColumns: 4,
@@ -110,7 +110,8 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
       const fetchSchemes = async () => {
         try {
           const division =
-            userInfo?.division === WWS_SPG || userInfo?.division === SERVICES
+            userInfo?.division === WWS_SPG ||
+            userInfo?.division === WWS_SERVICES
               ? WWS_SPG
               : userInfo?.division;
           const response = await getData(

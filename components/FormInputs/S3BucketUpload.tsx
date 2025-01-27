@@ -8,9 +8,11 @@ import { uploadBucketObject } from "@/actions/aws/s3-actions"; // Server action
 const S3BucketUpload = ({
   accept,
   folderPath,
+  onUploadSuccess,
 }: {
   accept: string;
   folderPath: string;
+  onUploadSuccess?: any;
 }) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -25,6 +27,7 @@ const S3BucketUpload = ({
       formData.append("file", file as unknown as Blob); // Convert to Blob
       await uploadBucketObject(folderPath, formData, file.name);
       message.success(`${file.name} uploaded successfully`);
+      onUploadSuccess(folderPath + file.name);
     } catch (error) {
       // console.log("Upload failed:", error);
       message.error(`Failed to upload ${fileList[0]?.name}. ${error}`);

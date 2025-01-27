@@ -2014,11 +2014,10 @@ const MCCcumPCCPLCPanel = ({
                   />
                 </div>
                 <div className="flex-1">
-                  <CustomTextInput
+                  <CustomTextAreaInput
                     control={control}
                     name="hardware_between_plc_and_burner_controller_lmv"
                     label="Communication Cable & Hardware Between PLC CPU System & Burner Controller LMV"
-                    size="small"
                     disabled={
                       !watch("is_burner_controller_lmv_mounting_selected")
                     }

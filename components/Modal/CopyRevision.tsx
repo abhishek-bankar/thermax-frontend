@@ -63,6 +63,8 @@ const CopyRevision: React.FC<CopyRevisionProps> = ({
         return "panel_ga";
       case "panel_specifications":
         return "panel_specifications";
+      case "cable_tray":
+        return "cable_tray";
       default:
         return "";
     }

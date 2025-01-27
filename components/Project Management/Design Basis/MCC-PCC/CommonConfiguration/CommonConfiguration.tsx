@@ -54,7 +54,7 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
       commonConfigData?.is_hazardous_lpbs_selected?.toString() || "1",
 
     dol_starter: commonConfigData?.dol_starter || "7.5",
-    star_delta_starter: commonConfigData?.star_delta_starter || "11",
+    star_delta_starter: commonConfigData?.star_delta_starter || "9.3",
     ammeter: commonConfigData?.ammeter || "0.37",
     ammeter_configuration:
       commonConfigData?.ammeter_configuration || "All Phase With CT",
@@ -101,7 +101,7 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     dm_standard: commonConfigData?.dm_standard || "IEC 61439",
     // testing_standard: commonConfigData?.testing_standard || "IEC 61439",
     power_wiring_color:
-      commonConfigData?.power_wiring_color || "Brown, Black, Grey, Blue",
+      commonConfigData?.power_wiring_color || "Red, Yellow, Blue, Black",
 
     power_wiring_size: commonConfigData?.power_wiring_size || "Min. 2.5 Sq. mm",
     control_wiring_color:
@@ -493,23 +493,15 @@ const CommonConfiguration = ({
 
     if (safe_field_motor_canopy === "NA") {
       setValue("safe_field_motor_canopy_type", "NA");
-    } else {
-      setValue("safe_field_motor_canopy_type", "On Top");
     }
     if (safe_lpbs_canopy === "NA") {
       setValue("safe_lpbs_canopy_type", "NA");
-    } else {
-      setValue("safe_lpbs_canopy_type", "On Top");
     }
     if (hazardous_field_motor_canopy === "NA") {
       setValue("hazardous_field_motor_canopy_type", "NA");
-    } else {
-      setValue("hazardous_field_motor_canopy_type", "On Top");
     }
     if (hazardous_lpbs_canopy === "NA") {
       setValue("hazardous_lpbs_canopy_type", "NA");
-    } else {
-      setValue("hazardous_lpbs_canopy_type", "On Top");
     }
   }, [
     currentTransformerNumber,

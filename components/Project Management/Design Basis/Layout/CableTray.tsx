@@ -204,6 +204,9 @@ const CableTray = ({
   const cable_tray_width_options = sortAlphaNumericArray(
     dropdown["Cable Tray Width"] || []
   );
+  const numericWidths = cable_tray_width_options?.map((item: any) =>
+    Number(item.value)
+  );
   const cable_tray_height_options = sortAlphaNumericArray(
     dropdown["Cable Tray Height"] || []
   );
@@ -234,6 +237,64 @@ const CableTray = ({
   const number_of_cores_controlled = watch("number_of_cores");
   const is_dry_area_selected_controlled = watch("is_dry_area_selected");
   const is_wet_area_selected_controlled = watch("is_wet_area_selected");
+
+  const pct_perforated_type_width_value = watch("pct_perforated_type_width");
+  const pct_perforated_type_max_width_value = watch(
+    "pct_perforated_type_max_width"
+  );
+  const cct_perforated_type_width_value = watch("cct_perforated_type_width");
+  const cct_perforated_type_max_width_value = watch(
+    "cct_perforated_type_max_width"
+  );
+  const sct_perforated_type_width_value = watch("sct_perforated_type_width");
+  const sct_perforated_type_max_width_value = watch(
+    "sct_perforated_type_max_width"
+  );
+
+  useEffect(() => {
+    const higherPCTPerforatedTypeWidth = numericWidths.find(
+      (item: any) => item > pct_perforated_type_width_value
+    );
+    const higherPCTPerforatedTypeMaxWidth = numericWidths.find(
+      (item: any) => item > pct_perforated_type_max_width_value
+    );
+    const higherCCTPerforatedTypeWidth = numericWidths.find(
+      (item: any) => item > cct_perforated_type_width_value
+    );
+    const higherCCTPerforatedTypeMaxWidth = numericWidths.find(
+      (item: any) => item > cct_perforated_type_max_width_value
+    );
+    const higherSCTPerforatedTypeWidth = numericWidths.find(
+      (item: any) => item > sct_perforated_type_width_value
+    );
+    const higherSCTPerforatedTypeMaxWidth = numericWidths.find(
+      (item: any) => item > sct_perforated_type_max_width_value
+    );
+    setValue("pct_ladder_type_width", higherPCTPerforatedTypeWidth?.toString());
+    setValue(
+      "pct_ladder_type_max_width",
+      higherPCTPerforatedTypeMaxWidth?.toString()
+    );
+    setValue("cct_ladder_type_width", higherCCTPerforatedTypeWidth?.toString());
+    setValue(
+      "cct_ladder_type_max_width",
+      higherCCTPerforatedTypeMaxWidth?.toString()
+    );
+    setValue("sct_ladder_type_width", higherSCTPerforatedTypeWidth?.toString());
+    setValue(
+      "sct_ladder_type_max_width",
+      higherSCTPerforatedTypeMaxWidth?.toString()
+    );
+  }, [
+    pct_perforated_type_width_value,
+    pct_perforated_type_max_width_value,
+    cct_perforated_type_width_value,
+    cct_perforated_type_max_width_value,
+    sct_perforated_type_width_value,
+    sct_perforated_type_max_width_value,
+    numericWidths,
+    setValue,
+  ]);
 
   useEffect(() => {
     if (is_dry_area_selected_controlled === "0") {
@@ -407,9 +468,7 @@ const CableTray = ({
                 options={running_motor_voltage_drop_options || []}
                 size="small"
                 suffixIcon={
-                  <>
-                    <p className="text-lg font-semibold text-blue-500">%</p>
-                  </>
+                  <p className="text-lg font-semibold text-blue-500">%</p>
                 }
               />
             </div>
@@ -418,12 +477,12 @@ const CableTray = ({
                 control={control}
                 name="motor_voltage_drop_during_starting"
                 label="Motor Voltage Drop During Starting"
-                options={starting_motor_voltage_drop_options || []}
+                options={sortAlphaNumericArray(
+                  starting_motor_voltage_drop_options || []
+                )}
                 size="small"
                 suffixIcon={
-                  <>
-                    <p className="text-lg font-semibold  text-blue-500">%</p>
-                  </>
+                  <p className="text-lg font-semibold  text-blue-500">%</p>
                 }
               />
             </div>
@@ -444,13 +503,9 @@ const CableTray = ({
                 control={control}
                 name="copper_conductor"
                 label="Copper Conductor (Sq mm. including and below)"
-                options={copper_conductor_options || []}
+                options={sortAlphaNumericArray(copper_conductor_options || [])}
                 suffixIcon={
-                  <>
-                    <p className="text-xs font-semibold text-blue-500">
-                      Sq. mm
-                    </p>
-                  </>
+                  <p className="text-xs font-semibold text-blue-500">Sq. mm</p>
                 }
                 size="small"
               />
@@ -460,20 +515,15 @@ const CableTray = ({
                 control={control}
                 name="aluminium_conductor"
                 label="Aluminium Conductor (Sq mm. including and above)"
-                options={aluminium_conductor_options || []}
+                options={sortAlphaNumericArray(
+                  aluminium_conductor_options || []
+                )}
                 suffixIcon={
-                  <>
-                    <p className="text-xs font-semibold text-blue-500">
-                      Sq. mm
-                    </p>
-                  </>
+                  <p className="text-xs font-semibold text-blue-500">Sq. mm</p>
                 }
                 size="small"
               />
             </div>
-            {/* <div className="flex-1">
-            <CustomTextInput control={control} name="derating_factor" label="Derating Factor" size="small" />
-          </div> */}
           </div>
           <div className="grid grid-cols-4 gap-3">
             <div className="font-semibold text-slate-700"></div>
@@ -603,7 +653,9 @@ const CableTray = ({
                 control={control}
                 name="future_space_on_trays"
                 label="Future Space on Trays"
-                options={future_space_on_trays_options || []}
+                options={sortAlphaNumericArray(
+                  future_space_on_trays_options || []
+                )}
                 size="small"
                 suffixIcon={
                   <>

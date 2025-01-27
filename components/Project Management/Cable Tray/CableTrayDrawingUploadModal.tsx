@@ -33,6 +33,8 @@ export const UploadCableTrayDrawingModal = ({
   const [fileExist, setFileExist] = useState(false);
 
   useEffect(() => {
+    console.log(revision_no);
+    
     const checkFileExist = async () => {
       const cableTrayDrawing = await getBucketObjects(
         `${S3FolderMapping[projectDivision]}/${projectData?.["project_name"]}/Cable Tray/${revision_no}/Input`

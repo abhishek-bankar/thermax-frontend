@@ -10,6 +10,7 @@ import {
   CABLE_SCHEDULE_REVISION_HISTORY_API,
   CABLE_SIZE_HEATING_API,
   CABLE_SIZING_DATA_API,
+  CABLE_TRAY_REVISION_HISTORY_API,
   ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
   GA_REVISIONS_API,
   HEATING_SWITCHGEAR_HEATER_API,
@@ -765,7 +766,7 @@ export const copyRevision = async (payload: any, project_id: string) => {
         panel_name: existing_panel_specification.panel_name,
         clone_note,
         design_basis_revision_id: latest_design_basis[0]?.name,
-      }; 
+      };
 
       const response = await createData(
         PANEL_SPECS_REVISIONS_API,
@@ -773,9 +774,47 @@ export const copyRevision = async (payload: any, project_id: string) => {
         new_panel_specification_revision
       );
       if (response) {
-        await updateData(`${PANEL_SPECS_REVISIONS_API}/${old_revision_id}`, false, {
-          is_copied: 1,
-        });
+        await updateData(
+          `${PANEL_SPECS_REVISIONS_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        );
+      }
+    } catch (error) {}
+  };
+  const copy_cable_tray = async () => {
+    try {
+      const existing_revision = await getData(
+        `${CABLE_TRAY_REVISION_HISTORY_API}/${old_revision_id}`
+      );
+      const latest_design_basis = await getLatestDesignBasisRevision(
+        project_id
+      );
+      const latest_cable_schedule = await getLatestCableScheduleRevision(
+        project_id
+      );
+      const new_revision = {
+        project_id: existing_revision.project_id,
+        clone_note,
+        design_basis_revision_id: latest_design_basis[0]?.name,
+        cable_schedule_revision_id: latest_cable_schedule[0]?.name,
+      };
+
+      const response = await createData(
+        CABLE_TRAY_REVISION_HISTORY_API,
+        false,
+        new_revision
+      );
+      if (response) {
+        await updateData(
+          `${CABLE_TRAY_REVISION_HISTORY_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        );
       }
     } catch (error) {}
   };
@@ -802,5 +841,8 @@ export const copyRevision = async (payload: any, project_id: string) => {
   }
   if (module_name === "panel_specifications") {
     copy_panel_specifications();
+  }
+  if (module_name === "cable_tray") {
+    copy_cable_tray();
   }
 };

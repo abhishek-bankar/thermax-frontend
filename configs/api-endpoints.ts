@@ -32,6 +32,7 @@ export const MOTOR_CANOPY_REVISION_HISTORY_API = `/document/Motor Canopy Revisio
 export const MOTOR_SPECIFICATIONS_REVISION_HISTORY_API = `/document/Motor Specification Revisions`;
 export const LBPS_SPECIFICATIONS_REVISION_HISTORY_API = `/document/LPBS Specification Revisions`;
 export const LOCAL_ISOLATOR_REVISION_HISTORY_API = `/document/Local Isolator Revisions`;
+export const CABLE_TRAY_REVISION_HISTORY_API = `/document/Cable Tray Revisions`;
 
 // Motor Parameters API Endpoints
 export const MOTOR_PARAMETER_API = `/document/Design Basis Motor Parameters`;

@@ -21,8 +21,7 @@ import {
 import { SLD_REVISION_STATUS } from "@/configs/constants";
 import { updateData } from "@/actions/crud-actions";
 import { SLD_REVISIONS_API } from "@/configs/api-endpoints";
-import { getAllSldRevisions } from "@/actions/electrical-load-list";
-import { useParams } from "next/navigation";
+import { getAllSldRevisions } from "@/actions/electrical-load-list"; 
 import PanelGa from "./Panel GA/PanelGa";
 import PanelSpecification from "./Panel Specification/PanelSpecification";
 
@@ -54,8 +53,7 @@ const   PanelTab: React.FC<Props> = ({
   setLastModified,
   designBasisRevisionId,
 }) => { 
-
-  const params = useParams();
+ 
   const [activeKey, setActiveKey] = useState<string>("1");
   const [setIntervaId, setSetIntervaId] = useState<any>(null);
   const [sldRevisionsData, setSldRevisionsData] = useState<any>([]);

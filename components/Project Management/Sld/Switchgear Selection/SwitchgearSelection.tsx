@@ -234,7 +234,7 @@ const SwitchgearSelection: React.FC<Props> = ({
     userInfo?.division,
     revision_id
   );
-  // console.log(swSelectionData, "switchegear data");
+  console.log(swSelectionData, "switchegear data");
 
   const typedSwitchgearColumns = useMemo(
     () =>

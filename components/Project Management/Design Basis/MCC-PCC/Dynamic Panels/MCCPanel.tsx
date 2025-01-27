@@ -60,11 +60,12 @@ const getDefaultValues = (
       Boolean(mccPanelData?.is_indication_trip_selected) || false,
     led_type_trip_input: mccPanelData?.led_type_trip_input || "Amber",
 
-    is_blue_cb_spring_charge_selected:
-      mccPanelData?.is_blue_cb_spring_charge_selected || "Blue",
-    is_red_cb_in_service: mccPanelData?.is_red_cb_in_service || "Red",
-    is_white_healthy_trip_circuit_selected:
-      mccPanelData?.is_white_healthy_trip_circuit_selected || "White",
+    acb_spring_charge_indication_lamp:
+      mccPanelData?.acb_spring_charge_indication_lamp || "Blue",
+    acb_service_indication_lamp:
+      mccPanelData?.acb_service_indication_lamp || "Red",
+    trip_circuit_healthy_indication_lamp:
+      mccPanelData?.trip_circuit_healthy_indication_lamp || "White",
 
     current_transformer_coating:
       mccPanelData?.current_transformer_coating || "Cast Resin",
@@ -329,10 +330,7 @@ const MCCPanel = ({
     }
   }, [currentTransformerCoating, setValue]);
 
-  console.log(mccPanelData, "MCC DATA");
-
   useEffect(() => {
-    console.log(mccPanelData, "MCC DATA");
     if (projectInfo && mccPanelData) {
       console.log(
         getDefaultValues(projectMetadata, projectInfo, mccPanelData[0]),
@@ -378,17 +376,27 @@ const MCCPanel = ({
     const hasACB =
       (incomer_type && incomer_type.includes("ACB")) ||
       (incomer_above_type && incomer_above_type.includes("ACB"));
-    // if (!hasACB) {
-    //   setValue("is_blue_cb_spring_charge_selected", "NA");
-    //   setValue("is_red_cb_in_service", "NA");
-    //   setValue("is_white_healthy_trip_circuit_selected", "NA");
-    // } else {
-    //   setValue("is_blue_cb_spring_charge_selected", "Blue");
-    //   setValue("is_red_cb_in_service", "Red");
-    //   setValue("is_white_healthy_trip_circuit_selected", "White");
-    // }
+    if (!hasACB) {
+      setValue("acb_spring_charge_indication_lamp", "NA");
+      setValue("acb_service_indication_lamp", "NA");
+      setValue("trip_circuit_healthy_indication_lamp", "NA");
+    } else {
+      setValue(
+        "acb_spring_charge_indication_lamp",
+        mccPanelData?.[0].acb_spring_charge_indication_lamp || "Blue"
+      );
+      setValue(
+        "acb_service_indication_lamp",
+        mccPanelData?.acb_service_indication_lamp || "Red"
+      );
+      setValue(
+        "trip_circuit_healthy_indication_lamp",
+        mccPanelData?.trip_circuit_healthy_indication_lamp || "White"
+      );
+    }
+
     setHasACB(hasACB);
-  }, [incomer_type, incomer_above_type, setValue]);
+  }, [incomer_type, incomer_above_type, setValue, mccPanelData]);
   useEffect(() => {
     if (currentTransformerNumber === "One") {
       setValue("current_transformer_configuration", "Y-Phase with CT");
@@ -691,7 +699,7 @@ const MCCPanel = ({
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
-              name="is_blue_cb_spring_charge_selected"
+              name="acb_spring_charge_indication_lamp"
               label="ACB Spring Charge Indication lamp"
               size="small"
               options={moveNAtoEnd(acb_spring_charge_options) || []}
@@ -701,7 +709,7 @@ const MCCPanel = ({
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
-              name="is_red_cb_in_service"
+              name="acb_service_indication_lamp"
               label="ACB Service Indication lamp"
               size="small"
               disabled={!hasACB}
@@ -711,7 +719,7 @@ const MCCPanel = ({
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
-              name="is_white_healthy_trip_circuit_selected"
+              name="trip_circuit_healthy_indication_lamp"
               label="Trip Circuit Healthy Indication lamp"
               size="small"
               disabled={!hasACB}
@@ -1125,16 +1133,6 @@ const MCCPanel = ({
               size="small"
             />
           </div>
-          {/* <div className="">
-            <CustomSingleSelect
-              control={control}
-              name="ppc_base_frame_paint_shade"
-              label="Paint Shade for Base Frame"
-              options={ppc_base_frame_paint_shade_options || []}
-              size="small"
-              disabled
-            />
-          </div> */}
 
           <div className="flex-1">
             <CustomTextAreaInput
@@ -1528,7 +1526,7 @@ const MCCPanel = ({
           <>
             <Divider>
               <span className="font-bold text-slate-700">
-                Name Plate Details For SPG
+                Name Plate Details
               </span>
               <div>
                 <CustomRadioSelect

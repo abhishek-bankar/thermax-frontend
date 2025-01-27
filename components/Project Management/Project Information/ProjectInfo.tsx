@@ -26,7 +26,11 @@ import PanelDataList from "./Panel/PanelDataList";
 import useProjectInfoDropdowns from "./ProjectInfoDropdowns";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Video } from "@/components/FormInputs/Video";
-import { convertToFrappeDatetime, getThermaxDateFormat } from "@/utils/helpers";
+import {
+  convertToFrappeDatetime,
+  getThermaxDateFormat,
+  sortAlphaNumericArray,
+} from "@/utils/helpers";
 
 const ProjectInfoSchema = zod.object({
   project_name: zod.string({
@@ -666,7 +670,9 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               name="max_humidity"
               control={control}
               label="Humidity [Max]"
-              options={dropdown["Humidity Dropdown"] || []}
+              options={sortAlphaNumericArray(
+                dropdown["Humidity Dropdown"] || []
+              )}
               suffixIcon={
                 <>
                   <PercentageOutlined

@@ -566,9 +566,6 @@ export const configItemValidationSchema = zod.object({
     required_error: "Control Transformer is required",
     message: "Control Transformer is required",
   }),
-  // Spares
-  // commissioning_spare: zod.string().optional(),
-  // two_year_operational_spare: zod.string().optional(),
 });
 
 export const mccPanelValidationSchema = zod
@@ -624,19 +621,16 @@ export const mccPanelValidationSchema = zod
     is_lsig_selected: zod.boolean().optional(),
     is_lsi_selected: zod.boolean().optional(),
     is_neural_link_with_disconnect_facility_selected: zod.boolean().optional(),
-    // is_led_type_lamp_selected: zod.string({
-    //   required_error: "LED Type Lamp is required",
-    //   message: "LED Type Lamp is required",
-    // }),
-    is_blue_cb_spring_charge_selected: zod.string({
+
+    acb_spring_charge_indication_lamp: zod.string({
       required_error: "This field is required",
       message: "This field is required",
     }),
-    is_red_cb_in_service: zod.string({
+    acb_service_indication_lamp: zod.string({
       required_error: "This field is required",
       message: "This field is required",
     }),
-    is_white_healthy_trip_circuit_selected: zod.string({
+    trip_circuit_healthy_indication_lamp: zod.string({
       required_error: "This field is required",
       message: "This field is required",
     }),
@@ -1004,31 +998,20 @@ export const pccPanelValidationSchema = zod.object({
     message: "Control Transformer Coating is required",
   }),
 
-  // control_transformer_coating: zod.string({
-  //   required_error: "Control Transformer Coating is required",
-  //   message: "Control Transformer Coating is required",
-  // }),
-  // control_transformer_configuration: zod.string({
-  //   required_error: "Control Transformer Configuration is required",
-  //   message: "Control Transformer Configuration is required",
-  // }),
   is_under_or_over_voltage_selected: zod.boolean().optional(),
   is_lsig_selected: zod.boolean().optional(),
   is_lsi_selected: zod.boolean().optional(),
   is_neural_link_with_disconnect_facility_selected: zod.boolean().optional(),
-  // is_led_type_lamp_selected: zod.string({
-  //   required_error: "LED Type Lamp is required",
-  //   message: "LED Type Lamp is required",
-  // }),
-  is_blue_cb_spring_charge_selected: zod.string({
+
+  acb_spring_charge_indication_lamp: zod.string({
     required_error: "This field is required",
     message: "This field is required",
   }),
-  is_red_cb_in_service: zod.string({
+  acb_service_indication_lamp: zod.string({
     required_error: "This field is required",
     message: "This field is required",
   }),
-  is_white_healthy_trip_circuit_selected: zod.string({
+  trip_circuit_healthy_indication_lamp: zod.string({
     required_error: "This field is required",
     message: "This field is required",
   }),

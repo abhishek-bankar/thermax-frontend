@@ -14,26 +14,20 @@ import * as zod from "zod";
 export default function CopyRevisionModel({
   open,
   setOpen,
-  userInfo,
   projectData,
-  revision_id,
+  oldRevisionId,
   dbRevisionHistoryUrl,
   setCopyRevisionId,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  userInfo: any;
   projectData: any;
-  revision_id: string;
+  oldRevisionId: string;
   dbRevisionHistoryUrl: string;
   setCopyRevisionId: (revision_id: string) => void;
 }) {
-  const { name: project_id } = projectData || {};
+  const { name: project_id, approver } = projectData || {};
   const [loading, setLoading] = useState(false);
-  const { dropdownOptions: approverOptions } = useDropdownOptions(
-    `${THERMAX_USER_API}?fields=["*"]&filters=[["division", "=",  "${userInfo?.division}"], ["email", "!=", "${userInfo?.email}"]]`,
-    "name"
-  );
   const { control, handleSubmit, reset } = useForm({
     resolver: zodResolver(
       zod.object({
@@ -51,7 +45,12 @@ export default function CopyRevisionModel({
     try {
       // API call
       const { clone_notes } = data;
-      await copyDesignBasisRevision(project_id, revision_id, clone_notes);
+      await copyDesignBasisRevision(
+        project_id,
+        approver,
+        oldRevisionId,
+        clone_notes
+      );
       mutate(dbRevisionHistoryUrl);
       message.success("Revision Copied Successfully");
       setOpen(false);

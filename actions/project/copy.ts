@@ -26,7 +26,12 @@ import {
   SLD_REVISIONS_API,
   CABLE_TRAY_REVISION_HISTORY_API,
 } from "@/configs/api-endpoints";
-import { DB_REVISION_STATUS } from "@/configs/constants";
+import {
+  DB_REVISION_STATUS,
+  MCC_PANEL_TYPE,
+  MCCcumPCC_PANEL_TYPE,
+  PCC_PANEL_TYPE,
+} from "@/configs/constants";
 import { createData, getData } from "../crud-actions";
 import {
   createProjectInformation,
@@ -455,6 +460,7 @@ export const copyMccCumPccPLCPanelData = async (
   oldPanelId: string,
   newPanelId: string
 ) => {
+  // Copy PLC Panel Data under MCC cum PCC PLC Panel Data
   const mccPccPlcPanel1Res = await getData(
     `${MCC_PCC_PLC_PANEL_1}?filters=[["panel_id", "=", "${oldPanelId}"]]&fields=["*"]`
   );
@@ -541,7 +547,7 @@ export const copyProjectDynamicPanels = async (
     );
 
     for (const projectPanel of projectPanelData || []) {
-      const oldPanelId = projectPanel.name;
+      const { name: oldPanelId, panel_main_type } = projectPanel;
       const createPanelData = await createProjectPanelData({
         ...projectPanel,
         revision_id: newDBRevisionID,
@@ -550,12 +556,25 @@ export const copyProjectDynamicPanels = async (
 
       // Create Dynamic Document List
       await copyDynamicDocumentList(oldPanelId, newPanelId);
+
       // Copy MCC Panel
-      await copyMCCPanel(oldPanelId, newPanelId);
+      if (panel_main_type === MCC_PANEL_TYPE) {
+        await copyMCCPanel(oldPanelId, newPanelId);
+      }
+
       // Copy PCC Panel
-      await copyPCCPanel(oldPanelId, newPanelId);
+      if (panel_main_type === PCC_PANEL_TYPE) {
+        await copyPCCPanel(oldPanelId, newPanelId);
+      }
+
       // Copy MCC cum PCC PLC Panel Data
-      await copyMccCumPccPLCPanelData(oldPanelId, newPanelId);
+      if (panel_main_type === MCCcumPCC_PANEL_TYPE) {
+        // Copy MCC Panel Data under MCC cum PCC PLC Panel Data
+        await copyMCCPanel(oldPanelId, newPanelId);
+        // Copy PLC Panel Data under MCC cum PCC PLC Panel Data
+        await copyMccCumPccPLCPanelData(oldPanelId, newPanelId);
+      }
+
       // Copy SLD Revisions
       await copySLDRevisions(oldPanelId, newPanelId);
       // Copy Panel GA Revisions

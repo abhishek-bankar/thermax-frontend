@@ -75,7 +75,7 @@ export default function CustomAutoComplete({
     const filtered = options.filter(
       (option) =>
         option.label?.toLowerCase().includes(searchText.toLowerCase()) ||
-        option.value.toLowerCase().includes(searchText.toLowerCase())
+        option.value?.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredOptions(filtered);
   };

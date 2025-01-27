@@ -99,6 +99,7 @@ import {
   deleteSLDRevisions,
   deleteStaticDocumentList,
 } from "./project/delete";
+import { copyDesignBasisRevision } from "./design-basis_revision";
 
 export const createThermaxProject = async (projectData: any, userInfo: any) => {
   try {
@@ -184,31 +185,19 @@ export const copyThermaxProject = async (
     // Create cable tray revisions
     await copyCableTrayRevisions(oldProjectId, newProjectId);
 
-    // Create copy of design basis revision history
-    const { name: newDBRevisionID, oldDBRevisionID } =
-      await copyDesignBasisRevisionHistory(
-        oldProjectId,
-        newProjectId,
-        approver_email
-      );
-    // Create copy of design basis general information
-    await copyDesignBasisGeneralInfo(oldDBRevisionID, newDBRevisionID);
-    // Create copy of main package for the project
-    await copyProjectMainPackage(oldDBRevisionID, newDBRevisionID);
-    // Create copy of design basis motor parameters
-    await copyDesignBasisMotorParameters(oldDBRevisionID, newDBRevisionID);
-    // Create copy of design basis make of component
-    await copyDesignBasisMakeofComponent(oldDBRevisionID, newDBRevisionID);
-    // Create copy of common configuration
-    await copyCommonConfiguration(oldDBRevisionID, newDBRevisionID);
-    // Create copy of cable tray layout
-    await copyCableTrayLayout(oldDBRevisionID, newDBRevisionID);
-    // Create copy of layout earthing
-    await copyLayoutEarthing(oldDBRevisionID, newDBRevisionID);
-    // Create copy of dynamic project panels
-    await copyProjectDynamicPanels(oldDBRevisionID, newDBRevisionID);
+    const oldDataRes = await getData(
+      `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${oldProjectId}"]]&fields=["*"]&order_by=creation desc`
+    );
+    const oldData = oldDataRes[0];
+    const oldDBRevisionID = oldData.name;
 
-    // Create copy of sld revisions
+    // Create latest copy of design basis revision
+    await copyDesignBasisRevision(
+      newProjectId,
+      approver_email,
+      oldDBRevisionID,
+      ""
+    );
 
     await createData(APPROVER_EMAIL_NOTIFICATION_API, false, {
       approvar_email: projectData?.approver,

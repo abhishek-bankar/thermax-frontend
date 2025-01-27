@@ -4,8 +4,7 @@ import { Button, message, Tabs } from "antd";
 import {
   CABLE_SCHEDULE_REVISION_HISTORY_API,
   ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
-  PROJECT_API,
-  PROJECT_PANEL_API,
+  PROJECT_API, 
 } from "@/configs/api-endpoints";
 import { useLoading } from "@/hooks/useLoading";
 import { useCallback, useEffect, useState } from "react";

@@ -270,12 +270,21 @@ const CableTray = ({
     const higherSCTPerforatedTypeMaxWidth = numericWidths.find(
       (item: any) => item > sct_perforated_type_max_width_value
     );
-    setValue("pct_ladder_type_width", higherPCTPerforatedTypeWidth);
-    setValue("pct_ladder_type_max_width", higherPCTPerforatedTypeMaxWidth);
-    setValue("cct_ladder_type_width", higherCCTPerforatedTypeWidth);
-    setValue("cct_ladder_type_max_width", higherCCTPerforatedTypeMaxWidth);
-    setValue("sct_ladder_type_width", higherSCTPerforatedTypeWidth);
-    setValue("sct_ladder_type_max_width", higherSCTPerforatedTypeMaxWidth);
+    setValue("pct_ladder_type_width", higherPCTPerforatedTypeWidth?.toString());
+    setValue(
+      "pct_ladder_type_max_width",
+      higherPCTPerforatedTypeMaxWidth?.toString()
+    );
+    setValue("cct_ladder_type_width", higherCCTPerforatedTypeWidth?.toString());
+    setValue(
+      "cct_ladder_type_max_width",
+      higherCCTPerforatedTypeMaxWidth?.toString()
+    );
+    setValue("sct_ladder_type_width", higherSCTPerforatedTypeWidth?.toString());
+    setValue(
+      "sct_ladder_type_max_width",
+      higherSCTPerforatedTypeMaxWidth?.toString()
+    );
   }, [
     pct_perforated_type_width_value,
     pct_perforated_type_max_width_value,

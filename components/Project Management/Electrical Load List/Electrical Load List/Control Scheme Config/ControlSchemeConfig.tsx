@@ -232,7 +232,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             if (division === WWS_SERVICES || division === WWS_SPG) {
               sortedSchemes = getSortedControlSchemes(res, division);
             } else if (division === ENVIRO) {
-              sortedSchemes = getSortedControlSchemes(res,division);
+              sortedSchemes = getSortedControlSchemes(res, division);
             } else if (division === WWS_IPG) {
               sortedSchemes = getIPGSchemesData();
             } else if (division === HEATING) {
@@ -280,7 +280,6 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             const selected: string[] = Array.from(
               new Set(selectedControlSchemes)
             );
-            console.log(selected);
             const temp = sortedSchemes.map((scheme: string[]) => {
               if (selected.includes(scheme[schemeIndex])) {
                 return [true, ...scheme.slice(1)];
@@ -337,6 +336,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           tableWidth: "100%",
           tableHeight: "500px",
           freezeColumns: 4,
+
           rowResize: true,
         });
 
@@ -348,6 +348,55 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           }
         };
       }, [isOpen, controlSchemes, typedControlSchemeColumns]);
+      const controlSchemeOptions: any = useMemo(
+        () => ({
+          data: controlSchemesSelected,
+          license: "39130-64ebc-bd98e-26bc4",
+          columns: typedControlSchemeColumns.map((column) => ({
+            ...column,
+            // readOnly: true,
+          })),
+          columnSorting: true,
+          columnDrag: true,
+          columnResize: true,
+          tableOverflow: true,
+          lazyLoading: true,
+          loadingSpin: true,
+          tableWidth: "100%",
+          tableHeight: "250px",
+          freezeColumns: 4,
+          rowResize: true,
+          onchange: (
+            instance: any,
+            cell: any,
+            x: string,
+            y: any,
+            value: boolean
+          ) => {
+            console.log(typeof y);
+
+            if (x === "0") {
+              // Check if change is in the checkbox column
+              const rowIndex = y;
+              if (value === false) {
+                // console.log(cell, x, y, value);
+
+                // const data = selectedSchemeInstance?.getData();
+                // console.log(controlSchemesSelected);
+                // console.log(selectedControlSchemes);
+                // console.log(data);
+                // selectedSchemeInstance?.setData([])
+
+                // Remove the unchecked row from controlSchemesSelected
+                // setControlSchemesSelected(prev =>
+                //   prev.filter((el:any) => el[0] === true)
+                // );
+              }
+            }
+          },
+        }),
+        [controlSchemesSelected, typedControlSchemeColumns]
+      );
 
       // Initialize selected schemes spreadsheet
       useEffect(() => {
@@ -361,23 +410,10 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           selectedSchemeInstance.destroy();
         }
 
-        const instance = jspreadsheet(controlSchemeSelectedSheetRef.current, {
-          data: controlSchemesSelected,
-          columns: typedControlSchemeColumns.map((column) => ({
-            ...column,
-            readOnly: true,
-          })),
-          columnSorting: true,
-          columnDrag: true,
-          columnResize: true,
-          tableOverflow: true,
-          lazyLoading: true,
-          loadingSpin: true,
-          tableWidth: "100%",
-          tableHeight: "250px",
-          freezeColumns: 4,
-          rowResize: true,
-        });
+        const instance = jspreadsheet(
+          controlSchemeSelectedSheetRef.current,
+          controlSchemeOptions
+        );
 
         setSelectedSchemeInstance(instance);
 
@@ -386,7 +422,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             instance.destroy();
           }
         };
-      }, [controlSchemesSelected]); // Removed dependencies that could trigger unwanted rerenders
+      }, [controlSchemesSelected, typedControlSchemeColumns]); // Removed dependencies that could trigger unwanted rerenders
 
       const handleAdd = useCallback(() => {
         if (!controlSchemeInstance) return;
@@ -559,9 +595,11 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
       };
 
       const handleConfirm = useCallback(() => {
-        const selectedSchemes = controlSchemesSelected.map((item) =>
-          division === HEATING ? item[2] : item[1]
-        );
+        console.log(controlSchemesSelected);
+
+        const selectedSchemes = controlSchemesSelected
+          .filter((item: any) => item[0] === true)
+          .map((item) => (division === HEATING ? item[2] : item[1]));
         if (division === HEATING) {
           const selectedSchemesWithLpbs = controlSchemesSelected.map((item) => {
             return { control_scheme: item[2], lpbs_type: item[6] };
@@ -632,21 +670,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             <h2 className="mb-4 text-2xl font-bold">
               Control Scheme Configurator
             </h2>
-            <div className="w-1/4 py-1">
-              {/* {(division === ENVIRO || division === WWS_IPG) && (
-                <select
-                  value={selectedFilter}
-                  onChange={handleFilterChange}
-                  className="rounded border p-2"
-                >
-                  {options.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              )} */}
-            </div>
+            <div className="w-1/4 py-1"></div>
             <MemoizedTableFilter
               filters={filterConfig()}
               onFilter={handleFilter}

@@ -26,6 +26,7 @@ import {
   LPBS_SCHEMES_URI,
   PROJECT_API,
   SPG_SERVICES_CONTROL_SCHEMES_URI,
+  STATIC_DOCUMENT_API,
 } from "@/configs/api-endpoints";
 import { useLoading } from "@/hooks/useLoading";
 import { useParams, useRouter } from "next/navigation";
@@ -38,15 +39,7 @@ import {
   WWS_IPG,
   WWS_SPG,
 } from "@/configs/constants";
-import {
-  Enviro_ControlSchemeDataDol,
-  Enviro_ControlSchemeDataSD,
-  Enviro_ControlSchemeDataVFD,
-  getIPGSchemesData,
-  lcs_od_gland_data,
-  WWS_IPG_data,
-  WWS_SPG_DATA,
-} from "@/app/Data";
+import { getIPGSchemesData, lcs_od_gland_data } from "@/app/Data";
 import { getStandByKw } from "../Electrical Load List/LoadListComponent";
 import { convertToFrappeDatetime } from "@/utils/helpers";
 import { useGetData } from "@/hooks/useCRUD";
@@ -857,6 +850,9 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       status: "Not Released",
       description: "test",
       cable_schedule_data: data?.map((row: any) => {
+        const loadListItem = loadListData.find(
+          (item: any) => item.tag_number === row[0]
+        );
         return {
           tag_number: row[0],
           service_description: row[1],
@@ -884,6 +880,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           derating_factor: Number(row[23]),
           final_capacity: Number(row[24]),
           cable_selected_status: row[25],
+          supply_phase: loadListItem?.phase
         };
       }),
       excel_payload: { ...individualFeeders, ...groupPayload },
@@ -916,8 +913,19 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     }
   };
   const getCableSizing = async () => {
-    setLoading(true);
     const cableScheduleData = spreadsheetInstance?.getData();
+    const is_cable_length_empty = cableScheduleData?.some((item: any) => {
+      if (item[8] === "" || item[8] === "0") {
+        message.error(`Please Enter Cable Length for Feeder: ${item[0]}`);
+        return true;
+      }
+      return false;
+    });
+    if (is_cable_length_empty) {
+      return;
+    }
+
+    setLoading(true);
     console.log(cableTrayData, "cableTrayData");
     const cableSizeCalc = await getCableSizingCalculation({
       divisionName: userInfo.division,
@@ -991,6 +999,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     setCableSizeCalcData(sizingCalcData);
     setIscableSizeFetched(true);
     setLoading(false);
+    message.success("Calculation Updated Successfully");
 
     // setLoadListData(updatedLoadList)
   };
@@ -1001,6 +1010,9 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     // console.log(getDownLoadEndpoint())
 
     try {
+      const document_name = await getData(
+        `${STATIC_DOCUMENT_API}?fields=["lt_cable_sizing"]&filters=[["project_id", "=", "${project_id}"]]`
+      );
       const base64Data: any = await downloadFile(
         GET_VOLTAGE_DROP_EXCEL_API,
         true,
@@ -1019,8 +1031,9 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
 
-      // Use Content-Disposition header to get the filename
-      const filename = "voltage_drop_calculation.xlsx";
+   
+      const name = document_name[0]?.lt_cable_sizing + "_LT Cable Sizing";
+      const filename = `${name}.xlsx`;
 
       link.download = filename.replace(/"/g, ""); // Remove quotes if present
 

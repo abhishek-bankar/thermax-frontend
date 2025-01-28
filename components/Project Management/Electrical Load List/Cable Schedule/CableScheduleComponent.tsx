@@ -24,6 +24,7 @@ import {
   GET_VOLTAGE_DROP_EXCEL_API,
   HEATING_CONTROL_SCHEMES_URI,
   LPBS_SCHEMES_URI,
+  PROJECT_API,
   SPG_SERVICES_CONTROL_SCHEMES_URI,
 } from "@/configs/api-endpoints";
 import { useLoading } from "@/hooks/useLoading";
@@ -41,12 +42,15 @@ import {
   Enviro_ControlSchemeDataDol,
   Enviro_ControlSchemeDataSD,
   Enviro_ControlSchemeDataVFD,
+  getIPGSchemesData,
   lcs_od_gland_data,
   WWS_IPG_data,
   WWS_SPG_DATA,
 } from "@/app/Data";
 import { getStandByKw } from "../Electrical Load List/LoadListComponent";
 import { convertToFrappeDatetime } from "@/utils/helpers";
+import { useGetData } from "@/hooks/useCRUD";
+import { getSortedControlSchemes } from "../Electrical Load List/Control Scheme Config/ControlSchemeConfig";
 
 interface CableScheduleProps {
   loadListLatestRevisionId: string;
@@ -140,7 +144,7 @@ const useDataFetching = (
   designBasisRevisionId: string,
   loadListLatestRevisionId: string,
   cableScheduleRevisionId: string,
-  userInfo: any
+  projectDivision: string
 ) => {
   const [isLoading, setIsLoading] = useState(true);
   const { setLoading } = useLoading();
@@ -174,12 +178,12 @@ const useDataFetching = (
     try {
       setIsLoading(true);
 
-      const division =
-        userInfo?.division === WWS_SPG || userInfo?.division === WWS_SERVICES
+      const division_name =
+        projectDivision === WWS_SPG || projectDivision === WWS_SERVICES
           ? WWS_SPG
-          : userInfo?.division;
+          : projectDivision;
       const lpbsResponse = await getData(
-        `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${division}"]]&fields=["*"]`
+        `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${division_name}"]]&fields=["*"]`
       );
 
       const loadList = await getData(
@@ -196,32 +200,91 @@ const useDataFetching = (
         savedCableSchedule,
         cableTrayData
       );
-
-      getData(getApiEndpoint(userInfo?.division)).then((res) => {
-        console.log(res);
+      try {
+        setLoading(true);
+        const res = await getData(getApiEndpoint(projectDivision));
         let sortedSchemes;
-        if (
-          userInfo.division === WWS_SERVICES ||
-          userInfo.division === WWS_SPG
-        ) {
-          sortedSchemes = WWS_SPG_DATA;
-        } else if (userInfo.division === ENVIRO) {
-          sortedSchemes = [
-            ...Enviro_ControlSchemeDataDol,
-            ...Enviro_ControlSchemeDataSD,
-            ...Enviro_ControlSchemeDataVFD,
-          ];
-        } else if (userInfo.division === WWS_IPG) {
-          sortedSchemes = WWS_IPG_data;
-        } else {
-          sortedSchemes = res;
+        console.log(res, "control schemes data");
+        if (projectDivision === WWS_SERVICES || projectDivision === WWS_SPG) {
+          sortedSchemes = getSortedControlSchemes(res, projectDivision);
+        } else if (projectDivision === ENVIRO) {
+          sortedSchemes = getSortedControlSchemes(res, projectDivision);
+        } else if (projectDivision === WWS_IPG) {
+          sortedSchemes = getIPGSchemesData();
+        } else if (projectDivision === HEATING) {
+          sortedSchemes = res
+            .map((item: any) => [
+              false,
+              item.scheme,
+              item.sub_scheme,
+              item.scheme_title,
+              item.description,
+              item.breaker,
+              item.lpbs,
+              item.lpbs_inc_dec_ind,
+              item.ammeter,
+              item.thermistor_relay,
+              item.motor_space_heater,
+              item.plc_current_signal,
+              item.plc_speed_signal,
+              item.olr,
+              item.phase,
+              item.limit_switch,
+              item.motor_protection_relay,
+              item.field_isolator,
+              item.local_panel,
+              item.field_ess,
+              item.electronic_relay,
+              item.plc1_and_plc2,
+              item.mcc_start_stop,
+              item.input_choke,
+              item.output_choke,
+              item.separate_plc_start_stop,
+              item.di,
+              item.do,
+              item.ai,
+              item.ao,
+            ])
+            .sort((a: any, b: any) => {
+              const [prefixA, numA] = a[2].split("-");
+              const [prefixB, numB] = b[2].split("-");
+              return prefixA === prefixB
+                ? parseInt(numA, 10) - parseInt(numB, 10)
+                : prefixA.localeCompare(prefixB);
+            });
         }
-
-        console.log(sortedSchemes, "control schemes sorted");
 
         setControlSchemes(sortedSchemes);
         setLoading(false);
-      });
+      } catch (error) {
+        console.error("Error fetching control schemes:", error);
+        setLoading(false);
+      }
+      // getData(getApiEndpoint(projectDivision)).then((res) => {
+      //   console.log(res);
+      //   let sortedSchemes;
+      //   if (
+      //     projectDivision === WWS_SERVICES ||
+      //     projectDivision === WWS_SPG
+      //   ) {
+      //     sortedSchemes = WWS_SPG_DATA;
+      //   } else if (projectDivision === ENVIRO) {
+      //     sortedSchemes = [
+      //       ...Enviro_ControlSchemeDataDol,
+      //       ...Enviro_ControlSchemeDataSD,
+      //       ...Enviro_ControlSchemeDataVFD,
+      //     ];
+      //   } else if (projectDivision === WWS_IPG) {
+      //     sortedSchemes = WWS_IPG_data;
+      //   } else {
+      //     sortedSchemes = res;
+      //   }
+
+      //   console.log(sortedSchemes, "control schemes sorted");
+
+      //   setControlSchemes(sortedSchemes);
+      //   setLoading(false);
+      // });
       setLpbsSchemes(lpbsResponse);
       setCableTrayData(cableTrayData[0]);
       setCableScheduleSavedData(savedCableSchedule);
@@ -273,6 +336,8 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
   } = useCurrentUser();
 
   const project_id = params.project_id as string;
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const projectDivision = projectData?.division;
 
   const [isMulticoreModalOpen, setIsMulticoreModalOpen] = useState(false);
 
@@ -288,7 +353,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     designBasisRevisionId,
     loadListLatestRevisionId,
     cableScheduleRevisionId,
-    userInfo
+    projectDivision
   );
 
   const typedCableScheduleColumns = useMemo(

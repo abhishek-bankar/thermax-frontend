@@ -1087,7 +1087,7 @@ const LoadList: React.FC<LoadListProps> = ({
       const instance = jspreadsheet(jRef.current, loadListOptions);
       spreadsheetRef.current = instance;
     }
-  }, [isLoading, loadListData, loadListOptions, panelList]);
+  }, [isLoading, loadListData,typedLoadListColumns, loadListOptions, panelList]);
   useEffect(() => {
     if (!isLoading) {
       setLoading(false);
@@ -1106,6 +1106,14 @@ const LoadList: React.FC<LoadListProps> = ({
     typedLoadListColumns.forEach((column) => {
       if (column.name === "controlScheme") {
         column.source = selectedSchemes;
+        if (spreadsheetRef.current) {
+          spreadsheetRef.current.destroy();
+        }
+        if(jRef.current){
+
+          const instance = jspreadsheet(jRef.current, loadListOptions);
+          spreadsheetRef.current = instance;
+        }
       }
     });
   };
@@ -1113,6 +1121,14 @@ const LoadList: React.FC<LoadListProps> = ({
     typedLoadListColumns.forEach((column) => {
       if (column.name === "lbpsType") {
         column.source = selectedSchemes;
+        if (spreadsheetRef.current) {
+          spreadsheetRef.current.destroy();
+        }
+        if(jRef.current){
+
+          const instance = jspreadsheet(jRef.current, loadListOptions);
+          spreadsheetRef.current = instance;
+        }
       }
     });
   };

@@ -6,6 +6,7 @@ import { PROJECT_API } from "@/configs/api-endpoints";
 import { useGetData } from "@/hooks/useCRUD";
 import { useLoading } from "@/hooks/useLoading";
 import clsx from "clsx";
+import { HEATING } from "@/configs/constants";
 
 export default function DesignBasisLayout({
   children,
@@ -20,12 +21,12 @@ export default function DesignBasisLayout({
   const { data: projectData }: any = useGetData(
     `${PROJECT_API}/${params?.project_id}`
   );
+  const projectDivision = projectData?.division;
 
   const document_revision_path = `/project/${params.project_id}/electrical-load-list/document-revision`;
   const load_list_path = `/project/${params.project_id}/electrical-load-list/load-list`;
   const cable_schedule_path = `/project/${params.project_id}/electrical-load-list/cable-schedule`;
   const motor_canopy_path = `/project/${params.project_id}/electrical-load-list/motor-canopy`;
-
   const handleTabChange = (path: string) => {
     setModalLoading(true);
     router.push(path);
@@ -77,17 +78,23 @@ export default function DesignBasisLayout({
           >
             Cable Schedule
           </div>
-          <div
-            className={clsx(
-              "white grid flex-auto cursor-pointer place-content-center rounded border p-1 text-xs font-bold uppercase tracking-wide text-white",
-              pathname.includes(motor_canopy_path)
-                ? "bg-green-500"
-                : "bg-blue-500"
-            )}
-            onClick={() => handleTabChange(motor_canopy_path)}
-          >
-            Motor Canopy
-          </div>
+          {
+            <div
+              className={clsx(
+                "white grid flex-auto cursor-pointer place-content-center rounded border p-1 text-xs font-bold uppercase tracking-wide text-white",
+                pathname.includes(motor_canopy_path)
+                  ? "bg-green-500"
+                  : "bg-blue-500"
+              )}
+              onClick={() => {
+                if (projectDivision !== HEATING) {
+                  handleTabChange(motor_canopy_path);
+                }
+              }}
+            >
+              Motor Canopy
+            </div>
+          }
         </nav>
       </div>
 

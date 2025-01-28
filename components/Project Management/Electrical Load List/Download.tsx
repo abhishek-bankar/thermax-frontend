@@ -41,6 +41,7 @@ import {
 } from "@/configs/api-endpoints";
 import {
   DB_REVISION_STATUS,
+  HEATING,
   LOAD_LIST_REVISION_STATUS,
 } from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
@@ -100,6 +101,10 @@ const Download: React.FC<Props> = ({
   const is_lpbs_specs_enabled =
     loadListData?.electrical_load_list_data?.some(
       (el: any) => el.lpbs_type && el.lpbs_type !== "NA"
+    ) ?? false;
+  const is_isolator_enabled =
+    loadListData?.electrical_load_list_data?.some(
+      (el: any) => el.local_isolator && el.local_isolator !== "No"
     ) ?? false;
 
   console.log(is_motor_specs_enabled);
@@ -209,9 +214,7 @@ const Download: React.FC<Props> = ({
     setModalLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  useEffect(() => {
-    // console.log(dataSource);
-  }, [dataSource]);
+
   const getColumns = (tab: string) => {
     const columns: TableColumnsType = [
       {
@@ -285,7 +288,7 @@ const Download: React.FC<Props> = ({
                       (tab === "lpbs-specs" &&
                         !commonConfigData?.is_local_push_button_station_selected) ||
                       (tab === "local-isolator" &&
-                        !commonConfigData?.is_field_motor_isolator_selected) ||
+                        (!commonConfigData?.is_field_motor_isolator_selected || !is_isolator_enabled)) ||
                       (tab === "lpbs-specs" && !record?.is_saved) ||
                       (tab === "local-isolator" && !record?.is_saved) ||
                       (tab === "motor-specs" && !record?.is_saved)
@@ -404,7 +407,7 @@ const Download: React.FC<Props> = ({
                     (tab === "lpbs-specs" &&
                       !commonConfigData?.is_local_push_button_station_selected) ||
                     (tab === "local-isolator" &&
-                      !commonConfigData?.is_field_motor_isolator_selected) ||
+                      (!commonConfigData?.is_field_motor_isolator_selected || !is_isolator_enabled)) ||
                     (tab === "motor-specs" && !is_motor_specs_enabled) ||
                     (tab === "lpbs-specs" && !is_lpbs_specs_enabled)
                   }
@@ -851,23 +854,29 @@ const Download: React.FC<Props> = ({
       key: "3",
       children: (
         <>
-          <div className="text-end">
-            <Button
-              icon={<SyncOutlined color="#492971" />}
-              onClick={() => updateDataSource("3")}
-            >
-              {" "}
-              Refresh
-            </Button>
-          </div>
+          {projectDivision !== HEATING ? (
+            <div>
+              <div className="text-end">
+                <Button
+                  icon={<SyncOutlined color="#492971" />}
+                  onClick={() => updateDataSource("3")}
+                >
+                  {" "}
+                  Refresh
+                </Button>
+              </div>
 
-          <div className="mt-2">
-            <Table
-              columns={getColumns("motor-canopy")}
-              dataSource={dataSource}
-              size="small"
-            />
-          </div>
+              <div className="mt-2">
+                <Table
+                  columns={getColumns("motor-canopy")}
+                  dataSource={dataSource}
+                  size="small"
+                />
+              </div>
+            </div>
+          ) : (
+            <></>
+          )}
         </>
       ),
     },
@@ -1158,6 +1167,10 @@ const Download: React.FC<Props> = ({
   const updateDataSource = async (key: any) => {
     console.log(key);
     console.log(getApiEndpoint(key));
+
+    if (key === "3" && projectDivision === HEATING) {
+      return;
+    }
 
     const data = await getData(getApiEndpoint(key));
     // console.log(data);

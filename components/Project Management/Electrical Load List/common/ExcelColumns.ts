@@ -662,7 +662,7 @@ export const CableSchedulecolumns = () => {
         "150/70",
         "185/95",
       ], //this has to be come from backend
-      title: "FINAL CABLE SIZE",
+      title: "FINAL CALCULATED CABLE SIZE",
       width: "120",
     },
     {

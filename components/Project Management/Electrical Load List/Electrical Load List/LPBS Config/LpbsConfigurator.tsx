@@ -163,6 +163,9 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
               ? [true, ...scheme.slice(1)]
               : scheme
           );
+          const selected = updatedSchemes.filter((row) => row[0] === true);
+
+          setLpbsSchemesSelected(selected);
         } catch (error) {
           console.error("Error parsing selected_lpbs_scheme:", error);
         }
@@ -186,7 +189,7 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
 
       const instance = jspreadsheet(
         lpbsSelectedSheetRef.current,
-        getSpreadsheetConfig(lpbsSchemesSelected, true)
+        getSpreadsheetConfig(lpbsSchemesSelected, false)
       );
       // setSelectedLpbsInstance(instance);
 
@@ -209,7 +212,11 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
     }, [lpbsInstance]);
 
     const handleConfirm = useCallback(() => {
-      const selectedSchemes = lpbsSchemesSelected.map((item) => item[1]);
+      console.log(lpbsSchemesSelected);
+
+      const selectedSchemes = lpbsSchemesSelected
+        .filter((item: any) => item[0] === true)
+        .map((item) => item[1]);
       // localStorage.setItem("selected_lpbs_scheme", JSON.stringify([...selectedSchemes, "NA"]))
       onConfigurationComplete([...selectedSchemes, "NA"]);
       onClose();

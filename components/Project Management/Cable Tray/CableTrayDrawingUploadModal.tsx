@@ -32,9 +32,7 @@ export const UploadCableTrayDrawingModal = ({
   const projectDivision = projectData?.division as keyof typeof S3FolderMapping;
   const [fileExist, setFileExist] = useState(false);
 
-  useEffect(() => {
-    console.log(revision_no);
-    
+  useEffect(() => { 
     const checkFileExist = async () => {
       const cableTrayDrawing = await getBucketObjects(
         `${S3FolderMapping[projectDivision]}/${projectData?.["project_name"]}/Cable Tray/${revision_no}/Input`
@@ -66,7 +64,7 @@ export const UploadCableTrayDrawingModal = ({
             {projectData && (
               <S3BucketUpload
                 accept=".pdf,.dwg"
-                folderPath={`${S3FolderMapping[projectDivision]}/${projectData?.["project_name"]}/Cable Tray/${revision_no}/Input/`}
+                folderPath={`${S3FolderMapping[projectDivision]}/${projectData?.["project_name"]}/Cable Tray/${revision_no}/Input`}
                 onUploadSuccess={onUploadSuccess}
               />
             )}

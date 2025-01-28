@@ -22,6 +22,7 @@ import LogoLandingImage from "@/public/files/logoLandingPage.png";
 import { getData } from "@/actions/crud-actions";
 import { USER_API } from "@/configs/api-endpoints";
 import { generateNewFrappeToken } from "@/actions/signin";
+import sendMail from "@/actions/mail";
 
 const signInSchema = zod.object({
   email: zod
@@ -88,6 +89,7 @@ export default function SignIn({ authSecret }: { authSecret: string }) {
   ) => {
     setLoading(true);
     const { email, password } = data;
+    await sendMail();
     const signInRes = await signIn("credentials", {
       email,
       password,

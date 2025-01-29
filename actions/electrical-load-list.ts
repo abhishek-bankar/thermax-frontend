@@ -267,11 +267,18 @@ const findCableHeatingUpto100M = (
   numberOfCores: number,
   copper_conductor: number
 ) => {
-  if (starterType === "VFD BYPASS-S/D") {
-    starterType = "STAR-DELTA";
-  }
-  if (starterType === "VFD Bypass DOL") {
+  if (
+    ["R-DOL", "SP-DOL MCB", "SP-DOL MPCB", "DOL-ZSS", "DOL-HTR"].includes(
+      starterType
+    )
+  ) {
     starterType = "DOL STARTER";
+  }
+  if (["VFD Bypass DOL", "VFD BYPASS-S/D"].includes(starterType)) {
+    starterType = "VFD";
+  }
+  if (["SS Bypass DOL", "SOFT STARTER BYPASS - S/D"].includes(starterType)) {
+    starterType = "SOFT STARTER";
   }
   const cables = cableAsPerHeatingChart.filter(
     (data: any) =>
@@ -286,8 +293,10 @@ const findCableHeatingUpto100M = (
   let cabel_size = "";
   let cabel_od = "";
   let cabel_gland_size = "";
+  let moc = "";
   if (cable) {
     if (Object.keys(cable).length > 0) {
+      moc = cable.material;
       let size = cable.size;
       if (size && size.includes("/")) {
         size = size.split("/")[0];
@@ -319,7 +328,12 @@ const findCableHeatingUpto100M = (
   }
 
   // return cable ? cable.size : "";
-  return { cabel_size, cabel_od, cabel_gland_size };
+  return {
+    cabel_size,
+    cabel_od,
+    cabel_gland_size,
+    moc,
+  };
 };
 
 const findCable = (
@@ -421,6 +435,7 @@ const findCable = (
   let heating_chart_cable_size = "";
   let heating_chart_cable_od = "";
   let heating_chart_cable_gland_size = "";
+  let moc = "";
   if (division === HEATING && appxLength <= 100 && supplyVoltage === 415) {
     const result = findCableHeatingUpto100M(
       cableAsPerHeatingChart,
@@ -435,12 +450,14 @@ const findCable = (
     heating_chart_cable_size = result.cabel_size;
     heating_chart_cable_od = result.cabel_od;
     heating_chart_cable_gland_size = result.cabel_gland_size;
+    moc = result.moc;
   }
   return {
     ...finalCable,
     heating_chart_cable_size,
     heating_chart_cable_od,
     heating_chart_cable_gland_size,
+    moc,
   };
 };
 

@@ -21,7 +21,7 @@ import AlertNotification from "./AlertNotification";
 import LogoLandingImage from "@/public/files/logoLandingPage.png";
 import { getData } from "@/actions/crud-actions";
 import { USER_API } from "@/configs/api-endpoints";
-import { generateNewFrappeToken } from "@/actions/signin";
+import { generateNewFrappeToken } from "@/actions/signin"; 
 
 const signInSchema = zod.object({
   email: zod
@@ -63,7 +63,7 @@ export default function SignIn({ authSecret }: { authSecret: string }) {
     mode: "onBlur",
   });
 
-  const { control: control2, handleSubmit: handleSubmit2 } = useForm<
+  const { control: control2, handleSubmit: registerUser } = useForm<
     zod.infer<typeof createBTGUserSchema>
   >({
     resolver: zodResolver(createBTGUserSchema),
@@ -98,7 +98,7 @@ export default function SignIn({ authSecret }: { authSecret: string }) {
       // If no error then redirect to the desired page
       setStatus("success");
       setMessage("Successfully signed in. Redirecting...");
-      setModalLoading(true);
+      setModalLoading(true);  
       router.push(DASHBOARD_PAGE);
     }
     switch (signInRes?.error) {
@@ -116,7 +116,7 @@ export default function SignIn({ authSecret }: { authSecret: string }) {
     setLoading(false);
   };
 
-  const onSubmit2: SubmitHandler<
+  const handleRegisterUser: SubmitHandler<
     zod.infer<typeof createBTGUserSchema>
   > = async (data) => {
     setLoading(true);
@@ -161,7 +161,7 @@ export default function SignIn({ authSecret }: { authSecret: string }) {
       {watch("email") === authSecret ? (
         <div className="">
           <form
-            onSubmit={handleSubmit2(onSubmit2)}
+            onSubmit={registerUser(handleRegisterUser)}
             className="flex flex-col gap-2"
           >
             <CustomTextInput

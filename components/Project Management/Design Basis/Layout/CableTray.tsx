@@ -26,7 +26,10 @@ const getDefaultValues = (cableTrayData: any) => {
     is_cable_tray_cover_selected:
       cableTrayData?.is_cable_tray_cover_selected?.toString() || "1",
     cable_tray_moc: cableTrayData?.cable_tray_moc || "SS 304",
+    outer_sheath: cableTrayData?.outer_sheath || "Fire resistant",
+    inner_sheath: cableTrayData?.inner_sheath || "Fire resistant",
     cable_tray_moc_input: cableTrayData?.cable_tray_moc_input || "",
+    design_manufacturing_testing_standard_for_cable: cableTrayData?.design_manufacturing_testing_standard_for_cable || "IS",
     number_of_cores: cableTrayData?.number_of_cores || "3C",
     specific_requirement:
       cableTrayData?.specific_requirement || "Fire Resistant",
@@ -181,6 +184,7 @@ const CableTray = ({
 
   const dropdown = useCableTrayDropdowns();
 
+  const dmt_standards_options = dropdown["DMT Standards"]
   const no_of_core_options = dropdown["Layout Number Of Cores"];
   const specific_requirement_options = dropdown["Layout Specific Requirement"];
   const type_of_insulation_options = dropdown["Layout Type of Insulation"];
@@ -424,6 +428,15 @@ const CableTray = ({
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
+                name="design_manufacturing_testing_standard_for_cable"
+                label="Design, Manufacturing & Testing Standard for Cable "
+                options={dmt_standards_options || []}
+                size="small"
+              />
+            </div>
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
                 name="number_of_cores"
                 label="Number of Cores"
                 options={no_of_core_options || []}
@@ -433,18 +446,10 @@ const CableTray = ({
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
-                name="specific_requirement"
-                label="Specific Requirement"
-                options={specific_requirement_options || []}
-                size="small"
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="type_of_insulation"
-                label="Type of Insulation"
-                options={type_of_insulation_options || []}
+                name="color_scheme"
+                label="Color Scheme"
+                options={color_scheme_options || []}
+                disabled={true}
                 size="small"
               />
             </div>
@@ -453,10 +458,39 @@ const CableTray = ({
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
-                name="color_scheme"
-                label="Color Scheme"
-                options={color_scheme_options || []}
-                disabled={true}
+                name="type_of_insulation"
+                label="Cable Insulation" // type of insulation
+                options={type_of_insulation_options || []}
+                size="small"
+              />
+            </div>
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="specific_requirement"
+                label="Cable Insulation Properties" // specific requirements 
+                options={specific_requirement_options || []}
+                size="small"
+              />
+            </div>
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="inner_sheath"
+                label="Inner Sheath" // specific requirements 
+                options={specific_requirement_options || []}
+                size="small"
+              />
+            </div>
+
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="outer_sheath"
+                label="Outer Sheath" // specific requirements 
+                options={specific_requirement_options || []}
                 size="small"
               />
             </div>
@@ -725,15 +759,15 @@ const CableTray = ({
               {Boolean(
                 watch("cable_tray_moc") === "MS - Hot dipped Galvanised"
               ) && (
-                <div className="w-1/2">
-                  <CustomTextInput
-                    control={control}
-                    name="cable_tray_moc_input"
-                    label="Coating Thickness"
-                    size="small"
-                  />
-                </div>
-              )}
+                  <div className="w-1/2">
+                    <CustomTextInput
+                      control={control}
+                      name="cable_tray_moc_input"
+                      label="Coating Thickness"
+                      size="small"
+                    />
+                  </div>
+                )}
               {/* <div className="flex flex-1 items-center gap-2">
               <div className="flex items-center gap-4">
                 <h4 className="text-sm font-semibold text-slate-700">Wet Area</h4>

@@ -529,6 +529,7 @@ const Download: React.FC<Props> = ({
           false,
           payload
         );
+        console.log("respones", respose)
         message.success("Local Isolator Specifications Saved");
         updateDataSource(tabKey);
       } catch (error) {
@@ -668,7 +669,7 @@ const Download: React.FC<Props> = ({
           false,
           payload
         );
-        console.log(respose);
+        console.log("lpbs response", respose);
         message.success("LPBS Specifications & List Saved");
         updateDataSource(tabKey);
       } catch (error) {
@@ -790,7 +791,7 @@ const Download: React.FC<Props> = ({
           false,
           payload
         );
-        console.log(respose);
+        console.log("Motor Spec. respose",respose);
         message.success("Motor Specifications & List Saved");
         updateDataSource(tabKey);
       } catch (error) {

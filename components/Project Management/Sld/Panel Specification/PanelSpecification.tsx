@@ -10,6 +10,7 @@ import {
 import { SLD_REVISION_STATUS } from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useLoading } from "@/hooks/useLoading";
 import {
   convertToFrappeDatetime,
   getThermaxDateFormat,
@@ -33,7 +34,6 @@ import {
 } from "antd";
 import { useParams } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-
 const useDataFetching = (
   project_id: string,
   panel: any,
@@ -43,29 +43,36 @@ const useDataFetching = (
   const [panelSpecificationRevisions, setPanelSpecificationRevisions] =
     useState<any[]>([]);
   const [sldData, setSldData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
+    if (!panel?.name || !sld_revision_id) {
+      setError("Missing required panel name or SLD revision ID");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const panelSpecificationRevisionsResponse = await getData(
-        `${PANEL_SPECS_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
-      );
-      const sldDataResponse = await getData(
-        `${SLD_REVISIONS_API}/${sld_revision_id}`
-      );
+      setError(null);
+
+      const [panelSpecificationRevisionsResponse, sldDataResponse] =
+        await Promise.all([
+          getData(
+            `${PANEL_SPECS_REVISIONS_API}?fields=["*"]&filters=[["panel_id", "=", "${panel.name}"]]`
+          ),
+          getData(`${SLD_REVISIONS_API}/${sld_revision_id}`),
+        ]);
 
       setPanelSpecificationRevisions(
         sortDatewise(panelSpecificationRevisionsResponse) || []
       );
 
-      // Safely extract busbar sizing data
-      console.log(sldDataResponse, "busbar data");
-
       const busbarData = sldDataResponse?.busbar_sizing_data?.[0];
       setSldData(busbarData || null);
     } catch (error) {
       console.error("Error fetching data:", error);
-      message.error("Failed to load data");
+      setError("Failed to load data");
       setPanelSpecificationRevisions([]);
       setSldData(null);
     } finally {
@@ -74,18 +81,18 @@ const useDataFetching = (
   }, [panel?.name, sld_revision_id]);
 
   useEffect(() => {
-    if (panel?.name && sld_revision_id) {
-      fetchData();
-    }
-  }, [fetchData, panel?.name, sld_revision_id]);
+    fetchData();
+  }, [fetchData]);
 
   return {
     panelSpecificationRevisions,
     sldData,
     isLoading,
+    error,
     refetch: fetchData,
   };
 };
+
 interface Props {
   panelData: any;
   projectPanelData: any;
@@ -105,7 +112,7 @@ const PanelSpecification: React.FC<Props> = ({
   const userInfo: {
     division: string;
   } = useCurrentUser();
-
+  const { setLoading } = useLoading();
   const project_id = params.project_id as string;
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
   const [versionToCopy, setVersionToCopy] = useState(null);
@@ -120,8 +127,6 @@ const PanelSpecification: React.FC<Props> = ({
 
   const { panelSpecificationRevisions, sldData, refetch, isLoading } =
     useDataFetching(project_id, panel, sld_revision_id);
-  // console.log(sldData);
-  console.log(sldData, "busbar data");
 
   const dataSource = useMemo(
     () =>
@@ -139,62 +144,68 @@ const PanelSpecification: React.FC<Props> = ({
     [panelSpecificationRevisions]
   );
 
-  const getExcelName = async (revision_id?: string) => {
-    let revisionNo = 0;
-    dataSource?.forEach((item: any, index: number) => {
-      if (item.key === revision_id) {
-        revisionNo = index;
-      }
-    });
-
-    const documents_number = await getData(
-      `${DYNAMIC_DOCUMENT_API}?fields=["panel_specification"]&filters=[["panel_id", "=", "${panel?.name}"]]`
-    );
-    // console.log(documents_data);
-
-    const filename =
-      documents_number[0]?.panel_specification +
-      "_R" +
-      revisionNo +
-      "_" +
-      panelData?.panelName +
-      " Panel Specifications";
-    return filename;
-  };
-  const handleDownload = async (revision_id: string) => {
-    //  setDownloadIconSpin(true);
-    // getExcelName(revision_id);
-    try {
-      const base64Data: any = await downloadFile(
-        GET_PANEL_SPECS_EXCEL_API,
-        true,
-        {
-          revision_id,
+  const getExcelName = useCallback(
+    async (revision_id?: string) => {
+      let revisionNo = 0;
+      dataSource?.forEach((item: any, index: number) => {
+        if (item.key === revision_id) {
+          revisionNo = index;
         }
-      );
-
-      const binaryData = Buffer.from(base64Data, "base64");
-      const blob = new Blob([binaryData], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
+      const documents_number = await getData(
+        `${DYNAMIC_DOCUMENT_API}?fields=["panel_specification"]&filters=[["panel_id", "=", "${panel?.name}"]]`
+      );
+      // console.log(documents_data);
 
-       const filename = `${getExcelName(revision_id)}.xlsx`;
+      const filename =
+        documents_number[0]?.panel_specification +
+        "_R" +
+        revisionNo +
+        "_" +
+        panelData?.panelName +
+        " Panel Specifications";
+      return filename;
+    },
+    [dataSource, panel?.name, panelData?.panelName]
+  );
+  const handleDownload = useCallback(
+    async (revision_id: string) => {
+      //  setDownloadIconSpin(true);
+      // getExcelName(revision_id);
+      try {
+        const base64Data: any = await downloadFile(
+          GET_PANEL_SPECS_EXCEL_API,
+          true,
+          {
+            revision_id,
+          }
+        );
 
-       link.download = filename.replace(/"/g, "");
+        const binaryData = Buffer.from(base64Data, "base64");
+        const blob = new Blob([binaryData], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
 
-      link.click();
-    } catch (error) {
-      console.error(error);
-      message.error("Unable to download file");
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
 
-      // setDownloadIconSpin(false);
-    } finally {
-      // setDownloadIconSpin(false);
-    }
-  };
+        const filename = `${getExcelName(revision_id)}.xlsx`;
+
+        link.download = filename.replace(/"/g, "");
+
+        link.click();
+      } catch (error) {
+        console.error(error);
+        message.error("Unable to download file");
+
+        // setDownloadIconSpin(false);
+      } finally {
+        // setDownloadIconSpin(false);
+      }
+    },
+    [getExcelName]
+  );
 
   useEffect(() => {
     if (panelSpecificationRevisions?.length) {
@@ -210,58 +221,72 @@ const PanelSpecification: React.FC<Props> = ({
     }
   }, [panelSpecificationRevisions, setLastModified]);
 
-  const handleSave = async (key: string, sldData: any) => {
-    console.log(sldData);
-    if (!sldData || !designBasisRevisionId) {
-      message.error("Missing required data for saving");
-      return;
-    }
-
-    const payload = {
-      is_saved: 1,
-      design_basis_revision_id: designBasisRevisionId,
-      sld_height_of_panel: sldData.enclosure_height || null,
-    };
-
-    try {
-      const response = await updateData(
-        `${PANEL_SPECS_REVISIONS_API}/${key}`,
-        false,
-        payload
-      );
-
-      if (response) {
-        refetch();
-        message.success("Panel Specification Saved");
+  const handleSave = useCallback(
+    async (key: string) => {
+      if (!sldData) {
+        message.error("Missing busbar sizing data");
+        return;
       }
-    } catch (error) {
-      console.error("Save error:", error);
-      message.error("Unable to Save Panel Specification");
-    }
-  };
+
+      if (!designBasisRevisionId) {
+        message.error("Missing design basis revision ID");
+        return;
+      }
+      setLoading(true)
+      try {
+        const payload = {
+          is_saved: 1,
+          design_basis_revision_id: designBasisRevisionId,
+          sld_height_of_panel: sldData.enclosure_height || null,
+        };
+
+        const response = await updateData(
+          `${PANEL_SPECS_REVISIONS_API}/${key}`,
+          false,
+          payload
+        );
+
+        if (response) {
+          await refetch(); // Wait for refetch to complete
+          message.success("Panel Specification Saved");
+        }
+      } catch (error) {
+        console.error("Save error:", error);
+        message.error("Unable to Save Panel Specification");
+      } finally {
+        setLoading(false)
+
+      }
+    },
+    [sldData, designBasisRevisionId, setLoading, refetch] // Dependencies
+  );
+
   const handleClone = async (record: any) => {
     setVersionToCopy(record);
   };
-  const handleRelease = async (record: any) => {
-    console.log(record);
-    try {
-      if (record.is_released === 0) {
-        const respose = await updateData(
-          `${PANEL_SPECS_REVISIONS_API}/${record?.key}`,
-          false,
-          {
-            is_released: 1,
-          }
-        );
+  const handleRelease = useCallback(
+    async (record: any) => {
+      console.log(record);
+      try {
+        if (record.is_released === 0) {
+          const respose = await updateData(
+            `${PANEL_SPECS_REVISIONS_API}/${record?.key}`,
+            false,
+            {
+              is_released: 1,
+            }
+          );
+        }
+        message.success("Revision is Released and Locked");
+        refetch();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        // setModalLoading(false);
       }
-      message.success("Revision is Released and Locked");
-      refetch();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      // setModalLoading(false);
-    }
-  };
+    },
+    [refetch]
+  );
   const columns: TableColumnsType = useMemo(
     () => [
       {
@@ -328,7 +353,7 @@ const PanelSpecification: React.FC<Props> = ({
                         }}
                       />
                     }
-                    onClick={() => handleSave(record?.key, sldData)}
+                    onClick={() => handleSave(record?.key)}
                   />
                 </Tooltip>
               </div>
@@ -370,7 +395,6 @@ const PanelSpecification: React.FC<Props> = ({
         title: () => <div className="text-center">Create New Revision</div>,
         dataIndex: "clone",
         render: (_, record) => {
-          console.log(record);
           if (record.is_copied === 1) {
             return null;
           }
@@ -441,7 +465,7 @@ const PanelSpecification: React.FC<Props> = ({
         ),
       },
     ],
-    []
+    [handleDownload, handleRelease, handleSave, projectDivision, userDivision]
   );
   const updateTableTimeout = async () => {
     setTimeout(() => {

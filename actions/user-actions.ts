@@ -9,6 +9,7 @@ import {
 } from "@/configs/api-endpoints";
 import { BTG } from "@/configs/constants";
 import { createData, deleteData, getData } from "./crud-actions";
+import { sendMail } from "./mail";
 
 export const getUserRoles = async () => {
   const session = await auth();
@@ -46,7 +47,18 @@ export const deleteUser = async (email: string) => {
     const superuser = await getData(`${USER_API}/${superuserEmail}`);
     await deleteData(`${THERMAX_USER_API}/${email}`, false);
     await deleteData(`${NEXT_AUTH_USER_API}/${email}`, false);
-    await createData(`${DELETE_USER_EMAIL_API}`, false, {
+    // await createData(`${DELETE_USER_EMAIL_API}`, false, {
+    //   recipient_email: thermaxUser?.email,
+    //   cc_email: superuserEmail,
+    //   subject: "User Removal Notification - EnIMAX",
+    //   division_name,
+    //   is_superuser: thermaxUser?.is_superuser,
+    //   sent_by: thermaxUser?.is_superuser
+    //     ? "Team BTG"
+    //     : `${superuser?.first_name} ${superuser?.last_name}`,
+    // });
+
+    await sendMail("delete_user_notification", {
       recipient_email: thermaxUser?.email,
       cc_email: superuserEmail,
       subject: "User Removal Notification - EnIMAX",

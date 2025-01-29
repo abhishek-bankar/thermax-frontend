@@ -24,6 +24,7 @@ interface LpbsConfiguratorProps {
   onClose: () => void;
   selectedLpbsSchemes: any[];
   onConfigurationComplete: (selectedSchemes: string[]) => void;
+  division: string;
 }
 
 interface LpbsScheme {
@@ -35,7 +36,13 @@ interface LpbsScheme {
 }
 
 const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
-  ({ isOpen, onClose, selectedLpbsSchemes, onConfigurationComplete }) => {
+  ({
+    isOpen,
+    onClose,
+    selectedLpbsSchemes,
+    onConfigurationComplete,
+    division,
+  }) => {
     const lpbsSheetRef = useRef<HTMLDivElement | null>(null);
     const lpbsSelectedSheetRef = useRef<HTMLDivElement | null>(null);
     const [lpbsInstance, setLpbsInstance] =
@@ -44,9 +51,7 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
     //   useState<JspreadsheetInstance | null>(null);
     const [lpbsSchemesSelected, setLpbsSchemesSelected] = useState<any[]>([]);
     const { setLoading, isLoading } = useLoading();
-    const userInfo: {
-      division: string;
-    } = useCurrentUser();
+
     const [lpbsSchemes, setLpbsSchemes] = useState<any[]>([]);
     const [isLpbsSchemeEmpty, setIsLpbsSchemeEmpty] = useState(false);
 
@@ -109,13 +114,12 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
       setLoading(true);
       const fetchSchemes = async () => {
         try {
-          const division =
-            userInfo?.division === WWS_SPG ||
-            userInfo?.division === WWS_SERVICES
+          const division_name =
+            division === WWS_SPG || division === WWS_SERVICES
               ? WWS_SPG
-              : userInfo?.division;
+              : division;
           const response = await getData(
-            `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${division}"]]&fields=["*"]`
+            `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${division_name}"]]&fields=["*"]`
           );
           // console.log(response, "lpbs schemes");
 
@@ -139,13 +143,7 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
       };
 
       fetchSchemes();
-    }, [
-      isOpen,
-      lpbsSchemes.length,
-      setLoading,
-      transformSchemeData,
-      userInfo?.division,
-    ]);
+    }, [division, isOpen, lpbsSchemes.length, setLoading, transformSchemeData]);
 
     // Initialize main LPBS spreadsheet
     useEffect(() => {
@@ -165,6 +163,9 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
               ? [true, ...scheme.slice(1)]
               : scheme
           );
+          const selected = updatedSchemes.filter((row) => row[0] === true);
+
+          setLpbsSchemesSelected(selected);
         } catch (error) {
           console.error("Error parsing selected_lpbs_scheme:", error);
         }
@@ -188,7 +189,7 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
 
       const instance = jspreadsheet(
         lpbsSelectedSheetRef.current,
-        getSpreadsheetConfig(lpbsSchemesSelected, true)
+        getSpreadsheetConfig(lpbsSchemesSelected, false)
       );
       // setSelectedLpbsInstance(instance);
 
@@ -211,7 +212,11 @@ const LpbsConfigurator: React.FC<LpbsConfiguratorProps> = React.memo(
     }, [lpbsInstance]);
 
     const handleConfirm = useCallback(() => {
-      const selectedSchemes = lpbsSchemesSelected.map((item) => item[1]);
+      console.log(lpbsSchemesSelected);
+
+      const selectedSchemes = lpbsSchemesSelected
+        .filter((item: any) => item[0] === true)
+        .map((item) => item[1]);
       // localStorage.setItem("selected_lpbs_scheme", JSON.stringify([...selectedSchemes, "NA"]))
       onConfigurationComplete([...selectedSchemes, "NA"]);
       onClose();

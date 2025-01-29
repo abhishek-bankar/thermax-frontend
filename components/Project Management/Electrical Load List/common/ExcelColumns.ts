@@ -1,4 +1,4 @@
-import { ENVIRO, HEATING, WWS_IPG, WWS_SPG } from "@/configs/constants";
+import { ENVIRO, HEATING, WWS_IPG, WWS_SERVICES, WWS_SPG } from "@/configs/constants";
 export const getStarterList = () => {
   return [
     "DOL STARTER",
@@ -412,7 +412,7 @@ export const LoadListcolumns = (division: string) => {
       width: "200",
     });
   }
-  if (division === WWS_IPG || division === WWS_SPG) {
+  if (division === WWS_IPG || division === WWS_SPG || division === WWS_SERVICES) {
     columns.splice(
       11,
       0,
@@ -533,7 +533,8 @@ export const LoadListcolumns = (division: string) => {
       width: "200",
     });
   }
-
+ 
+  
   return columns;
 };
 export const CableSchedulecolumns = () => {
@@ -661,7 +662,7 @@ export const CableSchedulecolumns = () => {
         "150/70",
         "185/95",
       ], //this has to be come from backend
-      title: "FINAL CABLE SIZE",
+      title: "FINAL CALCULATED CABLE SIZE",
       width: "120",
     },
     {

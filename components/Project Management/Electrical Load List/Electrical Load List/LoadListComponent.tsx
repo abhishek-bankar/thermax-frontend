@@ -24,8 +24,7 @@ import {
   PROJECT_INFO_API,
   PROJECT_MAIN_PKG_LIST_API,
 } from "@/configs/api-endpoints";
-import {
-  downloadFile,
+import { 
   downloadFrappeCloudFile,
   getData,
   updateData,
@@ -50,7 +49,7 @@ import {
   getFrameSizeCalculation,
 } from "@/actions/electrical-load-list";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { ENVIRO, HEATING, WWS_IPG, WWS_SPG } from "@/configs/constants";
+import { ENVIRO, HEATING, WWS_IPG, WWS_SERVICES, WWS_SPG } from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 import TableFilter from "../common/TabelFilter";
 import { convertToFrappeDatetime } from "@/utils/helpers";
@@ -206,8 +205,7 @@ const LoadList: React.FC<LoadListProps> = ({
   const project_id = params.project_id as string;
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
 
-  const userDivision = userInfo?.division;
-  console.log(projectData, "project data");
+  const userDivision = userInfo?.division;  
 
   const projectDivision = projectData?.division;
 
@@ -609,7 +607,7 @@ const LoadList: React.FC<LoadListProps> = ({
         }
       }
     }
-    if (projectDivision === WWS_SPG || projectDivision === WWS_IPG) {
+    if (projectDivision === WWS_SPG || projectDivision === WWS_IPG || projectDivision === WWS_SERVICES ) {
       let isHazardousPackage = false;
       if (colIndex === "19") {
         subPackages?.forEach((pckg: any) => {
@@ -729,35 +727,7 @@ const LoadList: React.FC<LoadListProps> = ({
     }
     if (projectDivision === ENVIRO) {
       let isHazardousPackage = false;
-      // if (colIndex === "20") {
-      //   subPackages?.forEach((pckg: any) => {
-      //     const selectedPckg = pckg?.sub_packages?.find(
-      //       (item: any) => item.sub_package_name == newValue
-      //     );
-
-      //     if (selectedPckg) {
-      //       if (selectedPckg?.area_of_classification === "Hazardous Area") {
-      //         data[rowIndex][21] = "Hazardous";
-      //         data[rowIndex][22] = pckg?.standard;
-      //         data[rowIndex][23] = pckg?.zone;
-      //         data[rowIndex][24] = pckg?.gas_group;
-      //         data[rowIndex][25] = pckg?.temperature_class;
-      //         data[rowIndex][34] =
-      //           motorParameters[0]?.hazardous_area_efficiency_level;
-      //         isHazardousPackage = true;
-      //       } else {
-      //         data[rowIndex][21] = "Safe";
-      //         data[rowIndex][22] = "NA";
-      //         data[rowIndex][23] = "NA";
-      //         data[rowIndex][24] = "NA";
-      //         data[rowIndex][25] = "NA";
-      //         data[rowIndex][34] =
-      //           motorParameters[0]?.safe_area_efficiency_level;
-      //         isSafePackage = true;
-      //       }
-      //     }
-      //   });
-      // }
+      
       if (Number(colIndex) === getColumnIndex("package")) {
         subPackages?.forEach((pckg: any) => {
           const selectedPckg = pckg?.sub_packages?.find(
@@ -890,15 +860,14 @@ const LoadList: React.FC<LoadListProps> = ({
   };
   const typedLoadListColumns = useMemo(
     () =>
-      LoadListcolumns(userInfo?.division).map((column) => ({
+      LoadListcolumns(projectDivision).map((column) => ({
         ...column,
         type: column.type as ValidColumnType,
       })),
-    []
+    [projectDivision]
   );
   const getArrayOfLoadListData = (data: any, revision?: any) => {
-    console.log(data?.electrical_load_list_data);
-
+   
     return data?.electrical_load_list_data?.map((item: any) => {
       const result = [
         item.tag_number,
@@ -955,7 +924,7 @@ const LoadList: React.FC<LoadListProps> = ({
         result.splice(37, 0, item.motor_make);
         result.splice(40, 0, item.motor_part_code);
       }
-      if (projectDivision === WWS_IPG || projectDivision === WWS_SPG) {
+      if (projectDivision === WWS_IPG || projectDivision === WWS_SPG || projectDivision === WWS_SERVICES) {
         result.splice(
           11,
           0,
@@ -1118,7 +1087,7 @@ const LoadList: React.FC<LoadListProps> = ({
       const instance = jspreadsheet(jRef.current, loadListOptions);
       spreadsheetRef.current = instance;
     }
-  }, [isLoading, loadListData, loadListOptions, panelList]);
+  }, [isLoading, loadListData,typedLoadListColumns, loadListOptions, panelList]);
   useEffect(() => {
     if (!isLoading) {
       setLoading(false);
@@ -1137,6 +1106,14 @@ const LoadList: React.FC<LoadListProps> = ({
     typedLoadListColumns.forEach((column) => {
       if (column.name === "controlScheme") {
         column.source = selectedSchemes;
+        if (spreadsheetRef.current) {
+          spreadsheetRef.current.destroy();
+        }
+        if(jRef.current){
+
+          const instance = jspreadsheet(jRef.current, loadListOptions);
+          spreadsheetRef.current = instance;
+        }
       }
     });
   };
@@ -1144,6 +1121,14 @@ const LoadList: React.FC<LoadListProps> = ({
     typedLoadListColumns.forEach((column) => {
       if (column.name === "lbpsType") {
         column.source = selectedSchemes;
+        if (spreadsheetRef.current) {
+          spreadsheetRef.current.destroy();
+        }
+        if(jRef.current){
+
+          const instance = jspreadsheet(jRef.current, loadListOptions);
+          spreadsheetRef.current = instance;
+        }
       }
     });
   };
@@ -1403,7 +1388,7 @@ const LoadList: React.FC<LoadListProps> = ({
               motor_rated_current: row[41],
             };
           }
-          if (projectDivision === WWS_IPG || projectDivision === WWS_SPG) {
+          if (projectDivision === WWS_IPG || projectDivision === WWS_SPG || projectDivision === WWS_SERVICES) {
             return {
               tag_number: row[0],
               service_description: row[1],
@@ -2162,6 +2147,7 @@ const LoadList: React.FC<LoadListProps> = ({
             onClose={() => setIsLPBSModalOpen(false)}
             selectedLpbsSchemes={getSelectedLpbsSchemes()}
             onConfigurationComplete={handleLpbsComplete}
+            division={projectDivision}
           />
         </Suspense>
       )}

@@ -15,10 +15,8 @@ import {
   columnsForWwsSPG,
   controlSchemeColumnsForHeating,
   getEnviroColumns,
-  getEnviroSchemesData,
   getIPGColumns,
   getIPGSchemesData,
-  WWS_SPG_DATA,
 } from "@/app/Data";
 import { ValidColumnType } from "../../types";
 import { useLoading } from "@/hooks/useLoading";
@@ -46,6 +44,97 @@ interface ControlSchemeConfiguratorProps {
   division: string;
 }
 const MemoizedTableFilter = memo(TableFilter);
+export const getSortedControlSchemes = (data: any, division: string) => {
+  if (division === ENVIRO) {
+    const schemes = data?.map((scheme: any) => [
+      false,
+      scheme.scheme,
+      scheme.type,
+      scheme.starter,
+      scheme.di,
+      scheme.do,
+      scheme.ai,
+      scheme.ao,
+      scheme.mccb,
+      scheme.mpcb,
+      scheme.ammeter,
+      scheme.current_transducer,
+      scheme.olr,
+      scheme.rating,
+      scheme.lpbs,
+      scheme.space_heater,
+      scheme.eocr_eolr,
+      scheme.sfu,
+      scheme.hrc,
+      scheme.direct_connected_ammeter_3_nos,
+    ]);
+    const sortedData = schemes?.sort((a: any, b: any) => {
+      // Extract numbers after 'D' from the second element of each subarray
+      const numA = parseInt(a[1].split("-")[0].substring(1));
+      const numB = parseInt(b[1].split("-")[0].substring(1));
+
+      // Sort in ascending order (a - b)
+      return numA - numB;
+    });
+    console.log(sortedData);
+    return schemes;
+  }
+  if (division === WWS_IPG) {
+    const schemes = data?.map((scheme: any) => [
+      false,
+      scheme.scheme,
+      scheme.type,
+      scheme.starter,
+      scheme.di,
+      scheme.do,
+      scheme.ai,
+      scheme.ao,
+      scheme.mccb,
+      scheme.mpcb,
+      scheme.ammeter,
+      scheme.current_transducer,
+      scheme.olr,
+      scheme.rating,
+      scheme.lpbs,
+      scheme.space_heater,
+      scheme.eocr_eolr,
+      scheme.sfu,
+      scheme.hrc,
+      scheme.direct_connected_ammeter_3_nos,
+    ]);
+    // const sortedData = schemes?.sort((a: any, b: any) => {
+    //   // Extract numbers after 'D' from the second element of each subarray
+    //   const numA = parseInt(a[1].split("-")[0].substring(1));
+    //   const numB = parseInt(b[1].split("-")[0].substring(1));
+
+    //   // Sort in ascending order (a - b)
+    //   return numA - numB;
+    // });
+    // console.log(sortedData);
+    return schemes;
+  }
+  if (division === WWS_SPG || division === WWS_SERVICES) {
+    const schemes = data?.map((scheme: any) => [
+      false,
+      scheme.scheme,
+      scheme.starter_type,
+      scheme.sub_type_filter,
+      scheme.description,
+      scheme.type,
+      scheme.selector_switch,
+      scheme.lbps,
+      scheme.indication,
+      scheme.di,
+      scheme.do,
+      scheme.ao,
+      scheme.ai,
+      scheme.plc_feedback,
+      scheme.plc_dcs_cmd,
+    ]);
+
+    return schemes;
+  }
+};
 
 const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
   React.memo(
@@ -73,7 +162,6 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
       const { setLoading } = useLoading();
 
       const schemeIndex = division === HEATING ? 2 : 1;
-      const options = useMemo(() => ["VFD", "DOL", "SD"], []);
 
       const getColumnsForDivision = useCallback(() => {
         switch (division) {
@@ -130,97 +218,6 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
         }
         console.log("set selected schemes");
       }, [isOpen, selectedControlSchemes, controlSchemes, schemeIndex]);
-      const getSortedControlSchemes = (data: any) => {
-        if (division === ENVIRO) {
-          const schemes = data?.map((scheme: any) => [
-            false,
-            scheme.scheme,
-            scheme.type,
-            scheme.starter,
-            scheme.di,
-            scheme.do,
-            scheme.ai,
-            scheme.ao,
-            scheme.mccb,
-            scheme.mpcb,
-            scheme.ammeter,
-            scheme.current_transducer,
-            scheme.olr,
-            scheme.rating,
-            scheme.lpbs,
-            scheme.space_heater,
-            scheme.eocr_eolr,
-            scheme.sfu,
-            scheme.hrc,
-            scheme.direct_connected_ammeter_3_nos,
-          ]);
-          const sortedData = schemes?.sort((a: any, b: any) => {
-            // Extract numbers after 'D' from the second element of each subarray
-            const numA = parseInt(a[1].split("-")[0].substring(1));
-            const numB = parseInt(b[1].split("-")[0].substring(1));
-
-            // Sort in ascending order (a - b)
-            return numA - numB;
-          });
-          console.log(sortedData);
-          return schemes;
-        }
-        if (division === WWS_IPG) {
-          const schemes = data?.map((scheme: any) => [
-            false,
-            scheme.scheme,
-            scheme.type,
-            scheme.starter,
-            scheme.di,
-            scheme.do,
-            scheme.ai,
-            scheme.ao,
-            scheme.mccb,
-            scheme.mpcb,
-            scheme.ammeter,
-            scheme.current_transducer,
-            scheme.olr,
-            scheme.rating,
-            scheme.lpbs,
-            scheme.space_heater,
-            scheme.eocr_eolr,
-            scheme.sfu,
-            scheme.hrc,
-            scheme.direct_connected_ammeter_3_nos,
-          ]);
-          // const sortedData = schemes?.sort((a: any, b: any) => {
-          //   // Extract numbers after 'D' from the second element of each subarray
-          //   const numA = parseInt(a[1].split("-")[0].substring(1));
-          //   const numB = parseInt(b[1].split("-")[0].substring(1));
-
-          //   // Sort in ascending order (a - b)
-          //   return numA - numB;
-          // });
-          // console.log(sortedData);
-          return schemes;
-        }
-        if (division === WWS_SPG || division === WWS_SERVICES) {
-          const schemes = data?.map((scheme: any) => [
-            false,
-            scheme.scheme,
-            scheme.starter_type,
-            scheme.sub_type_filter,
-            scheme.description,
-            scheme.type,
-            scheme.selector_switch,
-            scheme.lbps,
-            scheme.indication,
-            scheme.di,
-            scheme.do,
-            scheme.ao,
-            scheme.ai,
-            scheme.plc_feedback,
-            scheme.plc_dcs_cmd,
-          ]);
-
-          return schemes;
-        }
-      };
 
       // Fetch control schemes
       useEffect(() => {
@@ -233,9 +230,9 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             let sortedSchemes;
             console.log(res, "control schemes data");
             if (division === WWS_SERVICES || division === WWS_SPG) {
-              sortedSchemes = getSortedControlSchemes(res);
+              sortedSchemes = getSortedControlSchemes(res, division);
             } else if (division === ENVIRO) {
-              sortedSchemes = getSortedControlSchemes(res);
+              sortedSchemes = getSortedControlSchemes(res, division);
             } else if (division === WWS_IPG) {
               sortedSchemes = getIPGSchemesData();
             } else if (division === HEATING) {
@@ -283,7 +280,6 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             const selected: string[] = Array.from(
               new Set(selectedControlSchemes)
             );
-            console.log(selected);
             const temp = sortedSchemes.map((scheme: string[]) => {
               if (selected.includes(scheme[schemeIndex])) {
                 return [true, ...scheme.slice(1)];
@@ -340,6 +336,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           tableWidth: "100%",
           tableHeight: "500px",
           freezeColumns: 4,
+
           rowResize: true,
         });
 
@@ -351,6 +348,55 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           }
         };
       }, [isOpen, controlSchemes, typedControlSchemeColumns]);
+      const controlSchemeOptions: any = useMemo(
+        () => ({
+          data: controlSchemesSelected,
+          license: "39130-64ebc-bd98e-26bc4",
+          columns: typedControlSchemeColumns.map((column) => ({
+            ...column,
+            // readOnly: true,
+          })),
+          columnSorting: true,
+          columnDrag: true,
+          columnResize: true,
+          tableOverflow: true,
+          lazyLoading: true,
+          loadingSpin: true,
+          tableWidth: "100%",
+          tableHeight: "250px",
+          freezeColumns: 4,
+          rowResize: true,
+          onchange: (
+            instance: any,
+            cell: any,
+            x: string,
+            y: any,
+            value: boolean
+          ) => {
+            console.log(typeof y);
+
+            if (x === "0") {
+              // Check if change is in the checkbox column
+              const rowIndex = y;
+              if (value === false) {
+                // console.log(cell, x, y, value);
+
+                // const data = selectedSchemeInstance?.getData();
+                // console.log(controlSchemesSelected);
+                // console.log(selectedControlSchemes);
+                // console.log(data);
+                // selectedSchemeInstance?.setData([])
+
+                // Remove the unchecked row from controlSchemesSelected
+                // setControlSchemesSelected(prev =>
+                //   prev.filter((el:any) => el[0] === true)
+                // );
+              }
+            }
+          },
+        }),
+        [controlSchemesSelected, typedControlSchemeColumns]
+      );
 
       // Initialize selected schemes spreadsheet
       useEffect(() => {
@@ -364,23 +410,10 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
           selectedSchemeInstance.destroy();
         }
 
-        const instance = jspreadsheet(controlSchemeSelectedSheetRef.current, {
-          data: controlSchemesSelected,
-          columns: typedControlSchemeColumns.map((column) => ({
-            ...column,
-            readOnly: true,
-          })),
-          columnSorting: true,
-          columnDrag: true,
-          columnResize: true,
-          tableOverflow: true,
-          lazyLoading: true,
-          loadingSpin: true,
-          tableWidth: "100%",
-          tableHeight: "250px",
-          freezeColumns: 4,
-          rowResize: true,
-        });
+        const instance = jspreadsheet(
+          controlSchemeSelectedSheetRef.current,
+          controlSchemeOptions
+        );
 
         setSelectedSchemeInstance(instance);
 
@@ -389,7 +422,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             instance.destroy();
           }
         };
-      }, [controlSchemesSelected]); // Removed dependencies that could trigger unwanted rerenders
+      }, [controlSchemesSelected, typedControlSchemeColumns]); // Removed dependencies that could trigger unwanted rerenders
 
       const handleAdd = useCallback(() => {
         if (!controlSchemeInstance) return;
@@ -521,7 +554,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             placeholder: "Search by Starter Type",
           });
         }
-        if (division === WWS_SPG) {
+        if (division === WWS_SPG || division === WWS_SERVICES) {
           config.push(
             {
               key: "starter_type",
@@ -562,9 +595,11 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
       };
 
       const handleConfirm = useCallback(() => {
-        const selectedSchemes = controlSchemesSelected.map((item) =>
-          division === HEATING ? item[2] : item[1]
-        );
+        console.log(controlSchemesSelected);
+
+        const selectedSchemes = controlSchemesSelected
+          .filter((item: any) => item[0] === true)
+          .map((item) => (division === HEATING ? item[2] : item[1]));
         if (division === HEATING) {
           const selectedSchemesWithLpbs = controlSchemesSelected.map((item) => {
             return { control_scheme: item[2], lpbs_type: item[6] };
@@ -635,21 +670,7 @@ const ControlSchemeConfigurator: React.FC<ControlSchemeConfiguratorProps> =
             <h2 className="mb-4 text-2xl font-bold">
               Control Scheme Configurator
             </h2>
-            <div className="w-1/4 py-1">
-              {/* {(division === ENVIRO || division === WWS_IPG) && (
-                <select
-                  value={selectedFilter}
-                  onChange={handleFilterChange}
-                  className="rounded border p-2"
-                >
-                  {options.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              )} */}
-            </div>
+            <div className="w-1/4 py-1"></div>
             <MemoizedTableFilter
               filters={filterConfig()}
               onFilter={handleFilter}

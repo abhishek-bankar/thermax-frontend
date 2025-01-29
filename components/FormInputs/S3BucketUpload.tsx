@@ -27,7 +27,7 @@ const S3BucketUpload = ({
       formData.append("file", file as unknown as Blob); // Convert to Blob
       await uploadBucketObject(folderPath, formData, file.name);
       message.success(`${file.name} uploaded successfully`);
-      onUploadSuccess(folderPath + file.name);
+      onUploadSuccess(folderPath + "/" +  file.name);
     } catch (error) {
       // console.log("Upload failed:", error);
       message.error(`Failed to upload ${fileList[0]?.name}. ${error}`);

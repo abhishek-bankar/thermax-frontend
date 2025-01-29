@@ -16,6 +16,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { mutate } from "swr";
 import * as zod from "zod";
 import { uploadFile } from "@/actions/file-upload";
+import { sendMail } from "@/actions/mail";
 
 export default function ResubmitModel({
   open,
@@ -47,10 +48,24 @@ export default function ResubmitModel({
   const onSubmit: SubmitHandler<any> = async (data) => {
     setLoading(true);
     try {
-      const revisionData = await getData(
+      let revisionData = await getData(
         `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectData.name}"], ["status", "=", "${DB_REVISION_STATUS.Submitted}"]]&fields=["*"]`
       );
-      const revision_id = revisionData[0].name;
+      console.log(revisionData.length);
+      if (revisionData.length === 0) {
+        console.log(revisionData);
+        revisionData = await getData(
+          `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectData.name}"], ["status", "=", "${DB_REVISION_STATUS.ResubmittedAgain}"]]&fields=["*"]`
+        );
+      }
+      console.log(revisionData);
+
+      const revision_id = revisionData[0]?.name;
+      if (!revision_id) {
+        setLoading(false);
+
+        return false;
+      }
       await updateData(
         `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
         false,
@@ -67,8 +82,30 @@ export default function ResubmitModel({
         attachment_url = fileUploadResponse.file_url;
       }
 
-      await createData(REVIEW_RESUBMISSION_EMAIL_API, false, {
-        approver_email: projectData?.approver,
+      // await createData(REVIEW_RESUBMISSION_EMAIL_API, false, {
+      //   approver_email: projectData?.approver,
+      //   project_owner_email: projectData?.owner,
+      //   project_oc_number: projectData?.project_oc_number,
+      //   project_name: projectData?.project_name,
+      //   feedback_description: data.feedback_description,
+      //   subject: `Design Basis Approval - EnIMAX - ${projectData?.project_oc_number}`,
+      //   attachments: [{ file_url: attachment_url }],
+      // });
+      console.log(
+        {
+          recipient_email: projectData?.approver,
+          project_owner_email: projectData?.owner,
+          project_oc_number: projectData?.project_oc_number,
+          project_name: projectData?.project_name,
+          feedback_description: data.feedback_description,
+          subject: `Design Basis Approval - EnIMAX - ${projectData?.project_oc_number}`,
+          attachments: [{ file_url: attachment_url }],
+        },
+        "payload for email"
+      );
+
+      await sendMail("resubmit_for_review", {
+        recipient_email: projectData?.approver,
         project_owner_email: projectData?.owner,
         project_oc_number: projectData?.project_oc_number,
         project_name: projectData?.project_name,

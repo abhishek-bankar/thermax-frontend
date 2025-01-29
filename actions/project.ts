@@ -100,6 +100,7 @@ import {
   deleteStaticDocumentList,
 } from "./project/delete";
 import { copyDesignBasisRevision } from "./design-basis_revision";
+import { sendMail } from "./mail";
 
 export const createThermaxProject = async (projectData: any, userInfo: any) => {
   try {
@@ -112,7 +113,7 @@ export const createThermaxProject = async (projectData: any, userInfo: any) => {
     await createStaticDocumentList({ project_id });
     // Create Load List Revisions
     await createLoadListRevisions({ project_id });
-    // Create Cable Tray Revisions 
+    // Create Cable Tray Revisions
     await createCableTrayRevisions({ project_id });
     // Create Cable Schedule Revisions
     await createCableScheduleRevisions({ project_id });
@@ -139,9 +140,26 @@ export const createThermaxProject = async (projectData: any, userInfo: any) => {
     await createCableTrayLayout({ revision_id: db_revision_id });
     await createLayoutEarthing({ revision_id: db_revision_id });
 
-    await createData(APPROVER_EMAIL_NOTIFICATION_API, false, {
+    // await createData(APPROVER_EMAIL_NOTIFICATION_API, false, {
+    //   approvar_email: projectData?.approver,
+    //   creator_email: userInfo?.email,
+    //   project_oc_number: projectData.project_oc_number,
+    //   project_name: projectData.project_name,
+    //   sent_by: `${userInfo?.first_name} ${userInfo?.last_name}`,
+    //   subject: "Approver - EnIMAX",
+    // });
+    console.log({
       approvar_email: projectData?.approver,
       creator_email: userInfo?.email,
+      project_oc_number: projectData.project_oc_number,
+      project_name: projectData.project_name,
+      sent_by: `${userInfo?.first_name} ${userInfo?.last_name}`,
+      subject: "Approver - EnIMAX",
+    },"payload for email");
+    
+    await sendMail("approver_email_notification", {
+      recipient_email: projectData?.approver,
+      cc_email: userInfo?.email,
       project_oc_number: projectData.project_oc_number,
       project_name: projectData.project_name,
       sent_by: `${userInfo?.first_name} ${userInfo?.last_name}`,
@@ -199,9 +217,17 @@ export const copyThermaxProject = async (
       ""
     );
 
-    await createData(APPROVER_EMAIL_NOTIFICATION_API, false, {
-      approvar_email: projectData?.approver,
-      creator_email: userInfo?.email,
+    // await createData(APPROVER_EMAIL_NOTIFICATION_API, false, {
+    //   approvar_email: projectData?.approver,
+    //   creator_email: userInfo?.email,
+    //   project_oc_number: projectData.project_oc_number,
+    //   project_name: projectData.project_name,
+    //   sent_by: `${userInfo?.first_name} ${userInfo?.last_name}`,
+    //   subject: "Approver - EnIMAX",
+    // });
+    await sendMail("approver_email_notification", {
+      recipient_email: projectData?.approver,
+      cc_email: userInfo?.email, //creater email
       project_oc_number: projectData.project_oc_number,
       project_name: projectData.project_name,
       sent_by: `${userInfo?.first_name} ${userInfo?.last_name}`,

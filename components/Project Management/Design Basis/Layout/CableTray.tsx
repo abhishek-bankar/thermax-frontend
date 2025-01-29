@@ -425,7 +425,7 @@ const CableTray = ({
               <CustomSingleSelect
                 control={control}
                 name="number_of_cores"
-                label="Number of Cores"
+                label="Design, Manufacturing & Testing Standard for Cable "
                 options={no_of_core_options || []}
                 size="small"
               />
@@ -433,23 +433,12 @@ const CableTray = ({
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
-                name="specific_requirement"
-                label="Specific Requirement"
-                options={specific_requirement_options || []}
+                name="number_of_cores"
+                label="Number of Cores"
+                options={no_of_core_options || []}
                 size="small"
               />
             </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="type_of_insulation"
-                label="Type of Insulation"
-                options={type_of_insulation_options || []}
-                size="small"
-              />
-            </div>
-          </div>
-          <div className="flex gap-4">
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
@@ -460,6 +449,28 @@ const CableTray = ({
                 size="small"
               />
             </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="type_of_insulation"
+                label="Cable Insulation" // type of insulation
+                options={type_of_insulation_options || []}
+                size="small"
+              />
+            </div>
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="specific_requirement"
+                label="Cable Insulation Properties" // specific requirements 
+                options={specific_requirement_options || []}
+                size="small"
+              />
+            </div>
+          </div>
+          <div className="flex gap-4">
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
@@ -725,15 +736,15 @@ const CableTray = ({
               {Boolean(
                 watch("cable_tray_moc") === "MS - Hot dipped Galvanised"
               ) && (
-                <div className="w-1/2">
-                  <CustomTextInput
-                    control={control}
-                    name="cable_tray_moc_input"
-                    label="Coating Thickness"
-                    size="small"
-                  />
-                </div>
-              )}
+                  <div className="w-1/2">
+                    <CustomTextInput
+                      control={control}
+                      name="cable_tray_moc_input"
+                      label="Coating Thickness"
+                      size="small"
+                    />
+                  </div>
+                )}
               {/* <div className="flex flex-1 items-center gap-2">
               <div className="flex items-center gap-4">
                 <h4 className="text-sm font-semibold text-slate-700">Wet Area</h4>

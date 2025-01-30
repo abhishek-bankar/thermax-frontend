@@ -119,7 +119,9 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
       commonConfigData?.ct_wiring_color || "Red, Yellow, Blue, Black",
     ct_wiring_size: commonConfigData?.ct_wiring_size || "2.5 Sq. mm",
     cable_insulation_pvc:
-      commonConfigData?.cable_insulation_pvc || "Fire Resistant",
+      commonConfigData?.cable_insulation_pvc || "PVC",
+    cable_insulation_properties:
+      commonConfigData?.cable_insulation_properties || "Fire resistant",
     air_clearance_between_phase_to_phase_bus:
       commonConfigData?.air_clearance_between_phase_to_phase_bus || "25mm",
     air_clearance_between_phase_to_neutral_bus:
@@ -137,13 +139,17 @@ const getDefaultValues = (commonConfigData: any, mainPkgData: any) => {
     common_requirement:
       commonConfigData?.common_requirement ||
       "660/1100 V Grade PVC insulated, FR/FRLS, Multistranded, Copper, Flexible cable identified with colour code",
+      power_terminal_type:
+      commonConfigData?.power_terminal_type || "Clip-On",
+      control_terminal_type:
+      commonConfigData?.control_terminal_type || "Clip-On",
     power_terminal_clipon:
-      commonConfigData?.power_terminal_clipon || "Min.4 Sq.mm Clipon Type",
+      commonConfigData?.power_terminal_clipon || "Min.4 Sq.mm",
     power_terminal_busbar_type:
       commonConfigData?.power_terminal_busbar_type ||
       "Above 4 sq.mm Busbar Type",
     control_terminal:
-      commonConfigData?.control_terminal || "Min.4 Sq.mm Clipon Type",
+      commonConfigData?.control_terminal || "Min.4 Sq.mm",
     spare_terminal: commonConfigData?.spare_terminal || "10",
     forward_push_button_start:
       commonConfigData?.forward_push_button_start || "Yellow",
@@ -1396,8 +1402,17 @@ const CommonConfiguration = ({
             <CustomSingleSelect
               control={control}
               name="cable_insulation_pvc"
-              label="Cable Insulation (PVC)"
-              options={dropdown["Cable Insulation PVC"] || []}
+              label="Wire Insulation"
+              options={dropdown["Layout Type of Insulation"] || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
+              name="cable_insulation_properties"
+              label="Wire Insulation Properties"
+              options={dropdown["Layout Specific Requirement"] || []}
               size="small"
             />
           </div>
@@ -1445,8 +1460,17 @@ const CommonConfiguration = ({
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
+              name="power_terminal_type"
+              label="Power Terminal Type"
+              options={dropdown["Power Terminal Type"] || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
               name="power_terminal_clipon"
-              label="Power Terminal Clipon"
+              label="Power Terminal Size"
               options={dropdown["Power Terminal Clipon"] || []}
               size="small"
             />
@@ -1465,8 +1489,17 @@ const CommonConfiguration = ({
           <div className="flex-1">
             <CustomSingleSelect
               control={control}
+              name="control_terminal_type"
+              label="Control Terminal Type"
+              options={dropdown["Power Terminal Type"] || []}
+              size="small"
+            />
+          </div>
+          <div className="flex-1">
+            <CustomSingleSelect
+              control={control}
               name="control_terminal"
-              label="Control Terminal"
+              label="Control Terminal Size"
               options={dropdown["Control Terminal"] || []}
               size="small"
             />

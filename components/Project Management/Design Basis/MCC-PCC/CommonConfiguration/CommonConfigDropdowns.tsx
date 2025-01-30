@@ -17,6 +17,9 @@ export default function useCommonConfigDropdowns() {
         true,
         {
           "DOL Starter": "name",
+          "Layout Type of Insulation": "name",
+          "Power Terminal Type": "name",
+          "Layout Specific Requirement": "name",
           "Star Delta Starter": "name",
           Ammeter: "name",
           "Ammeter Configuration": "name",

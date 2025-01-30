@@ -169,6 +169,10 @@ export const configItemValidationSchema = zod.object({
     required_error: "Cable Insulation PVC is required",
     message: "Cable Insulation PVC Wiring Length is required",
   }),
+  cable_insulation_properties: zod.string({
+    required_error: "Cable Insulation Properties is required",
+    message: "Cable Insulation Properties Wiring Length is required",
+  }),
   air_clearance_between_phase_to_phase_bus: zod.string({
     required_error: "Air clearance between phase to phase Bus is required",
     message: "Air clearance between phase to phase Bus is required",
@@ -198,17 +202,25 @@ export const configItemValidationSchema = zod.object({
     message: "Common Requirements is required",
   }),
   // Terminal
+  power_terminal_type: zod.string({
+    required_error: "Power Terminal Type is required",
+    message: "Power Terminal Type is required",
+  }),
+  control_terminal_type: zod.string({
+    required_error: "Control Terminal Type is required",
+    message: "Control Terminal Type is required",
+  }),
   power_terminal_clipon: zod.string({
     required_error: "Power Terminal Clipon is required",
-    message: "Spare Terminal is required",
+    message: "Power Terminal Clipon is required",
   }),
   power_terminal_busbar_type: zod.string({
     required_error: "Power Terminal Busbar Type is required",
-    message: "Spare Terminal is required",
+    message: "Power Terminal Busbar Type is required",
   }),
   control_terminal: zod.string({
     required_error: "Control Terminal is required",
-    message: "Spare Terminal is required",
+    message: "Control Terminal is required",
   }),
   spare_terminal: zod.string({
     required_error: "Spare  is required",
@@ -573,6 +585,10 @@ export const mccPanelValidationSchema = zod
     commissioning_spare: zod.string({
       required_error: "This field is required",
       message: "This field is required",
+    }),
+    panel_incomer_protection: zod.array(zod.string(),{
+      required_error: "Panel Incomer Protection is required",
+      message: "Panel Incomer Protection is required",
     }),
     two_year_operational_spare: zod.string({
       required_error: "This field is required",
@@ -949,6 +965,10 @@ export const pccPanelValidationSchema = zod.object({
   commissioning_spare: zod.string({
     required_error: "This field is required",
     message: "This field is required",
+  }),
+  panel_incomer_protection: zod.array(zod.string(),{
+    required_error: "Panel Incomer Protection is required",
+    message: "Panel Incomer Protection is required",
   }),
   two_year_operational_spare: zod.string({
     required_error: "This field is required",

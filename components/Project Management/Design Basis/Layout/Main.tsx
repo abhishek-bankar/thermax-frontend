@@ -6,7 +6,7 @@ import CableTray from "./CableTray";
 import Earthing from "./Earthing";
 
 const MainLayout = ({ revision_id }: { revision_id: string }) => {
-  const [activeKey, setActiveKey] = useState<string>("1"); // Default active tab
+  const [activeKey, setActiveKey] = useState<string>("1"); 
   const { setLoading: setModalLoading } = useLoading();
   useEffect(() => {
     setModalLoading(false);

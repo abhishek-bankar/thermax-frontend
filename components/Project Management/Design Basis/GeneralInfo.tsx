@@ -13,6 +13,7 @@ import { createData, getData, updateData } from "@/actions/crud-actions";
 import {
   BATTERY_LIMIT_API,
   DESIGN_BASIS_GENERAL_INFO_API,
+  DESIGN_BASIS_REVISION_HISTORY_API,
   MAIN_PKG_API,
   MOTOR_PARAMETER_API,
   PROJECT_API,
@@ -28,6 +29,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { mutate } from "swr";
 import { SyncOutlined } from "@ant-design/icons";
 import { convertToFrappeDatetime } from "@/utils/helpers";
+import { DB_REVISION_STATUS } from "@/configs/constants";
 
 const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
   const userInfo = useCurrentUser();
@@ -241,6 +243,14 @@ const GeneralInfo = ({ revision_id }: { revision_id: string }) => {
         }
       );
     }
+    await updateData(
+      `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
+      false,
+      {
+        status: DB_REVISION_STATUS.Unsubmitted,
+      }
+    );
+
     setSaveLoading(false);
     message.success("Design Basis General Information Saved Successfully");
     setModalLoading(true);

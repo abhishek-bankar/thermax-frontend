@@ -6,12 +6,13 @@ import * as zod from "zod";
 import { createData, getData, updateData } from "@/actions/crud-actions";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
-import { LAYOUT_EARTHING, PROJECT_API } from "@/configs/api-endpoints";
+import { DESIGN_BASIS_REVISION_HISTORY_API, LAYOUT_EARTHING, PROJECT_API } from "@/configs/api-endpoints";
 import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useEarthingDropdowns from "./EarthingDropdown";
 import { useParams, useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { convertToFrappeDatetime } from "@/utils/helpers";
+import { DB_REVISION_STATUS } from "@/configs/constants";
 
 const cableTrayValidationSchema = zod.object({
   earthing_system: zod.string({
@@ -97,7 +98,13 @@ const Earthing = ({ revision_id }: { revision_id: string }) => {
         false,
         data
       );
-
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Unsubmitted,
+        }
+      );
       message.success("Earthing Data Saved Successfully");
     } catch (error) {
       console.error("error: ", error);

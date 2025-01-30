@@ -6,6 +6,7 @@ import {
   MCC_PANEL_TYPE,
   MCCcumPCC_PANEL_TYPE,
   PCC_PANEL_TYPE,
+  TRCC_PANEL_TYPE,
 } from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 import { useLoading } from "@/hooks/useLoading";
@@ -15,6 +16,7 @@ import MCCcumPCCPanel from "./Dynamic Panels/MCCcumPCC";
 import MCCPanel from "./Dynamic Panels/MCCPanel";
 import PCCPanel from "./Dynamic Panels/PCCPanel";
 import { sortDatewise } from "@/utils/helpers";
+import TRCCPanel from "./Dynamic Panels/TRCCPanel";
 
 const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
   const [activeKey, setActiveKey] = useState<string>("1");
@@ -87,6 +89,14 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
             setActiveKey={setActiveKey}
             revision_id={revision_id}
           />
+        ),
+      });
+    } else if (panel.panel_main_type === TRCC_PANEL_TYPE) {
+      TabMCC.push({
+        label: panel?.panel_name,
+        key: String(index + 3),
+        children: (
+          <TRCCPanel revision_id={revision_id} panel_id={panel?.name} setActiveKey={setActiveKey} />
         ),
       });
     }

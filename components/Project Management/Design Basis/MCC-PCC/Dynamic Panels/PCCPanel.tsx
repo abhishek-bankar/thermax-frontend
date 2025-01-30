@@ -10,6 +10,7 @@ import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomRadioSelect from "@/components/FormInputs/CustomRadioSelect";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
 import {
+  DESIGN_BASIS_REVISION_HISTORY_API,
   PCC_PANEL,
   PROJECT_API,
   PROJECT_INFO_API,
@@ -17,7 +18,12 @@ import {
 import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useMCCPCCPanelDropdowns from "./MCCPCCPanelDropdown";
 import { pccPanelValidationSchema } from "../schemas";
-import { HEATING, WWS_SERVICES, WWS_SPG } from "@/configs/constants";
+import {
+  DB_REVISION_STATUS,
+  HEATING,
+  WWS_SERVICES,
+  WWS_SPG,
+} from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
@@ -469,6 +475,13 @@ const PCCPanel = ({
         `${PCC_PANEL}/${pccPanelData[0].name}`,
         false,
         transformedData
+      );
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Unsubmitted,
+        }
       );
       message.success("Panel Data Saved Successfully");
       const redirectToLayout = () => {

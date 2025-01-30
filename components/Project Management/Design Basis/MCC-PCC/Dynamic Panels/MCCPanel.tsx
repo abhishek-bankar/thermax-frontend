@@ -10,6 +10,7 @@ import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomRadioSelect from "@/components/FormInputs/CustomRadioSelect";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
 import {
+  DESIGN_BASIS_REVISION_HISTORY_API,
   MCC_PANEL,
   PROJECT_API,
   PROJECT_INFO_API,
@@ -17,7 +18,12 @@ import {
 import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useMCCPCCPanelDropdowns from "./MCCPCCPanelDropdown";
 import { mccPanelValidationSchema } from "../schemas";
-import { HEATING, WWS_SERVICES, WWS_SPG } from "@/configs/constants";
+import {
+  DB_REVISION_STATUS,
+  HEATING,
+  WWS_SERVICES,
+  WWS_SPG,
+} from "@/configs/constants";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams, useRouter } from "next/navigation";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
@@ -219,9 +225,11 @@ const getDefaultValues = (
 
 const MCCPanel = ({
   panel_id,
+  revision_id,
   setActiveKey,
 }: {
   panel_id: string;
+  revision_id: string;
   setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const params = useParams();
@@ -483,6 +491,13 @@ const MCCPanel = ({
         `${MCC_PANEL}/${mccPanelData[0].name}`,
         false,
         transformedData
+      );
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Unsubmitted,
+        }
       );
       message.success("Panel Data Saved Successfully");
       const redirectToLayout = () => {

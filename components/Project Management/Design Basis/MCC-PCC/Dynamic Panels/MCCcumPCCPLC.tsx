@@ -11,6 +11,7 @@ import CustomRadioSelect from "@/components/FormInputs/CustomRadioSelect";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
 import CustomTextAreaInput from "@/components/FormInputs/CustomTextArea";
 import {
+  DESIGN_BASIS_REVISION_HISTORY_API,
   MCC_PCC_PLC_PANEL_1,
   MCC_PCC_PLC_PANEL_2,
   MCC_PCC_PLC_PANEL_3,
@@ -20,7 +21,7 @@ import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import usePLCDropdowns from "./PLCDropdown";
 import { plcPanelValidationSchema } from "../schemas";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { HEATING } from "@/configs/constants";
+import { DB_REVISION_STATUS, HEATING } from "@/configs/constants";
 import {
   convertToFrappeDatetime,
   moveNAtoEnd,
@@ -289,8 +290,10 @@ Note - MFM, VFD, ACB Incomer - Address List & Parameter shall be configure by PL
 
 const MCCcumPCCPLCPanel = ({
   panel_id,
+  revision_id,
   setActiveKey,
 }: {
+  revision_id: string;
   panel_id: string;
   setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
@@ -429,6 +432,13 @@ const MCCcumPCCPLCPanel = ({
         `${MCC_PCC_PLC_PANEL_3}/${plcPanelData3[0].name}`,
         false,
         data
+      );
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Unsubmitted,
+        }
       );
       message.success("PLC Data updated successfully");
       const redirectToLayout = () => {

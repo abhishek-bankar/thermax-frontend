@@ -260,7 +260,7 @@ const design_basis_approved = (payload: any) => {
   </div>
 `;
 };
-const design_basis_approval_revoked = (payload: any) => {
+const design_basis_approval_recall = (payload: any) => {
   const {
     owner_first_name,
     owner_last_name = "",
@@ -275,12 +275,39 @@ const design_basis_approval_revoked = (payload: any) => {
         <p class="h5">
           Dear ${approvar_name},
         </p>
-        <p class="mt-3">The design basis approval request for the following project is revoked and a revised version will be submitted for your review soon.</p>
+        <p class="mt-3">The design basis approval request for the following project is recalled and a revised version will be submitted for your review soon.</p>
         <div class="border p-3 mb-4 bg-light">
           <p class="mb-1"><strong>Project OC No. :</strong> ${project_oc_number}</p>
           <p class="mb-1"><strong>Project Name:</strong> ${project_name}</p>
         </div>
         <p class="mt-4">Regards,<br />${owner_first_name} ${owner_last_name}</p>
+      </div>
+    </div>
+  </div>
+`;
+};
+const design_basis_approval_recall_approver_action = (payload: any) => {
+  const {
+    owner_first_name,
+    owner_last_name = "",
+    project_oc_number,
+    project_name,
+    approvar_name,
+  } = payload;
+  return `
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-12">
+        <p class="h5">
+          Dear ${owner_first_name} ${owner_last_name},
+        </p>
+        <p class="mt-3">I recently reviewed and approved the below project design basis. However, upon further review, I have identified some necessary changes that need to be made before final approval.
+As a result, I am reversing the approval status to allow for the required modifications. Please make the necessary updates and resubmit the document for review.</p>
+        <div class="border p-3 mb-4 bg-light">
+          <p class="mb-1"><strong>Project OC No. :</strong> ${project_oc_number}</p>
+          <p class="mb-1"><strong>Project Name:</strong> ${project_name}</p>
+        </div>
+        <p class="mt-4">Regards,<br />${approvar_name}</p>
       </div>
     </div>
   </div>
@@ -411,7 +438,7 @@ export const sendMail = async (type: string, payload: any) => {
       }),
     };
   }
-  if (type === "design_basis_approval_revoked") {
+  if (type === "design_basis_approval_recall") {
     const project_approver = await getData(
       `${USER_API}/${payload.approver_email}`
     );
@@ -420,7 +447,25 @@ export const sendMail = async (type: string, payload: any) => {
       to: payload.approver_email,
       subject: payload.subject,
       cc: payload.recipient_email,
-      html: design_basis_approval_revoked({
+      html: design_basis_approval_recall({
+        ...payload,
+        owner_first_name: User?.first_name,
+        owner_last_name: User?.last_name,
+        approvar_name:
+          project_approver?.first_name + " " + project_approver?.last_name,
+      }),
+    };
+  }
+  if (type === "design_basis_approval_recall_approver_action") {
+    const project_approver = await getData(
+      `${USER_API}/${payload.approver_email}`
+    );
+    mailOptions = {
+      from: "noreply.enimax@thermaxglobal.com",
+      to: payload.approver_email,
+      subject: payload.subject,
+      cc: payload.recipient_email,
+      html: design_basis_approval_recall_approver_action({
         ...payload,
         owner_first_name: User?.first_name,
         owner_last_name: User?.last_name,
@@ -431,8 +476,8 @@ export const sendMail = async (type: string, payload: any) => {
   }
 
   try {
-    const info = await transporter.sendMail(mailOptions); 
-    
+    const info = await transporter.sendMail(mailOptions);
+
     return { status: 200 };
   } catch (error) {
     console.log("Error sending email:", error);

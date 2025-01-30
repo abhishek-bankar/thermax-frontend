@@ -14,6 +14,7 @@ import {
   COMMON_CONFIGURATION_1,
   COMMON_CONFIGURATION_2,
   COMMON_CONFIGURATION_3,
+  DESIGN_BASIS_REVISION_HISTORY_API,
   PROJECT_API,
   PROJECT_MAIN_PKG_LIST_API,
 } from "@/configs/api-endpoints";
@@ -21,7 +22,7 @@ import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useCommonConfigDropdowns from "./CommonConfigDropdowns";
 import { configItemValidationSchema } from "../schemas";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { WWS_SERVICES, WWS_SPG } from "@/configs/constants";
+import { DB_REVISION_STATUS, WWS_SERVICES, WWS_SPG } from "@/configs/constants";
 import {
   convertToFrappeDatetime,
   moveNAtoEnd,
@@ -672,6 +673,13 @@ const CommonConfiguration = ({
         `${COMMON_CONFIGURATION_3}/${commonConfiguration3[0].name}`,
         false,
         transformedData
+      );
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Unsubmitted,
+        }
       );
       message.success("Common Configuration Saved Successfully");
       setActiveKey((prevKey: string) => (parseInt(prevKey, 10) + 1).toString());

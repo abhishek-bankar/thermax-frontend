@@ -201,7 +201,7 @@ export default function DocumentRevision() {
       setModalLoading(false);
     }
   };
-  const handleRevokeAction = async (record: any) => {
+  const handleRecallOwnerAction = async (record: any) => {
     setModalLoading(true);
     try {
       const projectApproverEmail = record.approverEmail;
@@ -213,15 +213,43 @@ export default function DocumentRevision() {
           status: DB_REVISION_STATUS.Unsubmitted,
         }
       );
-      await sendMail("design_basis_approval_revoked", {
+      await sendMail("design_basis_approval_recall", {
         recipient_email: projectOwnerEmail,
         approver_email: projectApproverEmail,
         project_oc_number: projectData?.project_oc_number,
         project_name: projectData?.project_name,
-        subject: `Design Basis Approval Revoked - EnIMAX - ${projectData?.project_oc_number}`,
+        subject: `Design Basis Approval Recall - EnIMAX - ${projectData?.project_oc_number}`,
       });
       mutate(dbRevisionHistoryUrl);
-      message.success("Action Revoked");
+      message.success("Recalled Design Basis Approval");
+    } catch (error) {
+      message.error("Error");
+      console.error(error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+  const handleRecallApproverAction = async (record: any) => {
+    setModalLoading(true);
+    try {
+      const projectApproverEmail = record.approverEmail;
+
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${record.key}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Submitted,
+        }
+      );
+      await sendMail("design_basis_approval_recall_approver_action", {
+        recipient_email: projectOwnerEmail,
+        approver_email: projectApproverEmail,
+        project_oc_number: projectData?.project_oc_number,
+        project_name: projectData?.project_name,
+        subject: `Design Basis Approval Recall - EnIMAX - ${projectData?.project_oc_number}`,
+      });
+      mutate(dbRevisionHistoryUrl);
+      message.success("Recalled Design Basis Approval");
     } catch (error) {
       message.error("Error");
       console.error(error);
@@ -383,85 +411,65 @@ export default function DocumentRevision() {
                 />
               </Tooltip>
             </div>
-            <div>
-              <Tooltip title={"Submit for Review"}>
-                <Button
-                  type="link"
-                  shape="circle"
-                  icon={
-                    <ExportOutlined
-                      style={{
-                        color:
-                          [
-                            DB_REVISION_STATUS.Released,
-                            DB_REVISION_STATUS.Submitted,
-                            DB_REVISION_STATUS.Approved,
-                          ].includes(record?.status) ||
-                          userInfo?.email !== record.owner
-                            ? "grey"
-                            : "orange",
-                      }}
-                      spin={submitIconSpin}
-                    />
-                  }
-                  onClick={async () => await handleReviewSubmission(record)}
-                  disabled={
-                    [
-                      DB_REVISION_STATUS.Released,
-                      DB_REVISION_STATUS.Submitted,
-                      DB_REVISION_STATUS.Approved,
-                      DB_REVISION_STATUS.ResubmittedAgain,
-                    ].includes(record?.status) ||
-                    userInfo?.email !== record.owner ||
-                    userDivision !== projectDivision
-                  }
-                />
-              </Tooltip>
-            </div>
-            {([ 
-              DB_REVISION_STATUS.Submitted, 
-              DB_REVISION_STATUS.ResubmittedAgain,
-            ].includes(record?.status) &&
-              userInfo?.email === record.owner &&
-              userDivision === projectDivision) && (
+            {userInfo?.email === record.owner && (
               <div>
-                <Tooltip title={"Revoke Action"}>
+                <Tooltip title={"Submit for Review"}>
                   <Button
                     type="link"
                     shape="circle"
                     icon={
-                      // <ExportOutlined
-                      //   style={{
-                      //     color:
-                      //       [
-                      //         DB_REVISION_STATUS.Released,
-                      //         DB_REVISION_STATUS.Submitted,
-                      //         DB_REVISION_STATUS.Approved,
-                      //       ].includes(record?.status) ||
-                      //       userInfo?.email !== record.owner
-                      //         ? "grey"
-                      //         : "orange",
-                      //   }}
-                      //   spin={submitIconSpin}
-                      // />
-
-                      <RollbackOutlined />
+                      <ExportOutlined
+                        style={{
+                          color:
+                            [
+                              DB_REVISION_STATUS.Released,
+                              DB_REVISION_STATUS.Submitted,
+                              DB_REVISION_STATUS.Approved,
+                            ].includes(record?.status) ||
+                            userInfo?.email !== record.owner
+                              ? "grey"
+                              : "orange",
+                        }}
+                        spin={submitIconSpin}
+                      />
                     }
-                    onClick={async () => await handleRevokeAction(record)}
-                    // disabled={
-                    // [
-                    //   DB_REVISION_STATUS.Released,
-                    //   DB_REVISION_STATUS.Submitted,
-                    //   DB_REVISION_STATUS.Approved,
-                    //   DB_REVISION_STATUS.ResubmittedAgain,
-                    // ].includes(record?.status) ||
-                    // userInfo?.email !== record.owner ||
-                    // userDivision !== projectDivision
-                    // }
+                    onClick={async () => await handleReviewSubmission(record)}
+                    disabled={
+                      [
+                        DB_REVISION_STATUS.Released,
+                        DB_REVISION_STATUS.Submitted,
+                        DB_REVISION_STATUS.Approved,
+                        DB_REVISION_STATUS.ResubmittedAgain,
+                      ].includes(record?.status) ||
+                      userInfo?.email !== record.owner ||
+                      userDivision !== projectDivision
+                    }
                   />
                 </Tooltip>
               </div>
             )}
+            {[
+              DB_REVISION_STATUS.Submitted,
+              DB_REVISION_STATUS.ResubmittedAgain,
+            ].includes(record?.status) &&
+              userInfo?.email === record.owner &&
+              userDivision === projectDivision && (
+                <div>
+                  <Tooltip title={"Recall"}>
+                    <Button
+                      type="link"
+                      shape="circle"
+                      icon={
+                     
+                        <RollbackOutlined />
+                      }
+                      onClick={async () => await handleRecallOwnerAction(record)}
+                   
+                    />
+                  </Tooltip>
+                </div>
+              )}
+         
             <div
               className={clsx(
                 projectApproverEmail !== userInfo.email && "hidden"
@@ -536,6 +544,26 @@ export default function DocumentRevision() {
                 />
               </Tooltip>
             </div>
+            {[
+              DB_REVISION_STATUS.Approved,
+            ].includes(record?.status) &&
+            projectApproverEmail === userInfo.email &&
+              userDivision === projectDivision && (
+                <div>
+                  <Tooltip title={"Recall"}>
+                    <Button
+                      type="link"
+                      shape="circle"
+                      icon={
+                     
+                        <RollbackOutlined />
+                      }
+                      onClick={async () => await handleRecallApproverAction(record)}
+                   
+                    />
+                  </Tooltip>
+                </div>
+              )}
           </div>
         );
       },

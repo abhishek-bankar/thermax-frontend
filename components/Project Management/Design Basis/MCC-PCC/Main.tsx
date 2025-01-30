@@ -58,7 +58,11 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
         label: panel?.panel_name,
         key: String(index + 3),
         children: (
-          <MCCPanel panel_id={panel?.name} setActiveKey={setActiveKey} />
+          <MCCPanel
+            panel_id={panel?.name}
+            setActiveKey={setActiveKey}
+            revision_id={revision_id}
+          />
         ),
       });
     } else if (panel.panel_main_type === PCC_PANEL_TYPE) {
@@ -78,7 +82,11 @@ const MainMCCPCC = ({ revision_id }: { revision_id: string }) => {
         label: panel?.panel_name,
         key: String(index + 3),
         children: (
-          <MCCcumPCCPanel panel_id={panel?.name} setActiveKey={setActiveKey} />
+          <MCCcumPCCPanel
+            panel_id={panel?.name}
+            setActiveKey={setActiveKey}
+            revision_id={revision_id}
+          />
         ),
       });
     }

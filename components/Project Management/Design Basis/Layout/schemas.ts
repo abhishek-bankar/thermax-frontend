@@ -5,6 +5,10 @@ export const cableTrayValidationSchema = zod.object({
     required_error: "DMT Standards is required",
     message: "DMT Standards is required",
   }),
+  cable_tray_cover_input: zod.string({
+    required_error: "Cable Tray Cover Input is required",
+    message: "Cable Tray Cover Input is required",
+  }),
   inner_sheath: zod.string({
     required_error: "Inner Sheath field is required",
     message: "Inner Sheath is required"

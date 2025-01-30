@@ -18,6 +18,7 @@ export default function useMCCPCCPanelDropdowns() {
         true,
         {
           "SD Incomer Ampere": "name",
+          "Panel Incomer Protection": "name",
           "Current Transformer Coating": "name",
           "Current Transformer Number": "name",
           "Current Transformer Configuration": "name",

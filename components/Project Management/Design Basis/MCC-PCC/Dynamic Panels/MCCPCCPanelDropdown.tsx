@@ -17,6 +17,9 @@ export default function useMCCPCCPanelDropdowns() {
         "method/pcc_panel.get_pcc_panel_dropdown",
         true,
         {
+
+          "Bushing Orientation": "name",
+          "TRCC Cable Entry": "name",
           "SD Incomer Ampere": "name",
           "Panel Incomer Protection": "name",
           "Current Transformer Coating": "name",

@@ -29,7 +29,8 @@ import {
   SLD_REVISIONS_API,
   GA_REVISIONS_API,
   PANEL_SPECS_REVISIONS_API,
-  CABLE_TRAY_REVISION_HISTORY_API, 
+  CABLE_TRAY_REVISION_HISTORY_API,
+  TRCC_PANEL, 
 } from "@/configs/api-endpoints";
 import { createData } from "../crud-actions";
 
@@ -260,6 +261,14 @@ export const createDynamicDocumentList = async (data: any) => {
 export const createMCCPanel = async (data: any) => {
   try {
     const res = await createData(MCC_PANEL, false, data);
+    return res;
+  } catch (error: any) {
+    throw error;
+  }
+};
+export const createTRCCPanel = async (data: any) => {
+  try {
+    const res = await createData(TRCC_PANEL, false, data);
     return res;
   } catch (error: any) {
     throw error;

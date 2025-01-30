@@ -1334,6 +1334,30 @@ export const pccPanelValidationSchema = zod.object({
 //   path: ["mi_digital"],
 // });
 
+export const trccPanelValidationSchema = zod.object({
+  secondary_voltage_input: zod.string({
+    required_error: "Secondary Voltage Input field is required",
+    message: "Secondary Voltage Input field is required"
+  }),
+  secondary_current_output: zod.string({
+    required_error: "Secondary Current Output field is required",
+    message: "Secondary Current Output field is required"
+  }),
+  bushing_orientation: zod.string({
+    required_error: "Bushing Orientation field is required",
+    message: "Bushing Orientation field is required"
+  }),
+  cable_entry: zod.string({
+    required_error: "TRCC Cable Entry field is required",
+    message: "TRCC Cable Entry field is required"
+  }),
+  communication_protocol_input: zod.string({
+    required_error: "Communicaiton Protocol Input field is required",
+    message: "Communicaiton Protocol Input field is required"
+  }),
+  
+})
+
 export const plcPanelValidationSchema = zod.object({
   ups_control_voltage: zod.string({
     required_error: "Control Voltage is required",

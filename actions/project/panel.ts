@@ -4,6 +4,7 @@ import {
   MCCcumPCC_PANEL_TYPE,
   PCC_PANEL_TYPE,
   SLD_REVISION_STATUS,
+  TRCC_PANEL_TYPE,
 } from "@/configs/constants";
 import {
   createDynamicDocumentList,
@@ -14,6 +15,7 @@ import {
   createPCCPanel,
   createProjectPanelData,
   createSLDRevisions,
+  createTRCCPanel,
 } from "./create";
 import {
   deleteDynamicDocumentList,
@@ -34,6 +36,7 @@ import {
   PCC_PANEL,
   PROJECT_PANEL_API,
   SLD_REVISIONS_API,
+  TRCC_PANEL,
 } from "@/configs/api-endpoints";
 
 export const createDynamicPanel = async (panelData: any) => {
@@ -55,6 +58,9 @@ export const createDynamicPanel = async (panelData: any) => {
     if (panelType === MCCcumPCC_PANEL_TYPE) {
       await createMCCPanel({ panel_id });
       await createMccCumPccPLCPanelData({ panel_id });
+    }
+    if (panelType === TRCC_PANEL_TYPE) {
+      await createTRCCPanel({ panel_id });
     }
 
     const sld_data = {
@@ -84,6 +90,13 @@ export const deleteDynamicPanel = async (panel_id: string) => {
     );
     if (Array.isArray(mccPanel) && mccPanel.length > 0) {
       await deleteData(`${MCC_PANEL}/${mccPanel?.[0]?.name}`, false);
+    }
+    // Delete TRCC Panel Data 
+    const trccPanel = await getData(
+      `${TRCC_PANEL}?filters=[["panel_id", "=", "${panel_id}"]]`
+    )
+    if (Array.isArray(trccPanel) && trccPanel.length > 0) {
+      await deleteData(`${TRCC_PANEL}/${trccPanel?.[0]?.name}`, false);
     }
     // Delete PCC Panel Data
     const pccPanel = await getData(

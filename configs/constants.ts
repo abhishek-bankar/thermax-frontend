@@ -33,6 +33,7 @@ export const S3FolderMapping = {
 export const MCC_PANEL_TYPE = "MCC";
 export const PCC_PANEL_TYPE = "PCC";
 export const MCCcumPCC_PANEL_TYPE = "MCC cum PCC";
+export const TRCC_PANEL_TYPE = "TRCC"
 
 // Role Names
 export const THERMAX_USER = "Thermax User";

@@ -30,7 +30,10 @@ import {
 } from "@/configs/api-endpoints";
 import { useLoading } from "@/hooks/useLoading";
 import { useParams, useRouter } from "next/navigation";
-import { getCableSizingCalculation } from "@/actions/electrical-load-list";
+import {
+  getCableSizingCalculation,
+  recalculateCableSize,
+} from "@/actions/electrical-load-list";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   ENVIRO,
@@ -506,9 +509,8 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     return sortedSchemes;
   };
   const handleCableScheduleSave = async () => {
-     
     const data = spreadsheetInstance?.getData();
-    
+
     const individualFeeders: any = data?.map((row: any) => {
       const division = projectDivision;
       const loadListItem = loadListData.find(
@@ -608,7 +610,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           panel_name: loadListItem?.panel,
           starter_type: "",
           tag_number: row[0],
-          service_description: row[1], 
+          service_description: row[1],
           name: row[1] + " LCS (INC/DEC)",
           voltage: "",
           kw: "",
@@ -632,7 +634,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           panel_name: loadListItem?.panel,
           starter_type: "",
           tag_number: row[0],
-          service_description: row[1], 
+          service_description: row[1],
           name: row[1] + " LCS (RPM)",
           voltage: "",
           kw: "",
@@ -951,7 +953,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           cable_od: getCableOd(row[0]),
           cable_od_heating_chart: getCableOd(row[0]),
           gland_size: getCableGlandSize(row[0]),
-          gland_size_heating_chart: getCableGlandSize(row[0])
+          gland_size_heating_chart: getCableGlandSize(row[0]),
         };
       }),
       excel_payload: { ...individualFeeders, ...groupPayload },
@@ -1047,7 +1049,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         updatedRow[21] = calculationResult.vd_start_percentage;
         updatedRow[22] = calculationResult.current_air;
         updatedRow[24] = calculationResult.final_current_carrying_capacity;
-        updatedRow[25] = calculationResult.final_current_carrying_capacity; 
+        updatedRow[25] = calculationResult.final_current_carrying_capacity;
         sizingCalcData.push({
           tag_number: calculationResult.tagNo,
           cableOd:
@@ -1068,6 +1070,93 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     setIscableSizeFetched(true);
     setLoading(false);
     message.success("Calculation Updated Successfully");
+
+    // setLoadListData(updatedLoadList)
+  };
+  const recalculateCableSizing = async () => {
+    const cableScheduleData = spreadsheetInstance?.getData();
+    // const is_cable_length_empty = cableScheduleData?.some((item: any) => {
+    //   if (item[8] === "" || item[8] === "0") {
+    //     message.error(`Please Enter Cable Length for Feeder: ${item[0]}`);
+    //     return true;
+    //   }
+    //   return false;
+    // });
+    // if (is_cable_length_empty) {
+    //   return;
+    // }
+
+    setLoading(true);
+    const cableSizeCalc = await recalculateCableSize({
+      divisionName: userInfo.division,
+      layoutCableTray: {
+        motor_voltage_drop_during_running:
+          cableTrayData?.motor_voltage_drop_during_running,
+        motor_voltage_drop_during_starting:
+          cableTrayData?.motor_voltage_drop_during_starting,
+        copper_conductor: cableTrayData?.copper_conductor,
+        aluminium_conductor: cableTrayData?.aluminium_conductor,
+      },
+      data: cableScheduleData?.map((row: any) => {
+        return {
+          tagNo: row[0],
+          kw: getStandByKw(row[2], row[3]),
+          starterType: row[5],
+          supplyVoltage: Number(row[6].split(" ")[0]),
+          motorRatedCurrent: Number(row[7]),
+          appx_length: Number(row[8]),
+          numberOfRuns: Number(row[9]),
+          numberOfCores: row[10],
+          cableMaterial: row[12],
+          runningCos: Number(row[14]),
+          startingCos: Number(row[15]),
+          deratingFactor: Number(row[23]),
+          final_cable_size: row[11],
+          cable_size_heating_chart: row[13],
+        };
+      }),
+    });
+    const sizingCalcData: any = [];
+
+    const updatedCableSchedule: any = cableScheduleData?.map((row: any) => {
+      const calculationResult = cableSizeCalc?.find(
+        (item: any) => item.tagNo === row[0]
+      );
+      if (calculationResult) {
+        const updatedRow = [...row];
+        // updatedRow[11] = calculationResult.sizes.includes("/")
+        //   ? calculationResult.sizes
+        //   : parseFloat(calculationResult.sizes).toFixed(1);
+        // updatedRow[12] = calculationResult.moc;
+        // updatedRow[13] = calculationResult.heating_chart_cable_size; //cable size as per heating value
+        // updatedRow[16] = calculationResult.dbl_r;
+        // updatedRow[17] = calculationResult.dbl_x;
+        // updatedRow[18] = calculationResult.vd_run;
+        // updatedRow[19] = calculationResult.vd_start;
+        // updatedRow[20] = calculationResult.vd_run_percentage;
+        // updatedRow[21] = calculationResult.vd_start_percentage;
+        // updatedRow[22] = calculationResult.current_air;
+        // updatedRow[24] = calculationResult.final_current_carrying_capacity;
+        updatedRow[25] = calculationResult.cable_selected_status;
+        sizingCalcData.push({
+          tag_number: calculationResult?.tagNo,
+          cableOd:
+            calculationResult.od ?? calculationResult?.heating_chart_cable_od,
+          gladSize: calculationResult?.heating_chart_cable_gland_size,
+          type: calculationResult?.cable_type,
+          cable_selected_status: calculationResult?.cable_selected_status,
+        });
+
+        return updatedRow;
+      }
+
+      return row;
+    });
+    spreadsheetInstance?.setData(updatedCableSchedule);
+    // setCableSizeCalcData(sizingCalcData);
+    // setIscableSizeFetched(true);
+    setLoading(false);
+    message.success("Recalculated Successfully");
 
     // setLoadListData(updatedLoadList)
   };
@@ -1164,6 +1253,14 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           size="small"
         >
           Get Cable Sizing
+        </Button>
+        <Button
+          type="primary"
+          onClick={recalculateCableSizing}
+          // disabled={iscableSizeFetched}
+          size="small"
+        >
+          Recalculate Cable Sizing
         </Button>
         <Button
           type="primary"

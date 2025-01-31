@@ -1,4 +1,10 @@
-import { ENVIRO, HEATING, WWS_IPG, WWS_SERVICES, WWS_SPG } from "@/configs/constants";
+import {
+  ENVIRO,
+  HEATING,
+  WWS_IPG,
+  WWS_SERVICES,
+  WWS_SPG,
+} from "@/configs/constants";
 export const getStarterList = () => {
   return [
     "DOL STARTER",
@@ -191,7 +197,7 @@ export const LoadListcolumns = (division: string) => {
     { type: "text", name: "rev", title: "REV.", width: "200" },
     {
       type: "dropdown",
-      source: ["No", "Yes","All", "As per OEM Standard"],
+      source: ["No", "Yes", "All", "As per OEM Standard"],
       name: "spaceHeater",
       title: "SPACE HEATER",
       width: "150",
@@ -212,7 +218,7 @@ export const LoadListcolumns = (division: string) => {
     },
     {
       type: "dropdown",
-      source: ["No", "Yes","All", "As per OEM Standard"],
+      source: ["No", "Yes", "All", "As per OEM Standard"],
       name: "thermistor",
       title: "THERMISTOR",
       width: "150",
@@ -412,7 +418,11 @@ export const LoadListcolumns = (division: string) => {
       width: "200",
     });
   }
-  if (division === WWS_IPG || division === WWS_SPG || division === WWS_SERVICES) {
+  if (
+    division === WWS_IPG ||
+    division === WWS_SPG ||
+    division === WWS_SERVICES
+  ) {
     columns.splice(
       11,
       0,
@@ -533,8 +543,7 @@ export const LoadListcolumns = (division: string) => {
       width: "200",
     });
   }
- 
-  
+
   return columns;
 };
 export const CableSchedulecolumns = () => {
@@ -750,7 +759,7 @@ export const CableSchedulecolumns = () => {
     {
       type: "dropdown",
       name: "cableAsPerFl",
-      source: ["Fail", "Safe"],
+      source: ["Unsafe", "Safe"],
       title: "CABLE SELECTED STATUS",
       width: "140",
     },

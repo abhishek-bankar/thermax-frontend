@@ -148,14 +148,7 @@ export const createThermaxProject = async (projectData: any, userInfo: any) => {
     //   sent_by: `${userInfo?.first_name} ${userInfo?.last_name}`,
     //   subject: "Approver - EnIMAX",
     // });
-    console.log({
-      approvar_email: projectData?.approver,
-      creator_email: userInfo?.email,
-      project_oc_number: projectData.project_oc_number,
-      project_name: projectData.project_name,
-      sent_by: `${userInfo?.first_name} ${userInfo?.last_name}`,
-      subject: "Approver - EnIMAX",
-    },"payload for email");
+ 
     
     await sendMail("approver_email_notification", {
       recipient_email: projectData?.approver,

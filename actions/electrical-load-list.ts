@@ -4,6 +4,7 @@ import {
   DB_REVISION_STATUS,
   HEATING,
   LOAD_LIST_REVISION_STATUS,
+  SLD_REVISION_STATUS,
 } from "@/configs/constants";
 import { createData, getData, updateData } from "./crud-actions";
 import {
@@ -485,7 +486,9 @@ export const getCableSizingCalculation = async (cableScheduleData: any) => {
     .sort((a: any, b: any) => a.current_air - b.current_air);
 
   const calculatedData = cableScheduleRows?.map((row: any) => {
-    let finalCable: any = {};
+    let finalCable: any = {
+      cable_selected_status: "Safe",
+    };
 
     const copperConductor = layoutCableTray.copper_conductor;
     const aluminiumConductor = layoutCableTray.aluminium_conductor;
@@ -557,6 +560,111 @@ export const getCableSizingCalculation = async (cableScheduleData: any) => {
     }
 
     return { ...finalCable };
+  });
+
+  return calculatedData;
+};
+
+export const recalculateCableSize = async (cableSizingData: any) => {
+  const division = cableSizingData.divisionName;
+  const cableScheduleRows = cableSizingData.data;
+  const layoutCableTray = cableSizingData.layoutCableTray;
+  const cableAsPerHeatingChart = await getData(
+    `${CABLE_SIZE_HEATING_API}?fields=["*"]&limit=3000`
+  );
+  const cableSizesDBData = await getData(
+    `${CABLE_SIZING_DATA_API}?fields=["*"]&limit=3000`
+  );
+  console.log("cableSizesDBData", cableSizesDBData);
+
+  const perc_voltage_drop_running = +parseFloat(
+    layoutCableTray.motor_voltage_drop_during_running
+  ).toFixed(2);
+  const perc_voltage_drop_starting = +parseFloat(
+    layoutCableTray.motor_voltage_drop_during_starting
+  ).toFixed(2);
+
+  const calculatedData = cableScheduleRows?.map((row: any) => {
+    const cableMaterial = row.cableMaterial;
+    const numberOfCores = parseFloat(row.numberOfCores.replace(/[^\d.]/g, ""));
+    const finalCableSize = row?.final_cable_size?.includes("/")
+      ? row?.final_cable_size
+      : parseFloat(row?.final_cable_size).toFixed(1);
+    const appxLength: number = +parseFloat(row.appx_length).toFixed(2);
+    const cosPhiRunning: number = row.runningCos;
+    const sinPhiRunning = +Math.sqrt(1 - cosPhiRunning ** 2).toFixed(2);
+    const cosPhiStarting: number = row.startingCos;
+    const sinPhiStarting = +Math.sqrt(1 - cosPhiStarting ** 2).toFixed(2);
+    const motorRatedCurrent: number = +parseFloat(
+      row.motorRatedCurrent
+    ).toFixed(2);
+    const supplyVoltage: number = row.supplyVoltage;
+    const numberOfRuns = parseInt(row.numberOfRuns);
+    const starterType = row.starterType;
+
+    let motorStartingCurrent = 0;
+
+    if (starterType === "DOL STARTER") {
+      motorStartingCurrent = +(motorRatedCurrent * 7.5).toFixed(2);
+    } else if (starterType === "Supply Feeder") {
+      motorStartingCurrent = motorRatedCurrent;
+    } else {
+      motorStartingCurrent = +(motorRatedCurrent * 3).toFixed(2);
+    }
+
+    const cable = cableSizesDBData.find((cbl: any) => {
+      const dbCableSize = cbl.sizes?.includes("/")
+        ? cbl.sizes
+        : parseFloat(cbl.sizes).toFixed(1);
+      if (
+        cbl.number_of_core === numberOfCores &&
+        dbCableSize === finalCableSize &&
+        cbl.moc === cableMaterial
+      ) {
+        return cbl;
+      }
+    });
+
+    if (!cable) {
+      return {
+        ...row,
+        cable_selected_status: "Not Found",
+      };
+    }
+
+    const dbl_x = +parseFloat(cable.dbl_x).toFixed(2);
+    const dbl_r = +parseFloat(cable.dbl_r).toFixed(2);
+
+    const vd_run = +(
+      (1.732 *
+        motorRatedCurrent *
+        appxLength *
+        (cosPhiRunning * dbl_r + sinPhiRunning * dbl_x)) /
+      numberOfRuns /
+      1000
+    ).toFixed(2);
+    const vd_start = +(
+      (1.732 *
+        motorStartingCurrent *
+        appxLength *
+        (cosPhiStarting * dbl_r + sinPhiStarting * dbl_x)) /
+      numberOfRuns /
+      1000
+    ).toFixed(2);
+
+    const vd_run_percentage = +((vd_run / supplyVoltage) * 100).toFixed(2);
+    const vd_start_percentage = +((vd_start / supplyVoltage) * 100).toFixed(2);
+    if (
+      vd_run_percentage <= perc_voltage_drop_running &&
+      vd_start_percentage <= perc_voltage_drop_starting
+    ) {
+      return {
+        ...row,
+        cable_selected_status: "Safe",
+      };
+    } else {
+      return { ...row, cable_selected_status: "Unsafe" };
+    }
   });
 
   return calculatedData;
@@ -840,6 +948,32 @@ export const copyRevision = async (payload: any, project_id: string) => {
       }
     } catch (error) {}
   };
+  const copy_sld_revision = async () => {
+    try {
+      const existing_revision = await getData(
+        `${SLD_REVISIONS_API}/${old_revision_id}`
+      );
+      // const latest_design_basis = await getLatestDesignBasisRevision(
+      //   project_id
+      // );
+      // const latest_cable_schedule = await getLatestCableScheduleRevision(
+      //   project_id
+      // );
+      const new_revision = {
+        panel_id: existing_revision.panel_id,
+        panel_name: existing_revision.panel_name,
+        status: SLD_REVISION_STATUS.DEFAULT,
+        clone_note,
+      };
+
+      const response = await createData(SLD_REVISIONS_API, false, new_revision);
+      if (response) {
+        await updateData(`${SLD_REVISIONS_API}/${old_revision_id}`, false, {
+          is_copied: 1,
+        });
+      }
+    } catch (error) {}
+  };
   if (module_name === "load-list") {
     copy_load_list();
   }
@@ -866,5 +1000,8 @@ export const copyRevision = async (payload: any, project_id: string) => {
   }
   if (module_name === "cable_tray") {
     copy_cable_tray();
+  }
+  if (module_name === "sld_revision") {
+    copy_sld_revision();
   }
 };

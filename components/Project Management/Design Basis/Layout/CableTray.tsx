@@ -172,7 +172,6 @@ const CableTray = ({
   const { data: cableTrayData } = useNewGetData(
     `${CABLE_TRAY_LAYOUT}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
   );
-  console.log(cableTrayData);
   const lastModified = convertToFrappeDatetime(
     new Date(cableTrayData?.[0]?.modified)
   );
@@ -253,59 +252,33 @@ const CableTray = ({
   const is_wet_area_selected_controlled = watch("is_wet_area_selected");
 
   const pct_perforated_type_width_value = watch("pct_perforated_type_width");
-  const pct_perforated_type_max_width_value = watch(
-    "pct_perforated_type_max_width"
-  );
+
   const cct_perforated_type_width_value = watch("cct_perforated_type_width");
-  const cct_perforated_type_max_width_value = watch(
-    "cct_perforated_type_max_width"
-  );
+
   const sct_perforated_type_width_value = watch("sct_perforated_type_width");
-  const sct_perforated_type_max_width_value = watch(
-    "sct_perforated_type_max_width"
-  );
 
   useEffect(() => {
     const higherPCTPerforatedTypeWidth = numericWidths.find(
       (item: any) => item > pct_perforated_type_width_value
     );
-    const higherPCTPerforatedTypeMaxWidth = numericWidths.find(
-      (item: any) => item > pct_perforated_type_max_width_value
-    );
+
     const higherCCTPerforatedTypeWidth = numericWidths.find(
       (item: any) => item > cct_perforated_type_width_value
     );
-    const higherCCTPerforatedTypeMaxWidth = numericWidths.find(
-      (item: any) => item > cct_perforated_type_max_width_value
-    );
+
     const higherSCTPerforatedTypeWidth = numericWidths.find(
       (item: any) => item > sct_perforated_type_width_value
     );
-    const higherSCTPerforatedTypeMaxWidth = numericWidths.find(
-      (item: any) => item > sct_perforated_type_max_width_value
-    );
+
     setValue("pct_ladder_type_width", higherPCTPerforatedTypeWidth?.toString());
-    setValue(
-      "pct_ladder_type_max_width",
-      higherPCTPerforatedTypeMaxWidth?.toString()
-    );
+
     setValue("cct_ladder_type_width", higherCCTPerforatedTypeWidth?.toString());
-    setValue(
-      "cct_ladder_type_max_width",
-      higherCCTPerforatedTypeMaxWidth?.toString()
-    );
+
     setValue("sct_ladder_type_width", higherSCTPerforatedTypeWidth?.toString());
-    setValue(
-      "sct_ladder_type_max_width",
-      higherSCTPerforatedTypeMaxWidth?.toString()
-    );
   }, [
     pct_perforated_type_width_value,
-    pct_perforated_type_max_width_value,
     cct_perforated_type_width_value,
-    cct_perforated_type_max_width_value,
     sct_perforated_type_width_value,
-    sct_perforated_type_max_width_value,
     numericWidths,
     setValue,
   ]);

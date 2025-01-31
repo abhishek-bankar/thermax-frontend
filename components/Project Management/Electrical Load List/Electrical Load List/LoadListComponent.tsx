@@ -1958,6 +1958,74 @@ const LoadList: React.FC<LoadListProps> = ({
       setLoading(false);
     }
   };
+  const handleGetMotorPartCode = async () => {
+    // setLoading(true);
+    try {
+      const loadList = spreadsheetRef?.current?.getData();
+      
+
+      const currentCalculations = await getCurrentCalculation({
+        divisionName: projectDivision,
+        data: loadList?.map((row: any) => {
+          return {
+            kw: getStandByKw(row[2], row[3]),
+            supplyVoltage: Number(
+              row[getColumnIndex("supply_voltage")].split(" ")[0]
+            ),
+            phase: row[getColumnIndex("phase")],
+            powerFactor: Number(row[getColumnIndex("power_factor")]),
+            motorFrameSize: "",
+            motorPartCode: "",
+            motorRatedCurrent: "",
+            tagNo: row[0],
+            starterType: row[getColumnIndex("starter_type")],
+          };
+        }),
+      });
+      let getFrameSize: any[];
+      if (projectDivision !== HEATING) {
+        getFrameSize = await getFrameSizeCalculation({
+          divisionName: projectDivision,
+          data: loadList?.map((row: any) => {
+            return {
+              kw: getStandByKw(row[2], row[3]),
+              tagNo: row[0],
+              speed: Number(row[getColumnIndex("motor_rpm")]),
+              mounting_type: row[getColumnIndex("motor_mounting_type")],
+            };
+          }),
+        });
+      }
+      const updatedLoadList: any = loadList?.map((row: any) => {
+        const calculationResult = currentCalculations?.find(
+          (item: any) => item.tagNo === row[0]
+        );
+        const frameSizeResult = getFrameSize?.find(
+          (item: any) => item.tagNo === row[0]
+        );
+        if (calculationResult) {
+          const updatedRow = [...row];
+          if (projectDivision !== HEATING) {
+            updatedRow[getColumnIndex("motor_rated_current")] =
+              calculationResult.motorRatedCurrent;
+            updatedRow[getColumnIndex("motor_frame_size")] =
+              frameSizeResult.frameSize;
+          } else {
+            updatedRow[getColumnIndex("motor_rated_current")] =
+              calculationResult.motorRatedCurrent;
+          }
+
+          return updatedRow;
+        }
+        return row;
+      });
+      spreadsheetRef?.current?.setData(updatedLoadList);
+    } catch (error) {
+    } finally {
+      // setIsCurrentFetched(true);
+      setLoading(false);
+    }
+  };
   const handleTemplateDownload = async () => {
     const base64Data: any = await downloadFrappeCloudFile(
       `${process.env.FRAPPE_BASE_URL}/files/Final_Motor_Details_Template.xlsx`
@@ -2193,6 +2261,14 @@ const LoadList: React.FC<LoadListProps> = ({
           // size="small"
         >
           Get Current
+        </Button>
+        <Button
+          type="primary"
+          onClick={handleGetMotorPartCode}
+          disabled={userDivision !== projectDivision || !isCurrentFetched}
+          // size="small"
+        >
+          Get Motor Part Code
         </Button>
         <Button
           type="primary"

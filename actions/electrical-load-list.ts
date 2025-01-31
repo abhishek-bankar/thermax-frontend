@@ -4,6 +4,7 @@ import {
   DB_REVISION_STATUS,
   HEATING,
   LOAD_LIST_REVISION_STATUS,
+  SLD_REVISION_STATUS,
 } from "@/configs/constants";
 import { createData, getData, updateData } from "./crud-actions";
 import {
@@ -840,6 +841,40 @@ export const copyRevision = async (payload: any, project_id: string) => {
       }
     } catch (error) {}
   };
+  const copy_sld_revision = async () => {
+    try {
+      const existing_revision = await getData(
+        `${SLD_REVISIONS_API}/${old_revision_id}`
+      );
+      // const latest_design_basis = await getLatestDesignBasisRevision(
+      //   project_id
+      // );
+      // const latest_cable_schedule = await getLatestCableScheduleRevision(
+      //   project_id
+      // );
+      const new_revision = {
+        panel_id: existing_revision.panel_id,
+        panel_name: existing_revision.panel_name, 
+        status: SLD_REVISION_STATUS.DEFAULT,
+        clone_note
+      };
+
+      const response = await createData(
+        SLD_REVISIONS_API,
+        false,
+        new_revision
+      );
+      if (response) {
+        await updateData(
+          `${SLD_REVISIONS_API}/${old_revision_id}`,
+          false,
+          {
+            is_copied: 1,
+          }
+        );
+      }
+    } catch (error) {}
+  };
   if (module_name === "load-list") {
     copy_load_list();
   }
@@ -866,5 +901,8 @@ export const copyRevision = async (payload: any, project_id: string) => {
   }
   if (module_name === "cable_tray") {
     copy_cable_tray();
+  }
+  if (module_name === "sld_revision") {
+    copy_sld_revision();
   }
 };

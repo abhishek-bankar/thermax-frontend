@@ -1,18 +1,27 @@
 import {
   CloudDownloadOutlined,
+  CopyTwoTone,
   FolderOpenOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
 import {
   Button,
   message,
+  Popconfirm,
   Table,
   TableColumnsType,
   Tabs,
   Tag,
   Tooltip,
 } from "antd";
-import React, { useMemo, Suspense, lazy, useState, useEffect } from "react";
+import React, {
+  useMemo,
+  Suspense,
+  lazy,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   convertToFrappeDatetime,
   getThermaxDateFormat,
@@ -20,10 +29,15 @@ import {
 } from "@/utils/helpers";
 import { SLD_REVISION_STATUS } from "@/configs/constants";
 import { updateData } from "@/actions/crud-actions";
-import { SLD_REVISIONS_API } from "@/configs/api-endpoints";
-import { getAllSldRevisions } from "@/actions/electrical-load-list"; 
+import { PROJECT_API, SLD_REVISIONS_API } from "@/configs/api-endpoints";
+import { getAllSldRevisions } from "@/actions/electrical-load-list";
 import PanelGa from "./Panel GA/PanelGa";
 import PanelSpecification from "./Panel Specification/PanelSpecification";
+import { useGetData } from "@/hooks/useCRUD";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useParams } from "next/navigation";
+import { useLoading } from "@/hooks/useLoading";
+import CopyRevision from "@/components/Modal/CopyRevision";
 
 // Lazy load tab components
 const SwitchgearSelection = lazy(
@@ -44,24 +58,39 @@ interface SLDRevision {
   name: string;
   status: string;
   is_released: boolean;
+  is_saved: boolean;
+  is_copied: boolean;
   creation: string;
 }
 
-const   PanelTab: React.FC<Props> = ({
+const PanelTab: React.FC<Props> = ({
   panelData,
   projectPanelData,
   setLastModified,
   designBasisRevisionId,
-}) => { 
- 
+}) => {
   const [activeKey, setActiveKey] = useState<string>("1");
   const [setIntervaId, setSetIntervaId] = useState<any>(null);
   const [sldRevisionsData, setSldRevisionsData] = useState<any>([]);
   const [isSLDInProcess, setIsSLDInProcess] = useState(false);
-  const getSLDRevision = async () => {
+  const { setLoading } = useLoading();
+  const params = useParams();
+  const project_id = params.project_id as string;
+  const userInfo: {
+    division: string;
+  } = useCurrentUser();
+  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
+  const [versionToCopy, setVersionToCopy] = useState(null);
+
+  const userDivision = userInfo?.division;
+  console.log(projectData, "project data");
+
+  const projectDivision = projectData?.division;
+  const getSLDRevisions = async () => {
+    setLoading(true);
     try {
       const response = await getAllSldRevisions(panelData?.panelId);
-     
+
       if (response.length) {
         const lastModified = convertToFrappeDatetime(
           new Date(response[0]?.modified)
@@ -70,10 +99,13 @@ const   PanelTab: React.FC<Props> = ({
       }
 
       setSldRevisionsData(response);
-    } catch (error) {}
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => {
-    getSLDRevision();
+    getSLDRevisions();
   }, []);
 
   const handleDownload = async (record: any) => {
@@ -87,8 +119,8 @@ const   PanelTab: React.FC<Props> = ({
         console.log(respose);
         message.success("SLD is Being Prepared Please Wait For A While");
         const interval = setInterval(async () => {
-          getSLDRevision();
-          // const revisionData:any = await getSLDRevision();
+          getSLDRevisions();
+          // const revisionData:any = await getSLDRevisions();
           // const updatedRecord = revisionData.find((r:any) => r.key === record.key); // Find the specific record by key
           // if (updatedRecord && updatedRecord.status === SLD_REVISION_STATUS.SUCCESS) {
           //   clearInterval(interval); // Stop the interval when the status is SUCCESS
@@ -112,6 +144,30 @@ const   PanelTab: React.FC<Props> = ({
       document.body.removeChild(link);
     }
   };
+  const handleClone = async (record: any) => {
+    setVersionToCopy(record);
+  };
+  const handleRelease = useCallback(async (record: any) => {
+    console.log(record);
+    setLoading(true);
+    try {
+      if (record.is_released === 0) {
+        const respose = await updateData(
+          `${SLD_REVISIONS_API}/${record?.key}`,
+          false,
+          {
+            is_released: 1,
+          }
+        );
+      }
+      message.success("Revision is Released and Locked");
+      getSLDRevisions();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   const columns: TableColumnsType = useMemo(
     () => [
       {
@@ -191,20 +247,88 @@ const   PanelTab: React.FC<Props> = ({
         ),
       },
       {
+        title: () => <div className="text-center">Create New Revision</div>,
+        dataIndex: "clone",
+        render: (_, record) => {
+          console.log(record);
+          if (record.is_copied === 1) {
+            return null;
+          }
+          console.log(record.is_released);
+          console.log(userDivision !== projectDivision);
+          console.log(!record.is_released || userDivision !== projectDivision);
+
+          return (
+            <div className="text-center">
+              <Tooltip title={"Create New Revision"}>
+                <Button
+                  type="link"
+                  shape="circle"
+                  icon={
+                    <CopyTwoTone
+                      style={{
+                        fontSize: "1rem",
+                      }}
+                    />
+                  }
+                  onClick={() => handleClone(record)}
+                  disabled={
+                    !record.is_released || userDivision !== projectDivision
+                  }
+                />
+              </Tooltip>
+            </div>
+          );
+        },
+      },
+      {
         title: () => <div className="text-center">Release</div>,
         dataIndex: "release",
-        render: () => (
+        render: (_, record) => (
+          // <div className="text-center">
+          //   <Button
+          //     type="primary"
+          //     size="small"
+          //     name="Release"
+          //     disabled={
+          //       sldRevisionsData.some(
+          //         (item: any) => item.status === "IN_PROCESS"
+          //       ) ||
+          //       record.is_released === 1 ||
+          //       userDivision !== projectDivision
+          //     }
+          //     onClick={() => handleRelease(record)}
+          //   >
+          //     Release
+          //   </Button>
+          // </div>
+
           <div className="text-center">
-            <Button
-              type="primary"
-              size="small"
-              name="Release"
-              disabled={sldRevisionsData.some(
-                (item: any) => item.status === "IN_PROCESS"
-              )}
+            <Popconfirm
+              title="Are you sure to release this revision?"
+              onConfirm={async () => handleRelease(record)}
+              okText="Yes"
+              cancelText="No"
+              placement="topRight"
+              disabled={
+                sldRevisionsData.some(
+                  (item: any) => item.status === "IN_PROCESS"
+                ) ||
+                record.is_released === 1 ||
+                userDivision !== projectDivision
+              }
             >
-              Release
-            </Button>
+              <Button
+                type="primary"
+                size="small"
+                name="Release"
+                disabled={
+                  record.is_released === 1 || userDivision !== projectDivision
+                }
+              >
+                Release
+              </Button>
+            </Popconfirm>
           </div>
         ),
       },
@@ -221,6 +345,9 @@ const   PanelTab: React.FC<Props> = ({
         documentRevision: `R${index}`,
         createdDate: item.creation,
         sld_path: item.sld_path,
+        is_released: item.is_released,
+        is_copied: item.is_copied,
+        is_saved: item.is_saved,
       })),
     [sldRevisionsData]
   );
@@ -230,7 +357,7 @@ const   PanelTab: React.FC<Props> = ({
     );
     if (in_process) {
       const interval = setInterval(async () => {
-        getSLDRevision();
+        getSLDRevisions();
       }, 30000);
       setSetIntervaId(interval);
     } else {
@@ -259,7 +386,7 @@ const   PanelTab: React.FC<Props> = ({
       <div className="text-end">
         <Button
           icon={<SyncOutlined color="#492971" />}
-          onClick={() => getSLDRevision()}
+          onClick={() => getSLDRevisions()}
         >
           Refresh
         </Button>
@@ -366,6 +493,12 @@ const   PanelTab: React.FC<Props> = ({
         style={{ fontSize: "11px !important" }}
         items={tabItems}
         destroyInactiveTabPane
+      />
+       <CopyRevision
+        version={versionToCopy}
+        setVersionToCopy={setVersionToCopy}
+        tab={"sld_revision"}
+        updateTable={async () => await getSLDRevisions()}
       />
     </div>
   );

@@ -32,6 +32,7 @@ import { useParams, useRouter } from "next/navigation";
 import { PercentageOutlined } from "@ant-design/icons";
 
 const getDefaultValues = (plcData: any) => {
+  console.log("plcData", plcData);
   const defaultValues = {
     // Supply Requirements
     ups_control_voltage:
@@ -93,6 +94,7 @@ const getDefaultValues = (plcData: any) => {
       plcData?.indicating_lamp_colour_for_ups_power_supply || "NA",
     // IO Modules
     // DI Modules
+    is_di_module_selected: plcData?.is_di_module_selected,
     di_module_channel_density:
       plcData?.di_module_channel_density || "8 Nos. Per Card",
     di_module_loop_current: plcData?.di_module_loop_current || "VTS",
@@ -103,6 +105,7 @@ const getDefaultValues = (plcData: any) => {
       plcData?.di_module_interrogation_voltage || "24 VDC",
     di_module_scan_time: plcData?.di_module_scan_time || "VTS",
     // DO Modules
+    is_do_module_selected: plcData?.is_do_module_selected,
     do_module_channel_density:
       plcData?.do_module_channel_density || "8 Nos. Per Card",
     do_module_loop_current: plcData?.do_module_loop_current || "VTS",
@@ -116,6 +119,7 @@ const getDefaultValues = (plcData: any) => {
     is_no_of_contacts_selected: plcData?.is_no_of_contacts_selected,
     no_of_contacts: plcData?.no_of_contacts || "1NO + 1NC",
     // AI Modules
+    is_ai_module_selected: plcData?.is_ai_module_selected,
     ai_module_channel_density:
       plcData?.ai_module_channel_density || "8 Nos. Per Card",
     ai_module_loop_current: plcData?.ai_module_loop_current || "VTS",
@@ -125,6 +129,7 @@ const getDefaultValues = (plcData: any) => {
     is_ai_module_hart_protocol_support_selected:
       plcData?.is_ai_module_hart_protocol_support_selected,
     // AO Modules
+    is_ao_module_selected: plcData?.is_ao_module_selected,
     ao_module_channel_density:
       plcData?.ao_module_channel_density || "8 Nos. Per Card",
     ao_module_loop_current: plcData?.ao_module_loop_current || "VTS",
@@ -135,6 +140,7 @@ const getDefaultValues = (plcData: any) => {
     is_ao_module_hart_protocol_support_selected:
       plcData?.is_ao_module_hart_protocol_support_selected,
     // RTD Modules
+    is_rtd_module_selected: plcData?.is_rtd_module_selected,
     rtd_module_channel_density:
       plcData?.rtd_module_channel_density || "8 Nos. Per Card",
     rtd_module_loop_current: plcData?.rtd_module_loop_current || "VTS",
@@ -144,6 +150,7 @@ const getDefaultValues = (plcData: any) => {
     is_rtd_module_hart_protocol_support_selected:
       plcData?.is_rtd_module_hart_protocol_support_selected,
     // Thermocouple Modules
+    is_thermocouple_module_selected: plcData?.is_thermocouple_module_selected,
     thermocouple_module_channel_density:
       plcData?.thermocouple_module_channel_density || "8 Nos. Per Card",
     thermocouple_module_loop_current:
@@ -157,6 +164,7 @@ const getDefaultValues = (plcData: any) => {
     is_thermocouple_module_hart_protocol_support_selected:
       plcData?.is_thermocouple_module_hart_protocol_support_selected,
     // Universal Modules
+    is_universal_module_selected: plcData?.is_universal_module_selected,
     universal_module_channel_density:
       plcData?.universal_module_channel_density || "8 Nos. Per Card",
     universal_module_loop_current:
@@ -373,10 +381,19 @@ const MCCcumPCCPLCPanel = ({
       tabsCount.current = localStorage.getItem("dynamic-tabs-count") ?? "0";
     }
   }, []);
-  console.log("form errors PLC", plcPanelData);
 
   const upsScope = watch("ups_scope");
   const is_electronic_hooter_selected = watch("is_electronic_hooter_selected");
+  const is_di_module_selected = watch("is_di_module_selected");
+  const is_do_module_selected = watch("is_do_module_selected");
+  const is_ai_module_selected = watch("is_ai_module_selected");
+  const is_ao_module_selected = watch("is_ao_module_selected");
+  const is_rtd_module_selected = watch("is_rtd_module_selected");
+  const is_thermocouple_module_selected = watch(
+    "is_thermocouple_module_selected"
+  );
+  const is_universal_module_selected = watch("is_universal_module_selected");
+
   const noOfContacts = [
     {
       name: "1NO + 1NC",
@@ -831,7 +848,7 @@ const MCCcumPCCPLCPanel = ({
                     options={
                       moveNAtoEnd(electronic_hooter_acknowledge_options) || []
                     }
-                    disabled={watch("is_electronic_hooter_selected") === 0}
+                    disabled={is_electronic_hooter_selected === 0}
                     size="small"
                   />
                 </div>
@@ -881,7 +898,24 @@ const MCCcumPCCPLCPanel = ({
           <span className="font-bold text-slate-700">IO Modules</span>
         </Divider>
         <Divider orientation="left" orientationMargin={0}>
-          <span className="text-sm font-bold text-blue-500">DI Modules</span>
+          <div className="flex gap-4 items-center">
+            <div>
+              <span className="text-sm font-bold text-blue-500">
+                DI Modules
+              </span>
+            </div>
+            <div className="flex-1">
+              <CustomRadioSelect
+                control={control}
+                name="is_di_module_selected"
+                label=""
+                options={[
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
+                ]}
+              />
+            </div>
+          </div>
         </Divider>
         <div className="flex flex-col gap-4">
           <div className="flex gap-4">
@@ -892,6 +926,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Channel Density"
                 size="small"
                 options={sortAlphaNumericArray(channel_density_options) || []}
+                disabled={is_di_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -900,6 +935,7 @@ const MCCcumPCCPLCPanel = ({
                 name="di_module_loop_current"
                 label="Loop Current"
                 size="small"
+                disabled={is_di_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -909,6 +945,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Isolation"
                 size="small"
                 options={moveNAtoEnd(isolation_dropdown_options) || []}
+                disabled={is_di_module_selected === 0}
               />
             </div>
           </div>
@@ -919,6 +956,7 @@ const MCCcumPCCPLCPanel = ({
                 name="di_module_input_type"
                 label="Type of Input"
                 size="small"
+                disabled={is_di_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -928,6 +966,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Interrogation Voltage"
                 size="small"
                 options={di_module_interrogation_voltage_options || []}
+                disabled={is_di_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -936,16 +975,33 @@ const MCCcumPCCPLCPanel = ({
                 name="di_module_scan_time"
                 label="Scan Time"
                 size="small"
+                disabled={is_di_module_selected === 0}
               />
             </div>
           </div>
         </div>
 
         <Divider orientation="left" orientationMargin={0}>
-          <span className="text-sm font-bold text-blue-500">DO Modules</span>
+          <div className="flex gap-4 items-center">
+            <div>
+              <span className="text-sm font-bold text-blue-500">
+                DO Modules
+              </span>
+            </div>
+            <div className="flex-1">
+              <CustomRadioSelect
+                control={control}
+                name="is_do_module_selected"
+                label=""
+                options={[
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
+                ]}
+              />
+            </div>
+          </div>
         </Divider>
         <div className="flex flex-col gap-4">
-          {" "}
           <div className="flex gap-4">
             <div className="flex-1">
               <CustomSingleSelect
@@ -954,6 +1010,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Channel Density"
                 size="small"
                 options={channel_density_options || []}
+                disabled={is_do_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -962,6 +1019,7 @@ const MCCcumPCCPLCPanel = ({
                 name="do_module_loop_current"
                 label="Loop Current"
                 size="small"
+                disabled={is_do_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -971,6 +1029,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Isolation"
                 size="small"
                 options={moveNAtoEnd(isolation_dropdown_options) || []}
+                disabled={is_do_module_selected === 0}
               />
             </div>
           </div>
@@ -981,6 +1040,7 @@ const MCCcumPCCPLCPanel = ({
                 name="do_module_output_type"
                 label="Type of Output"
                 size="small"
+                disabled={is_do_module_selected === 0}
               />
             </div>
             <div className="flex-1" />
@@ -1039,7 +1099,24 @@ const MCCcumPCCPLCPanel = ({
         </div>
 
         <Divider orientation="left" orientationMargin={0}>
-          <span className="text-sm font-bold text-blue-500">AI Modules</span>
+          <div className="flex gap-4 items-center">
+            <div>
+              <span className="text-sm font-bold text-blue-500">
+                AI Modules
+              </span>
+            </div>
+            <div className="flex-1">
+              <CustomRadioSelect
+                control={control}
+                name="is_ai_module_selected"
+                label=""
+                options={[
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
+                ]}
+              />
+            </div>
+          </div>
         </Divider>
         <div className="flex flex-col gap-4">
           <div className="flex gap-4">
@@ -1050,6 +1127,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Channel Density"
                 size="small"
                 options={channel_density_options || []}
+                disabled={is_ai_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1058,6 +1136,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ai_module_loop_current"
                 label="Loop Current"
                 size="small"
+                disabled={is_ai_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1067,6 +1146,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Isolation"
                 size="small"
                 options={moveNAtoEnd(isolation_dropdown_options) || []}
+                disabled={is_ai_module_selected === 0}
               />
             </div>
           </div>
@@ -1077,6 +1157,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ai_module_input_type"
                 label="Type of Input"
                 size="small"
+                disabled={is_ai_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1085,6 +1166,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ai_module_scan_time"
                 label="Scan Time"
                 size="small"
+                disabled={is_ai_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1096,13 +1178,31 @@ const MCCcumPCCPLCPanel = ({
                   { label: "Yes", value: 1 },
                   { label: "No", value: 0 },
                 ]}
+                disabled={is_ai_module_selected === 0}
               />
             </div>
           </div>
         </div>
 
         <Divider orientation="left" orientationMargin={0}>
-          <span className="text-sm font-bold text-blue-500">AO Modules</span>
+          <div className="flex gap-4 items-center">
+            <div>
+              <span className="text-sm font-bold text-blue-500">
+                AO Modules
+              </span>
+            </div>
+            <div className="flex-1">
+              <CustomRadioSelect
+                control={control}
+                name="is_ao_module_selected"
+                label=""
+                options={[
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
+                ]}
+              />
+            </div>
+          </div>
         </Divider>
         <div className="flex flex-col gap-4">
           <div className="flex flex-1 gap-4">
@@ -1113,6 +1213,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Channel Density"
                 size="small"
                 options={channel_density_options || []}
+                disabled={is_ao_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1121,6 +1222,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ao_module_loop_current"
                 label="Loop Current"
                 size="small"
+                disabled={is_ao_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1130,6 +1232,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Isolation"
                 size="small"
                 options={moveNAtoEnd(isolation_dropdown_options) || []}
+                disabled={is_ao_module_selected === 0}
               />
             </div>
           </div>
@@ -1140,7 +1243,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ao_module_output_type"
                 label="Type of Output"
                 size="small"
-                // options={ao_module_output_type_options || []}
+                disabled={is_ao_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1149,6 +1252,7 @@ const MCCcumPCCPLCPanel = ({
                 name="ao_module_scan_time"
                 label="Scan Time"
                 size="small"
+                disabled={is_ao_module_selected === 0}
               />
             </div>
             <div className="flex flex-1 items-center gap-4">
@@ -1161,6 +1265,7 @@ const MCCcumPCCPLCPanel = ({
                     { label: "Yes", value: 1 },
                     { label: "No", value: 0 },
                   ]}
+                  disabled={is_ao_module_selected === 0}
                 />
               </div>
             </div>
@@ -1168,7 +1273,24 @@ const MCCcumPCCPLCPanel = ({
         </div>
 
         <Divider orientation="left" orientationMargin={0}>
-          <span className="text-sm font-bold text-blue-500">RTD Module</span>
+          <div className="flex gap-4 items-center">
+            <div>
+              <span className="text-sm font-bold text-blue-500">
+                RTD Modules
+              </span>
+            </div>
+            <div className="flex-1">
+              <CustomRadioSelect
+                control={control}
+                name="is_rtd_module_selected"
+                label=""
+                options={[
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
+                ]}
+              />
+            </div>
+          </div>
         </Divider>
         <div className="flex flex-col gap-4">
           <div className="flex gap-4">
@@ -1179,6 +1301,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Channel Density"
                 size="small"
                 options={channel_density_options || []}
+                disabled={is_rtd_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1187,6 +1310,7 @@ const MCCcumPCCPLCPanel = ({
                 name="rtd_module_loop_current"
                 label="Loop Current"
                 size="small"
+                disabled={is_rtd_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1196,6 +1320,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Isolation"
                 size="small"
                 options={moveNAtoEnd(isolation_dropdown_options) || []}
+                disabled={is_rtd_module_selected === 0}
               />
             </div>
           </div>
@@ -1206,6 +1331,7 @@ const MCCcumPCCPLCPanel = ({
                 name="rtd_module_input_type"
                 label="Type of Input"
                 size="small"
+                disabled={is_rtd_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1214,6 +1340,7 @@ const MCCcumPCCPLCPanel = ({
                 name="rtd_module_scan_time"
                 label="Scan Time"
                 size="small"
+                disabled={is_rtd_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1225,15 +1352,31 @@ const MCCcumPCCPLCPanel = ({
                   { label: "Yes", value: 1 },
                   { label: "No", value: 0 },
                 ]}
+                disabled={is_rtd_module_selected === 0}
               />
             </div>
           </div>
         </div>
 
         <Divider orientation="left" orientationMargin={0}>
-          <span className="text-sm font-bold text-blue-500">
-            Thermocouple Modules
-          </span>
+          <div className="flex gap-4 items-center">
+            <div>
+              <span className="text-sm font-bold text-blue-500">
+                Thermocouple Modules
+              </span>
+            </div>
+            <div className="flex-1">
+              <CustomRadioSelect
+                control={control}
+                name="is_thermocouple_module_selected"
+                label=""
+                options={[
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
+                ]}
+              />
+            </div>
+          </div>
         </Divider>
         <div className="flex flex-col gap-4">
           <div className="flex gap-4">
@@ -1244,6 +1387,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Channel Density"
                 size="small"
                 options={channel_density_options || []}
+                disabled={is_thermocouple_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1252,6 +1396,7 @@ const MCCcumPCCPLCPanel = ({
                 name="thermocouple_module_loop_current"
                 label="Loop Current"
                 size="small"
+                disabled={is_thermocouple_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1261,6 +1406,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Isolation"
                 size="small"
                 options={moveNAtoEnd(isolation_dropdown_options) || []}
+                disabled={is_thermocouple_module_selected === 0}
               />
             </div>
           </div>
@@ -1271,6 +1417,7 @@ const MCCcumPCCPLCPanel = ({
                 name="thermocouple_module_input_type"
                 label="Type of Input"
                 size="small"
+                disabled={is_thermocouple_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1279,6 +1426,7 @@ const MCCcumPCCPLCPanel = ({
                 name="thermocouple_module_scan_time"
                 label="Scan Time"
                 size="small"
+                disabled={is_thermocouple_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1290,15 +1438,31 @@ const MCCcumPCCPLCPanel = ({
                   { label: "Yes", value: 1 },
                   { label: "No", value: 0 },
                 ]}
+                disabled={is_thermocouple_module_selected === 0}
               />
             </div>
           </div>
         </div>
 
         <Divider orientation="left" orientationMargin={0}>
-          <span className="text-sm font-bold text-blue-500">
-            Universal Modules
-          </span>
+          <div className="flex gap-4 items-center">
+            <div>
+              <span className="text-sm font-bold text-blue-500">
+                Universal Modules
+              </span>
+            </div>
+            <div className="flex-1">
+              <CustomRadioSelect
+                control={control}
+                name="is_universal_module_selected"
+                label=""
+                options={[
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
+                ]}
+              />
+            </div>
+          </div>
         </Divider>
         <div className="flex flex-col gap-4">
           <div className="flex gap-4">
@@ -1309,6 +1473,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Channel Density"
                 size="small"
                 options={channel_density_options || []}
+                disabled={is_universal_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1317,6 +1482,7 @@ const MCCcumPCCPLCPanel = ({
                 name="universal_module_loop_current"
                 label="Loop Current"
                 size="small"
+                disabled={is_universal_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1326,6 +1492,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Isolation"
                 size="small"
                 options={moveNAtoEnd(isolation_dropdown_options) || []}
+                disabled={is_universal_module_selected === 0}
               />
             </div>
           </div>
@@ -1336,6 +1503,7 @@ const MCCcumPCCPLCPanel = ({
                 name="universal_module_input_type"
                 label="Type of Input"
                 size="small"
+                disabled={is_universal_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1344,6 +1512,7 @@ const MCCcumPCCPLCPanel = ({
                 name="universal_module_scan_time"
                 label="Scan Time"
                 size="small"
+                disabled={is_universal_module_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1355,6 +1524,7 @@ const MCCcumPCCPLCPanel = ({
                   { label: "Yes", value: 1 },
                   { label: "No", value: 0 },
                 ]}
+                disabled={is_universal_module_selected === 0}
               />
             </div>
           </div>

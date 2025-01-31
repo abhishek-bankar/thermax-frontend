@@ -132,12 +132,28 @@ const getArrayOfCableScheduleData = (
     ];
   });
 };
+export const getApiEndpoint = (division: string) => {
+  switch (division) {
+    case HEATING:
+      return `${HEATING_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
+    case WWS_SPG:
+      return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
+    case WWS_SERVICES:
+      return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
+    case ENVIRO:
+      return `${HEATING_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
+    case WWS_IPG:
+      return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
 
+    default:
+      return "";
+  }
+};
 const useDataFetching = (
   designBasisRevisionId: string,
   loadListLatestRevisionId: string,
   cableScheduleRevisionId: string,
-  projectDivision: string
+  project_id: string
 ) => {
   const [isLoading, setIsLoading] = useState(true);
   const { setLoading } = useLoading();
@@ -148,33 +164,23 @@ const useDataFetching = (
 
   const [loadListData, setLoadListData] = useState<any[]>([]);
   const [cableTrayData, setCableTrayData] = useState<any>();
-  const getApiEndpoint = (division: string) => {
-    switch (division) {
-      case HEATING:
-        return `${HEATING_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
-      case WWS_SPG:
-        return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
-      case WWS_SERVICES:
-        return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
-      case ENVIRO:
-        return `${HEATING_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
-      case WWS_IPG:
-        return `${SPG_SERVICES_CONTROL_SCHEMES_URI}?limit=1000&fields=["*"]`;
+  const [projectData, setProjectData] = useState<any>();
 
-      default:
-        return "";
-    }
-  };
   const fetchData = useCallback(async () => {
     if (!loadListLatestRevisionId) return;
 
     try {
       setIsLoading(true);
 
+      const projectData = await getData(`${PROJECT_API}/${project_id}`);
+      const projectDivision = projectData?.division;
+
       const division_name =
         projectDivision === WWS_SPG || projectDivision === WWS_SERVICES
           ? WWS_SPG
           : projectDivision;
+      console.log(projectDivision);
+
       const lpbsResponse = await getData(
         `${LPBS_SCHEMES_URI}?filters=[["division_name", "=", "${division_name}"]]&fields=["*"]`
       );
@@ -195,7 +201,9 @@ const useDataFetching = (
       );
       try {
         setLoading(true);
-        const res = await getData(getApiEndpoint(projectDivision));
+        console.log(getApiEndpoint(division_name));
+
+        const res = await getData(getApiEndpoint(division_name));
         let sortedSchemes;
         console.log(res, "control schemes data");
         if (projectDivision === WWS_SERVICES || projectDivision === WWS_SPG) {
@@ -278,6 +286,8 @@ const useDataFetching = (
       //   setControlSchemes(sortedSchemes);
       //   setLoading(false);
       // });
+      console.log(lpbsResponse, "lpbs schemes");
+      setProjectData(projectData);
       setLpbsSchemes(lpbsResponse);
       setCableTrayData(cableTrayData[0]);
       setCableScheduleSavedData(savedCableSchedule);
@@ -304,6 +314,7 @@ const useDataFetching = (
     cableTrayData,
     cableScheduleData,
     loadListData,
+    projectData,
     isLoading,
     refetch: fetchData,
   };
@@ -329,8 +340,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
   } = useCurrentUser();
 
   const project_id = params.project_id as string;
-  const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
-  const projectDivision = projectData?.division;
+  // const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
 
   const [isMulticoreModalOpen, setIsMulticoreModalOpen] = useState(false);
 
@@ -341,13 +351,16 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     cableTrayData,
     cableScheduleData,
     loadListData,
+    projectData,
     isLoading,
+    refetch,
   } = useDataFetching(
     designBasisRevisionId,
     loadListLatestRevisionId,
     cableScheduleRevisionId,
-    projectDivision
+    project_id
   );
+  const projectDivision = projectData?.division;
 
   const typedCableScheduleColumns = useMemo(
     () =>
@@ -428,20 +441,76 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     const od = lcs_od_gland_data.find(
       (item) => item[0] == core && item[3] == size
     );
-    return od ? od[1] : [];
+    console.log("core checking", core, "size", size, "od", od);
+
+    return od ? od[1] : 0;
   };
   const getGladSizeLcs = (core: any, size: any) => {
     const od = lcs_od_gland_data.find(
       (item) => item[0] == core && item[3] == size
     );
-    return od ? od[2] : [];
+    return od ? od[2] : "";
+  };
+  const getControlSchemes = async () => {
+    const res = await getData(getApiEndpoint(projectDivision));
+    let sortedSchemes;
+    console.log(res, "control schemes data");
+    if (projectDivision === WWS_SERVICES || projectDivision === WWS_SPG) {
+      sortedSchemes = getSortedControlSchemes(res, projectDivision);
+    } else if (projectDivision === ENVIRO) {
+      sortedSchemes = getSortedControlSchemes(res, projectDivision);
+    } else if (projectDivision === WWS_IPG) {
+      sortedSchemes = getIPGSchemesData();
+    } else if (projectDivision === HEATING) {
+      sortedSchemes = res
+        .map((item: any) => [
+          false,
+          item.scheme,
+          item.sub_scheme,
+          item.scheme_title,
+          item.description,
+          item.breaker,
+          item.lpbs,
+          item.lpbs_inc_dec_ind,
+          item.ammeter,
+          item.thermistor_relay,
+          item.motor_space_heater,
+          item.plc_current_signal,
+          item.plc_speed_signal,
+          item.olr,
+          item.phase,
+          item.limit_switch,
+          item.motor_protection_relay,
+          item.field_isolator,
+          item.local_panel,
+          item.field_ess,
+          item.electronic_relay,
+          item.plc1_and_plc2,
+          item.mcc_start_stop,
+          item.input_choke,
+          item.output_choke,
+          item.separate_plc_start_stop,
+          item.di,
+          item.do,
+          item.ai,
+          item.ao,
+        ])
+        .sort((a: any, b: any) => {
+          const [prefixA, numA] = a[2].split("-");
+          const [prefixB, numB] = b[2].split("-");
+          return prefixA === prefixB
+            ? parseInt(numA, 10) - parseInt(numB, 10)
+            : prefixA.localeCompare(prefixB);
+        });
+    }
+    return sortedSchemes;
   };
   const handleCableScheduleSave = async () => {
+     
     const data = spreadsheetInstance?.getData();
-    console.log(data, "Cable schedule data");
-    console.log("Load list data", loadListData);
+    
     const individualFeeders: any = data?.map((row: any) => {
-      const division = userInfo?.division;
+      const division = projectDivision;
       const loadListItem = loadListData.find(
         (item: any) => item.tag_number === row[0]
       );
@@ -539,8 +608,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           panel_name: loadListItem?.panel,
           starter_type: "",
           tag_number: row[0],
-          service_description: row[1],
-
+          service_description: row[1], 
           name: row[1] + " LCS (INC/DEC)",
           voltage: "",
           kw: "",
@@ -564,8 +632,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           panel_name: loadListItem?.panel,
           starter_type: "",
           tag_number: row[0],
-          service_description: row[1],
-
+          service_description: row[1], 
           name: row[1] + " LCS (RPM)",
           voltage: "",
           kw: "",
@@ -880,7 +947,11 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           derating_factor: Number(row[23]),
           final_capacity: Number(row[24]),
           cable_selected_status: row[25],
-          supply_phase: loadListItem?.phase
+          supply_phase: loadListItem?.phase,
+          cable_od: getCableOd(row[0]),
+          cable_od_heating_chart: getCableOd(row[0]),
+          gland_size: getCableGlandSize(row[0]),
+          gland_size_heating_chart: getCableGlandSize(row[0])
         };
       }),
       excel_payload: { ...individualFeeders, ...groupPayload },
@@ -954,7 +1025,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         };
       }),
     });
-    console.log(cableSizeCalc, "cableSizeCalc");
+    console.log(cableSizeCalc, "cable size calculations");
     const sizingCalcData: any = [];
 
     const updatedCableSchedule: any = cableScheduleData?.map((row: any) => {
@@ -976,10 +1047,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         updatedRow[21] = calculationResult.vd_start_percentage;
         updatedRow[22] = calculationResult.current_air;
         updatedRow[24] = calculationResult.final_current_carrying_capacity;
-        updatedRow[25] = calculationResult.final_current_carrying_capacity;
-        console.log(calculationResult);
-        // heating_chart_cable_od,
-        // heating_chart_cable_gland_size,
+        updatedRow[25] = calculationResult.final_current_carrying_capacity; 
         sizingCalcData.push({
           tag_number: calculationResult.tagNo,
           cableOd:
@@ -1031,7 +1099,6 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
 
-   
       const name = document_name[0]?.lt_cable_sizing + "_LT Cable Sizing";
       const filename = `${name}.xlsx`;
 

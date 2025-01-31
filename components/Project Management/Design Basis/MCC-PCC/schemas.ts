@@ -586,7 +586,7 @@ export const mccPanelValidationSchema = zod
       required_error: "This field is required",
       message: "This field is required",
     }),
-    panel_incomer_protection: zod.array(zod.string(),{
+    panel_incomer_protection: zod.array(zod.string(), {
       required_error: "Panel Incomer Protection is required",
       message: "Panel Incomer Protection is required",
     }),
@@ -966,7 +966,7 @@ export const pccPanelValidationSchema = zod.object({
     required_error: "This field is required",
     message: "This field is required",
   }),
-  panel_incomer_protection: zod.array(zod.string(),{
+  panel_incomer_protection: zod.array(zod.string(), {
     required_error: "Panel Incomer Protection is required",
     message: "Panel Incomer Protection is required",
   }),
@@ -1337,26 +1337,25 @@ export const pccPanelValidationSchema = zod.object({
 export const trccPanelValidationSchema = zod.object({
   secondary_voltage_input: zod.string({
     required_error: "Secondary Voltage Input field is required",
-    message: "Secondary Voltage Input field is required"
+    message: "Secondary Voltage Input field is required",
   }),
   secondary_current_output: zod.string({
     required_error: "Secondary Current Output field is required",
-    message: "Secondary Current Output field is required"
+    message: "Secondary Current Output field is required",
   }),
   bushing_orientation: zod.string({
     required_error: "Bushing Orientation field is required",
-    message: "Bushing Orientation field is required"
+    message: "Bushing Orientation field is required",
   }),
   cable_entry: zod.string({
     required_error: "TRCC Cable Entry field is required",
-    message: "TRCC Cable Entry field is required"
+    message: "TRCC Cable Entry field is required",
   }),
   communication_protocol_input: zod.string({
     required_error: "Communicaiton Protocol Input field is required",
-    message: "Communicaiton Protocol Input field is required"
+    message: "Communicaiton Protocol Input field is required",
   }),
-  
-})
+});
 
 export const plcPanelValidationSchema = zod.object({
   ups_control_voltage: zod.string({
@@ -1494,6 +1493,11 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "Indicating Lamp Colour for UPS Power Supply is required",
     message: "Indicating Lamp Colour for UPS Power Supply is required",
   }),
+  // DI Module
+  is_di_module_selected: zod.number({
+    required_error: "DI Module is required",
+    message: "DI Module is required",
+  }),
   di_module_channel_density: zod.string({
     required_error: "DI Module Channel Density is required",
     message: "DI Module Channel Density is required",
@@ -1517,6 +1521,11 @@ export const plcPanelValidationSchema = zod.object({
   di_module_scan_time: zod.string({
     required_error: "DI Module Scan Time is required",
     message: "DI Module Scan Time is required",
+  }),
+  // DO Module
+  is_do_module_selected: zod.number({
+    required_error: "DO Module is required",
+    message: "DO Module is required",
   }),
   do_module_channel_density: zod.string({
     required_error: "DO Module Channel Density is required",
@@ -1550,6 +1559,11 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "No of Contacts is required",
     message: "No of Contacts is required",
   }),
+  // AI Module
+  is_ai_module_selected: zod.number({
+    required_error: "AI Module is required",
+    message: "AI Module is required",
+  }),
   ai_module_channel_density: zod.string({
     required_error: "AI Module Channel Density is required",
     message: "AI Module Channel Density is required",
@@ -1573,6 +1587,11 @@ export const plcPanelValidationSchema = zod.object({
   is_ai_module_hart_protocol_support_selected: zod.number({
     required_error: "AI Module HART Protocol Support is required",
     message: "AI Module HART Protocol Support is required",
+  }),
+  // AO Module
+  is_ao_module_selected: zod.number({
+    required_error: "AO Module is required",
+    message: "AO Module is required",
   }),
   ao_module_channel_density: zod.string({
     required_error: "AO Module Channel Density is required",
@@ -1598,6 +1617,11 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "AO Module HART Protocol Support is required",
     message: "AO Module HART Protocol Support is required",
   }),
+  // RTD Module
+  is_rtd_module_selected: zod.number({
+    required_error: "RTD Module is required",
+    message: "RTD Module is required",
+  }),
   rtd_module_channel_density: zod.string({
     required_error: "RTD Module Channel Density is required",
     message: "RTD Module Channel Density is required",
@@ -1622,6 +1646,11 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "RTD Module HART Protocol Support is required",
     message: "RTD Module HART Protocol Support is required",
   }),
+  // Thermocouple Module
+  is_thermocouple_module_selected: zod.number({
+    required_error: "Thermocouple Module is required",
+    message: "Thermocouple Module is required",
+  }),
   thermocouple_module_channel_density: zod.string({
     required_error: "Thermocouple Module Channel Density is required",
     message: "Thermocouple Module Channel Density is required",
@@ -1645,6 +1674,11 @@ export const plcPanelValidationSchema = zod.object({
   is_thermocouple_module_hart_protocol_support_selected: zod.number({
     required_error: "Thermocouple Module HART Protocol Support is required",
     message: "Thermocouple Module HART Protocol Support is required",
+  }),
+  // Universal Module
+  is_universal_module_selected: zod.number({
+    required_error: "Universal Module is required",
+    message: "Universal Module is required",
   }),
   universal_module_channel_density: zod.string({
     required_error: "Universal Module Channel Density is required",

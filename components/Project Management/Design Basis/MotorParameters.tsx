@@ -14,6 +14,7 @@ import {
   MOTOR_PARAMETER_API,
   PROJECT_API,
   PROJECT_INFO_API,
+  DESIGN_BASIS_REVISION_HISTORY_API,
 } from "@/configs/api-endpoints";
 
 import { useNewGetData } from "@/hooks/useCRUD";
@@ -22,6 +23,7 @@ import useMotorParametersDropdowns from "./MotorParametersDropdown";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import { convertToFrappeDatetime, sortDropdownOptions } from "@/utils/helpers";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { DB_REVISION_STATUS } from "@/configs/constants";
 
 const fieldSchema = zod.object({
   safe_area_efficiency_level: zod.string({
@@ -375,6 +377,14 @@ const MotorParameters = ({ revision_id }: { revision_id: string }) => {
           false,
           data
         );
+        await updateData(
+          `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
+          false,
+          {
+            status: DB_REVISION_STATUS.Unsubmitted,
+          }
+        );
+
         message.success("Motor Parameters Saved Successfully");
       }
     } catch (error) {

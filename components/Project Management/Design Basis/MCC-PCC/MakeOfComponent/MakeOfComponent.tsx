@@ -6,8 +6,12 @@ import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as zod from "zod";
 import { getData, updateData } from "@/actions/crud-actions";
-import { MAKE_OF_COMPONENT_API, PROJECT_API } from "@/configs/api-endpoints";
-import { HEATING } from "@/configs/constants";
+import {
+  DESIGN_BASIS_REVISION_HISTORY_API,
+  MAKE_OF_COMPONENT_API,
+  PROJECT_API,
+} from "@/configs/api-endpoints";
+import { DB_REVISION_STATUS, HEATING } from "@/configs/constants";
 import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLoading } from "@/hooks/useLoading";
@@ -232,6 +236,13 @@ const MakeOfComponent = ({
         `${MAKE_OF_COMPONENT_API}/${makeOfComponent[0].name}`,
         false,
         transformedData
+      );
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Unsubmitted,
+        }
       );
       message.success("Make of Component Saved Successfully");
       setActiveKey("2");

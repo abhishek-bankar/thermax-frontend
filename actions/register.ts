@@ -12,7 +12,8 @@ import {
 import { BTG, NEXT_PUBLIC_FRONTEND_URL } from "@/configs/constants";
 import { adminApiClient } from "./axios-clients";
 import { createData, getData, updateData } from "./crud-actions";
-import { getSuperuserEmail } from "./user-actions";
+import { getSuperuserEmail } from "./user-actions"; 
+import { sendMail } from "./mail";
 
 export const generateSimplePassword = (length = 8) => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -114,12 +115,20 @@ export const sendUserVerificationEmail = async (
   token: string
 ) => {
   try {
-    await createData(EMAIL_VERIFICATION_API, true, {
-      email,
-      division_name,
-      verification_link: `${NEXT_PUBLIC_FRONTEND_URL}/auth/verify-account?token=${token}`,
-      sent_by,
-    });
+    // await createData(EMAIL_VERIFICATION_API, true, {
+    //   email,
+    //   division_name,
+    //   verification_link: `${NEXT_PUBLIC_FRONTEND_URL}/auth/verify-account?token=${token}`,
+    //   sent_by,
+    // });
+
+    // await sendMail("email_verification_email", {
+    //   recipient_email: email,
+    //   division_name, 
+    //   subject: "Verify your email account",
+    //   verification_link: `${NEXT_PUBLIC_FRONTEND_URL}/auth/verify-account?token=${token}`,
+    //   sent_by,
+    // });
   } catch (error) {
     throw error;
   }
@@ -192,7 +201,19 @@ export const sendCredentialsEmail = async (
 
     const superuser = await getData(`${USER_API}/${cc_email}`);
 
-    await createData(CREDENTIALS_EMAIL_API, true, {
+    // await createData(CREDENTIALS_EMAIL_API, true, {
+    //   recipient_email: email,
+    //   cc_email: cc_email,
+    //   password: system_generated_password,
+    //   division_name,
+    //   is_superuser,
+    //   sent_by: is_superuser
+    //     ? "Team BTG"
+    //     : `${superuser?.first_name} ${superuser?.last_name}`,
+    //   subject: "Added New User - EnIMAX",
+    // });
+
+    await sendMail("send_credentials", {
       recipient_email: email,
       cc_email: cc_email,
       password: system_generated_password,

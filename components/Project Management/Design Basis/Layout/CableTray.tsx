@@ -9,7 +9,11 @@ import * as zod from "zod";
 import CustomTextInput from "@/components/FormInputs/CustomInput";
 import CustomRadioSelect from "@/components/FormInputs/CustomRadioSelect";
 import CustomSingleSelect from "@/components/FormInputs/CustomSingleSelect";
-import { CABLE_TRAY_LAYOUT, PROJECT_API } from "@/configs/api-endpoints";
+import {
+  CABLE_TRAY_LAYOUT,
+  DESIGN_BASIS_REVISION_HISTORY_API,
+  PROJECT_API,
+} from "@/configs/api-endpoints";
 import { useGetData, useNewGetData } from "@/hooks/useCRUD";
 import useCableTrayDropdowns from "./CableTrayDropdown";
 import { cableTrayValidationSchema } from "./schemas";
@@ -20,13 +24,20 @@ import {
   convertToFrappeDatetime,
   sortAlphaNumericArray,
 } from "@/utils/helpers";
+import { DB_REVISION_STATUS } from "@/configs/constants";
 
 const getDefaultValues = (cableTrayData: any) => {
   return {
     is_cable_tray_cover_selected:
       cableTrayData?.is_cable_tray_cover_selected?.toString() || "1",
+    cable_tray_cover_input:
+      cableTrayData?.cable_tray_cover_input || "On Only Top Layer",
     cable_tray_moc: cableTrayData?.cable_tray_moc || "SS 304",
+    outer_sheath: cableTrayData?.outer_sheath || "Fire resistant",
+    inner_sheath: cableTrayData?.inner_sheath || "Fire resistant",
     cable_tray_moc_input: cableTrayData?.cable_tray_moc_input || "",
+    design_manufacturing_testing_standard_for_cable:
+      cableTrayData?.design_manufacturing_testing_standard_for_cable || "IS",
     number_of_cores: cableTrayData?.number_of_cores || "3C",
     specific_requirement:
       cableTrayData?.specific_requirement || "Fire Resistant",
@@ -161,6 +172,7 @@ const CableTray = ({
   const { data: cableTrayData } = useNewGetData(
     `${CABLE_TRAY_LAYOUT}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
   );
+  console.log(cableTrayData);
   const lastModified = convertToFrappeDatetime(
     new Date(cableTrayData?.[0]?.modified)
   );
@@ -181,6 +193,7 @@ const CableTray = ({
 
   const dropdown = useCableTrayDropdowns();
 
+  const dmt_standards_options = dropdown["DMT Standards"];
   const no_of_core_options = dropdown["Layout Number Of Cores"];
   const specific_requirement_options = dropdown["Layout Specific Requirement"];
   const type_of_insulation_options = dropdown["Layout Type of Insulation"];
@@ -199,6 +212,7 @@ const CableTray = ({
   const gland_moc_options = dropdown["Gland MOC"];
   const type_of_gland_options = dropdown["Type Of Gland"];
   const future_space_on_trays_options = dropdown["Future Space on Trays"];
+  const cable_tray_cover_input_options = dropdown["Cable Tray Cover Input"];
   const cable_placement_options = dropdown["Cable Placement"];
   const cable_tray_moc_options = dropdown["Cable Tray MOC"];
   const cable_tray_width_options = sortAlphaNumericArray(
@@ -398,6 +412,13 @@ const CableTray = ({
         false,
         values
       );
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${revision_id}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Unsubmitted,
+        }
+      );
       message.success("Cable Tray Saved Successfully");
       setActiveKey("2");
     } catch (error) {
@@ -424,6 +445,15 @@ const CableTray = ({
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
+                name="design_manufacturing_testing_standard_for_cable"
+                label="Design, Manufacturing & Testing Standard for Cable "
+                options={sortAlphaNumericArray(dmt_standards_options || [])}
+                size="small"
+              />
+            </div>
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
                 name="number_of_cores"
                 label="Number of Cores"
                 options={no_of_core_options || []}
@@ -433,18 +463,10 @@ const CableTray = ({
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
-                name="specific_requirement"
-                label="Specific Requirement"
-                options={specific_requirement_options || []}
-                size="small"
-              />
-            </div>
-            <div className="flex-1">
-              <CustomSingleSelect
-                control={control}
-                name="type_of_insulation"
-                label="Type of Insulation"
-                options={type_of_insulation_options || []}
+                name="color_scheme"
+                label="Color Scheme"
+                options={color_scheme_options || []}
+                disabled={true}
                 size="small"
               />
             </div>
@@ -453,10 +475,38 @@ const CableTray = ({
             <div className="flex-1">
               <CustomSingleSelect
                 control={control}
-                name="color_scheme"
-                label="Color Scheme"
-                options={color_scheme_options || []}
-                disabled={true}
+                name="type_of_insulation"
+                label="Cable Insulation" // type of insulation
+                options={type_of_insulation_options || []}
+                size="small"
+              />
+            </div>
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="specific_requirement"
+                label="Cable Insulation Properties" // specific requirements
+                options={specific_requirement_options || []}
+                size="small"
+              />
+            </div>
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="inner_sheath"
+                label="Inner Sheath Properties" // specific requirements
+                options={specific_requirement_options || []}
+                size="small"
+              />
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <CustomSingleSelect
+                control={control}
+                name="outer_sheath"
+                label="Outer Sheath Properties" // specific requirements
+                options={specific_requirement_options || []}
                 size="small"
               />
             </div>
@@ -637,16 +687,35 @@ const CableTray = ({
         </Divider>
         <div className="flex flex-col gap-4">
           <div className="flex gap-4">
-            <div className="flex-1">
-              <CustomRadioSelect
-                control={control}
-                name="is_cable_tray_cover_selected"
-                label="Cable Tray Cover"
-                options={[
-                  { label: "Yes", value: "1" },
-                  { label: "No", value: "0" },
-                ]}
-              />
+            <div className="flex-1 flex flex-row gap-2 justify-center items-center">
+              <div className="w-1/3">
+                <CustomRadioSelect
+                  control={control}
+                  name="is_cable_tray_cover_selected"
+                  label="Cable Tray Cover"
+                  options={[
+                    { label: "Yes", value: "1" },
+                    { label: "No", value: "0" },
+                  ]}
+                />
+              </div>
+              <div className="flex-1 mt-5">
+                <CustomSingleSelect
+                  control={control}
+                  name="cable_tray_cover_input"
+                  label=""
+                  disabled={watch("is_cable_tray_cover_selected") == "0"}
+                  options={sortAlphaNumericArray(
+                    cable_tray_cover_input_options || []
+                  )}
+                  size="small"
+                  // suffixIcon={
+                  //   <>
+                  //     <p className="text-lg font-semibold text-blue-500">%</p>
+                  //   </>
+                  // }
+                />
+              </div>
             </div>
             <div className="flex-1">
               <CustomSingleSelect

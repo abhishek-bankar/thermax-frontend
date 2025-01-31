@@ -15,7 +15,9 @@ export default function useCableTrayDropdowns() {
       const response = await createData(
         "method/cable_tray_layout.get_cable_tray_layout_dropdown",
         true,
-        {
+        { 
+          "DMT Standards": "name",
+          "Cable Tray Cover Input": "name",
           "Layout Number Of Cores": "name",
           "Layout Specific Requirement": "name",
           "Layout Type of Insulation": "name",

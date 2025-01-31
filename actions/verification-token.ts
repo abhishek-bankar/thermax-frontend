@@ -4,12 +4,14 @@ import { v4 as uuid } from "uuid";
 import { NEXT_PUBLIC_FRONTEND_URL } from "@/configs/constants";
 import { convertToFrappeDatetime } from "@/utils/helpers";
 import { adminApiClient } from "./axios-clients";
-import { NEXT_AUTH_USER_API } from "@/configs/api-endpoints";
+import { NEXT_AUTH_USER_API, USER_API } from "@/configs/api-endpoints";
 import { sendCredentialsEmail } from "./register";
+import { sendMail } from "./mail";
 
 export const verifyEmailandGenerateToken = async (email: string) => {
   try {
-    const response = await adminApiClient.get(`/document/User/${email}`);
+    // const response = await adminApiClient.get(`/document/User/${email}`);
+    const response = await adminApiClient.get(`${USER_API}/${email}`);
     if (response.status !== 200) {
       return { status: "error", message: "User not found" };
     }
@@ -28,14 +30,20 @@ export const verifyEmailandGenerateToken = async (email: string) => {
     if (updateResponse.status !== 200) {
       return { status: "error", message: "Failed to send verification email" };
     }
-    const sendEmailResponse = await adminApiClient.post(
-      "/method/nextintegration.next_integration.doctype.nextauthuser.api.trigger_next_reset_password",
-      {
-        email: email,
-        reset_link: `${NEXT_PUBLIC_FRONTEND_URL}/auth/new-password?token=${token}`,
-        sent_by: "Admin Team",
-      }
-    );
+    // const sendEmailResponse = await adminApiClient.post(
+    //   "/method/nextintegration.next_integration.doctype.nextauthuser.api.trigger_next_reset_password",
+    //   {
+    //     email: email,
+    //     reset_link: `${NEXT_PUBLIC_FRONTEND_URL}/auth/new-password?token=${token}`,
+    //     sent_by: "Admin Team",
+    //   }
+    // );
+    const sendEmailResponse: any = await sendMail("reset_password_email", {
+      recipient_email: email,
+      link: `${NEXT_PUBLIC_FRONTEND_URL}/auth/new-password?token=${token}`,
+      subject: "Password Reset",
+      sent_by: "Admin Team",
+    });
     if (sendEmailResponse.status !== 200) {
       return { status: "error", message: "Failed to send verification email" };
     }

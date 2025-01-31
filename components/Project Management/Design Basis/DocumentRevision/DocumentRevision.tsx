@@ -6,6 +6,7 @@ import {
   ExportOutlined,
   FolderOpenOutlined,
   RetweetOutlined,
+  RollbackOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
 import { Button, message, Table, TableColumnsType, Tag, Tooltip } from "antd";
@@ -28,6 +29,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import clsx from "clsx";
 import ResubmitModel from "./ResubmitModel";
 import CopyRevisionModel from "./CopyModel";
+import { sendMail } from "@/actions/mail";
 
 export default function DocumentRevision() {
   const userInfo = useCurrentUser();
@@ -54,6 +56,7 @@ export default function DocumentRevision() {
   const projectOwnerEmail = projectData?.owner;
   const projectDivision = projectData?.division;
   const userDivision = userInfo?.division;
+  console.log(revisionHistory);
 
   const handleReviewSubmission = async (record: any) => {
     const revision_id = record?.key;
@@ -73,9 +76,17 @@ export default function DocumentRevision() {
         }
       );
 
-      await createData(REVIEW_SUBMISSION_EMAIL_API, false, {
-        approver_email: projectApproverEmail,
-        project_owner_email: projectOwnerEmail,
+      // await createData(REVIEW_SUBMISSION_EMAIL_API, false, {
+      //   approver_email: projectApproverEmail,
+      //   project_owner_email: projectOwnerEmail,
+      //   project_oc_number: projectData?.project_oc_number,
+      //   project_name: projectData?.project_name,
+      //   subject: `Design Basis Approval - EnIMAX - ${projectData?.project_oc_number}`,
+      // });
+
+      await sendMail("submit_design_basis_approval", {
+        recipient_email: projectApproverEmail,
+        cc_email: projectOwnerEmail,
         project_oc_number: projectData?.project_oc_number,
         project_name: projectData?.project_name,
         subject: `Design Basis Approval - EnIMAX - ${projectData?.project_oc_number}`,
@@ -147,9 +158,17 @@ export default function DocumentRevision() {
         }
       );
 
-      await createData(REVIEW_APPROVAL_EMAIL_API, false, {
+      // await createData(REVIEW_APPROVAL_EMAIL_API, false, {
+      //   approver_email: projectApproverEmail,
+      //   project_owner_email: projectOwnerEmail,
+      //   project_oc_number: projectData?.project_oc_number,
+      //   project_name: projectData?.project_name,
+      //   subject: `Approved - EnIMAX - ${projectData?.project_oc_number}`,
+      // });
+
+      await sendMail("design_basis_approved", {
+        recipient_email: projectOwnerEmail,
         approver_email: projectApproverEmail,
-        project_owner_email: projectOwnerEmail,
         project_oc_number: projectData?.project_oc_number,
         project_name: projectData?.project_name,
         subject: `Approved - EnIMAX - ${projectData?.project_oc_number}`,
@@ -177,6 +196,62 @@ export default function DocumentRevision() {
       message.success("Design Basis revision is released and locked");
     } catch (error) {
       message.error("Error releasing Design Basis revision");
+      console.error(error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+  const handleRecallOwnerAction = async (record: any) => {
+    setModalLoading(true);
+    try {
+      const projectApproverEmail = record.approverEmail;
+
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${record.key}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Unsubmitted,
+        }
+      );
+      await sendMail("design_basis_approval_recall", {
+        recipient_email: projectOwnerEmail,
+        approver_email: projectApproverEmail,
+        project_oc_number: projectData?.project_oc_number,
+        project_name: projectData?.project_name,
+        subject: `Design Basis Approval Recall - EnIMAX - ${projectData?.project_oc_number}`,
+      });
+      mutate(dbRevisionHistoryUrl);
+      message.success("Recalled Design Basis Approval");
+    } catch (error) {
+      message.error("Error");
+      console.error(error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+  const handleRecallApproverAction = async (record: any) => {
+    setModalLoading(true);
+    try {
+      const projectApproverEmail = record.approverEmail;
+
+      await updateData(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}/${record.key}`,
+        false,
+        {
+          status: DB_REVISION_STATUS.Submitted,
+        }
+      );
+      await sendMail("design_basis_approval_recall_approver_action", {
+        recipient_email: projectOwnerEmail,
+        approver_email: projectApproverEmail,
+        project_oc_number: projectData?.project_oc_number,
+        project_name: projectData?.project_name,
+        subject: `Design Basis Approval Recall - EnIMAX - ${projectData?.project_oc_number}`,
+      });
+      mutate(dbRevisionHistoryUrl);
+      message.success("Recalled Design Basis Approval");
+    } catch (error) {
+      message.error("Error");
       console.error(error);
     } finally {
       setModalLoading(false);
@@ -336,40 +411,65 @@ export default function DocumentRevision() {
                 />
               </Tooltip>
             </div>
-            <div>
-              <Tooltip title={"Submit for Review"}>
-                <Button
-                  type="link"
-                  shape="circle"
-                  icon={
-                    <ExportOutlined
-                      style={{
-                        color:
-                          [
-                            DB_REVISION_STATUS.Released,
-                            DB_REVISION_STATUS.Submitted,
-                            DB_REVISION_STATUS.Approved,
-                          ].includes(record?.status) ||
-                          userInfo?.email !== record.owner
-                            ? "grey"
-                            : "orange",
-                      }}
-                      spin={submitIconSpin}
+            {userInfo?.email === record.owner && (
+              <div>
+                <Tooltip title={"Submit for Review"}>
+                  <Button
+                    type="link"
+                    shape="circle"
+                    icon={
+                      <ExportOutlined
+                        style={{
+                          color:
+                            [
+                              DB_REVISION_STATUS.Released,
+                              DB_REVISION_STATUS.Submitted,
+                              DB_REVISION_STATUS.Approved,
+                            ].includes(record?.status) ||
+                            userInfo?.email !== record.owner
+                              ? "grey"
+                              : "orange",
+                        }}
+                        spin={submitIconSpin}
+                      />
+                    }
+                    onClick={async () => await handleReviewSubmission(record)}
+                    disabled={
+                      [
+                        DB_REVISION_STATUS.Released,
+                        DB_REVISION_STATUS.Submitted,
+                        DB_REVISION_STATUS.Approved,
+                        DB_REVISION_STATUS.ResubmittedAgain,
+                      ].includes(record?.status) ||
+                      userInfo?.email !== record.owner ||
+                      userDivision !== projectDivision
+                    }
+                  />
+                </Tooltip>
+              </div>
+            )}
+            {[
+              DB_REVISION_STATUS.Submitted,
+              DB_REVISION_STATUS.ResubmittedAgain,
+            ].includes(record?.status) &&
+              userInfo?.email === record.owner &&
+              userDivision === projectDivision && (
+                <div>
+                  <Tooltip title={"Recall"}>
+                    <Button
+                      type="link"
+                      shape="circle"
+                      icon={
+                     
+                        <RollbackOutlined />
+                      }
+                      onClick={async () => await handleRecallOwnerAction(record)}
+                   
                     />
-                  }
-                  onClick={async () => await handleReviewSubmission(record)}
-                  disabled={
-                    [
-                      DB_REVISION_STATUS.Released,
-                      DB_REVISION_STATUS.Submitted,
-                      DB_REVISION_STATUS.Approved,
-                    ].includes(record?.status) ||
-                    userInfo?.email !== record.owner ||
-                    userDivision !== projectDivision
-                  }
-                />
-              </Tooltip>
-            </div>
+                  </Tooltip>
+                </div>
+              )}
+         
             <div
               className={clsx(
                 projectApproverEmail !== userInfo.email && "hidden"
@@ -444,6 +544,26 @@ export default function DocumentRevision() {
                 />
               </Tooltip>
             </div>
+            {[
+              DB_REVISION_STATUS.Approved,
+            ].includes(record?.status) &&
+            projectApproverEmail === userInfo.email &&
+              userDivision === projectDivision && (
+                <div>
+                  <Tooltip title={"Recall"}>
+                    <Button
+                      type="link"
+                      shape="circle"
+                      icon={
+                     
+                        <RollbackOutlined />
+                      }
+                      onClick={async () => await handleRecallApproverAction(record)}
+                   
+                    />
+                  </Tooltip>
+                </div>
+              )}
           </div>
         );
       },

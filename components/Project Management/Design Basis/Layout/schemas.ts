@@ -1,6 +1,22 @@
 import * as zod from "zod";
 
 export const cableTrayValidationSchema = zod.object({
+  design_manufacturing_testing_standard_for_cable: zod.string({
+    required_error: "DMT Standards is required",
+    message: "DMT Standards is required",
+  }),
+  cable_tray_cover_input: zod.string({
+    required_error: "Cable Tray Cover Input is required",
+    message: "Cable Tray Cover Input is required",
+  }),
+  inner_sheath: zod.string({
+    required_error: "Inner Sheath field is required",
+    message: "Inner Sheath is required"
+  }),
+  outer_sheath: zod.string({
+    required_error: "Outer Sheath field is required",
+    message: "Outer Sheath is required"
+  }),
   number_of_cores: zod.string({
     required_error: "Number of cores is required",
     message: "Number of cores is required",

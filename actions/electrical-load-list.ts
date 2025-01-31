@@ -82,7 +82,6 @@ export const getCurrentCalculation = async (loadListData: any) => {
           current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
         }
       } else if (phase === "3 Phase") {
-        // current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor)
         current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
       } else if (phase === "1 Phase") {
         current = (kw * 1000) / (supplyVoltage * powerFactor);
@@ -452,13 +451,19 @@ const findCable = (
     heating_chart_cable_gland_size = result.cabel_gland_size;
     moc = result.moc;
   }
-  return {
+  let finalOutput: any = {
     ...finalCable,
     heating_chart_cable_size,
     heating_chart_cable_od,
     heating_chart_cable_gland_size,
-    moc,
   };
+  if (division === HEATING && appxLength <= 100 && supplyVoltage === 415) {
+    finalOutput = {
+      ...finalOutput,
+      moc,
+    };
+  }
+  return finalOutput;
 };
 
 export const getCableSizingCalculation = async (cableScheduleData: any) => {

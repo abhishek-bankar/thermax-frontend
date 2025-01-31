@@ -6,9 +6,11 @@ import MCCcumPCCPLCPanel from "./MCCcumPCCPLC";
 import MCCPanel from "./MCCPanel";
 
 const MCCcumPCC = ({
+  revision_id,
   panel_id,
   setActiveKey,
 }: {
+  revision_id: string;
   panel_id: string;
   setActiveKey: React.Dispatch<React.SetStateAction<string>>;
 }) => {
@@ -23,13 +25,23 @@ const MCCcumPCC = ({
     {
       label: "MCC",
       key: "1",
-      children: <MCCPanel panel_id={panel_id} setActiveKey={setPLCActiveKey} />,
+      children: (
+        <MCCPanel
+          panel_id={panel_id}
+          setActiveKey={setPLCActiveKey}
+          revision_id={revision_id}
+        />
+      ),
     },
     {
       label: "PLC",
       key: "2",
       children: (
-        <MCCcumPCCPLCPanel panel_id={panel_id} setActiveKey={setActiveKey} />
+        <MCCcumPCCPLCPanel
+          panel_id={panel_id}
+          setActiveKey={setActiveKey}
+          revision_id={revision_id}
+        />
       ),
     },
   ];

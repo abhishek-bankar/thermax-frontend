@@ -30,7 +30,8 @@ const getDefaultValues = (cableTrayData: any) => {
   return {
     is_cable_tray_cover_selected:
       cableTrayData?.is_cable_tray_cover_selected?.toString() || "1",
-    cable_tray_cover_input: cableTrayData?.cable_tray_cover_input || "On Only Top Layer",
+    cable_tray_cover_input:
+      cableTrayData?.cable_tray_cover_input || "On Only Top Layer",
     cable_tray_moc: cableTrayData?.cable_tray_moc || "SS 304",
     outer_sheath: cableTrayData?.outer_sheath || "Fire resistant",
     inner_sheath: cableTrayData?.inner_sheath || "Fire resistant",
@@ -171,6 +172,7 @@ const CableTray = ({
   const { data: cableTrayData } = useNewGetData(
     `${CABLE_TRAY_LAYOUT}?fields=["*"]&filters=[["revision_id", "=", "${revision_id}"]]`
   );
+  console.log(cableTrayData);
   const lastModified = convertToFrappeDatetime(
     new Date(cableTrayData?.[0]?.modified)
   );
@@ -445,9 +447,7 @@ const CableTray = ({
                 control={control}
                 name="design_manufacturing_testing_standard_for_cable"
                 label="Design, Manufacturing & Testing Standard for Cable "
-                options={sortAlphaNumericArray(
-                  dmt_standards_options || []
-                )}
+                options={sortAlphaNumericArray(dmt_standards_options || [])}
                 size="small"
               />
             </div>
@@ -494,7 +494,7 @@ const CableTray = ({
               <CustomSingleSelect
                 control={control}
                 name="inner_sheath"
-                label="Inner Sheath Properties" // specific requirements 
+                label="Inner Sheath Properties" // specific requirements
                 options={specific_requirement_options || []}
                 size="small"
               />
@@ -505,7 +505,7 @@ const CableTray = ({
               <CustomSingleSelect
                 control={control}
                 name="outer_sheath"
-                label="Outer Sheath Properties" // specific requirements 
+                label="Outer Sheath Properties" // specific requirements
                 options={specific_requirement_options || []}
                 size="small"
               />
@@ -709,11 +709,11 @@ const CableTray = ({
                     cable_tray_cover_input_options || []
                   )}
                   size="small"
-                // suffixIcon={
-                //   <>
-                //     <p className="text-lg font-semibold text-blue-500">%</p>
-                //   </>
-                // }
+                  // suffixIcon={
+                  //   <>
+                  //     <p className="text-lg font-semibold text-blue-500">%</p>
+                  //   </>
+                  // }
                 />
               </div>
             </div>

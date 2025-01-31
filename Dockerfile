@@ -36,10 +36,5 @@ RUN npm install --only=production
 # Expose port 3000
 EXPOSE 3000
 
-# Configure the application to use SSL by setting environment variables
-ENV NODE_ENV=production
-ENV SSL_CERT_PATH=/etc/ssl/certs/server.csr
-ENV SSL_KEY_PATH=/etc/ssl/private/server.key
-
 # Start the Next.js application with SSL enabled
 CMD ["npm", "start"]

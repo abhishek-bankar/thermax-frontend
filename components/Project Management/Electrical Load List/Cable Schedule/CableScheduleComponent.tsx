@@ -30,7 +30,10 @@ import {
 } from "@/configs/api-endpoints";
 import { useLoading } from "@/hooks/useLoading";
 import { useParams, useRouter } from "next/navigation";
-import { getCableSizingCalculation } from "@/actions/electrical-load-list";
+import {
+  getCableSizingCalculation,
+  recalculateCableSize,
+} from "@/actions/electrical-load-list";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   ENVIRO,
@@ -506,9 +509,8 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     return sortedSchemes;
   };
   const handleCableScheduleSave = async () => {
-     
     const data = spreadsheetInstance?.getData();
-    
+
     const individualFeeders: any = data?.map((row: any) => {
       const division = projectDivision;
       const loadListItem = loadListData.find(
@@ -608,7 +610,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           panel_name: loadListItem?.panel,
           starter_type: "",
           tag_number: row[0],
-          service_description: row[1], 
+          service_description: row[1],
           name: row[1] + " LCS (INC/DEC)",
           voltage: "",
           kw: "",
@@ -632,7 +634,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           panel_name: loadListItem?.panel,
           starter_type: "",
           tag_number: row[0],
-          service_description: row[1], 
+          service_description: row[1],
           name: row[1] + " LCS (RPM)",
           voltage: "",
           kw: "",
@@ -951,7 +953,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           cable_od: getCableOd(row[0]),
           cable_od_heating_chart: getCableOd(row[0]),
           gland_size: getCableGlandSize(row[0]),
-          gland_size_heating_chart: getCableGlandSize(row[0])
+          gland_size_heating_chart: getCableGlandSize(row[0]),
         };
       }),
       excel_payload: { ...individualFeeders, ...groupPayload },
@@ -1047,7 +1049,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         updatedRow[21] = calculationResult.vd_start_percentage;
         updatedRow[22] = calculationResult.current_air;
         updatedRow[24] = calculationResult.final_current_carrying_capacity;
-        updatedRow[25] = calculationResult.final_current_carrying_capacity; 
+        updatedRow[25] = calculationResult.final_current_carrying_capacity;
         sizingCalcData.push({
           tag_number: calculationResult.tagNo,
           cableOd:
@@ -1084,7 +1086,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
     //   return;
     // }
 
-    setLoading(true); 
+    setLoading(true);
     const cableSizeCalc = await recalculateCableSize({
       divisionName: userInfo.division,
       layoutCableTray: {
@@ -1109,11 +1111,11 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
           runningCos: Number(row[14]),
           startingCos: Number(row[15]),
           deratingFactor: Number(row[23]),
-          final_cable_size: Number(row[11]),
-          cable_size_heating_chart: Number(row[13]),
+          final_cable_size: row[11],
+          cable_size_heating_chart: row[13],
         };
       }),
-    }); 
+    });
     const sizingCalcData: any = [];
 
     const updatedCableSchedule: any = cableScheduleData?.map((row: any) => {
@@ -1135,7 +1137,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         // updatedRow[21] = calculationResult.vd_start_percentage;
         // updatedRow[22] = calculationResult.current_air;
         // updatedRow[24] = calculationResult.final_current_carrying_capacity;
-        updatedRow[25] = calculationResult.cable_selected_status; 
+        updatedRow[25] = calculationResult.cable_selected_status;
         sizingCalcData.push({
           tag_number: calculationResult?.tagNo,
           cableOd:
@@ -1149,10 +1151,10 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
       }
 
       return row;
-    }); 
+    });
     spreadsheetInstance?.setData(updatedCableSchedule);
-    setCableSizeCalcData(sizingCalcData);
-    setIscableSizeFetched(true);
+    // setCableSizeCalcData(sizingCalcData);
+    // setIscableSizeFetched(true);
     setLoading(false);
     message.success("Recalculated Successfully");
 

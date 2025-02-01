@@ -18,13 +18,22 @@ import {
   PROJECT_API,
   THERMAX_USER_API,
 } from "@/configs/api-endpoints";
-import { useDropdownOptions } from "@/hooks/useDropdownOptions";
+import {
+  useDropdownOptions,
+  useNewDropdownOptions,
+} from "@/hooks/useDropdownOptions";
 import { createThermaxProject } from "@/actions/project";
 
 const getProjectFormValidationSchema = (
   project_oc_numbers: string[],
-  editMode: boolean
+  editMode: boolean,
+  clientNameOptions: any,
+  consultantNameOptions: any
 ) => {
+  const clientName = clientNameOptions.map((option: any) => option.value);
+  const consultantName = consultantNameOptions.map(
+    (option: any) => option.value
+  );
   return zod.object({
     project_name: zod.string({
       required_error: "Project name is required",
@@ -41,14 +50,29 @@ const getProjectFormValidationSchema = (
         },
         { message: "Project OC number already exists" }
       ),
-    client_name: zod.string({
-      required_error: "Client name is required",
-      message: "Client name is required",
-    }),
-    consultant_name: zod.string({
-      required_error: "Consultant name is required",
-      message: "Consultant name is required",
-    }),
+    client_name: zod
+      .string({
+        required_error: "Client name is required",
+        message: "Client name is required",
+      })
+      .refine(
+        (value) => {
+          return clientName.includes(value);
+        },
+        { message: "Please create client first!" }
+      ),
+    consultant_name: zod
+      .string({
+        required_error: "Consultant name is required",
+        message: "Consultant name is required",
+      })
+      .refine(
+        (value) => {
+          return consultantName.includes(value);
+        },
+        { message: "Please create consultant first!" }
+      ),
+
     approver: zod.string({
       required_error: "Approver is required",
       message: "Approver is required",
@@ -80,26 +104,32 @@ export default function ProjectFormModal({
   const [infoMessage, setInfoMessage] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const getClientOptionsUrl = `${CLIENT_NAME_API}?fields=["*"]&filters=[["division", "=", "${division}"]]`;
+  const getConsultantOptionsUrl = `${CONSULTANT_NAME_API}?fields=["*"]&filters=[["division", "=", "${division}"]]`;
 
-  const { dropdownOptions: clientNameOptions } = useDropdownOptions(
-    `${CLIENT_NAME_API}?fields=["*"]&filters=[["division", "=", "${division}"]]`,
+  const { dropdownOptions: clientNameOptions } = useNewDropdownOptions(
+    getClientOptionsUrl,
     "client_name"
   );
-  const { dropdownOptions: consultantNameOptions } = useDropdownOptions(
-    `${CONSULTANT_NAME_API}?fields=["*"]&filters=[["division", "=", "${division}"]]`,
+  const { dropdownOptions: consultantNameOptions } = useNewDropdownOptions(
+    getConsultantOptionsUrl,
     "consultant_name"
   );
   const { dropdownOptions: approverOptions } = useDropdownOptions(
     `${THERMAX_USER_API}?fields=["*"]&filters=[["division", "=",  "${userInfo?.division}"], ["email", "!=", "${userInfo?.email}"]]`,
     "name"
   );
+  console.log("clientNameOptions", clientNameOptions);
+  console.log("consultantNameOptions", consultantNameOptions);
 
   const ProjectFormValidationSchema = getProjectFormValidationSchema(
     projectOCNos,
-    editMode
+    editMode,
+    clientNameOptions,
+    consultantNameOptions
   );
 
-  const { control, handleSubmit, reset, getValues } = useForm({
+  const { control, handleSubmit, reset, watch } = useForm({
     resolver: zodResolver(ProjectFormValidationSchema),
     defaultValues: getDefaultValues(editMode, values),
     mode: "onBlur",
@@ -206,7 +236,7 @@ export default function ProjectFormModal({
         <div className="flex gap-2">
           <div className="flex-1">
             <CustomAutoComplete
-              defaultOption={editMode ? getValues("client_name") : null}
+              defaultOption={editMode ? watch("client_name") : null}
               name="client_name"
               control={control}
               label="Client Name"
@@ -214,12 +244,13 @@ export default function ProjectFormModal({
               optionKeyName="client_name"
               createOptionUrl={CLIENT_NAME_API}
               placeholder="Select or create a new client by typing..."
+              mutateUrl={getClientOptionsUrl}
               extraParams={{ division }}
             />
           </div>
           <div className="flex-1">
             <CustomAutoComplete
-              defaultOption={editMode ? getValues("consultant_name") : null}
+              defaultOption={editMode ? watch("consultant_name") : null}
               name="consultant_name"
               control={control}
               label="Consultant Name"
@@ -227,6 +258,7 @@ export default function ProjectFormModal({
               optionKeyName="consultant_name"
               createOptionUrl={CONSULTANT_NAME_API}
               placeholder="Select or create a new consultant by typing..."
+              mutateUrl={getConsultantOptionsUrl}
               extraParams={{ division }}
             />
           </div>

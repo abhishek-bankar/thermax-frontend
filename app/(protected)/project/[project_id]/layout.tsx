@@ -91,15 +91,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               className={clsx(
                 "white grid flex-auto cursor-pointer place-content-center rounded border p-1 text-sm font-bold uppercase tracking-wide text-white",
                 pathname.includes(sld_path) ? "bg-green-700" : "bg-blue-700",
-                (isProjectInfoSaved === 0 || !isDesignBasisReleased) &&
-                  "opacity-50 cursor-not-allowed bg-gray-500"
+                (isProjectInfoSaved === 0 || isDesignBasisReleased === false) &&
+                  "opacity-50 bg-gray-500 cursor-not-allowed"
               )}
-              // onClick={() => {
-              //   if (isProjectInfoSaved === 1 && isDesignBasisReleased) {
-              //     handleTabChange(sld_path);
-              //   }
-              // }}
-              onClick={() => handleTabChange(sld_path)}
+              onClick={() => {
+                if (isProjectInfoSaved === 1 && isDesignBasisReleased) {
+                  handleTabChange(sld_path);
+                }
+              }}
               aria-disabled={isProjectInfoSaved}
             >
               SLD

@@ -1056,7 +1056,7 @@ const CommonConfiguration = ({
           </div>
         </div>
         <Divider>
-          <span className="font-bold text-slate-700">Outgoing Feeder</span>
+          <span className="font-bold text-slate-700">Motor Outgoing Feeder</span>
         </Divider>
         <div className="flex items-center gap-8">
           <div className="flex-1">
@@ -1124,7 +1124,7 @@ const CommonConfiguration = ({
 
         <Divider>
           <span className="font-bold text-slate-700">
-            Metering Instruments for Feeder
+            Outgoing Feeder Instruments
           </span>
         </Divider>
         <div className="flex gap-8">
@@ -1187,7 +1187,7 @@ const CommonConfiguration = ({
         </div>
         <Divider>
           <span className="font-bold text-slate-700">
-            Current Transformer for Feeder
+            Current Transformer for Outgoing Feeder
           </span>
         </Divider>
         <div className="flex gap-4">
@@ -1250,7 +1250,7 @@ const CommonConfiguration = ({
           </div>
         </div>
         <Divider>
-          <span className="font-bold text-slate-700">Supply Feeder</span>
+          <span className="font-bold text-slate-700">Outgoing Supply Feeder</span>
         </Divider>
         <div className="flex items-center gap-4">
           <div className="w-1/4">
@@ -1265,7 +1265,7 @@ const CommonConfiguration = ({
         </div>
 
         <Divider>
-          <span className="font-bold text-slate-700">Wiring</span>
+          <span className="font-bold text-slate-700">Panel Internal Wiring</span>
         </Divider>
         <div className="flex items-center gap-4">
           <h4 className="flex-1 text-sm font-semibold text-slate-700">
@@ -1461,7 +1461,7 @@ const CommonConfiguration = ({
         </div>
         <Divider>
           <span className="font-bold text-slate-700">
-            Terminal Block Connectors
+            Terminal Block Details
           </span>
         </Divider>
         <div className="flex gap-4">
@@ -1682,7 +1682,7 @@ const CommonConfiguration = ({
           <div className="flex-1"></div>
         </div>
         <Divider>
-          <span className="font-bold text-slate-700">Selector Switch</span>
+          <span className="font-bold text-slate-700">Panel Mounted Selector Switch</span>
         </Divider>
         <div className="flex items-center gap-4">
           <div className="flex-1">
@@ -2447,7 +2447,7 @@ const CommonConfiguration = ({
 
         <Divider>
           <span className="font-bold text-slate-700">
-            Identification of Components
+          Identification of Panel Components
           </span>
         </Divider>
         <div className="flex gap-4">
@@ -2478,7 +2478,7 @@ const CommonConfiguration = ({
           </div>
         </div>
         <Divider>
-          <span className="font-bold text-slate-700">Others</span>
+          <span className="font-bold text-slate-700">Utility</span>
         </Divider>
         <div className="flex items-center gap-4">
           <div className="flex flex-row items-center gap-4 flex-1">

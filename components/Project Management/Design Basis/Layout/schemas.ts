@@ -11,11 +11,11 @@ export const cableTrayValidationSchema = zod.object({
   }),
   inner_sheath: zod.string({
     required_error: "Inner Sheath field is required",
-    message: "Inner Sheath is required"
+    message: "Inner Sheath is required",
   }),
   outer_sheath: zod.string({
     required_error: "Outer Sheath field is required",
-    message: "Outer Sheath is required"
+    message: "Outer Sheath is required",
   }),
   number_of_cores: zod.string({
     required_error: "Number of cores is required",
@@ -141,10 +141,12 @@ export const cableTrayValidationSchema = zod.object({
     required_error: "Ladder type is required",
     message: "Ladder type is required",
   }),
-  pct_ladder_type_width: zod.string({
-    required_error: "Width is required",
-    message: "Width is required",
-  }),
+  pct_ladder_type_width: zod
+    .string({
+      required_error: "Width is required",
+      message: "Width is required",
+    })
+    .optional(),
   pct_ladder_type_height: zod.string({
     required_error: "Height is required",
     message: "Height is required",

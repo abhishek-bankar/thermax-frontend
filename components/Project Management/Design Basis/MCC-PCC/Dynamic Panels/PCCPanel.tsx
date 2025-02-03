@@ -105,7 +105,7 @@ const getDefaultValues = (
     door_thickness: pccPanelData?.door_thickness || "1.6 mm",
     ga_moc_thickness_covers: pccPanelData?.ga_moc_thickness_covers || "1.6 mm",
     ga_pcc_compartmental:
-      pccPanelData?.ga_pcc_compartmental || "Form-III A (Compartmentalized)",
+      pccPanelData?.ga_pcc_compartmental || "Form 3a (Compartmental)",
     ga_pcc_construction_front_type:
       pccPanelData?.ga_pcc_construction_front_type || "Single Front",
 
@@ -139,7 +139,7 @@ const getDefaultValues = (
     ga_gland_plate_3mm_drill_type:
       pccPanelData?.ga_gland_plate_3mm_drill_type || "Knockout",
     ga_gland_plate_thickness:
-      pccPanelData?.ga_gland_plate_thickness || "1.6 mm",
+      pccPanelData?.ga_gland_plate_thickness || "3 mm",
     ga_busbar_chamber_position:
       pccPanelData?.ga_busbar_chamber_position || "Top",
     ga_power_and_control_busbar_separation:
@@ -365,7 +365,7 @@ const PCCPanel = ({
     if (ga_gland_plate_3mm_drill_type === "NA") {
       setValue("ga_gland_plate_thickness", "NA");
     } else {
-      setValue("ga_gland_plate_thickness", "1.6 mm");
+      setValue("ga_gland_plate_thickness", "3 mm");
     }
   }, [ga_gland_plate_3mm_drill_type, setValue]);
   useEffect(() => {
@@ -635,7 +635,7 @@ const PCCPanel = ({
           </div>
         </div> */}
         <div className="mt-2 flex gap-4">
-          <div className="w-1/3">
+          <div className="w-1/2">
             <CustomMultiSelect
               control={control}
               name="panel_incomer_protection"
@@ -891,7 +891,7 @@ const PCCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ga_pcc_compartmental"
-              label="Panel Front Type"
+              label="Form of Separation"
               options={ga_mcc_compartmental_options || []}
               size="small"
             />

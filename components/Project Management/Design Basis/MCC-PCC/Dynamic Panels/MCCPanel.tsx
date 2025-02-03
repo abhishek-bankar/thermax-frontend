@@ -31,6 +31,7 @@ import {
   convertToFrappeDatetime,
   moveNAtoEnd,
   parseToArray,
+  sortDropdownOptions,
 } from "@/utils/helpers";
 import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 
@@ -87,8 +88,8 @@ const getDefaultValues = (
     alarm_annunciator: mccPanelData?.alarm_annunciator || "Applicable",
     panel_incomer_protection: mccPanelData?.panel_incomer_protection
       ? parseToArray(mccPanelData?.panel_incomer_protection)
-      : ["Only Magnetic Short circuit Protection"],
-      
+      : ["Only Magnetic Short Circuit Protection"],
+
     mi_analog: mccPanelData?.mi_analog
       ? parseToArray(mccPanelData?.mi_analog)
       : ["Ammeter with ASS"],
@@ -100,7 +101,7 @@ const getDefaultValues = (
     ga_moc_thickness_door: mccPanelData?.ga_moc_thickness_door || "1.6 mm",
     ga_moc_thickness_covers: mccPanelData?.ga_moc_thickness_covers || "1.6 mm",
     ga_mcc_compartmental:
-      mccPanelData?.ga_mcc_compartmental || "Form-III A (Compartmentalized)",
+      mccPanelData?.ga_mcc_compartmental || "Form 3a (Compartmental)",
     ga_mcc_construction_front_type:
       mccPanelData?.ga_mcc_construction_front_type || "Single Front",
 
@@ -133,8 +134,7 @@ const getDefaultValues = (
       Boolean(mccPanelData?.is_both_side_extension_section_selected) || false,
     ga_gland_plate_3mm_drill_type:
       mccPanelData?.ga_gland_plate_3mm_drill_type || "Knockout",
-    ga_gland_plate_thickness:
-      mccPanelData?.ga_gland_plate_thickness || "1.6 mm",
+    ga_gland_plate_thickness: mccPanelData?.ga_gland_plate_thickness || "3 mm",
     // ga_gland_plate_3mm_attachment_type:
     //   mccPanelData?.ga_gland_plate_3mm_attachment_type || "Detachable",
     ga_busbar_chamber_position:
@@ -279,7 +279,7 @@ const MCCPanel = ({
     dropdown["ACB Spring Charge Indication lamp"];
   const trip_circuit_healthy_indication_options =
     dropdown["Trip Circuit Healthy Indication lamp"];
-  const panel_incomer_protection_options = dropdown["Panel Incomer Protection"]
+  const panel_incomer_protection_options = dropdown["Panel Incomer Protection"];
 
   const incomer_pole_options = dropdown["SD Incomer Pole"];
   const incomer_type_options = dropdown["SD Incomer Type"];
@@ -378,7 +378,7 @@ const MCCPanel = ({
     if (ga_gland_plate_3mm_drill_type === "NA") {
       setValue("ga_gland_plate_thickness", "NA");
     } else {
-      setValue("ga_gland_plate_thickness", "1.6 mm");
+      setValue("ga_gland_plate_thickness", "3 mm");
     }
   }, [
     control_transformer_coating_controlled,
@@ -452,15 +452,10 @@ const MCCPanel = ({
   }, []);
 
   useEffect(() => {
-    if (incomer_ampere_controlled === "1000") {
-      setValue("incomer_above_ampere", "1001");
-    } else if (incomer_ampere_controlled === "400") {
-      setValue("incomer_above_ampere", "401");
-    } else if (incomer_ampere_controlled === "630") {
-      setValue("incomer_above_ampere", "631");
-    } else {
-      setValue("incomer_above_ampere", "801");
-    }
+    setValue(
+      "incomer_above_ampere",
+      String(Number(incomer_ampere_controlled) + 1)
+    );
   }, [incomer_ampere_controlled, setValue]);
 
   const handleError = (error: any) => {
@@ -478,7 +473,11 @@ const MCCPanel = ({
   > = async (data) => {
     setLoading(true);
     try {
-      const fieldsToStringify = ["mi_analog", "mi_digital", "panel_incomer_protection"];
+      const fieldsToStringify = [
+        "mi_analog",
+        "mi_digital",
+        "panel_incomer_protection",
+      ];
 
       const transformedData: any = { ...data };
 
@@ -558,7 +557,7 @@ const MCCPanel = ({
               control={control}
               name="incomer_ampere"
               label="Ampere"
-              options={incomer_ampere_options || []}
+              options={sortDropdownOptions(incomer_ampere_options) || []}
               size="small"
             />
           </div>
@@ -595,7 +594,7 @@ const MCCPanel = ({
               control={control}
               name="incomer_above_ampere"
               label="Ampere"
-              options={incomer_above_ampere_options || []}
+              options={sortDropdownOptions(incomer_above_ampere_options) || []}
               disabled={true}
               size="small"
             />
@@ -651,7 +650,7 @@ const MCCPanel = ({
         </div> */}
 
         <div className="mt-2 flex gap-4">
-          <div className="w-1/3">
+          <div className="w-1/2">
             <CustomMultiSelect
               control={control}
               name="panel_incomer_protection"
@@ -677,8 +676,8 @@ const MCCPanel = ({
               options={
                 led_type_on_input_options
                   ? led_type_on_input_options.filter(
-                    (el: any) => el.name !== "NA"
-                  )
+                      (el: any) => el.name !== "NA"
+                    )
                   : []
               }
               size="small"
@@ -698,8 +697,8 @@ const MCCPanel = ({
               options={
                 led_type_off_input_options
                   ? led_type_off_input_options.filter(
-                    (el: any) => el.name !== "NA"
-                  )
+                      (el: any) => el.name !== "NA"
+                    )
                   : []
               }
               size="small"
@@ -720,8 +719,8 @@ const MCCPanel = ({
               options={
                 led_type_trip_input_options
                   ? led_type_trip_input_options.filter(
-                    (el: any) => el.name !== "NA"
-                  )
+                      (el: any) => el.name !== "NA"
+                    )
                   : []
               }
               size="small"
@@ -913,7 +912,7 @@ const MCCPanel = ({
             <CustomSingleSelect
               control={control}
               name="ga_mcc_compartmental"
-              label="Panel Front Type"
+              label="Form of Separation"
               options={ga_mcc_compartmental_options || []}
               size="small"
             />
@@ -1556,77 +1555,77 @@ const MCCPanel = ({
         )}
         {(userInfo?.division === WWS_SPG ||
           userInfo?.division === WWS_SERVICES) && (
-            <>
-              <Divider>
-                <span className="font-bold text-slate-700">
-                  Name Plate Details
-                </span>
-                <div>
-                  <CustomRadioSelect
-                    control={control}
-                    name="is_spg_applicable"
-                    label=""
-                    options={[
-                      { label: "Yes", value: "1" },
-                      { label: "No", value: "0" },
-                    ]}
-                  />
-                </div>
-              </Divider>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <CustomTextInput
-                    control={control}
-                    name="spg_name_plate_unit_name"
-                    label="Unit Name"
-                    disabled={watch("is_spg_applicable") === "0"}
-                  />
-                </div>
-                <div className="flex-1">
-                  <CustomTextInput
-                    control={control}
-                    name="spg_name_plate_capacity"
-                    label="Capacity"
-                    disabled={watch("is_spg_applicable") === "0"}
-                  />
-                </div>
-                <div className="flex-1">
-                  <CustomTextInput
-                    control={control}
-                    name="spg_name_plate_manufacturing_year"
-                    label="Year of Manufacturing"
-                    disabled={watch("is_spg_applicable") === "0"}
-                  />
-                </div>
+          <>
+            <Divider>
+              <span className="font-bold text-slate-700">
+                Name Plate Details
+              </span>
+              <div>
+                <CustomRadioSelect
+                  control={control}
+                  name="is_spg_applicable"
+                  label=""
+                  options={[
+                    { label: "Yes", value: "1" },
+                    { label: "No", value: "0" },
+                  ]}
+                />
               </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <CustomTextInput
-                    control={control}
-                    name="spg_name_plate_weight"
-                    label="Weight"
-                    disabled={watch("is_spg_applicable") === "0"}
-                  />
-                </div>
-                <div className="flex-1">
-                  <CustomTextInput
-                    control={control}
-                    name="spg_name_plate_oc_number"
-                    label="OC No."
-                    disabled={watch("is_spg_applicable") === "0"}
-                  />
-                </div>
-                <div className="flex-1">
-                  <CustomTextInput
-                    control={control}
-                    name="spg_name_plate_part_code"
-                    label="Part Code"
-                    disabled={watch("is_spg_applicable") === "0"}
-                  />
-                </div>
+            </Divider>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <CustomTextInput
+                  control={control}
+                  name="spg_name_plate_unit_name"
+                  label="Unit Name"
+                  disabled={watch("is_spg_applicable") === "0"}
+                />
               </div>
-            </>
-          )}
+              <div className="flex-1">
+                <CustomTextInput
+                  control={control}
+                  name="spg_name_plate_capacity"
+                  label="Capacity"
+                  disabled={watch("is_spg_applicable") === "0"}
+                />
+              </div>
+              <div className="flex-1">
+                <CustomTextInput
+                  control={control}
+                  name="spg_name_plate_manufacturing_year"
+                  label="Year of Manufacturing"
+                  disabled={watch("is_spg_applicable") === "0"}
+                />
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <CustomTextInput
+                  control={control}
+                  name="spg_name_plate_weight"
+                  label="Weight"
+                  disabled={watch("is_spg_applicable") === "0"}
+                />
+              </div>
+              <div className="flex-1">
+                <CustomTextInput
+                  control={control}
+                  name="spg_name_plate_oc_number"
+                  label="OC No."
+                  disabled={watch("is_spg_applicable") === "0"}
+                />
+              </div>
+              <div className="flex-1">
+                <CustomTextInput
+                  control={control}
+                  name="spg_name_plate_part_code"
+                  label="Part Code"
+                  disabled={watch("is_spg_applicable") === "0"}
+                />
+              </div>
+            </div>
+          </>
+        )}
 
         <div className="mt-4 w-full">
           <CustomTextAreaInput

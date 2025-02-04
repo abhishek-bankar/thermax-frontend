@@ -16,6 +16,7 @@ interface CustomAutoCompleteProps {
   createOptionUrl: string;
   defaultOption?: string;
   reset?: boolean;
+  mutateUrl?: string;
   extraParams?: any;
 }
 
@@ -30,6 +31,7 @@ export default function CustomAutoComplete({
   createOptionUrl,
   defaultOption,
   reset,
+  mutateUrl,
   extraParams,
 }: CustomAutoCompleteProps) {
   const [typedValue, setTypedValue] = useState<string>("");
@@ -60,7 +62,7 @@ export default function CustomAutoComplete({
         ...extraParams,
       });
       onChange(value);
-      mutate(createOptionUrl); // Trigger SWR to re-fetch data
+      mutate(mutateUrl); // Trigger SWR to re-fetch data
       message.success(`Option "${value}" created successfully!`);
     } catch (error: any) {
       const errorObj = JSON.parse(error?.message) as any;

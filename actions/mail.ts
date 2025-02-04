@@ -417,7 +417,12 @@ export const sendMail = async (type: string, payload: any) => {
         owner_last_name: project_creator?.last_name,
         approvar_name: User?.first_name + " " + User?.last_name,
       }),
-      attachments: [payload.attachments],
+      attachments: [
+        {
+          ...payload.attachments,
+          path: `${process.env.FRAPPE_BASE_URL}${payload.attachments.file_url}`,
+        },
+      ],
     };
   }
   if (type === "design_basis_approved") {

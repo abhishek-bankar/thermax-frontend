@@ -56,7 +56,6 @@ export default function DocumentRevision() {
   const projectOwnerEmail = projectData?.owner;
   const projectDivision = projectData?.division;
   const userDivision = userInfo?.division;
-  console.log(revisionHistory);
 
   const handleReviewSubmission = async (record: any) => {
     const revision_id = record?.key;
@@ -193,6 +192,9 @@ export default function DocumentRevision() {
         }
       );
       mutate(dbRevisionHistoryUrl);
+      mutate(
+        `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"], ["status", "=", "${DB_REVISION_STATUS.Released}"]]`
+      );
       message.success("Design Basis revision is released and locked");
     } catch (error) {
       message.error("Error releasing Design Basis revision");
@@ -258,9 +260,6 @@ export default function DocumentRevision() {
     }
   };
 
-  // console.log(userInfo);
-  // console.log(revisionHistory);
-
   // Ensure columns is defined as an array of ColumnType
   const columns: TableColumnsType = [
     {
@@ -281,7 +280,10 @@ export default function DocumentRevision() {
                 style={{ color: "#fef65b", fontSize: "1.2rem" }}
               />
             }
-            disabled={record.status === DB_REVISION_STATUS.Released}
+            disabled={[
+              DB_REVISION_STATUS.Released,
+              DB_REVISION_STATUS.Copied,
+            ].includes(record.status)}
           >
             {text}
           </Button>
@@ -293,7 +295,8 @@ export default function DocumentRevision() {
       dataIndex: "status",
       render: (text, record) => {
         const projectApproverEmail = record.approverEmail;
-        let status = text;
+        let status = record.status;
+        console.log("status", record.documentRevision, status);
 
         switch (status) {
           case DB_REVISION_STATUS.Submitted:
@@ -319,6 +322,9 @@ export default function DocumentRevision() {
             break;
           case DB_REVISION_STATUS.Released:
             status = "Released & Locked";
+            break;
+          case DB_REVISION_STATUS.Copied:
+            status = "Revision Released";
             break;
           default:
             status = "Review Unsubmitted";
@@ -425,6 +431,8 @@ export default function DocumentRevision() {
                               DB_REVISION_STATUS.Released,
                               DB_REVISION_STATUS.Submitted,
                               DB_REVISION_STATUS.Approved,
+                              DB_REVISION_STATUS.Copied,
+                              DB_REVISION_STATUS.ResubmittedAgain,
                             ].includes(record?.status) ||
                             userInfo?.email !== record.owner
                               ? "grey"
@@ -440,6 +448,7 @@ export default function DocumentRevision() {
                         DB_REVISION_STATUS.Submitted,
                         DB_REVISION_STATUS.Approved,
                         DB_REVISION_STATUS.ResubmittedAgain,
+                        DB_REVISION_STATUS.Copied,
                       ].includes(record?.status) ||
                       userInfo?.email !== record.owner ||
                       userDivision !== projectDivision
@@ -459,17 +468,15 @@ export default function DocumentRevision() {
                     <Button
                       type="link"
                       shape="circle"
-                      icon={
-                     
-                        <RollbackOutlined />
+                      icon={<RollbackOutlined />}
+                      onClick={async () =>
+                        await handleRecallOwnerAction(record)
                       }
-                      onClick={async () => await handleRecallOwnerAction(record)}
-                   
                     />
                   </Tooltip>
                 </div>
               )}
-         
+
             <div
               className={clsx(
                 projectApproverEmail !== userInfo.email && "hidden"
@@ -546,20 +553,20 @@ export default function DocumentRevision() {
             </div>
             {[
               DB_REVISION_STATUS.Approved,
+              DB_REVISION_STATUS.Resubmitted,
+              DB_REVISION_STATUS.ResubmittedAgain,
             ].includes(record?.status) &&
-            projectApproverEmail === userInfo.email &&
+              projectApproverEmail === userInfo.email &&
               userDivision === projectDivision && (
                 <div>
                   <Tooltip title={"Recall"}>
                     <Button
                       type="link"
                       shape="circle"
-                      icon={
-                     
-                        <RollbackOutlined />
+                      icon={<RollbackOutlined />}
+                      onClick={async () =>
+                        await handleRecallApproverAction(record)
                       }
-                      onClick={async () => await handleRecallApproverAction(record)}
-                   
                     />
                   </Tooltip>
                 </div>
@@ -586,7 +593,12 @@ export default function DocumentRevision() {
               }
               onClick={() => handleRelease(record.key)}
             >
-              Release
+              {[
+                DB_REVISION_STATUS.Released,
+                DB_REVISION_STATUS.Copied,
+              ].includes(record.status)
+                ? "Released"
+                : "Release"}
             </Button>
           </div>
         );
@@ -603,7 +615,6 @@ export default function DocumentRevision() {
     approverEmail: item.approver_email,
     owner: item.owner,
   }));
-  // console.log(revisionHistory);
 
   return (
     <>

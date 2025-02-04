@@ -51,14 +51,11 @@ export default function ResubmitModel({
       let revisionData = await getData(
         `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectData.name}"], ["status", "=", "${DB_REVISION_STATUS.Submitted}"]]&fields=["*"]`
       );
-      console.log(revisionData.length);
       if (revisionData.length === 0) {
-        console.log(revisionData);
         revisionData = await getData(
           `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${projectData.name}"], ["status", "=", "${DB_REVISION_STATUS.ResubmittedAgain}"]]&fields=["*"]`
         );
       }
-      console.log(revisionData);
 
       const revision_id = revisionData[0]?.name;
       if (!revision_id) {
@@ -91,18 +88,6 @@ export default function ResubmitModel({
       //   subject: `Design Basis Approval - EnIMAX - ${projectData?.project_oc_number}`,
       //   attachments: [{ file_url: attachment_url }],
       // });
-      console.log(
-        {
-          recipient_email: projectData?.approver,
-          project_owner_email: projectData?.owner,
-          project_oc_number: projectData?.project_oc_number,
-          project_name: projectData?.project_name,
-          feedback_description: data.feedback_description,
-          subject: `Design Basis Approval - EnIMAX - ${projectData?.project_oc_number}`,
-          attachments: [{ file_url: attachment_url }],
-        },
-        "payload for email"
-      );
 
       await sendMail("resubmit_for_review", {
         recipient_email: projectData?.approver,
@@ -111,7 +96,10 @@ export default function ResubmitModel({
         project_name: projectData?.project_name,
         feedback_description: data.feedback_description,
         subject: `Design Basis Approval - EnIMAX - ${projectData?.project_oc_number}`,
-        attachments: [{ file_url: attachment_url }],
+        attachments: {
+          file_url: attachment_url,
+          filename: email_attachment.name,
+        },
       });
       mutate(dbRevisionHistoryUrl);
       setOpen(false);

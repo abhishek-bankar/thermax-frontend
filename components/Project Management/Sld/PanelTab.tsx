@@ -355,6 +355,7 @@ const PanelTab: React.FC<Props> = ({
       })),
     [sldRevisionsData]
   );
+  
   useEffect(() => {
     const in_process = sldRevisionsData?.some(
       (item: any) => item.status === "IN_PROCESS" || item.status === "IN_QUEUE"

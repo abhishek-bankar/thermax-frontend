@@ -50,13 +50,13 @@ const useDataFetching = (project_id: string) => {
   const [hasInProcessItems, setHasInProcessItems] = useState(false);
   const fetchData = useCallback(async () => {
     try {
-      setIsLoading(false);
+      // setIsLoading(true);
       const projectData = await getData(`${PROJECT_API}/${project_id}`);
 
       const cableTrayRevisions = await getData(
         `${CABLE_TRAY_REVISION_HISTORY_API}?fields=["*"]&filters=[["project_id", "=", "${project_id}"]]`
       );
-      const cable_schedule_data = await getLatestCableScheduleRevision(
+      const cable_schedule_data: any = await getLatestCableScheduleRevision(
         project_id
       );
       const design_basis_data = await getLatestDesignBasisRevision(project_id);
@@ -90,7 +90,7 @@ const useDataFetching = (project_id: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [project_id]);
 
   useEffect(() => {
     fetchData();
@@ -130,7 +130,8 @@ const CableTray: React.FC = ({}) => {
   const userDivision = userInfo?.division;
   const projectDivision = projectData?.division;
   // console.log(projectDivision);
-  console.log(hasInProcessItems);
+  console.log(cableScheduleRevisionId);
+  console.log(designBasisRevisionId);
   console.log(cableTrayRevisions);
   // let revisionNo = 0;
   useEffect(() => {
@@ -169,7 +170,7 @@ const CableTray: React.FC = ({}) => {
       }
     } else if (record.status === SLD_REVISION_STATUS.SUCCESS) {
       const link = document.createElement("a");
-      link.href = record.sld_path;
+      link.href = record.output_path;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -330,7 +331,10 @@ const CableTray: React.FC = ({}) => {
                   <Button
                     type="link"
                     shape="circle"
-                    disabled={!record?.is_saved || record.status === SLD_REVISION_STATUS.ERROR}
+                    disabled={
+                      !record?.is_saved ||
+                      record.status === SLD_REVISION_STATUS.ERROR
+                    }
                     icon={
                       <CloudDownloadOutlined
                         style={{
@@ -410,52 +414,111 @@ const CableTray: React.FC = ({}) => {
         },
       },
     ],
-    []
+    [designBasisRevisionId, cableScheduleRevisionId]
   );
+  console.log(designBasisRevisionId, "Design basis data save");
+  console.log(cableScheduleRevisionId, "Design basis data save");
+  // const handleSave = async (record: any) => {
+  //   console.log(record);
+  //   if (record.input_path.length < 5) {
+  //     message.error("Please Upload Drawing File");
+  //     return;
+  //   }
+  //   if (!designBasisRevisionId) {
 
-  const handleSave = async (record: any) => {
-    console.log(record);
-    if (record.input_path.length < 5) {
-      // console.log(record.input_path);
+  //     message.error("Design Basis Id Missing");
+  //     return;
+  //   }
+  //   if (!cableScheduleRevisionId) {
 
-      message.error("Please Upload Drawing File");
-      return;
-    }
-    const key = record.key;
-    // console.log(sld_revision_id);
-    console.log(designBasisRevisionId, "Design basis data save");
-    console.log(cableScheduleRevisionId, "Design basis data save");
+  //     message.error("Cable Schedule Id Missing");
+  //     return;
+  //   }
+  //   const key = record.key;
+  //   console.log(designBasisRevisionId, "Design basis data save");
+  //   console.log(cableScheduleRevisionId, "Design basis data save");
 
-    // console.log(designBasisData);
+  //   const payload = {
+  //     design_basis_revision_id: designBasisRevisionId,
+  //     cable_schedule_revision_id: cableScheduleRevisionId,
+  //     is_saved: 1,
+  //     status: SLD_REVISION_STATUS.DEFAULT,
+  //   };
+  //   try {
+  //     console.log(payload);
+  //     // console.log(`${GA_REVISIONS_API}/${key}`);
 
-    const payload = {
-      design_basis_revision_id: designBasisRevisionId,
-      cable_schedule_revision_id: cableScheduleRevisionId,
-      is_saved: 1,
-      status: SLD_REVISION_STATUS.DEFAULT,
-    };
-    try {
-      console.log(payload);
-      // console.log(`${GA_REVISIONS_API}/${key}`);
+  //     const response = await updateData(
+  //       `${CABLE_TRAY_REVISION_HISTORY_API}/${key}`,
+  //       false,
+  //       payload
+  //     );
+  //     if (response) {
+  //       const lastModified = convertToFrappeDatetime(
+  //         new Date(response?.modified)
+  //       );
+  //       // setLastModified(lastModified);
+  //     }
+  //     console.log(response);
+  //     refetch();
+  //     message.success("Cable Tray Saved");
+  //   } catch (error) {
+  //     message.error("Unable to Save Cable Tray");
+  //   }
+  // };
 
-      const response = await updateData(
-        `${CABLE_TRAY_REVISION_HISTORY_API}/${key}`,
-        false,
-        payload
-      );
-      if (response) {
-        const lastModified = convertToFrappeDatetime(
-          new Date(response?.modified)
-        );
-        // setLastModified(lastModified);
+  const handleSave = useCallback(
+    async (record: any) => {
+      console.log(record);
+      if (record.input_path.length < 5) {
+        message.error("Please Upload Drawing File");
+        return;
       }
-      console.log(response);
-      refetch();
-      message.success("Cable Tray Saved");
-    } catch (error) {
-      message.error("Unable to Save Cable Tray");
-    }
-  };
+      if (!designBasisRevisionId) {
+        message.error("Design Basis Id Missing");
+        return;
+      }
+      if (!cableScheduleRevisionId) {
+        message.error("Cable Schedule Id Missing");
+        return;
+      }
+
+      const key = record.key;
+      console.log(designBasisRevisionId, "Design basis data save");
+      console.log(cableScheduleRevisionId, "Design basis data save");
+
+      const payload = {
+        design_basis_revision_id: designBasisRevisionId,
+        cable_schedule_revision_id: cableScheduleRevisionId,
+        is_saved: 1,
+        status: SLD_REVISION_STATUS.DEFAULT,
+      };
+
+      try {
+        console.log(payload);
+
+        const response = await updateData(
+          `${CABLE_TRAY_REVISION_HISTORY_API}/${key}`,
+          false,
+          payload
+        );
+
+        if (response) {
+          const lastModified = convertToFrappeDatetime(
+            new Date(response?.modified)
+          );
+          // setLastModified(lastModified);
+        }
+
+        console.log(response);
+        refetch();
+        message.success("Cable Tray Saved");
+      } catch (error) {
+        message.error("Unable to Save Cable Tray");
+      }
+    },
+    [designBasisRevisionId, cableScheduleRevisionId, refetch] // Dependencies
+  );
   const onUploadSuccess = async (path: string) => {
     console.log(revisionToUploadFile);
 

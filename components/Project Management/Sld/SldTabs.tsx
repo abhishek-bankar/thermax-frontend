@@ -156,6 +156,7 @@ const SLDTabs: React.FC<Props> = ({
 
   const getLoadListData = () => {
     if (loadListData.length && projectPanelData.length) {
+      setModalLoading(true)
       const panelWiseData = projectPanelData.reduce((acc: any, panel: any) => {
         const panelName = panel.panel_name;
         const panelId = panel.name;
@@ -207,6 +208,9 @@ const SLDTabs: React.FC<Props> = ({
 
       setPanelWiseData(panelWiseData);
     }
+    setModalLoading(false)
+    message.success("Load List Data Fetched Successfully")
+
   };
 
   return (

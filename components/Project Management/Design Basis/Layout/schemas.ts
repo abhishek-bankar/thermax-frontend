@@ -203,10 +203,12 @@ export const cableTrayValidationSchema = zod.object({
     required_error: "Ladder type is required",
     message: "Ladder type is required",
   }),
-  cct_ladder_type_width: zod.string({
-    required_error: "Width is required",
-    message: "Width is required",
-  }),
+  cct_ladder_type_width: zod
+    .string({
+      required_error: "Width is required",
+      message: "Width is required",
+    })
+    .optional(),
   cct_ladder_type_height: zod.string({
     required_error: "Height is required",
     message: "Height is required",
@@ -263,10 +265,12 @@ export const cableTrayValidationSchema = zod.object({
     required_error: "Ladder type is required",
     message: "Ladder type is required",
   }),
-  sct_ladder_type_width: zod.string({
-    required_error: "Width is required",
-    message: "Width is required",
-  }),
+  sct_ladder_type_width: zod
+    .string({
+      required_error: "Width is required",
+      message: "Width is required",
+    })
+    .optional(),
   sct_ladder_type_height: zod.string({
     required_error: "Height is required",
     message: "Height is required",

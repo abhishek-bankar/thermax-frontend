@@ -170,7 +170,7 @@ const CableTray: React.FC = ({}) => {
       }
     } else if (record.status === SLD_REVISION_STATUS.SUCCESS) {
       const link = document.createElement("a");
-      link.href = record.sld_path;
+      link.href = record.output_path;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

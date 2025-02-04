@@ -31,6 +31,7 @@ import {
   convertToFrappeDatetime,
   moveNAtoEnd,
   parseToArray,
+  sortDropdownOptions,
 } from "@/utils/helpers";
 import CustomMultiSelect from "@/components/FormInputs/CustomMultiSelect";
 
@@ -50,7 +51,7 @@ const getDefaultValues = (
     incomer_above_type: pccPanelData?.incomer_above_type || "EDO ACB",
     panel_incomer_protection: pccPanelData?.panel_incomer_protection
     ? parseToArray(pccPanelData?.panel_incomer_protection)
-    : ["Only Magnetic Short circuit Protection"],
+    : ["Only Magnetic Short Circuit Protection"],
     is_under_or_over_voltage_selected:
       Boolean(pccPanelData?.is_under_or_over_voltage_selected) || false,
     is_lsig_selected: Boolean(pccPanelData?.is_lsig_selected) || false,
@@ -542,7 +543,7 @@ const PCCPanel = ({
               control={control}
               name="incomer_ampere"
               label="Ampere"
-              options={incomer_ampere_options || []}
+              options={sortDropdownOptions(incomer_ampere_options) || []}
               size="small"
             />
           </div>

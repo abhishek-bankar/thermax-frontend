@@ -22,6 +22,7 @@ import {
   MOTOR_SPECIFICATIONS_REVISION_HISTORY_API,
   PANEL_SPECS_REVISIONS_API,
   SLD_REVISIONS_API,
+  STANDARD_MOTOR_PARTCODE_LIBRARY,
 } from "@/configs/api-endpoints";
 import { sortDatewise } from "@/utils/helpers";
 import { getLatestDesignBasisRevision } from "./design-basis";
@@ -92,6 +93,49 @@ export const getCurrentCalculation = async (loadListData: any) => {
     return {
       ...item,
       motorRatedCurrent: current.toFixed(2),
+    };
+  });
+
+  return calculatedData;
+};
+export const getMotorPartCode = async (loadListData: any) => {
+  const division = loadListData.divisionName;
+  const calcData = loadListData.data;
+  const part_code_library = await getData(
+    `${STANDARD_MOTOR_PARTCODE_LIBRARY}?fields=["*"]&limit=3000`
+  );
+  const calculatedData = calcData.map((item: any) => {
+    const {
+      motor_make,
+      no_of_poles,
+      kw,
+      motor_efficiency,
+      motor_mounting_type,
+      motor_frame_size,
+      supply_voltage,
+    } = item;
+    // let current = 0;
+
+    const item_found = part_code_library.find(
+      (el: any) =>
+        el.make === motor_make &&
+        el.kw === kw &&
+        el.pole === no_of_poles &&
+        el.voltage === supply_voltage &&
+        el.mounting === motor_mounting_type &&
+        el.frame_size === motor_frame_size &&
+        el.efficiency_class === motor_efficiency
+    );
+    if (!item_found) {
+      return {
+        ...item,
+        part_code: "",
+      };
+    }
+
+    return {
+      ...item,
+      part_code: item_found.part_number,
     };
   });
 
@@ -970,6 +1014,9 @@ export const copyRevision = async (payload: any, project_id: string) => {
         panel_name: existing_revision.panel_name,
         status: SLD_REVISION_STATUS.DEFAULT,
         clone_note,
+        switchgear_selection_data: existing_revision.switchgear_selection_data,
+        incomer_data: existing_revision.incomer_data,
+        busbar_sizing_data: existing_revision.busbar_sizing_data,
       };
 
       const response = await createData(SLD_REVISIONS_API, false, new_revision);
@@ -978,7 +1025,9 @@ export const copyRevision = async (payload: any, project_id: string) => {
           is_copied: 1,
         });
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
   if (module_name === "load-list") {
     copy_load_list();

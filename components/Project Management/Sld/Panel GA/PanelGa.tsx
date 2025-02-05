@@ -9,9 +9,23 @@ import {
   SaveTwoTone,
   SyncOutlined,
 } from "@ant-design/icons";
-import { Button, message, Table, TableColumnsType, Tag, Tooltip } from "antd";
+import {
+  Button,
+  message,
+  Spin,
+  Table,
+  TableColumnsType,
+  Tag,
+  Tooltip,
+} from "antd";
 import { useParams } from "next/navigation";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useLoading } from "@/hooks/useLoading";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useGetData } from "@/hooks/useCRUD";
@@ -22,6 +36,7 @@ const useDataFetching = (project_id: string, panel: any) => {
   const [isLoading, setIsLoading] = useState(true);
   const [panelGARevisions, setpanelGARevisions] = useState<any>();
   const [panelData, setPanelData] = useState<any>();
+  const [hasInProcessItems, setHasInProcessItems] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -38,6 +53,13 @@ const useDataFetching = (project_id: string, panel: any) => {
           const dateB = new Date(b.creation);
           return dateA.getTime() - dateB.getTime();
         });
+
+        const hasProcessingItems = sortedData.some(
+          (item: any) =>
+            item.status === SLD_REVISION_STATUS.IN_PROCESS ||
+            item.status === SLD_REVISION_STATUS.IN_QUEUE
+        );
+        setHasInProcessItems(hasProcessingItems);
         setpanelGARevisions(sortedData);
       }
       const getFields = (name: string) => {
@@ -125,6 +147,7 @@ const useDataFetching = (project_id: string, panel: any) => {
     designBasisData: panelData,
     panelGARevisions,
     isLoading,
+    hasInProcessItems,
     refetch: fetchData,
   };
 };
@@ -150,10 +173,8 @@ const PanelGa: React.FC<Props> = ({
     (el: any) => el.panel_name === panelData.panelName
   );
 
-  const { panelGARevisions, designBasisData, refetch } = useDataFetching(
-    project_id,
-    panel
-  );
+  const { panelGARevisions, designBasisData, hasInProcessItems, refetch } =
+    useDataFetching(project_id, panel);
   console.log(designBasisData);
   console.log(panelGARevisions);
   const { setLoading } = useLoading();
@@ -161,6 +182,7 @@ const PanelGa: React.FC<Props> = ({
     division: string;
   } = useCurrentUser();
   const [setIntervaId, setSetIntervaId] = useState<any>(null);
+  const refreshIntervalRef = useRef<NodeJS.Timeout>();
 
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
   const [versionToCopy, setVersionToCopy] = useState(null);
@@ -197,6 +219,21 @@ const PanelGa: React.FC<Props> = ({
     }
   }, [panelGARevisions]);
   useEffect(() => {
+    if (hasInProcessItems) {
+      refreshIntervalRef.current = setInterval(refetch, 30000);
+    } else {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    }
+
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [hasInProcessItems, refetch]);
+  useEffect(() => {
     if (!versionToCopy) {
       setTimeout(() => {
         refetch();
@@ -214,22 +251,8 @@ const PanelGa: React.FC<Props> = ({
           false,
           { status: SLD_REVISION_STATUS.IN_QUEUE }
         );
-        // setLoading(false);
         console.log(respose);
         message.success("Panel GA is Being Prepared Please Wait For A While");
-        // const interval = setInterval(async () => {
-        //   getSLDRevision();
-        //   // const revisionData:any = await getSLDRevision();
-        //   // const updatedRecord = revisionData.find((r:any) => r.key === record.key); // Find the specific record by key
-        //   // if (updatedRecord && updatedRecord.status === SLD_REVISION_STATUS.SUCCESS) {
-        //   //   clearInterval(interval); // Stop the interval when the status is SUCCESS
-        //   //   const link = document.createElement("a");
-        //   //   link.href = updatedRecord.sld_path;
-        //   //   document.body.appendChild(link);
-        //   //   link.click();
-        //   //   document.body.removeChild(link);
-        //   // }
-        // }, 30000); // 30 seconds interval
       } catch (error) {
       } finally {
         refetch();
@@ -245,43 +268,46 @@ const PanelGa: React.FC<Props> = ({
   };
   console.log(designBasisData, "Design basis data ");
 
-  const handleSave = async (key: any) => {
-    console.log(key);
-    console.log(sld_revision_id);
-    console.log(designBasisData, "Design basis data save");
+  const handleSave = useCallback(
+    async (key: any) => {
+      console.log(key);
+      console.log(sld_revision_id);
+      console.log(designBasisData, "Design basis data save");
 
-    // console.log(designBasisData);
+      const payload = {
+        panel_ga_data: [
+          {
+            ...designBasisData,
+            switchgear_selection_revision_id: sld_revision_id,
+          },
+        ],
+        status: SLD_REVISION_STATUS.DEFAULT,
+      };
 
-    const payload = {
-      panel_ga_data: [
-        {
-          ...designBasisData,
-          switchgear_selection_revision_id: sld_revision_id,
-        },
-      ],
-      status: SLD_REVISION_STATUS.DEFAULT,
-    };
-    try {
-      console.log(payload);
-      console.log(`${GA_REVISIONS_API}/${key}`);
+      try {
+        console.log(payload);
+        console.log(`${GA_REVISIONS_API}/${key}`);
 
-      const response = await updateData(
-        `${GA_REVISIONS_API}/${key}`,
-        false,
-        payload
-      );
-      if (response) {
-        const lastModified = convertToFrappeDatetime(
-          new Date(response?.modified)
+        const response = await updateData(
+          `${GA_REVISIONS_API}/${key}`,
+          false,
+          payload
         );
-        setLastModified(lastModified);
-        refetch();
+
+        if (response) {
+          const lastModified = convertToFrappeDatetime(
+            new Date(response?.modified)
+          );
+          setLastModified(lastModified);
+          refetch();
+        }
+        message.success("Panel GA Saved");
+      } catch (error) {
+        message.error("Unable to Save Panel GA");
       }
-      message.success("Panel GA Saved");
-    } catch (error) {
-      message.error("Unable to Save Panel GA");
-    }
-  };
+    },
+    [sld_revision_id, designBasisData, setLastModified, refetch] // Dependencies for memoization
+  );
   const handleRelease = async (record: any) => {
     console.log(record);
     try {
@@ -383,31 +409,44 @@ const PanelGa: React.FC<Props> = ({
       {
         title: () => <div className="text-center">Download</div>,
         dataIndex: "download",
-        render: (text, record) => (
-          <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
-            <Tooltip
-              title={
-                record.status === SLD_REVISION_STATUS.DEFAULT
-                  ? "Submit To Download"
-                  : "Download"
-              }
-            >
-              <Button
-                type="link"
-                shape="circle"
-                icon={
-                  <CloudDownloadOutlined
-                    style={{
-                      fontSize: "1.3rem",
-                      color: "green",
-                    }}
-                    onClick={() => handleDownload(record)}
+        render: (text, record) => {
+          if (
+            record.status === SLD_REVISION_STATUS.IN_PROCESS ||
+            record.status === SLD_REVISION_STATUS.IN_QUEUE
+          ) {
+            return (
+              <div className="flex justify-center">
+                <Spin />
+              </div>
+            );
+          } else {
+            return (
+              <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
+                <Tooltip
+                  title={
+                    record.status === SLD_REVISION_STATUS.DEFAULT
+                      ? "Submit To Download"
+                      : "Download"
+                  }
+                >
+                  <Button
+                    type="link"
+                    shape="circle"
+                    icon={
+                      <CloudDownloadOutlined
+                        style={{
+                          fontSize: "1.3rem",
+                          color: "green",
+                        }}
+                        onClick={() => handleDownload(record)}
+                      />
+                    }
                   />
-                }
-              />
-            </Tooltip>
-          </div>
-        ),
+                </Tooltip>
+              </div>
+            );
+          }
+        },
       },
       {
         title: () => <div className="text-center">Create New Revision</div>,
@@ -463,23 +502,23 @@ const PanelGa: React.FC<Props> = ({
     ],
     []
   );
-  useEffect(() => {
-    const in_process = dataSource?.some(
-      (item: any) => item.status === "IN_PROCESS" || item.status === "IN_QUEUE"
-    );
-    if (in_process) {
-      const interval = setInterval(async () => {
-        refetch();
-      }, 30000);
-      setSetIntervaId(interval);
-    } else {
-      if (setIntervaId) {
-        clearInterval(setIntervaId);
-        setSetIntervaId(null);
-      }
-      // setSetIntervaId()
-    }
-  }, [setIntervaId, dataSource, refetch]);
+  // useEffect(() => {
+  //   const in_process = dataSource?.some(
+  //     (item: any) => item.status === "IN_PROCESS" || item.status === "IN_QUEUE"
+  //   );
+  //   if (in_process) {
+  //     const interval = setInterval(async () => {
+  //       refetch();
+  //     }, 30000);
+  //     setSetIntervaId(interval);
+  //   } else {
+  //     if (setIntervaId) {
+  //       clearInterval(setIntervaId);
+  //       setSetIntervaId(null);
+  //     }
+  //     // setSetIntervaId()
+  //   }
+  // }, [setIntervaId, dataSource, refetch]);
   const GARevisionTab = () => (
     <>
       <div className="text-end">

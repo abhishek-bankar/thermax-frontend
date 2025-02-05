@@ -8,6 +8,7 @@ import {
   Button,
   message,
   Popconfirm,
+  Spin,
   Table,
   TableColumnsType,
   Tabs,
@@ -21,6 +22,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import {
   convertToFrappeDatetime,
@@ -81,13 +83,16 @@ const PanelTab: React.FC<Props> = ({
   } = useCurrentUser();
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
   const [versionToCopy, setVersionToCopy] = useState(null);
+  const [hasInProcessItems, setHasInProcessItems] = useState(false);
+  const refreshIntervalRef = useRef<NodeJS.Timeout>();
 
   const userDivision = userInfo?.division;
   console.log(projectData, "project data");
 
   const projectDivision = projectData?.division;
-  const getSLDRevisions = async () => {
-    setLoading(true);
+
+  const getSLDRevisions = useCallback(async () => {
+    // setLoading(true);
     try {
       const response = await getAllSldRevisions(panelData?.panelId);
 
@@ -98,17 +103,52 @@ const PanelTab: React.FC<Props> = ({
         setLastModified(lastModified);
       }
 
+      const sortedData = response.sort((a: any, b: any) => {
+        const dateA = new Date(a.creation);
+        const dateB = new Date(b.creation);
+        return dateA.getTime() - dateB.getTime();
+      });
+
+      const hasProcessingItems = sortedData.some(
+        (item: any) =>
+          item.status === SLD_REVISION_STATUS.IN_PROCESS ||
+          item.status === SLD_REVISION_STATUS.IN_QUEUE
+      );
+
+      setHasInProcessItems(hasProcessingItems);
       setSldRevisionsData(response);
     } catch (error) {
+      console.error("Error fetching SLD revisions:", error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
-  };
+  }, [panelData?.panelId, setLastModified]);
   useEffect(() => {
     getSLDRevisions();
   }, []);
+  useEffect(() => {
+    if (hasInProcessItems) {
+      refreshIntervalRef.current = setInterval(getSLDRevisions, 30000);
+    } else {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    }
 
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+    };
+  }, [getSLDRevisions, hasInProcessItems]);
   const handleDownload = async (record: any) => {
+    if (
+      record.status === SLD_REVISION_STATUS.IN_PROCESS ||
+      record.status === SLD_REVISION_STATUS.IN_QUEUE
+    ) {
+      return message.error("SLD is in process");
+    }
+
     if (record.status === SLD_REVISION_STATUS.DEFAULT) {
       try {
         const respose = await updateData(
@@ -118,21 +158,21 @@ const PanelTab: React.FC<Props> = ({
         );
         console.log(respose);
         message.success("SLD is Being Prepared Please Wait For A While");
-        const interval = setInterval(async () => {
-          getSLDRevisions();
-          // const revisionData:any = await getSLDRevisions();
-          // const updatedRecord = revisionData.find((r:any) => r.key === record.key); // Find the specific record by key
-          // if (updatedRecord && updatedRecord.status === SLD_REVISION_STATUS.SUCCESS) {
-          //   clearInterval(interval); // Stop the interval when the status is SUCCESS
-          //   const link = document.createElement("a");
-          //   link.href = updatedRecord.sld_path;
-          //   document.body.appendChild(link);
-          //   link.click();
-          //   document.body.removeChild(link);
-          // }
-        }, 30000); // 30 seconds interval
-        setIsSLDInProcess(true);
-        setSetIntervaId(interval);
+        getSLDRevisions();
+        // const interval = setInterval(async () => {
+        //   // const revisionData:any = await getSLDRevisions();
+        //   // const updatedRecord = revisionData.find((r:any) => r.key === record.key); // Find the specific record by key
+        //   // if (updatedRecord && updatedRecord.status === SLD_REVISION_STATUS.SUCCESS) {
+        //   //   clearInterval(interval); // Stop the interval when the status is SUCCESS
+        //   //   const link = document.createElement("a");
+        //   //   link.href = updatedRecord.sld_path;
+        //   //   document.body.appendChild(link);
+        //   //   link.click();
+        //   //   document.body.removeChild(link);
+        //   // }
+        // }, 30000); // 30 seconds interval
+        // setIsSLDInProcess(true);
+        // setSetIntervaId(interval);
       } catch (error) {
       } finally {
       }
@@ -196,11 +236,21 @@ const PanelTab: React.FC<Props> = ({
       {
         title: () => <div className="text-center">Status</div>,
         dataIndex: "status",
-        render: (text) => (
-          <div className="text-center">
-            <Tag color="green">{text}</Tag>
-          </div>
-        ),
+        render: (text, record) => {
+          if (record.is_released && SLD_REVISION_STATUS.SUCCESS) {
+            return (
+              <div className="flex justify-center">
+                <Tag color="green">RELEASED</Tag>
+              </div>
+            );
+          } else {
+            return (
+              <div className="text-center">
+                <Tag color="green">{text}</Tag>
+              </div>
+            );
+          }
+        },
       },
       {
         title: () => <div className="text-center">Document Revision</div>,
@@ -219,46 +269,53 @@ const PanelTab: React.FC<Props> = ({
       {
         title: () => <div className="text-center">Download</div>,
         dataIndex: "download",
-        render: (text, record) => (
-          <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
-            <Tooltip
-              title={
-                record.status === SLD_REVISION_STATUS.DEFAULT
-                  ? "Submit To Download"
-                  : "Download"
-              }
-            >
-              <Button
-                type="link"
-                shape="circle"
-                disabled={sldRevisionsData.some(
-                  (item: any) => item.status === "IN_PROCESS"
-                )}
-                icon={
-                  <CloudDownloadOutlined
-                    style={{
-                      fontSize: "1.3rem",
-                      color: "green",
-                    }}
-                    onClick={() => handleDownload(record)}
-                  />
+        render: (text, record) => {
+          if (
+            record.status === SLD_REVISION_STATUS.IN_PROCESS ||
+            record.status === SLD_REVISION_STATUS.IN_QUEUE
+          ) {
+            return (
+              <div className="flex justify-center">
+                <Spin />
+              </div>
+            );
+          }
+
+          return (
+            <div className="flex flex-row justify-center gap-2 hover:cursor-pointer">
+              <Tooltip
+                title={
+                  record.status === SLD_REVISION_STATUS.DEFAULT
+                    ? "Submit To Download"
+                    : "Download"
                 }
-              />
-            </Tooltip>
-          </div>
-        ),
+              >
+                <Button
+                  type="link"
+                  shape="circle"
+                  disabled={sldRevisionsData.some(
+                    (item: any) => item.status === "IN_PROCESS"
+                  )}
+                  icon={
+                    <CloudDownloadOutlined
+                      style={{
+                        fontSize: "1.3rem",
+                        color: "green",
+                      }}
+                      onClick={() => handleDownload(record)}
+                    />
+                  }
+                />
+              </Tooltip>
+            </div>
+          );
+        },
       },
       {
         title: () => <div className="text-center">Create New Revision</div>,
         dataIndex: "clone",
         render: (_, record) => {
           console.log(record);
-          if (record.is_copied === 1) {
-            return null;
-          }
-          console.log(record.is_released);
-          console.log(userDivision !== projectDivision);
-          console.log(!record.is_released || userDivision !== projectDivision);
 
           return (
             <div className="text-center">
@@ -275,7 +332,9 @@ const PanelTab: React.FC<Props> = ({
                   }
                   onClick={() => handleClone(record)}
                   disabled={
-                    !record.is_released || userDivision !== projectDivision
+                    !record.is_released ||
+                    record.is_copied ||
+                    userDivision !== projectDivision
                   }
                 />
               </Tooltip>
@@ -312,22 +371,16 @@ const PanelTab: React.FC<Props> = ({
               okText="Yes"
               cancelText="No"
               placement="topRight"
-              disabled={
-                sldRevisionsData.some(
-                  (item: any) =>
-                    item.status === SLD_REVISION_STATUS.IN_PROCESS ||
-                    item.status === SLD_REVISION_STATUS.IN_QUEUE
-                ) ||
-                record.is_released === 1 ||
-                userDivision !== projectDivision
-              }
             >
               <Button
                 type="primary"
                 size="small"
                 name="Release"
                 disabled={
-                  record.is_released === 1 || userDivision !== projectDivision
+                  record.status === SLD_REVISION_STATUS.IN_PROCESS ||
+                  record.status === SLD_REVISION_STATUS.IN_QUEUE ||
+                  record.is_released === 1 ||
+                  userDivision !== projectDivision
                 }
               >
                 Release
@@ -337,7 +390,7 @@ const PanelTab: React.FC<Props> = ({
         ),
       },
     ],
-    []
+    [sldRevisionsData]
   );
 
   const dataSource = useMemo(
@@ -355,27 +408,27 @@ const PanelTab: React.FC<Props> = ({
       })),
     [sldRevisionsData]
   );
-  
-  useEffect(() => {
-    const in_process = sldRevisionsData?.some(
-      (item: any) => item.status === "IN_PROCESS" || item.status === "IN_QUEUE"
-    );
-    if (in_process) {
-      const interval = setInterval(async () => {
-        getSLDRevisions();
-      }, 30000);
-      setSetIntervaId(interval);
-    } else {
-      if (setIntervaId) {
-        clearInterval(setIntervaId);
-        setSetIntervaId(null);
-      }
-      // setSetIntervaId()
-    }
-  }, [setIntervaId, sldRevisionsData]);
+
+  // useEffect(() => {
+  //   const in_process = sldRevisionsData?.some(
+  //     (item: any) => item.status === "IN_PROCESS" || item.status === "IN_QUEUE"
+  //   );
+  //   if (in_process) {
+  //     const interval = setInterval(async () => {
+  //       getSLDRevisions();
+  //     }, 30000);
+  //     setSetIntervaId(interval);
+  //   } else {
+  //     if (setIntervaId) {
+  //       clearInterval(setIntervaId);
+  //       setSetIntervaId(null);
+  //     }
+  //     // setSetIntervaId()
+  //   }
+  // }, [getSLDRevisions, setIntervaId, sldRevisionsData]);
 
   const latestRevision = useMemo(
-    () => sortDatewise(sldRevisionsData)[0] ?? {},
+    () => sortDatewise(sldRevisionsData)[sldRevisionsData.length - 1] ?? {},
     [sldRevisionsData]
   );
   console.log(latestRevision, "latest rev");

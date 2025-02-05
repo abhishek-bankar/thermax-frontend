@@ -149,20 +149,14 @@ const useDataFetching = (
 
       const commonConfiguration = await getData(
         `${COMMON_CONFIGURATION_1}?fields=["*"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
-      );
-      // const commonConfiguration2 = await getData(
-      //   `${COMMON_CONFIGURATION_2}?fields=["*"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
-      // )
-      // const commonConfiguration3 = await getData(
-      //   `${COMMON_CONFIGURATION_3}?fields=["*"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
-      // )
-
-      // const commonConfiguration: any =  [...(commonConfiguration1 || []), ...(commonConfiguration2 || []), ...(commonConfiguration3 || [])].flat()
-      // console.log(revision_id, "revision_id");
+      ); 
 
       const sg_saved_data = await getData(
         `${SLD_REVISIONS_API}/${revision_id}`
       );
+      console.log(revision_id,"rajguru");
+      console.log(sg_saved_data,"rajguru");
+      
       const makeComponents = await getData(
         `${MAKE_OF_COMPONENT_API}?fields=["preferred_soft_starter","preferred_lv_switchgear","preferred_vfdvsd"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
       );

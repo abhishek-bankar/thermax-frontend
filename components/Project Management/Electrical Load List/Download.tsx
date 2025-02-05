@@ -147,7 +147,8 @@ const Download: React.FC<Props> = ({
   };
 
   const handleDownload = async (revision_id: string) => {
-    setDownloadIconSpin(true);
+    // setDownloadIconSpin(true);
+    setModalLoading(true);
 
     try {
       const base64Data: any = await downloadFile(getDownLoadEndpoint(), true, {
@@ -170,10 +171,8 @@ const Download: React.FC<Props> = ({
     } catch (error) {
       console.error(error);
       message.error("Unable to download file");
-
-      setDownloadIconSpin(false);
     } finally {
-      setDownloadIconSpin(false);
+      setModalLoading(false);
     }
   };
 

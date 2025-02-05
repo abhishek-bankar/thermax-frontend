@@ -18,8 +18,12 @@ export default async function MotorCanopyPage({
 
   return (
     <MotorCanopy
-      loadListLatestRevisionId={loadListRevisionData[0]?.name}
-      motorCanopyRevisionId={motorCanopyRevisionData[0]?.name}
+      loadListLatestRevisionId={
+        loadListRevisionData[loadListRevisionData.length - 1]?.name
+      }
+      motorCanopyRevisionId={
+        motorCanopyRevisionData[motorCanopyRevisionData.length - 1]?.name
+      }
     />
   );
 }

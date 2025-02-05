@@ -85,14 +85,19 @@ const CopyRevision: React.FC<CopyRevisionProps> = ({
       console.log(version);
 
       const revision_id = version?.key;
-      copyRevision(
+      await copyRevision(
         {
           revision_id,
           clone_notes,
           module_name: get_tab_name(tab),
         },
         project_id
-      ).then(() => updateTable(tab));
+      );
+      // .then(() =>
+      // );
+      setTimeout(() => {
+        updateTable(tab);
+      }, 3000);
 
       message.success("Revision Copied Successfully");
       handleCancel();

@@ -114,7 +114,7 @@ const PanelTab: React.FC<Props> = ({
         const respose = await updateData(
           `${SLD_REVISIONS_API}/${record.key}`,
           false,
-          { status: SLD_REVISION_STATUS.DOWNLOAD_READY }
+          { status: SLD_REVISION_STATUS.IN_QUEUE }
         );
         console.log(respose);
         message.success("SLD is Being Prepared Please Wait For A While");
@@ -168,6 +168,8 @@ const PanelTab: React.FC<Props> = ({
       setLoading(false);
     }
   }, []);
+  console.log(sldRevisionsData);
+
   const columns: TableColumnsType = useMemo(
     () => [
       {
@@ -312,7 +314,9 @@ const PanelTab: React.FC<Props> = ({
               placement="topRight"
               disabled={
                 sldRevisionsData.some(
-                  (item: any) => item.status === "IN_PROCESS"
+                  (item: any) =>
+                    item.status === SLD_REVISION_STATUS.IN_PROCESS ||
+                    item.status === SLD_REVISION_STATUS.IN_QUEUE
                 ) ||
                 record.is_released === 1 ||
                 userDivision !== projectDivision
@@ -351,9 +355,10 @@ const PanelTab: React.FC<Props> = ({
       })),
     [sldRevisionsData]
   );
+  
   useEffect(() => {
     const in_process = sldRevisionsData?.some(
-      (item: any) => item.status === "IN_PROCESS"
+      (item: any) => item.status === "IN_PROCESS" || item.status === "IN_QUEUE"
     );
     if (in_process) {
       const interval = setInterval(async () => {
@@ -367,7 +372,7 @@ const PanelTab: React.FC<Props> = ({
       }
       // setSetIntervaId()
     }
-  }, [sldRevisionsData]);
+  }, [setIntervaId, sldRevisionsData]);
 
   const latestRevision = useMemo(
     () => sortDatewise(sldRevisionsData)[0] ?? {},
@@ -494,7 +499,7 @@ const PanelTab: React.FC<Props> = ({
         items={tabItems}
         destroyInactiveTabPane
       />
-       <CopyRevision
+      <CopyRevision
         version={versionToCopy}
         setVersionToCopy={setVersionToCopy}
         tab={"sld_revision"}

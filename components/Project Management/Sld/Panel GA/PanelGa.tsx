@@ -98,8 +98,11 @@ const useDataFetching = (project_id: string, panel: any) => {
         )}?fields=["*"]&filters=[["panel_id", "=", "${panel?.name}"]]`
       );
       if (panelData) {
-        console.log(panelDataByType(panel?.panel_main_type, panelData[0]),"vishal 2");
-        
+        console.log(
+          panelDataByType(panel?.panel_main_type, panelData[0]),
+          "vishal 2"
+        );
+
         setPanelData(panelDataByType(panel?.panel_main_type, panelData[0]));
       }
       console.log(panelData);
@@ -157,6 +160,7 @@ const PanelGa: React.FC<Props> = ({
   const userInfo: {
     division: string;
   } = useCurrentUser();
+  const [setIntervaId, setSetIntervaId] = useState<any>(null);
 
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
   const [versionToCopy, setVersionToCopy] = useState(null);
@@ -202,12 +206,13 @@ const PanelGa: React.FC<Props> = ({
 
   const handleDownload = async (record: any) => {
     console.log(record);
+    setLoading(true);
     if (record.status === SLD_REVISION_STATUS.DEFAULT) {
       try {
         const respose = await updateData(
           `${GA_REVISIONS_API}/${record.key}`,
           false,
-          { status: SLD_REVISION_STATUS.DOWNLOAD_READY }
+          { status: SLD_REVISION_STATUS.IN_QUEUE }
         );
         // setLoading(false);
         console.log(respose);
@@ -227,6 +232,8 @@ const PanelGa: React.FC<Props> = ({
         // }, 30000); // 30 seconds interval
       } catch (error) {
       } finally {
+        refetch();
+        setLoading(false);
       }
     } else if (record.status === SLD_REVISION_STATUS.SUCCESS) {
       const link = document.createElement("a");
@@ -252,6 +259,7 @@ const PanelGa: React.FC<Props> = ({
           switchgear_selection_revision_id: sld_revision_id,
         },
       ],
+      status: SLD_REVISION_STATUS.DEFAULT,
     };
     try {
       console.log(payload);
@@ -267,6 +275,7 @@ const PanelGa: React.FC<Props> = ({
           new Date(response?.modified)
         );
         setLastModified(lastModified);
+        refetch();
       }
       message.success("Panel GA Saved");
     } catch (error) {
@@ -454,7 +463,23 @@ const PanelGa: React.FC<Props> = ({
     ],
     []
   );
-
+  useEffect(() => {
+    const in_process = dataSource?.some(
+      (item: any) => item.status === "IN_PROCESS" || item.status === "IN_QUEUE"
+    );
+    if (in_process) {
+      const interval = setInterval(async () => {
+        refetch();
+      }, 30000);
+      setSetIntervaId(interval);
+    } else {
+      if (setIntervaId) {
+        clearInterval(setIntervaId);
+        setSetIntervaId(null);
+      }
+      // setSetIntervaId()
+    }
+  }, [setIntervaId, dataSource, refetch]);
   const GARevisionTab = () => (
     <>
       <div className="text-end">

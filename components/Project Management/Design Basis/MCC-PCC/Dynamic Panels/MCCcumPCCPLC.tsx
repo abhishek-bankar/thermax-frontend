@@ -113,6 +113,7 @@ const getDefaultValues = (plcData: any) => {
     do_module_output_type:
       plcData?.do_module_output_type || "Potential Free Contacts",
     // Interposing Relay
+    is_interposing_relay_selected: plcData?.is_interposing_relay_selected,
     interposing_relay: plcData?.interposing_relay || "Applicable for DI",
     interposing_relay_contacts_rating:
       plcData?.interposing_relay_contacts_rating || "230 VAC, 5AMP",
@@ -393,6 +394,7 @@ const MCCcumPCCPLCPanel = ({
     "is_thermocouple_module_selected"
   );
   const is_universal_module_selected = watch("is_universal_module_selected");
+  const is_interposing_relay_selected = watch("is_interposing_relay_selected");
 
   const noOfContacts = [
     {
@@ -406,12 +408,15 @@ const MCCcumPCCPLCPanel = ({
       label: "2NO + 2NC",
     },
   ];
+
   useEffect(() => {
     window.scroll(0, 0);
   }, []);
+
   useEffect(() => {
     reset(getDefaultValues(plcPanelData));
   }, [plcPanelData, reset]);
+
   useEffect(() => {
     if (is_electronic_hooter_selected) {
       setValue("electronic_hooter_acknowledge", "Black");
@@ -1049,9 +1054,24 @@ const MCCcumPCCPLCPanel = ({
         </div>
 
         <Divider orientation="left" orientationMargin={0}>
-          <span className="text-sm font-bold text-blue-500">
-            Interposing Relay
-          </span>
+          <div className="flex gap-4 items-center">
+            <div>
+              <span className="text-sm font-bold text-blue-500">
+                Interposing Relay
+              </span>
+            </div>
+            <div className="flex-1">
+              <CustomRadioSelect
+                control={control}
+                name="is_interposing_relay_selected"
+                label=""
+                options={[
+                  { label: "Yes", value: 1 },
+                  { label: "No", value: 0 },
+                ]}
+              />
+            </div>
+          </div>
         </Divider>
         <div className="flex flex-col gap-4">
           <div className="flex gap-4">
@@ -1062,6 +1082,7 @@ const MCCcumPCCPLCPanel = ({
                 label="Interposing Relay"
                 size="small"
                 options={interposing_relay_options || []}
+                disabled={is_interposing_relay_selected === 0}
               />
             </div>
             <div className="flex-1">
@@ -1070,6 +1091,7 @@ const MCCcumPCCPLCPanel = ({
                 name="interposing_relay_contacts_rating"
                 label="Interposing Relay Contacts Rating"
                 size="small"
+                disabled={is_interposing_relay_selected === 0}
               />
             </div>
             <div className="flex flex-1 items-end gap-4">
@@ -1082,6 +1104,7 @@ const MCCcumPCCPLCPanel = ({
                     { label: "Yes", value: 1 },
                     { label: "No", value: 0 },
                   ]}
+                  disabled={is_interposing_relay_selected === 0}
                 />
               </div>
               <div className="flex-1">
@@ -1091,7 +1114,10 @@ const MCCcumPCCPLCPanel = ({
                   label=""
                   size="small"
                   options={noOfContacts}
-                  disabled={watch("is_no_of_contacts_selected") === 0}
+                  disabled={
+                    watch("is_no_of_contacts_selected") === 0 ||
+                    is_interposing_relay_selected === 0
+                  }
                 />
               </div>
             </div>

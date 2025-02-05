@@ -1543,6 +1543,10 @@ export const plcPanelValidationSchema = zod.object({
     required_error: "DO Module Output Type is required",
     message: "DO Module Output Type is required",
   }),
+  is_interposing_relay_selected: zod.number({
+    required_error: "Interposing Relay is required",
+    message: "Interposing Relay is required",
+  }),
   interposing_relay: zod.string({
     required_error: "Interposing Relay is required",
     message: "Interposing Relay is required",

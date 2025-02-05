@@ -1049,7 +1049,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         updatedRow[21] = calculationResult.vd_start_percentage;
         updatedRow[22] = calculationResult.current_air;
         updatedRow[24] = calculationResult.final_current_carrying_capacity;
-        updatedRow[25] = calculationResult.final_current_carrying_capacity;
+        updatedRow[25] = calculationResult.cable_selected_status;
         sizingCalcData.push({
           tag_number: calculationResult.tagNo,
           cableOd:
@@ -1131,11 +1131,11 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         // updatedRow[13] = calculationResult.heating_chart_cable_size; //cable size as per heating value
         // updatedRow[16] = calculationResult.dbl_r;
         // updatedRow[17] = calculationResult.dbl_x;
-        // updatedRow[18] = calculationResult.vd_run;
-        // updatedRow[19] = calculationResult.vd_start;
-        // updatedRow[20] = calculationResult.vd_run_percentage;
-        // updatedRow[21] = calculationResult.vd_start_percentage;
-        // updatedRow[22] = calculationResult.current_air;
+        updatedRow[18] = calculationResult.vd_run;
+        updatedRow[19] = calculationResult.vd_start;
+        updatedRow[20] = calculationResult.vd_run_percentage;
+        updatedRow[21] = calculationResult.vd_start_percentage;
+        updatedRow[22] = calculationResult.current_air;
         // updatedRow[24] = calculationResult.final_current_carrying_capacity;
         updatedRow[25] = calculationResult.cable_selected_status;
         sizingCalcData.push({

@@ -559,7 +559,7 @@ export const getCableSizingCalculation = async (cableScheduleData: any) => {
       );
     }
 
-    return { ...finalCable };
+    return { ...finalCable, cable_selected_status: "Safe" };
   });
 
   return calculatedData;
@@ -654,6 +654,12 @@ export const recalculateCableSize = async (cableSizingData: any) => {
 
     const vd_run_percentage = +((vd_run / supplyVoltage) * 100).toFixed(2);
     const vd_start_percentage = +((vd_start / supplyVoltage) * 100).toFixed(2);
+
+    row.vd_run = vd_run;
+    row.vd_start = vd_start;
+    row.vd_run_percentage = vd_run_percentage;
+    row.vd_start_percentage = vd_start_percentage;
+    row.current_air = cable.current_air;
     if (
       vd_run_percentage <= perc_voltage_drop_running &&
       vd_start_percentage <= perc_voltage_drop_starting

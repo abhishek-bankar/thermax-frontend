@@ -429,11 +429,13 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               name="main_supply_lv_variation"
               control={control}
               label="Variation"
-              options={
-                dropdown["Voltage Variation"]?.filter(
-                  (item: any) => item.name !== "NA"
-                ) || []
-              }
+              options={[
+                { label: "+/-5.0", value: "+/-5.0" },
+                { label: "+/-10.0", value: "+/-10.0" },
+                { label: "+10.0", value: "+10.0" },
+                { label: "-15.0", value: "-15.0" },
+                { label: "NA", value: "-NA" },
+              ]}
               size="small"
               suffixIcon={
                 <>
@@ -448,11 +450,12 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
               name="main_supply_lv_phase"
               control={control}
               label="Phase"
-              options={
-                dropdown["Main Supply Phase"]?.filter(
-                  (item: any) => item.name !== "NA"
-                ) || []
-              }
+              options={[
+                { label: "1 Phase", value: "1 Phase" },
+                { label: "3 Phase / 3 Wire", value: "3 Phase / 3 Wire" },
+                { label: "3 Phase / 4 Wire", value: "3 Phase / 4 Wire" },
+                { label: "NA", value: "NA" },
+              ]}
               size="small"
             />
           </div>

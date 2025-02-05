@@ -287,7 +287,12 @@ const MCCPanel = ({
   const incomer_above_pole_options = dropdown["SD Incomer Above Pole"];
   const incomer_above_type_options = dropdown["SD Incomer Above Type"];
   const analog_meters_options = dropdown["Analog Meters"];
-  const digital_meters_options = dropdown["Digital Meters"];
+  let digital_meters_options = dropdown["Digital Meters"] || [];
+  digital_meters_options = [
+    ...digital_meters_options,
+    { label: "Trivector Meter", value: "Trivector Meter" },
+  ];
+
   const communication_protocol_options = dropdown["Communication Protocol"];
   const ga_moc_material_options = dropdown["GA MOC"];
   const ga_moc_thickness_door_options = dropdown["GA MOC Thickness Door"];
@@ -396,15 +401,15 @@ const MCCPanel = ({
     } else {
       setValue(
         "acb_spring_charge_indication_lamp",
-        mccPanelData?.[0].acb_spring_charge_indication_lamp || "Blue"
+        mccPanelData?.[0]?.acb_spring_charge_indication_lamp || "Blue"
       );
       setValue(
         "acb_service_indication_lamp",
-        mccPanelData?.acb_service_indication_lamp || "Red"
+        mccPanelData?.[0]?.acb_service_indication_lamp || "Red"
       );
       setValue(
         "trip_circuit_healthy_indication_lamp",
-        mccPanelData?.trip_circuit_healthy_indication_lamp || "White"
+        mccPanelData?.[0]?.trip_circuit_healthy_indication_lamp || "White"
       );
     }
 

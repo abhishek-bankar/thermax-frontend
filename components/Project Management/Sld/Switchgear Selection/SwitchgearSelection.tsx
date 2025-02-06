@@ -391,6 +391,8 @@ const SwitchgearSelection: React.FC<Props> = ({
             unit_2: otherInfo.unit_2 ?? "",
             unit_3: otherInfo.unit_3 ?? "",
             unit_4: otherInfo.unit_4 ?? "",
+            unit_5: otherInfo.unit_5 ?? "",
+            power_cable_type: otherInfo.unit_5 ?? "",
             section: loadListItem.package ?? "",
             emergency_name: "No",
             control_scheme: loadListItem.control_scheme ?? "",
@@ -540,7 +542,7 @@ const SwitchgearSelection: React.FC<Props> = ({
         }
         return row;
       });
-      // console.log("updated sg_data", sg_data);
+      console.log("updated sg_data", sg_data);
       // console.log("updated calc", updatedSgData);
 
       spreadsheetInstance?.setData(updatedSgData);

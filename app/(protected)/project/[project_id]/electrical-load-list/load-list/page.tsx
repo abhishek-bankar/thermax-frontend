@@ -16,7 +16,7 @@ export default async function Loadlist({
     return (
       <LoadList
         designBasisRevisionId={designbasisData[0]?.name}
-        loadListLatestRevisionId={loadListRevisionData[0]?.name}
+        loadListLatestRevisionId={loadListRevisionData[loadListRevisionData.length - 1]?.name}
         revision={loadListRevisionData?.length - 1}
       />
     );

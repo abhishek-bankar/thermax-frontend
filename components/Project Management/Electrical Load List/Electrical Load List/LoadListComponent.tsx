@@ -47,6 +47,7 @@ import { useLoading } from "@/hooks/useLoading";
 import {
   getCurrentCalculation,
   getFrameSizeCalculation,
+  getMotorPartCode,
 } from "@/actions/electrical-load-list";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
@@ -235,6 +236,7 @@ const LoadList: React.FC<LoadListProps> = ({
     () => projectPanelData?.map((item: any) => item.panel_name) || [],
     [projectPanelData]
   );
+  const [isFilterAppllied, setIsFilterAppllied] = useState(false);
 
   const [panelsSumData, setPanelsSumData] = useState<PanelSumData[]>([]);
   const [isControlSchemeModalOpen, setIsControlSchemeModalOpen] =
@@ -330,6 +332,8 @@ const LoadList: React.FC<LoadListProps> = ({
         motor_mounting_type: projectDivision === ENVIRO ? 14 : 13,
         motor_make: projectDivision === ENVIRO ? 37 : 36,
         motor_frame_size: projectDivision === ENVIRO ? 15 : 14,
+        motor_part_code: projectDivision === ENVIRO ? 40 : 39,
+
         panel_ammeter:
           projectDivision === HEATING
             ? 27
@@ -410,6 +414,8 @@ const LoadList: React.FC<LoadListProps> = ({
 
   const handleFilter = useCallback(
     (values: any) => {
+      console.log(values);
+
       let filtered: any;
       const isEmpty = Object.keys(values).length === 0;
       if (isEmpty) {
@@ -460,20 +466,35 @@ const LoadList: React.FC<LoadListProps> = ({
                 );
                 return true;
               }
+              function convertToNumber(value: any) {
+                const num = Number(value); // Convert string to number
+                return isNaN(num)
+                  ? { value, type: typeof value }
+                  : { value: num, type: typeof num };
+              }
+              console.log(itemValue);
+              console.log(convertToNumber(value));
+              console.log(convertToNumber(value).type === "number");
 
-              if (typeof value === "string") {
+              if (convertToNumber(value).type === "string") {
                 return itemValue
                   .toString()
                   .toLowerCase()
-                  .includes(value.toLowerCase());
+                  .includes(convertToNumber(value).value.toLowerCase());
               }
-              return itemValue === value;
+              if (convertToNumber(value).type === "number") {
+                return itemValue === convertToNumber(value).value;
+              }
             });
+            setIsFilterAppllied(true);
           }
         });
       }
       if (spreadsheetRef?.current) {
         spreadsheetRef?.current?.setData(filtered);
+      }
+      if (isEmpty) {
+        setIsFilterAppllied(false);
       }
     },
     [spreadsheetRef, getColumnIndex] // Add any other dependencies used in this function
@@ -964,7 +985,7 @@ const LoadList: React.FC<LoadListProps> = ({
       data: getArrayOfLoadListData(loadListData, revision),
       columns: typedLoadListColumns,
       columnSorting: true,
-      columnDrag: true,
+      // columnDrag: true,
       columnResize: true,
       tableOverflow: true,
       onchange: handleCellChange,
@@ -1201,6 +1222,8 @@ const LoadList: React.FC<LoadListProps> = ({
       XLSX.writeFile(wb, `Current Data ${projectData.project_oc_number}.xlsx`);
     }
   };
+  console.log(loadListLatestRevisionId, "loadListLatestRevisionId");
+
   const downloadCurrentData = () => {
     if (spreadsheetRef?.current) {
       exportSpreadsheet(spreadsheetRef?.current, "excel");
@@ -1265,8 +1288,8 @@ const LoadList: React.FC<LoadListProps> = ({
       let greaterThanZeroCount = 0;
       let allZero = true;
 
-      // Check last three columns (indexes 2, 3, 4 assuming 0-based indexing)
-      for (let colIndex = 2; colIndex <= 4; colIndex++) {
+      const lastIndex = projectDivision === ENVIRO ? 4 : 3;
+      for (let colIndex = 2; colIndex <= lastIndex; colIndex++) {
         const cellValue = parseFloat((row[colIndex] as string) || "0");
 
         if (cellValue > 0) {
@@ -1284,23 +1307,17 @@ const LoadList: React.FC<LoadListProps> = ({
           "white"
         );
       }
-
-      // If more than one column has a value greater than 0, highlight the cells
       if (greaterThanZeroCount > 1 || allZero) {
         isInvalid = true;
-        for (let colIndex = 2; colIndex <= 4; colIndex++) {
-          const cellValue = parseFloat((row[colIndex] as string) || "0");
-
-          if (cellValue > 0) {
-            const cellAddress = `${String.fromCharCode(65 + colIndex)}${
-              rowIndex + 1
-            }`;
-            spreadsheetRef?.current?.setStyle(
-              cellAddress,
-              "background-color",
-              "yellow"
-            );
-          }
+        for (let colIndex = 2; colIndex <= lastIndex; colIndex++) {
+          const cellAddress = `${String.fromCharCode(65 + colIndex)}${
+            rowIndex + 1
+          }`;
+          spreadsheetRef?.current?.setStyle(
+            cellAddress,
+            "background-color",
+            "yellow"
+          );
         }
       }
     });
@@ -1707,7 +1724,7 @@ const LoadList: React.FC<LoadListProps> = ({
               motorParameters[0]?.safe_area_thermister === "As per OEM Standard"
                 ? "As per OEM Standard"
                 : motorParameters[0]?.safe_area_thermister === "All"
-                ? "All"
+                ? "Yes"
                 : motorParameters[0]?.safe_area_thermister === "No"
                 ? "No"
                 : getStandByKw(item[2], item[3]) >=
@@ -1720,7 +1737,7 @@ const LoadList: React.FC<LoadListProps> = ({
               motorParameters[0]?.safe_area_thermister === "As per OEM Standard"
                 ? "As per OEM Standard"
                 : motorParameters[0]?.safe_area_thermister === "All"
-                ? "All"
+                ? "Yes"
                 : motorParameters[0]?.safe_area_thermister === "No"
                 ? "No"
                 : getStandByKw(item[2], item[3]) >=
@@ -1749,6 +1766,10 @@ const LoadList: React.FC<LoadListProps> = ({
           if (!item[37]) {
             item[37] = commonConfigurationData[0]?.ammeter_configuration; //ametter config selection
           }
+        } else {
+          if (!item[37]) {
+            item[37] = "NA"; //ametter config selection
+          }
         }
         if (projectDivision !== HEATING) {
           if (!item[38]) {
@@ -1768,7 +1789,7 @@ const LoadList: React.FC<LoadListProps> = ({
               item[5],
               item[6],
               item[7],
-              "", //starting time
+              item[8], //starting time
               item[9], //eocr
               "", //lpbs type
               "", //control scheme
@@ -1804,14 +1825,14 @@ const LoadList: React.FC<LoadListProps> = ({
               "", //lpbs type
               "", // control scheme
               "", // panel
-              "", // bus segrigation
-              "", // motor rpm
-              "", // type of mounting
-              "", // frame size
-              "", // gd2
-              "", // driven equipment
-              "", //bkw
-              "", //type of coupling
+              item[13], // bus segrigation
+              item[14], // motor rpm
+              item[15], // type of mounting
+              item[16], // frame size
+              item[17], // gd2
+              item[18], // driven equipment
+              item[19], //bkw
+              item[20], //type of coupling
               "", // pkg
               "", // area
               "", // standard
@@ -1819,19 +1840,19 @@ const LoadList: React.FC<LoadListProps> = ({
               "", // gas group
               "", // temp class
               "", // remark
-              "", // rev
+              revision, // rev
               item[29],
               item[30],
               item[31],
               item[32],
-              "", // type of bearing
+              item[33], // type of bearing
               item[34], //24th power factor
               item[35], //motor efficiency
               item[36], //local isolator
               item[37], // panel ameter
               item[38], // prefered motor make
-              "", // motor scope
-              "", // motor location
+              item[39], // motor scope
+              item[40], // motor location
               "", // motor part code
               "", // motor rated current
             ];
@@ -1848,14 +1869,14 @@ const LoadList: React.FC<LoadListProps> = ({
               "", //lpbs type
               "", // control scheme
               "", // panel
-              "", // bus segrigation
-              "", // motor rpm
-              "", // type of mounting
-              "", // frame size
-              "", // gd2
-              "", // driven equipment
-              "", //bkw
-              "", //type of coupling
+              item[13], // bus segrigation
+              item[14], // motor rpm
+              item[15], // type of mounting
+              item[16], // frame size
+              item[17], // gd2
+              item[18], // driven equipment
+              item[19], //bkw
+              item[20], //type of coupling
               "", // pkg
               "", // area
               "", // standard
@@ -1863,19 +1884,19 @@ const LoadList: React.FC<LoadListProps> = ({
               "", // gas group
               "", // temp class
               "", // remark
-              "", // rev
+              revision, // rev
               item[29],
               item[30],
               item[31],
               item[32],
-              "", // type of bearing
+              item[33], // type of bearing
               item[34], //24th power factor
               item[35], //motor efficiency
               item[36], //local isolator
               item[37], // panel ameter
               item[38], // prefered motor make
-              "", // motor scope
-              "", // motor location
+              item[39], // motor scope
+              item[40], // motor location
               "", // motor part code
               "", // motor rated current
             ];
@@ -1980,67 +2001,63 @@ const LoadList: React.FC<LoadListProps> = ({
       setLoading(false);
     }
   };
+  function getPolesFromRPM(rpm: any) {
+    const rpmToPoles: any = {
+      3000: 2,
+      1500: 4,
+      1000: 6,
+      750: 8,
+    };
+
+    return rpmToPoles[rpm] || "Unknown RPM";
+  }
   const handleGetMotorPartCode = async () => {
-    // setLoading(true);
+    setLoading(true);
     try {
       const loadList = spreadsheetRef?.current?.getData();
-
-      const currentCalculations = await getCurrentCalculation({
-        divisionName: projectDivision,
-        data: loadList?.map((row: any) => {
-          return {
-            kw: getStandByKw(row[2], row[3]),
-            supplyVoltage: Number(
-              row[getColumnIndex("supply_voltage")].split(" ")[0]
-            ),
-            phase: row[getColumnIndex("phase")],
-            powerFactor: Number(row[getColumnIndex("power_factor")]),
-            motorFrameSize: "",
-            motorPartCode: "",
-            motorRatedCurrent: "",
-            tagNo: row[0],
-            starterType: row[getColumnIndex("starter_type")],
-          };
-        }),
-      });
-      let getFrameSize: any[];
-      if (projectDivision !== HEATING) {
-        getFrameSize = await getFrameSizeCalculation({
+      if (
+        projectDivision === WWS_IPG ||
+        projectDivision === WWS_SPG ||
+        projectDivision === WWS_SERVICES
+      ) {
+        const currentCalculations = await getMotorPartCode({
           divisionName: projectDivision,
           data: loadList?.map((row: any) => {
             return {
+              motor_make: row[getColumnIndex("motor_make")],
+              no_of_poles: getPolesFromRPM(row[getColumnIndex("motor_rpm")]),
               kw: getStandByKw(row[2], row[3]),
+              motor_efficiency: row[getColumnIndex("motor_efficiency")],
+              motor_mounting_type: row[getColumnIndex("motor_mounting_type")],
+              motor_frame_size: row[getColumnIndex("motor_frame_size")],
+              supply_voltage: Number(
+                row[getColumnIndex("supply_voltage")].split(" ")[0]
+              ),
               tagNo: row[0],
-              speed: Number(row[getColumnIndex("motor_rpm")]),
-              mounting_type: row[getColumnIndex("motor_mounting_type")],
             };
           }),
         });
-      }
-      const updatedLoadList: any = loadList?.map((row: any) => {
-        const calculationResult = currentCalculations?.find(
-          (item: any) => item.tagNo === row[0]
-        );
-        const frameSizeResult = getFrameSize?.find(
-          (item: any) => item.tagNo === row[0]
-        );
-        if (calculationResult) {
-          const updatedRow = [...row];
-          if (projectDivision !== HEATING) {
-            updatedRow[getColumnIndex("motor_rated_current")] =
-              calculationResult.motorRatedCurrent;
-            updatedRow[getColumnIndex("motor_frame_size")] =
-              frameSizeResult.frameSize;
-          } else {
-            updatedRow[getColumnIndex("motor_rated_current")] =
-              calculationResult.motorRatedCurrent;
-          }
 
-          return updatedRow;
-        }
-        return row;
-      });
-      spreadsheetRef?.current?.setData(updatedLoadList);
+        const updatedLoadList: any = loadList?.map((row: any) => {
+          const calculationResult = currentCalculations?.find(
+            (item: any) => item.tagNo === row[0]
+          );
+
+          if (calculationResult) {
+            const updatedRow = [...row];
+            updatedRow[getColumnIndex("motor_part_code")] =
+              calculationResult.part_code;
+
+            return updatedRow;
+          }
+          return row;
+        });
+        console.log(currentCalculations);
+        console.log(updatedLoadList);
+
+        spreadsheetRef?.current?.setData(updatedLoadList);
+        message.success("Motor Part Code Updated Successfully");
+      }
     } catch (error) {
     } finally {
       // setIsCurrentFetched(true);
@@ -2303,7 +2320,7 @@ const LoadList: React.FC<LoadListProps> = ({
         <Button
           type="primary"
           onClick={handleLoadListSave}
-          disabled={userDivision !== projectDivision}
+          disabled={userDivision !== projectDivision || isFilterAppllied}
           // size="small"
         >
           Save

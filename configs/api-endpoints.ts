@@ -320,6 +320,7 @@ export const REVIEW_APPROVAL_EMAIL_API =
 
 // Load List
 export const CABLE_SIZE_HEATING_API = `/document/Cable Size Heating`;
+export const STANDARD_MOTOR_PARTCODE_LIBRARY = `/document/Standard Motor Partcode Library`;
 export const CABLE_SIZING_DATA_API = `/document/Cable Sizing Data`;
 export const MOTOR_CANOPY_METADATA = `/document/Motor Canopy List Metadata`;
 export const HEATING_SWITCHGEAR_HEATER_API = `/document/Heating Switchgear Combination Heaters`;

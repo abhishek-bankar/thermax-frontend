@@ -21,8 +21,13 @@ export default async function CableSchedule({
   return (
     <CableScheduleComponent
       designBasisRevisionId={designbasisData[0]?.name}
-      loadListLatestRevisionId={loadListRevisionData[0]?.name}
-      cableScheduleRevisionId={cableScheduleRevisionData[0]?.name}
+      loadListLatestRevisionId={
+        loadListRevisionData[loadListRevisionData.length - 1]?.name
+      }
+      cableScheduleRevisionId={
+        cableScheduleRevisionData[cableScheduleRevisionData.length - 1]?.name
+      }
+      revision={cableScheduleRevisionData?.length - 1}
     />
   );
 }

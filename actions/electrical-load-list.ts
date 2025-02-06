@@ -2,6 +2,7 @@
 
 import {
   DB_REVISION_STATUS,
+  ENVIRO,
   HEATING,
   LOAD_LIST_REVISION_STATUS,
   SLD_REVISION_STATUS,
@@ -26,6 +27,22 @@ import {
 import { sortDatewise } from "@/utils/helpers";
 import { getLatestDesignBasisRevision } from "./design-basis";
 
+function getCurrentFromKVA(kva: any) {
+  const kvaCurrent: any = {
+    10.2: 24.59,
+    20.41: 49.17,
+    30.61: 73.76,
+    71.42: 172.11,
+    40.81: 98.35,
+    189.12: 263.1,
+    69.67: 96.93,
+    29.86: 41.54,
+    149.3: 207.71,
+  };
+
+  return kvaCurrent[kva] || 0;
+}
+
 export const getCurrentCalculation = async (loadListData: any) => {
   const division = loadListData.divisionName;
   const calcData = loadListData.data;
@@ -42,6 +59,7 @@ export const getCurrentCalculation = async (loadListData: any) => {
     const phase = item.phase;
     const powerFactor = item.powerFactor;
     const starterType = item.starterType;
+    const kva = item.kva;
     let current = 0;
 
     if (division === HEATING) {
@@ -65,12 +83,24 @@ export const getCurrentCalculation = async (loadListData: any) => {
         if (standardCurrent) {
           current = standardCurrent.motor_current_amp_il;
         } else {
-          current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
+          current =
+            (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor * 0.9);
         }
       } else if (supplyVoltage !== 415 && phase === "3 Phase") {
-        current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
+        current =
+          (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor * 0.9);
       } else if (phase === "1 Phase") {
-        current = (kw * 1000) / (supplyVoltage * powerFactor);
+        current = (kw * 1000) / (supplyVoltage * powerFactor * 0.9);
+      }
+    } else if (division === ENVIRO) {
+      if (kw > 0) {
+        current =
+          (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor * 0.9);
+      } else {
+        current = getCurrentFromKVA(kva);
+        if (current === 0) {
+          current = (kva * 1000) / (Math.sqrt(3) * supplyVoltage);
+        }
       }
     } else {
       if (starterType === "DOL-HTR" && supplyVoltage === 415) {
@@ -83,9 +113,10 @@ export const getCurrentCalculation = async (loadListData: any) => {
           current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
         }
       } else if (phase === "3 Phase") {
-        current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
+        current =
+          (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor * 0.9);
       } else if (phase === "1 Phase") {
-        current = (kw * 1000) / (supplyVoltage * powerFactor);
+        current = (kw * 1000) / (supplyVoltage * powerFactor * 0.9);
       }
     }
 

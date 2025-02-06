@@ -24,7 +24,7 @@ import {
   PROJECT_INFO_API,
   PROJECT_MAIN_PKG_LIST_API,
 } from "@/configs/api-endpoints";
-import { 
+import {
   downloadFrappeCloudFile,
   getData,
   updateData,
@@ -49,7 +49,13 @@ import {
   getFrameSizeCalculation,
 } from "@/actions/electrical-load-list";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { ENVIRO, HEATING, WWS_IPG, WWS_SERVICES, WWS_SPG } from "@/configs/constants";
+import {
+  ENVIRO,
+  HEATING,
+  WWS_IPG,
+  WWS_SERVICES,
+  WWS_SPG,
+} from "@/configs/constants";
 import { useGetData } from "@/hooks/useCRUD";
 import TableFilter from "../common/TabelFilter";
 import { convertToFrappeDatetime } from "@/utils/helpers";
@@ -205,7 +211,7 @@ const LoadList: React.FC<LoadListProps> = ({
   const project_id = params.project_id as string;
   const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
 
-  const userDivision = userInfo?.division;  
+  const userDivision = userInfo?.division;
 
   const projectDivision = projectData?.division;
 
@@ -400,7 +406,7 @@ const LoadList: React.FC<LoadListProps> = ({
       return columnMap[key] ?? -1;
     },
     [projectDivision]
-  ); 
+  );
 
   const handleFilter = useCallback(
     (values: any) => {
@@ -607,7 +613,11 @@ const LoadList: React.FC<LoadListProps> = ({
         }
       }
     }
-    if (projectDivision === WWS_SPG || projectDivision === WWS_IPG || projectDivision === WWS_SERVICES ) {
+    if (
+      projectDivision === WWS_SPG ||
+      projectDivision === WWS_IPG ||
+      projectDivision === WWS_SERVICES
+    ) {
       let isHazardousPackage = false;
       if (colIndex === "19") {
         subPackages?.forEach((pckg: any) => {
@@ -727,7 +737,7 @@ const LoadList: React.FC<LoadListProps> = ({
     }
     if (projectDivision === ENVIRO) {
       let isHazardousPackage = false;
-      
+
       if (Number(colIndex) === getColumnIndex("package")) {
         subPackages?.forEach((pckg: any) => {
           const selectedPckg = pckg?.sub_packages?.find(
@@ -867,7 +877,6 @@ const LoadList: React.FC<LoadListProps> = ({
     [projectDivision]
   );
   const getArrayOfLoadListData = (data: any, revision?: any) => {
-   
     return data?.electrical_load_list_data?.map((item: any) => {
       const result = [
         item.tag_number,
@@ -924,7 +933,11 @@ const LoadList: React.FC<LoadListProps> = ({
         result.splice(37, 0, item.motor_make);
         result.splice(40, 0, item.motor_part_code);
       }
-      if (projectDivision === WWS_IPG || projectDivision === WWS_SPG || projectDivision === WWS_SERVICES) {
+      if (
+        projectDivision === WWS_IPG ||
+        projectDivision === WWS_SPG ||
+        projectDivision === WWS_SERVICES
+      ) {
         result.splice(
           11,
           0,
@@ -1087,7 +1100,13 @@ const LoadList: React.FC<LoadListProps> = ({
       const instance = jspreadsheet(jRef.current, loadListOptions);
       spreadsheetRef.current = instance;
     }
-  }, [isLoading, loadListData,typedLoadListColumns, loadListOptions, panelList]);
+  }, [
+    isLoading,
+    loadListData,
+    typedLoadListColumns,
+    loadListOptions,
+    panelList,
+  ]);
   useEffect(() => {
     if (!isLoading) {
       setLoading(false);
@@ -1109,8 +1128,7 @@ const LoadList: React.FC<LoadListProps> = ({
         if (spreadsheetRef.current) {
           spreadsheetRef.current.destroy();
         }
-        if(jRef.current){
-
+        if (jRef.current) {
           const instance = jspreadsheet(jRef.current, loadListOptions);
           spreadsheetRef.current = instance;
         }
@@ -1124,8 +1142,7 @@ const LoadList: React.FC<LoadListProps> = ({
         if (spreadsheetRef.current) {
           spreadsheetRef.current.destroy();
         }
-        if(jRef.current){
-
+        if (jRef.current) {
           const instance = jspreadsheet(jRef.current, loadListOptions);
           spreadsheetRef.current = instance;
         }
@@ -1388,7 +1405,11 @@ const LoadList: React.FC<LoadListProps> = ({
               motor_rated_current: row[41],
             };
           }
-          if (projectDivision === WWS_IPG || projectDivision === WWS_SPG || projectDivision === WWS_SERVICES) {
+          if (
+            projectDivision === WWS_IPG ||
+            projectDivision === WWS_SPG ||
+            projectDivision === WWS_SERVICES
+          ) {
             return {
               tag_number: row[0],
               service_description: row[1],
@@ -1911,6 +1932,7 @@ const LoadList: React.FC<LoadListProps> = ({
             motorRatedCurrent: "",
             tagNo: row[0],
             starterType: row[getColumnIndex("starter_type")],
+            kva: projectDivision === ENVIRO ? row[4] : 0,
           };
         }),
       });
@@ -1962,7 +1984,6 @@ const LoadList: React.FC<LoadListProps> = ({
     // setLoading(true);
     try {
       const loadList = spreadsheetRef?.current?.getData();
-      
 
       const currentCalculations = await getCurrentCalculation({
         divisionName: projectDivision,

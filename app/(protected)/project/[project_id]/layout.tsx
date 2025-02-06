@@ -1,9 +1,9 @@
 "use client";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import React from "react";
+import React, { use, useEffect, useState } from "react";
 import { useLoading } from "@/hooks/useLoading";
 import clsx from "clsx";
-import { useGetData, useNewGetData } from "@/hooks/useCRUD";
+import { useNewGetData } from "@/hooks/useCRUD";
 import {
   DESIGN_BASIS_REVISION_HISTORY_API,
   PROJECT_INFO_API,
@@ -13,15 +13,19 @@ import { DB_REVISION_STATUS } from "@/configs/constants";
 export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const params = useParams();
+  const project_id = params.project_id;
   const { setLoading: setModalLoading } = useLoading();
   const pathname = usePathname();
-  const project_information_path = `/project/${params.project_id}/project-information`;
-  const design_basis_path = `/project/${params.project_id}/design-basis`;
-  const electrical_load_list_path = `/project/${params.project_id}/electrical-load-list`;
-  const sld_path = `/project/${params.project_id}/sld`;
-  const cable_tray_path = `/project/${params.project_id}/cable-tray`;
-  const earthing_path = `/project/${params.project_id}/earthing`;
-  const lighting_path = `/project/${params.project_id}/lighting`;
+  const [isProjectInfoSaved, setIsProjectInfoSaved] = useState(0);
+  const [isDesignBasisReleased, setIsDesignBasisReleased] = useState(0);
+
+  const project_information_path = `/project/${project_id}/project-information`;
+  const design_basis_path = `/project/${project_id}/design-basis`;
+  const electrical_load_list_path = `/project/${project_id}/electrical-load-list`;
+  const sld_path = `/project/${project_id}/sld`;
+  const cable_tray_path = `/project/${project_id}/cable-tray`;
+  const earthing_path = `/project/${project_id}/earthing`;
+  const lighting_path = `/project/${project_id}/lighting`;
 
   const handleTabChange = (path: string) => {
     setModalLoading(true);
@@ -31,10 +35,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     `${PROJECT_INFO_API}/${params?.project_id}`
   );
   const { data: designBasisRevisionData } = useNewGetData(
-    `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${params?.project_id}"], ["status", "=", "${DB_REVISION_STATUS.Released}"]]`
+    `${DESIGN_BASIS_REVISION_HISTORY_API}?filters=[["project_id", "=", "${project_id}"], ["status", "=", "${DB_REVISION_STATUS.Released}"]]`
   );
-  const isProjectInfoSaved = projectData?.is_saved;
-  const isDesignBasisReleased = designBasisRevisionData?.length > 0;
+
+  useEffect(() => {
+    if (projectData) {
+      setIsProjectInfoSaved(projectData?.is_saved);
+    }
+    if (designBasisRevisionData && designBasisRevisionData.length > 0) {
+      setIsDesignBasisReleased(1);
+    }
+  }, [projectData, designBasisRevisionData]);
+
   return (
     <>
       <div className="flex h-full flex-col gap-4">
@@ -65,7 +77,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   handleTabChange(design_basis_path);
                 }
               }}
-              aria-disabled={isProjectInfoSaved}
             >
               Design Basis
             </div>
@@ -83,7 +94,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   handleTabChange(electrical_load_list_path);
                 }
               }}
-              aria-disabled={isProjectInfoSaved}
             >
               Electrical Load List
             </div>
@@ -91,7 +101,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               className={clsx(
                 "white grid flex-auto cursor-pointer place-content-center rounded border p-1 text-sm font-bold uppercase tracking-wide text-white",
                 pathname.includes(sld_path) ? "bg-green-700" : "bg-blue-700",
-                (isProjectInfoSaved === 0 || isDesignBasisReleased === false) &&
+                (isProjectInfoSaved === 0 || isDesignBasisReleased === 0) &&
                   "opacity-50 bg-gray-500 cursor-not-allowed"
               )}
               onClick={() => {
@@ -99,7 +109,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   handleTabChange(sld_path);
                 }
               }}
-              aria-disabled={isProjectInfoSaved}
             >
               SLD
             </div>
@@ -117,7 +126,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   handleTabChange(cable_tray_path);
                 }
               }}
-              aria-disabled={isProjectInfoSaved}
             >
               Cable Tray
             </div>
@@ -135,7 +143,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   handleTabChange(earthing_path);
                 }
               }}
-              aria-disabled={isProjectInfoSaved}
             >
               Earthing
             </div>
@@ -153,7 +160,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   handleTabChange(lighting_path);
                 }
               }}
-              aria-disabled={isProjectInfoSaved}
             >
               Lighting
             </div>

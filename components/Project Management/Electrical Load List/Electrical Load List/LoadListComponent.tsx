@@ -1953,6 +1953,7 @@ const LoadList: React.FC<LoadListProps> = ({
             motorRatedCurrent: "",
             tagNo: row[0],
             starterType: row[getColumnIndex("starter_type")],
+            kva: projectDivision === ENVIRO ? row[4] : 0,
           };
         }),
       });
@@ -2029,7 +2030,9 @@ const LoadList: React.FC<LoadListProps> = ({
               motor_efficiency: row[getColumnIndex("motor_efficiency")],
               motor_mounting_type: row[getColumnIndex("motor_mounting_type")],
               motor_frame_size: row[getColumnIndex("motor_frame_size")],
-              supply_voltage: Number(row[getColumnIndex("supply_voltage")].split(" ")[0]),
+              supply_voltage: Number(
+                row[getColumnIndex("supply_voltage")].split(" ")[0]
+              ),
               tagNo: row[0],
             };
           }),
@@ -2051,15 +2054,14 @@ const LoadList: React.FC<LoadListProps> = ({
         });
         console.log(currentCalculations);
         console.log(updatedLoadList);
-        
+
         spreadsheetRef?.current?.setData(updatedLoadList);
-        message.success("Motor Part Code Updated Successfully")
+        message.success("Motor Part Code Updated Successfully");
       }
     } catch (error) {
     } finally {
       // setIsCurrentFetched(true);
       setLoading(false);
-
     }
   };
   const handleTemplateDownload = async () => {

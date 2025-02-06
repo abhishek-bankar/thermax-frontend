@@ -296,7 +296,6 @@ export default function DocumentRevision() {
       render: (text, record) => {
         const projectApproverEmail = record.approverEmail;
         let status = record.status;
-        console.log("status", record.documentRevision, status);
 
         switch (status) {
           case DB_REVISION_STATUS.Submitted:

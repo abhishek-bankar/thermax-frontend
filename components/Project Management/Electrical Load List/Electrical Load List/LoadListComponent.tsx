@@ -535,7 +535,7 @@ const LoadList: React.FC<LoadListProps> = ({
               data[rowIndex][15] = pckg?.zone;
               data[rowIndex][16] = pckg?.gas_group;
               data[rowIndex][17] = pckg?.temperature_class;
-              data[rowIndex][26] =
+              data[rowIndex][25] =
                 motorParameters[0]?.hazardous_area_efficiency_level;
             } else {
               data[rowIndex][13] = "Safe";
@@ -543,7 +543,7 @@ const LoadList: React.FC<LoadListProps> = ({
               data[rowIndex][15] = "NA";
               data[rowIndex][16] = "NA";
               data[rowIndex][17] = "NA";
-              data[rowIndex][26] =
+              data[rowIndex][25] =
                 motorParameters[0]?.safe_area_efficiency_level;
             }
           }
@@ -556,6 +556,7 @@ const LoadList: React.FC<LoadListProps> = ({
           data[rowIndex][15] = "NA";
           data[rowIndex][16] = "NA";
           data[rowIndex][17] = "NA";
+          data[rowIndex][25] = motorParameters[0]?.safe_area_efficiency_level;
         }
       }
 
@@ -985,7 +986,9 @@ const LoadList: React.FC<LoadListProps> = ({
       data: getArrayOfLoadListData(loadListData, revision),
       columns: typedLoadListColumns,
       columnSorting: true,
-      // columnDrag: true,
+      // columnDrag: true,\
+      freezeRowControl: true,
+      freezeColumnControl: true,
       columnResize: true,
       tableOverflow: true,
       onchange: handleCellChange,
@@ -1721,9 +1724,9 @@ const LoadList: React.FC<LoadListProps> = ({
         if (!item[32]) {
           if (projectDivision === WWS_IPG) {
             item[32] =
-              motorParameters[0]?.safe_area_thermister === "As per OEM Standard"
+              motorParameters[0]?.safe_area_thermister === "As per OEM Standard" &&  item[5]?.includes("VFD")
                 ? "As per OEM Standard"
-                : motorParameters[0]?.safe_area_thermister === "All"
+                : motorParameters[0]?.safe_area_thermister === "All" &&  item[5]?.includes("VFD")
                 ? "Yes"
                 : motorParameters[0]?.safe_area_thermister === "No"
                 ? "No"
@@ -1754,9 +1757,9 @@ const LoadList: React.FC<LoadListProps> = ({
         if (!item[35]) {
           item[35] = motorParameters[0]?.safe_area_efficiency_level; // efficieany
         }
-        // if (!item[36]) {
-        item[36] = "No"; // local isolator
-        // }
+        if (!item[36]) {
+          item[36] = "No"; // local isolator
+        }
 
         // }
         if (
@@ -1978,13 +1981,15 @@ const LoadList: React.FC<LoadListProps> = ({
         const frameSizeResult = getFrameSize?.find(
           (item: any) => item.tagNo === row[0]
         );
+        console.log(frameSizeResult, "frameSizeResult");
+
         if (calculationResult) {
           const updatedRow = [...row];
           if (projectDivision !== HEATING) {
             updatedRow[getColumnIndex("motor_rated_current")] =
               calculationResult.motorRatedCurrent;
             updatedRow[getColumnIndex("motor_frame_size")] =
-              frameSizeResult.frameSize;
+              frameSizeResult.speed === 0 ? "NA" : frameSizeResult.frameSize;
           } else {
             updatedRow[getColumnIndex("motor_rated_current")] =
               calculationResult.motorRatedCurrent;

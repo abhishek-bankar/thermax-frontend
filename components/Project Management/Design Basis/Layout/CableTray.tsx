@@ -22,6 +22,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useParams } from "next/navigation";
 import {
   convertToFrappeDatetime,
+  moveNAtoEnd,
   sortAlphaNumericArray,
 } from "@/utils/helpers";
 import { DB_REVISION_STATUS } from "@/configs/constants";
@@ -33,8 +34,8 @@ const getDefaultValues = (cableTrayData: any) => {
     cable_tray_cover_input:
       cableTrayData?.cable_tray_cover_input || "On Only Top Layer",
     cable_tray_moc: cableTrayData?.cable_tray_moc || "SS 304",
-    outer_sheath: cableTrayData?.outer_sheath || "Fire resistant",
-    inner_sheath: cableTrayData?.inner_sheath || "Fire resistant",
+    outer_sheath: cableTrayData?.outer_sheath || "Fire Resistant",
+    inner_sheath: cableTrayData?.inner_sheath || "Fire Resistant",
     cable_tray_moc_input: cableTrayData?.cable_tray_moc_input || "",
     design_manufacturing_testing_standard_for_cable:
       cableTrayData?.design_manufacturing_testing_standard_for_cable || "IS",
@@ -420,7 +421,9 @@ const CableTray = ({
                 control={control}
                 name="design_manufacturing_testing_standard_for_cable"
                 label="Design, Manufacturing & Testing Standard for Cable "
-                options={sortAlphaNumericArray(dmt_standards_options || [])}
+                options={
+                  moveNAtoEnd(dmt_standards_options) || []
+                }
                 size="small"
               />
             </div>

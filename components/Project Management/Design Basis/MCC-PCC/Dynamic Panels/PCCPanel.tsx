@@ -439,15 +439,10 @@ const PCCPanel = ({
     }
   }, [currentTransformerNumber, setValue]);
   useEffect(() => {
-    if (incomer_ampere_controlled === "1000") {
-      setValue("incomer_above_ampere", "1001");
-    } else if (incomer_ampere_controlled === "400") {
-      setValue("incomer_above_ampere", "401");
-    } else if (incomer_ampere_controlled === "630") {
-      setValue("incomer_above_ampere", "631");
-    } else {
-      setValue("incomer_above_ampere", "801");
-    }
+    setValue(
+      "incomer_above_ampere",
+      String(Number(incomer_ampere_controlled) + 1)
+    );
   }, [incomer_ampere_controlled, setValue]);
 
   const handleError = (error: any) => {

@@ -8,7 +8,16 @@ import {
   SyncOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { Button, Input, message, Popconfirm, Table, Tag, Tooltip } from "antd";
+import {
+  Button,
+  Input,
+  message,
+  Popconfirm,
+  Spin,
+  Table,
+  Tag,
+  Tooltip,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -30,6 +39,7 @@ import {
   WWS_SPG,
 } from "@/configs/constants";
 import CopyProjectModel from "./CopyProjectModel";
+import { useSearchParams } from "next/navigation";
 
 interface DataType {
   key: string;
@@ -54,7 +64,6 @@ const changeNameToKey = (projectList: any[]) => {
 export default function ProjectList({ userInfo, isComplete }: any) {
   const userDivision = userInfo?.division;
   const isUserSuperUser = userInfo?.is_superuser;
-
   const [open, setOpen] = useState(false);
   const [uploadFileOpen, setUploadFileOpen] = useState(false);
   const [copyModelOpen, setCopyModelOpen] = useState(false);
@@ -62,10 +71,29 @@ export default function ProjectList({ userInfo, isComplete }: any) {
   const [projectRow, setProjectRow] = useState<any>(null);
   const [projectListData, setProjectListData] = useState<any>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
+  const year = searchParams.get("year");
+  const category = searchParams.get("category");
 
+  console.log(year, category, "projes");
+  // if()
   let getProjectUrl = `${PROJECT_API}?fields=["*"]&limit=1000&filters=[["division", "=",  "${userDivision}"], ["is_complete", "=", "${isComplete}"]]&order_by=creation desc`;
+  console.log(isComplete);
+
   if (isUserSuperUser) {
     getProjectUrl = `${PROJECT_API}?fields=["*"]&limit=1000&filters=[["is_complete", "=", "${isComplete}"]]&order_by=creation desc`;
+  }
+  if (year && category) {
+    const start_date = `${year.split("-")[0]}-04-01`;
+    const end_date = `${year.split("-")[1]}-03-31`;
+    console.log(start_date, end_date, "start_date");
+    //     const startDate = "2024-02-01";
+    // const endDate = "2024-02-10";
+
+    getProjectUrl = `${PROJECT_API}?fields=["*"]&limit=1000&filters=[["is_complete", "=", "${Number(
+      category
+    )}"], ["creation", "Between", ["${start_date}", "${end_date}"]]]&order_by=creation desc`;
+    console.log(getProjectUrl);
   }
   const { data: projectList, isLoading } = useGetData(getProjectUrl);
 
@@ -326,6 +354,13 @@ export default function ProjectList({ userInfo, isComplete }: any) {
     });
     mutate(getProjectUrl);
   };
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Spin size="large" tip="Loading Project data..." />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

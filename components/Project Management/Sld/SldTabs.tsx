@@ -4,7 +4,7 @@ import { Button, message, Tabs } from "antd";
 import {
   CABLE_SCHEDULE_REVISION_HISTORY_API,
   ELECTRICAL_LOAD_LIST_REVISION_HISTORY_API,
-  PROJECT_API, 
+  PROJECT_API,
 } from "@/configs/api-endpoints";
 import { useLoading } from "@/hooks/useLoading";
 import { useCallback, useEffect, useState } from "react";
@@ -27,7 +27,7 @@ const useDataFetching = (
 ) => {
   const { isLoading, setLoading: setIsLoading } = useLoading();
   const [loadListData, setLoadListData] = useState<any[]>([]);
-  const [cableScheduleData, setCableScheduleData] = useState<any[]>([]);
+  const [cableScheduleData, setCableScheduleData] = useState<any>([]);
   const [projectData, setProjectData] = useState<any>();
   const fetchData = useCallback(async () => {
     if (!loadListLatestRevisionId) return;
@@ -44,7 +44,7 @@ const useDataFetching = (
       const projectData = await getData(`${PROJECT_API}/${project_id}`);
       setProjectData(projectData);
 
-      setCableScheduleData(cableScheduleData.cable_schedule_data);
+      setCableScheduleData(cableScheduleData);
       setLoadListData(loadList?.electrical_load_list_data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -74,6 +74,8 @@ const SLDTabs: React.FC<Props> = ({
   projectPanelData,
   sldRevisions,
 }) => {
+  console.log(loadListLatestRevisionId,"loadListLatestRevisionId");
+  
   const { setLoading: setModalLoading } = useLoading();
   const [sLDTabs, setSLDTabs] = useState<any[]>([]);
   const params = useParams();
@@ -113,6 +115,17 @@ const SLDTabs: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const findTypeOfCable = (tagNumber: string, data: any) => {
+    for (const key in data) {
+      const cables = data[key].cables;
+      for (const cable of cables) {
+        if (cable.tag_number === tagNumber) {
+          return cable.type_of_cable;
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     if (loadListData.length && projectPanelData.length) {
       const panelWiseData = projectPanelData.reduce((acc: any, panel: any) => {
@@ -121,16 +134,22 @@ const SLDTabs: React.FC<Props> = ({
         const filteredData = loadListData.filter(
           (item) => item.panel === panelName
         );
-
         if (filteredData.length) {
           acc.push({
             panelId,
             panelName,
             data: [],
             otherData: filteredData.map((item) => {
-              const cablesize = cableScheduleData.find(
-                (el) => el.tag_number === item.tag_number
+              const cablesize = cableScheduleData?.cable_schedule_data?.find(
+                (el: any) => el.tag_number === item.tag_number
               );
+
+              const jsondata = JSON.parse(cableScheduleData?.excel_payload);
+              const power_cable_type = findTypeOfCable(
+                cablesize?.tag_number,
+                jsondata
+              );
+
               return {
                 ...item,
                 cablesize:
@@ -140,6 +159,7 @@ const SLDTabs: React.FC<Props> = ({
                   cablesize.final_cable_size
                     ? `${cablesize.number_of_runs}R X ${cablesize.number_of_cores} X ${cablesize.final_cable_size} Sqmm`
                     : "",
+                power_cable_type,
               };
             }),
           });
@@ -156,7 +176,7 @@ const SLDTabs: React.FC<Props> = ({
 
   const getLoadListData = () => {
     if (loadListData.length && projectPanelData.length) {
-      setModalLoading(true)
+      setModalLoading(true);
       const panelWiseData = projectPanelData.reduce((acc: any, panel: any) => {
         const panelName = panel.panel_name;
         const panelId = panel.name;
@@ -169,8 +189,13 @@ const SLDTabs: React.FC<Props> = ({
             panelName,
             panelId,
             data: filteredData.map((item) => {
-              const cablesize = cableScheduleData.find(
-                (el) => el.tag_number === item.tag_number
+              const cablesize = cableScheduleData.cable_schedule_data.find(
+                (el: any) => el.tag_number === item.tag_number
+              );
+              const jsondata = JSON.parse(cableScheduleData?.excel_payload);
+              const power_cable_type = findTypeOfCable(
+                cablesize?.tag_number,
+                jsondata
               );
               return {
                 ...item,
@@ -181,11 +206,17 @@ const SLDTabs: React.FC<Props> = ({
                   cablesize.final_cable_size
                     ? `${cablesize.number_of_runs}R X ${cablesize.number_of_cores} X ${cablesize.final_cable_size} Sqmm`
                     : "",
+                power_cable_type,
               };
             }),
             otherData: filteredData.map((item) => {
-              const cablesize = cableScheduleData.find(
-                (el) => el.tag_number === item.tag_number
+              const cablesize = cableScheduleData.cable_schedule_data.find(
+                (el: any) => el.tag_number === item.tag_number
+              );
+              const jsondata = JSON.parse(cableScheduleData?.excel_payload);
+              const power_cable_type = findTypeOfCable(
+                cablesize?.tag_number,
+                jsondata
               );
               return {
                 ...item,
@@ -196,6 +227,7 @@ const SLDTabs: React.FC<Props> = ({
                   cablesize.final_cable_size
                     ? `${cablesize.number_of_runs}R X ${cablesize.number_of_cores} X ${cablesize.final_cable_size} Sqmm`
                     : "",
+                power_cable_type,
               };
             }),
           });
@@ -208,9 +240,8 @@ const SLDTabs: React.FC<Props> = ({
 
       setPanelWiseData(panelWiseData);
     }
-    setModalLoading(false)
-    message.success("Load List Data Fetched Successfully")
-
+    setModalLoading(false);
+    message.success("Load List Data Fetched Successfully");
   };
 
   return (

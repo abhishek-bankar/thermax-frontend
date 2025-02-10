@@ -21,7 +21,7 @@ export default async function Page({
   const cableScheduleRevisionData = await getLatestCableScheduleRevision(
     params.project_id
   );
-  const loadListLatestRevisionId: string = loadListRevisionData[0]?.name; 
+  const loadListLatestRevisionId: string = loadListRevisionData[loadListRevisionData.length - 1]?.name
   const projectPanelData = await getData(
     `${PROJECT_PANEL_API}?fields=["*"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]&order_by=creation asc`
   );

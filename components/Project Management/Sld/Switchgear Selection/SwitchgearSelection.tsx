@@ -149,14 +149,14 @@ const useDataFetching = (
 
       const commonConfiguration = await getData(
         `${COMMON_CONFIGURATION_1}?fields=["*"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
-      ); 
+      );
 
       const sg_saved_data = await getData(
         `${SLD_REVISIONS_API}/${revision_id}`
       );
-      console.log(revision_id,"rajguru");
-      console.log(sg_saved_data,"rajguru");
-      
+      console.log(revision_id, "rajguru");
+      console.log(sg_saved_data, "rajguru");
+
       const makeComponents = await getData(
         `${MAKE_OF_COMPONENT_API}?fields=["preferred_soft_starter","preferred_lv_switchgear","preferred_vfdvsd"]&filters=[["revision_id", "=", "${designBasisRevisionId}"]]`
       );
@@ -366,6 +366,9 @@ const SwitchgearSelection: React.FC<Props> = ({
         const loadListItem = otherData?.find(
           (item: any) => item.tag_number === row[0]
         );
+        console.log(loadListItem, "vishal");
+        console.log(otherInfo, "vishal");
+
         if (userInfo.division === ENVIRO) {
           return {
             tag_number: row[0],
@@ -392,7 +395,7 @@ const SwitchgearSelection: React.FC<Props> = ({
             unit_3: otherInfo.unit_3 ?? "",
             unit_4: otherInfo.unit_4 ?? "",
             unit_5: otherInfo.unit_5 ?? "",
-            power_cable_type: otherInfo.unit_5 ?? "",
+            power_cable_type: loadListItem?.power_cable_type ?? "",
             section: loadListItem.package ?? "",
             emergency_name: "No",
             control_scheme: loadListItem.control_scheme ?? "",
@@ -423,9 +426,11 @@ const SwitchgearSelection: React.FC<Props> = ({
             unit_2: otherInfo.unit_2 ?? "",
             unit_3: otherInfo.unit_3 ?? "",
             unit_4: otherInfo.unit_4 ?? "",
+            unit_5: otherInfo.unit_5 ?? "",
             section: loadListItem.package ?? "",
             emergency_name: "No",
             control_scheme: loadListItem.control_scheme ?? "",
+            power_cable_type: loadListItem?.power_cable_type ?? "",
             push_button_station: loadListItem.lpbs_type ?? "",
           };
         } else {
@@ -453,9 +458,11 @@ const SwitchgearSelection: React.FC<Props> = ({
             unit_2: otherInfo.unit_2 ?? "",
             unit_3: otherInfo.unit_3 ?? "",
             unit_4: otherInfo.unit_4 ?? "",
+            unit_5: otherInfo.unit_5 ?? "",
             section: loadListItem.package ?? "",
             emergency_name: "No",
             control_scheme: loadListItem.control_scheme ?? "",
+            power_cable_type: loadListItem?.power_cable_type ?? "",
             push_button_station: loadListItem.lpbs_type ?? "",
           };
         }
@@ -469,7 +476,7 @@ const SwitchgearSelection: React.FC<Props> = ({
         false,
         payload
       );
-      setLoading(false);  
+      setLoading(false);
       if (response) {
         const lastModified = convertToFrappeDatetime(
           new Date(response?.modified)

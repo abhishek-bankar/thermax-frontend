@@ -1644,8 +1644,8 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
   const userInfo: {
     division: string;
   } = useCurrentUser();
-console.log(loadListLatestRevisionId);
-console.log(cableScheduleRevisionId);
+  console.log(loadListLatestRevisionId);
+  console.log(cableScheduleRevisionId);
 
   const project_id = params.project_id as string;
   // const { data: projectData } = useGetData(`${PROJECT_API}/${project_id}`);
@@ -2354,7 +2354,7 @@ console.log(cableScheduleRevisionId);
         updatedRow[21] = calculationResult.vd_start_percentage;
         updatedRow[22] = calculationResult.current_air;
         updatedRow[24] = calculationResult.final_current_carrying_capacity;
-        updatedRow[25] = calculationResult.final_current_carrying_capacity;
+        updatedRow[25] = calculationResult.cable_selected_status;
         sizingCalcData.push({
           tag_number: calculationResult.tagNo,
           cableOd:
@@ -2494,7 +2494,10 @@ console.log(cableScheduleRevisionId);
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
 
-      const name = document_name[0]?.lt_cable_sizing + `_R${revision}`+ "_LT Cable Sizing";
+      const name =
+        document_name[0]?.lt_cable_sizing +
+        `_R${revision}` +
+        "_LT Cable Sizing";
       const filename = `${name}.xlsx`;
 
       link.download = filename.replace(/"/g, ""); // Remove quotes if present

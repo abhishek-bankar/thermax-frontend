@@ -426,7 +426,6 @@ const findCable = (
   const cableMaterial = row.cableMaterial;
   const numberOfCores = parseFloat(row.numberOfCores.replace(/[^\d.]/g, ""));
   const numberOfRuns = parseInt(row.numberOfRuns);
-  // const efficiency = 0.86
   const cosPhiRunning: number = row.runningCos;
   const sinPhiRunning = +Math.sqrt(1 - cosPhiRunning ** 2).toFixed(2);
   const cosPhiStarting: number = row.startingCos;
@@ -492,7 +491,8 @@ const findCable = (
 
       if (
         vd_run_percentage <= perc_voltage_drop_running &&
-        vd_start_percentage <= perc_voltage_drop_starting
+        vd_start_percentage <= perc_voltage_drop_starting &&
+        final_current_carrying_capacity >= motorRatedCurrent
       ) {
         finalCable = {
           ...cable,

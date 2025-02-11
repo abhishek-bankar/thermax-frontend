@@ -2332,7 +2332,7 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         };
       }),
     });
-    console.log(cableSizeCalc, "cable size calculations");
+    console.log("cable size calculations", cableSizeCalc);
     const sizingCalcData: any = [];
 
     const updatedCableSchedule: any = cableScheduleData?.map((row: any) => {
@@ -2344,6 +2344,8 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         updatedRow[11] = calculationResult.sizes.includes("/")
           ? calculationResult.sizes
           : parseFloat(calculationResult.sizes).toFixed(1);
+        updatedRow[9] = calculationResult.number_of_runs;
+        updatedRow[10] = `${calculationResult.number_of_core}C`;
         updatedRow[12] = calculationResult.moc;
         updatedRow[13] = calculationResult.heating_chart_cable_size; //cable size as per heating value
         updatedRow[16] = calculationResult.dbl_r;
@@ -2435,14 +2437,14 @@ const CableSchedule: React.FC<CableScheduleProps> = ({
         //   : parseFloat(calculationResult.sizes).toFixed(1);
         // updatedRow[12] = calculationResult.moc;
         // updatedRow[13] = calculationResult.heating_chart_cable_size; //cable size as per heating value
-        // updatedRow[16] = calculationResult.dbl_r;
-        // updatedRow[17] = calculationResult.dbl_x;
-        // updatedRow[18] = calculationResult.vd_run;
-        // updatedRow[19] = calculationResult.vd_start;
-        // updatedRow[20] = calculationResult.vd_run_percentage;
-        // updatedRow[21] = calculationResult.vd_start_percentage;
-        // updatedRow[22] = calculationResult.current_air;
-        // updatedRow[24] = calculationResult.final_current_carrying_capacity;
+        updatedRow[16] = calculationResult.dbl_r;
+        updatedRow[17] = calculationResult.dbl_x;
+        updatedRow[18] = calculationResult.vd_run;
+        updatedRow[19] = calculationResult.vd_start;
+        updatedRow[20] = calculationResult.vd_run_percentage;
+        updatedRow[21] = calculationResult.vd_start_percentage;
+        updatedRow[22] = calculationResult.current_air;
+        updatedRow[24] = calculationResult.final_current_carrying_capacity;
         updatedRow[25] = calculationResult.cable_selected_status;
         sizingCalcData.push({
           tag_number: calculationResult?.tagNo,

@@ -104,7 +104,7 @@ export const LoadListcolumns = (division: string) => {
       name: "panelList",
       source: [],
       title: "PANEL",
-      width: "80",
+      width: "90",
       height: "60",
     },
 
@@ -121,7 +121,7 @@ export const LoadListcolumns = (division: string) => {
       name: "area",
       source: ["Safe", "Hazardous", "NA"],
       title: "AREA",
-      width: "150",
+      width: "100",
     },
     //applicable only if Hazardous selected
     {
@@ -144,7 +144,7 @@ export const LoadListcolumns = (division: string) => {
         "NA",
       ],
       title: "STANDARD",
-      width: "150",
+      width: "100",
     },
     {
       type: "dropdown",
@@ -162,7 +162,7 @@ export const LoadListcolumns = (division: string) => {
         "NA",
       ],
       title: "ZONE",
-      width: "150",
+      width: "100",
     },
     //options not availble
     {
@@ -183,18 +183,18 @@ export const LoadListcolumns = (division: string) => {
         "NA",
       ],
       title: "GAS GROUP",
-      width: "150",
+      width: "100",
     },
     {
       type: "dropdown",
       name: "tempClass",
       source: ["T1", "T2", "T3", "T4", "T5", "T6", "NA"],
       title: "TEMPERATURE  CLASS",
-      width: "150",
+      width: "100",
     },
 
     { type: "text", name: "remark", title: "REMARK", width: "200" },
-    { type: "text", name: "rev", title: "REV.", width: "200" },
+    { type: "text", name: "rev", title: "REV.", width: "70" },
     {
       type: "dropdown",
       source: ["No", "Yes", "All", "As per OEM Standard"],
@@ -207,14 +207,14 @@ export const LoadListcolumns = (division: string) => {
       source: ["No", "Yes"],
       name: "bearingRTD",
       title: "BEARING RTD",
-      width: "150",
+      width: "100",
     },
     {
       type: "dropdown",
       source: ["No", "Yes"],
       name: "windingRTD",
       title: "WINDING RTD",
-      width: "150",
+      width: "100",
     },
     {
       type: "dropdown",
@@ -228,21 +228,21 @@ export const LoadListcolumns = (division: string) => {
       type: "text",
       name: "powerFactor",
       title: "POWER FACTOR",
-      width: "150",
+      width: "70",
     },
     {
       type: "dropdown",
       source: ["IE-2", "IE-3", "IE-4", "NA"],
       name: "motorEfficiency",
       title: "MOTOR EFFICIENCY",
-      width: "150",
+      width: "100",
     },
     {
       type: "dropdown",
       source: ["Yes", "No"],
       name: "localIsolator",
       title: "LOCAL ISOLATOR",
-      width: "150",
+      width: "100",
     },
     {
       type: "dropdown",
@@ -263,21 +263,21 @@ export const LoadListcolumns = (division: string) => {
       name: "motorScope",
       source: ["THERMAX", "CLIENT", "VENDOR", "NA"],
       title: "MOTOR SCOPE",
-      width: "200",
+      width: "130",
     },
     {
       type: "dropdown",
       name: "motorLocation",
       source: ["INDOOR", "OUTDOOR", "NA"],
       title: "MOTOR LOCATION",
-      width: "200",
+      width: "130",
     },
 
     {
       type: "text",
       name: "partcode",
       title: "MOTOR RATED CURRENT (Amp) ",
-      width: "200",
+      width: "150",
     },
   ];
   if (division === ENVIRO) {
@@ -357,26 +357,26 @@ export const LoadListcolumns = (division: string) => {
         name: "motorFrameSize",
 
         title: "MOTOR  FRAME SIZE",
-        width: "150",
+        width: "100",
       },
       {
         type: "text",
         name: "motorGD2",
         title: "MOTOR GD 2",
-        width: "150",
+        width: "100",
       },
       {
         type: "text",
         name: "drivenEqGD2",
 
         title: "DRIVEN  EQUIPMENT GD2",
-        width: "150",
+        width: "100",
       },
       {
         type: "text",
         name: "bkw",
         title: "BkW",
-        width: "150",
+        width: "100",
       },
       {
         type: "dropdown",
@@ -384,7 +384,7 @@ export const LoadListcolumns = (division: string) => {
         source: ["V-Belt", "Direct", "NA"],
         title: "TYPE OF  COUPLING",
 
-        width: "150",
+        width: "100",
       }
     );
     columns.splice(32, 0, {
@@ -392,7 +392,7 @@ export const LoadListcolumns = (division: string) => {
       name: "typeOfBearing",
       source: ["Roller", "Insulated", "Roller and Insulated", "NA"],
       title: "TYPE OF BEARING",
-      width: "150",
+      width: "120",
     });
     columns.splice(37, 0, {
       type: "dropdown",
@@ -482,26 +482,26 @@ export const LoadListcolumns = (division: string) => {
         name: "motorFrameSize",
 
         title: "MOTOR  FRAME SIZE",
-        width: "150",
+        width: "100",
       },
       {
         type: "text",
         name: "motorGD2",
         title: "MOTOR GD 2",
-        width: "150",
+        width: "100",
       },
       {
         type: "text",
         name: "drivenEqGD2",
 
         title: "DRIVEN  EQUIPMENT GD2",
-        width: "150",
+        width: "100",
       },
       {
         type: "text",
         name: "bkw",
         title: "BkW",
-        width: "150",
+        width: "100",
       },
       {
         type: "dropdown",
@@ -509,7 +509,7 @@ export const LoadListcolumns = (division: string) => {
         source: ["V-Belt", "Direct", "NA"],
         title: "TYPE OF  COUPLING",
 
-        width: "150",
+        width: "100",
       }
     );
     columns.splice(31, 0, {
@@ -517,7 +517,7 @@ export const LoadListcolumns = (division: string) => {
       name: "typeOfBearing",
       source: ["Roller", "Insulated", "Roller and Insulated", "NA"],
       title: "TYPE OF BEARING",
-      width: "150",
+      width: "120",
     });
     columns.splice(36, 0, {
       type: "dropdown",
@@ -613,7 +613,7 @@ export const CableSchedulecolumns = () => {
       name: "supplyVoltage",
       // source: [],
       title: "SUPPLY VOLTAGE",
-      width: "100",
+      width: "80",
       readOnly: true,
     },
     // { type: "text", name: "panel", title: "PANEL", width: "150" },
@@ -622,7 +622,7 @@ export const CableSchedulecolumns = () => {
       name: "phase",
       // source: ["", "3 Phase", "1 Phase"],
       title: "MOTOR RATED CURRENT IN AMP",
-      width: "100",
+      width: "120",
     },
     {
       type: "text",
@@ -634,14 +634,14 @@ export const CableSchedulecolumns = () => {
       type: "text",
       name: "noOfRuns",
       title: "NO. OF RUNS",
-      width: "120",
+      width: "80",
     },
     {
       type: "dropdown",
       source: ["2C", "3C", "3.5C", "4C"],
       name: "noOfCores",
       title: "NO. OF CORES",
-      width: "120",
+      width: "80",
     },
     {
       type: "dropdown",
@@ -672,7 +672,7 @@ export const CableSchedulecolumns = () => {
         "185/95",
       ], //this has to be come from backend
       title: "FINAL CALCULATED CABLE SIZE",
-      width: "120",
+      width: "130",
     },
     {
       type: "dropdown",
@@ -686,19 +686,19 @@ export const CableSchedulecolumns = () => {
       type: "text",
       name: "cableAsPerFl",
       title: "CABLE SIZE AS PER HEATING CHART ",
-      width: "150",
+      width: "130",
     },
     {
       type: "text",
       name: "cosRunning",
       title: "COSφ (Running)",
-      width: "100",
+      width: "70",
     },
     {
       type: "text",
       name: "cosStarting",
       title: "COSφ (starting)",
-      width: "100",
+      width: "70",
     },
     {
       type: "text",
@@ -729,31 +729,31 @@ export const CableSchedulecolumns = () => {
       type: "text",
       name: "percentVdAtRunning",
       title: "% VOLTAGE DROP AT RUNNING ",
-      width: "100",
+      width: "110",
     },
     {
       type: "text",
       name: "percentVdAtStart",
       title: "% VOLTAGE DROP AT STARTING ",
-      width: "100",
+      width: "110",
     },
     {
       type: "text",
       name: "selectedCableCarryCapacity",
       title: "SELECTED CABLE CURRENT CARRYING CAPACITY (Amp)",
-      width: "220",
+      width: "180",
     },
     {
       type: "text",
       name: "deratingFactor",
       title: "DERATING FACTOR",
-      width: "200",
+      width: "70",
     },
     {
       type: "text",
       name: "finalCurrentCarryCapacity",
       title: "FINAL CURRENT CARRYING CAPACITY (Amp)",
-      width: "160",
+      width: "180",
     },
 
     {
@@ -761,7 +761,7 @@ export const CableSchedulecolumns = () => {
       name: "cableAsPerFl",
       source: ["Unsafe", "Safe"],
       title: "CABLE SELECTED STATUS",
-      width: "140",
+      width: "120",
     },
   ];
 };
@@ -977,7 +977,7 @@ export const motorCanopyColumns = [
     type: "text",
     name: "canopyCutOut",
     title: " CANOPY CUT OUT",
-    width: "100",
+    width:"150"
   },
   {
     type: "text",

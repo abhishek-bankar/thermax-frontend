@@ -454,6 +454,7 @@ const ProjectInfo = ({ revision_id }: { revision_id: string }) => {
                 { label: "1 Phase", value: "1 Phase" },
                 { label: "3 Phase / 3 Wire", value: "3 Phase / 3 Wire" },
                 { label: "3 Phase / 4 Wire", value: "3 Phase / 4 Wire" },
+                { label: "3 Phase / 5 Wire", value: "3 Phase / 5 Wire" },
                 { label: "NA", value: "NA" },
               ]}
               size="small"

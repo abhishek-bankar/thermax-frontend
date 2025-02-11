@@ -2,6 +2,7 @@
 
 import {
   DB_REVISION_STATUS,
+  ENVIRO,
   HEATING,
   LOAD_LIST_REVISION_STATUS,
   SLD_REVISION_STATUS,
@@ -27,6 +28,22 @@ import {
 import { sortDatewise } from "@/utils/helpers";
 import { getLatestDesignBasisRevision } from "./design-basis";
 
+function getCurrentFromKVA(kva: any) {
+  const kvaCurrent: any = {
+    10.2: 24.59,
+    20.41: 49.17,
+    30.61: 73.76,
+    71.42: 172.11,
+    40.81: 98.35,
+    189.12: 263.1,
+    69.67: 96.93,
+    29.86: 41.54,
+    149.3: 207.71,
+  };
+
+  return kvaCurrent[kva] || 0;
+}
+
 export const getCurrentCalculation = async (loadListData: any) => {
   const division = loadListData.divisionName;
   const calcData = loadListData.data;
@@ -43,6 +60,7 @@ export const getCurrentCalculation = async (loadListData: any) => {
     const phase = item.phase;
     const powerFactor = item.powerFactor;
     const starterType = item.starterType;
+    const kva = item.kva;
     let current = 0;
 
     if (division === HEATING) {
@@ -66,12 +84,24 @@ export const getCurrentCalculation = async (loadListData: any) => {
         if (standardCurrent) {
           current = standardCurrent.motor_current_amp_il;
         } else {
-          current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
+          current =
+            (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor * 0.9);
         }
       } else if (supplyVoltage !== 415 && phase === "3 Phase") {
-        current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
+        current =
+          (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor * 0.9);
       } else if (phase === "1 Phase") {
-        current = (kw * 1000) / (supplyVoltage * powerFactor);
+        current = (kw * 1000) / (supplyVoltage * powerFactor * 0.9);
+      }
+    } else if (division === ENVIRO) {
+      if (kw > 0) {
+        current =
+          (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor * 0.9);
+      } else {
+        current = getCurrentFromKVA(kva);
+        if (current === 0) {
+          current = (kva * 1000) / (Math.sqrt(3) * supplyVoltage);
+        }
       }
     } else {
       if (starterType === "DOL-HTR" && supplyVoltage === 415) {
@@ -84,9 +114,10 @@ export const getCurrentCalculation = async (loadListData: any) => {
           current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
         }
       } else if (phase === "3 Phase") {
-        current = (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor);
+        current =
+          (kw * 1000) / (Math.sqrt(3) * supplyVoltage * powerFactor * 0.9);
       } else if (phase === "1 Phase") {
-        current = (kw * 1000) / (supplyVoltage * powerFactor);
+        current = (kw * 1000) / (supplyVoltage * powerFactor * 0.9);
       }
     }
 
@@ -393,9 +424,7 @@ const findCable = (
   const phase = row.phase;
   const starterType = row.starterType;
   const cableMaterial = row.cableMaterial;
-  const numberOfCores = parseFloat(row.numberOfCores.replace(/[^\d.]/g, ""));
-  const numberOfRuns = parseInt(row.numberOfRuns);
-  // const efficiency = 0.86
+
   const cosPhiRunning: number = row.runningCos;
   const sinPhiRunning = +Math.sqrt(1 - cosPhiRunning ** 2).toFixed(2);
   const cosPhiStarting: number = row.startingCos;
@@ -423,59 +452,88 @@ const findCable = (
     motorStartingCurrent = +(motorRatedCurrent * 3).toFixed(2);
   }
 
-  let finalCable = {};
-  for (const cable of cableSizeData) {
-    if (
-      cable.current_air >= motorRatedCurrent &&
-      cable.number_of_core === numberOfCores
-    ) {
-      const dbl_x = +parseFloat(cable.dbl_x).toFixed(2);
-      const dbl_r = +parseFloat(cable.dbl_r).toFixed(2);
-
-      const vd_run = +(
-        (1.732 *
-          motorRatedCurrent *
-          appxLength *
-          (cosPhiRunning * dbl_r + sinPhiRunning * dbl_x)) /
-        numberOfRuns /
-        1000
-      ).toFixed(2);
-      const vd_start = +(
-        (1.732 *
-          motorStartingCurrent *
-          appxLength *
-          (cosPhiStarting * dbl_r + sinPhiStarting * dbl_x)) /
-        numberOfRuns /
-        1000
-      ).toFixed(2);
-
-      const vd_run_percentage = +((vd_run / supplyVoltage) * 100).toFixed(2);
-      const vd_start_percentage = +((vd_start / supplyVoltage) * 100).toFixed(
-        2
-      );
-      const final_current_carrying_capacity = +(
-        cable.current_air *
-        deratingFactor *
-        numberOfRuns
-      ).toFixed(2);
-
+  let finalCable: any = {};
+  let numberOfRuns = parseInt(row.numberOfRuns);
+  let numberOfCores = parseFloat(row.numberOfCores.replace(/[^\d.]/g, ""));
+  while (Object.keys(finalCable).length === 0) {
+    for (const cable of cableSizeData) {
+      let current_air = cable.current_air;
+      if (numberOfRuns > 1) {
+        current_air = current_air * numberOfRuns;
+      }
       if (
-        vd_run_percentage <= perc_voltage_drop_running &&
-        vd_start_percentage <= perc_voltage_drop_starting
+        current_air >= motorRatedCurrent &&
+        cable.number_of_core === numberOfCores
       ) {
-        finalCable = {
-          ...cable,
-          vd_run,
-          vd_start,
-          vd_run_percentage,
-          vd_start_percentage,
-          final_current_carrying_capacity,
-          tagNo,
-        };
-        break; // Stop iterating once a suitable cable is found.
+        const dbl_x = +parseFloat(cable.dbl_x).toFixed(2);
+        const dbl_r = +parseFloat(cable.dbl_r).toFixed(2);
+
+        const vd_run = +(
+          (1.732 *
+            motorRatedCurrent *
+            appxLength *
+            (cosPhiRunning * dbl_r + sinPhiRunning * dbl_x)) /
+          numberOfRuns /
+          1000
+        ).toFixed(2);
+        const vd_start = +(
+          (1.732 *
+            motorStartingCurrent *
+            appxLength *
+            (cosPhiStarting * dbl_r + sinPhiStarting * dbl_x)) /
+          numberOfRuns /
+          1000
+        ).toFixed(2);
+
+        const vd_run_percentage = +((vd_run / supplyVoltage) * 100).toFixed(2);
+        const vd_start_percentage = +((vd_start / supplyVoltage) * 100).toFixed(
+          2
+        );
+        const final_current_carrying_capacity = +(
+          current_air * deratingFactor
+        ).toFixed(2);
+
+        if (
+          vd_run_percentage <= perc_voltage_drop_running &&
+          vd_start_percentage <= perc_voltage_drop_starting &&
+          final_current_carrying_capacity >= motorRatedCurrent
+        ) {
+          finalCable = {
+            ...cable,
+            vd_run,
+            vd_start,
+            vd_run_percentage,
+            vd_start_percentage,
+            final_current_carrying_capacity,
+            tagNo,
+            number_of_runs: numberOfRuns,
+            number_of_core: numberOfCores,
+          };
+          break; // Stop iterating once a suitable cable is found.
+        }
       }
     }
+
+    if (Object.keys(finalCable).length === 0) {
+      numberOfRuns += 1;
+      continue;
+    }
+
+    const size = finalCable?.sizes.includes("/")
+      ? parseFloat(finalCable?.sizes.split("/")[0]).toFixed(1)
+      : parseFloat(finalCable?.sizes).toFixed(1);
+
+    const sizeNumber = +parseFloat(size).toFixed(2);
+    if (
+      sizeNumber >= 25 &&
+      ["VFD", "Supply Feeder"].includes(starterType) &&
+      numberOfCores > 3.5
+    ) {
+      finalCable = {};
+      numberOfCores = 3.5;
+    }
   }
+
   let heating_chart_cable_size = "";
   let heating_chart_cable_od = "";
   let heating_chart_cable_gland_size = "";
@@ -619,7 +677,6 @@ export const recalculateCableSize = async (cableSizingData: any) => {
   const cableSizesDBData = await getData(
     `${CABLE_SIZING_DATA_API}?fields=["*"]&limit=3000`
   );
-  console.log("cableSizesDBData", cableSizesDBData);
 
   const perc_voltage_drop_running = +parseFloat(
     layoutCableTray.motor_voltage_drop_during_running
@@ -645,6 +702,7 @@ export const recalculateCableSize = async (cableSizingData: any) => {
     const supplyVoltage: number = row.supplyVoltage;
     const numberOfRuns = parseInt(row.numberOfRuns);
     const starterType = row.starterType;
+    const deratingFactor: number = +parseFloat(row.deratingFactor).toFixed(2);
 
     let motorStartingCurrent = 0;
 
@@ -699,14 +757,24 @@ export const recalculateCableSize = async (cableSizingData: any) => {
     const vd_run_percentage = +((vd_run / supplyVoltage) * 100).toFixed(2);
     const vd_start_percentage = +((vd_start / supplyVoltage) * 100).toFixed(2);
 
+    const final_current_carrying_capacity = +(
+      cable.current_air *
+      deratingFactor *
+      numberOfRuns
+    ).toFixed(2);
+
+    row.dbl_r = dbl_r;
+    row.dbl_x = dbl_x;
     row.vd_run = vd_run;
     row.vd_start = vd_start;
     row.vd_run_percentage = vd_run_percentage;
     row.vd_start_percentage = vd_start_percentage;
     row.current_air = cable.current_air;
+    row.final_current_carrying_capacity = final_current_carrying_capacity;
     if (
       vd_run_percentage <= perc_voltage_drop_running &&
-      vd_start_percentage <= perc_voltage_drop_starting
+      vd_start_percentage <= perc_voltage_drop_starting &&
+      final_current_carrying_capacity >= motorRatedCurrent
     ) {
       return {
         ...row,

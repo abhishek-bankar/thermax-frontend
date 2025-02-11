@@ -424,8 +424,7 @@ const findCable = (
   const phase = row.phase;
   const starterType = row.starterType;
   const cableMaterial = row.cableMaterial;
-  const numberOfCores = parseFloat(row.numberOfCores.replace(/[^\d.]/g, ""));
-  const numberOfRuns = parseInt(row.numberOfRuns);
+
   const cosPhiRunning: number = row.runningCos;
   const sinPhiRunning = +Math.sqrt(1 - cosPhiRunning ** 2).toFixed(2);
   const cosPhiStarting: number = row.startingCos;
@@ -453,60 +452,88 @@ const findCable = (
     motorStartingCurrent = +(motorRatedCurrent * 3).toFixed(2);
   }
 
-  let finalCable = {};
-  for (const cable of cableSizeData) {
-    if (
-      cable.current_air >= motorRatedCurrent &&
-      cable.number_of_core === numberOfCores
-    ) {
-      const dbl_x = +parseFloat(cable.dbl_x).toFixed(2);
-      const dbl_r = +parseFloat(cable.dbl_r).toFixed(2);
-
-      const vd_run = +(
-        (1.732 *
-          motorRatedCurrent *
-          appxLength *
-          (cosPhiRunning * dbl_r + sinPhiRunning * dbl_x)) /
-        numberOfRuns /
-        1000
-      ).toFixed(2);
-      const vd_start = +(
-        (1.732 *
-          motorStartingCurrent *
-          appxLength *
-          (cosPhiStarting * dbl_r + sinPhiStarting * dbl_x)) /
-        numberOfRuns /
-        1000
-      ).toFixed(2);
-
-      const vd_run_percentage = +((vd_run / supplyVoltage) * 100).toFixed(2);
-      const vd_start_percentage = +((vd_start / supplyVoltage) * 100).toFixed(
-        2
-      );
-      const final_current_carrying_capacity = +(
-        cable.current_air *
-        deratingFactor *
-        numberOfRuns
-      ).toFixed(2);
-
+  let finalCable: any = {};
+  let numberOfRuns = parseInt(row.numberOfRuns);
+  let numberOfCores = parseFloat(row.numberOfCores.replace(/[^\d.]/g, ""));
+  while (Object.keys(finalCable).length === 0) {
+    for (const cable of cableSizeData) {
+      let current_air = cable.current_air;
+      if (numberOfRuns > 1) {
+        current_air = current_air * numberOfRuns;
+      }
       if (
-        vd_run_percentage <= perc_voltage_drop_running &&
-        vd_start_percentage <= perc_voltage_drop_starting &&
-        final_current_carrying_capacity >= motorRatedCurrent
+        current_air >= motorRatedCurrent &&
+        cable.number_of_core === numberOfCores
       ) {
-        finalCable = {
-          ...cable,
-          vd_run,
-          vd_start,
-          vd_run_percentage,
-          vd_start_percentage,
-          final_current_carrying_capacity,
-          tagNo,
-        };
-        break; // Stop iterating once a suitable cable is found.
+        const dbl_x = +parseFloat(cable.dbl_x).toFixed(2);
+        const dbl_r = +parseFloat(cable.dbl_r).toFixed(2);
+
+        const vd_run = +(
+          (1.732 *
+            motorRatedCurrent *
+            appxLength *
+            (cosPhiRunning * dbl_r + sinPhiRunning * dbl_x)) /
+          numberOfRuns /
+          1000
+        ).toFixed(2);
+        const vd_start = +(
+          (1.732 *
+            motorStartingCurrent *
+            appxLength *
+            (cosPhiStarting * dbl_r + sinPhiStarting * dbl_x)) /
+          numberOfRuns /
+          1000
+        ).toFixed(2);
+
+        const vd_run_percentage = +((vd_run / supplyVoltage) * 100).toFixed(2);
+        const vd_start_percentage = +((vd_start / supplyVoltage) * 100).toFixed(
+          2
+        );
+        const final_current_carrying_capacity = +(
+          current_air * deratingFactor
+        ).toFixed(2);
+
+        if (
+          vd_run_percentage <= perc_voltage_drop_running &&
+          vd_start_percentage <= perc_voltage_drop_starting &&
+          final_current_carrying_capacity >= motorRatedCurrent
+        ) {
+          finalCable = {
+            ...cable,
+            vd_run,
+            vd_start,
+            vd_run_percentage,
+            vd_start_percentage,
+            final_current_carrying_capacity,
+            tagNo,
+            number_of_runs: numberOfRuns,
+            number_of_core: numberOfCores,
+          };
+          break; // Stop iterating once a suitable cable is found.
+        }
       }
     }
+
+    if (Object.keys(finalCable).length === 0) {
+      numberOfRuns += 1;
+      continue;
+    }
+
+    const size = finalCable?.sizes.includes("/")
+      ? parseFloat(finalCable?.sizes.split("/")[0]).toFixed(1)
+      : parseFloat(finalCable?.sizes).toFixed(1);
+
+    const sizeNumber = +parseFloat(size).toFixed(2);
+    if (
+      sizeNumber >= 25 &&
+      ["VFD", "Supply Feeder"].includes(starterType) &&
+      numberOfCores > 3.5
+    ) {
+      finalCable = {};
+      numberOfCores = 3.5;
+    }
   }
+
   let heating_chart_cable_size = "";
   let heating_chart_cable_od = "";
   let heating_chart_cable_gland_size = "";
@@ -650,7 +677,6 @@ export const recalculateCableSize = async (cableSizingData: any) => {
   const cableSizesDBData = await getData(
     `${CABLE_SIZING_DATA_API}?fields=["*"]&limit=3000`
   );
-  console.log("cableSizesDBData", cableSizesDBData);
 
   const perc_voltage_drop_running = +parseFloat(
     layoutCableTray.motor_voltage_drop_during_running
@@ -676,6 +702,7 @@ export const recalculateCableSize = async (cableSizingData: any) => {
     const supplyVoltage: number = row.supplyVoltage;
     const numberOfRuns = parseInt(row.numberOfRuns);
     const starterType = row.starterType;
+    const deratingFactor: number = +parseFloat(row.deratingFactor).toFixed(2);
 
     let motorStartingCurrent = 0;
 
@@ -730,14 +757,24 @@ export const recalculateCableSize = async (cableSizingData: any) => {
     const vd_run_percentage = +((vd_run / supplyVoltage) * 100).toFixed(2);
     const vd_start_percentage = +((vd_start / supplyVoltage) * 100).toFixed(2);
 
+    const final_current_carrying_capacity = +(
+      cable.current_air *
+      deratingFactor *
+      numberOfRuns
+    ).toFixed(2);
+
+    row.dbl_r = dbl_r;
+    row.dbl_x = dbl_x;
     row.vd_run = vd_run;
     row.vd_start = vd_start;
     row.vd_run_percentage = vd_run_percentage;
     row.vd_start_percentage = vd_start_percentage;
     row.current_air = cable.current_air;
+    row.final_current_carrying_capacity = final_current_carrying_capacity;
     if (
       vd_run_percentage <= perc_voltage_drop_running &&
-      vd_start_percentage <= perc_voltage_drop_starting
+      vd_start_percentage <= perc_voltage_drop_starting &&
+      final_current_carrying_capacity >= motorRatedCurrent
     ) {
       return {
         ...row,
